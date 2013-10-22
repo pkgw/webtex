@@ -1,0 +1,248 @@
+# Fundamental TeX commands
+#
+# Each command is associated with a built-in control sequence. There are,
+# however, additional built-in control sequences not listed here associated
+# with each "named parameter" (cf. namedparams.txt). In the TeX
+# implementation, many similar commands are implemented with common codepaths
+# and mode arguments; I've annotated these in comments. I've also annotated
+# when the command and its associated control sequence have dissimilar names.
+#
+# I haven't quite figured out how to deal with all of these, so the
+# implementation and/or data table format will probably evolve.
+#
+# expand: whether this command is expandable into a new set of tokens to
+#   be evaluated
+# cond: whether this command starts a conditional
+# afm: assign flag mode. Sets whether this command can legally accept or
+#   propagate \global, etc., assignment flags
+#
+# The file tex.py in commits 499ed6ca2 or earlier list the builtin control
+# sequences with some annotations about their origins. That list was manually
+# constructed from examinination of TeX: The Program, and seems to have been
+# complete except for the omission of "noindent".
+
+#escname		expand	cond	afm
+
+_dash_			n	n	inval	# -> "discretionary"
+_fslash_		n	n	inval	# "ital_corr" command in TeX
+_space_			n	n	inval	# "ex_space" command
+above			n	n	inval
+abovewithdelims		n	n	inval	# -> "above"
+accent			n	n	inval
+advance			n	n	consume
+afterassignment		n	n	inval
+aftergroup		n	n	inval
+atop			n	n	inval	# -> "above"
+atopwithdelims		n	n	inval	# -> "above"
+badness			n	n	inval	# -> "last_item"
+batchmode		n	n	consume # -> "set_interaction"
+begingroup		n	n	inval
+botmark			n	n	inval	# -> "top_bot_mark"
+box			n	n	inval	# -> "make_box"
+catcode			n	n	consume # -> "def_code"
+char			n	n	inval	# "char_num" command
+chardef			n	n	consume	# -> "shorthand_def"
+cleaders		n	n	inval # -> "leader_ship"
+closein			n	n	inval # -> "in_stream"
+closeout		n	n	inval # -> *"extension"
+copy			n	n	inval	# -> "make_box"
+count			n	n	consume # -> "register"
+countdef		n	n	consume	# -> "shorthand_def"
+cr			n	n	inval	# -> "car_ret"
+crcr			n	n	inval	# -> "car_ret"
+csname			yes 	n	inval
+deadcycles		n	n	consume # -> "set_page_int"
+def			n	n	consume
+delcode			n	n	consume # -> "def_code"
+delimiter		n	n	inval	# "delim_num" cmd; also: invalid_char
+dimen			n	n	consume # -> "register"
+dimendef		n	n	consume	# -> "shorthand_def"
+discretionary		n	n	inval
+displaylimits		n	n	inval # -> "limit_switch"
+displaystyle		n	n	inval # -> "math_style"
+divide			n	n	consume
+dp			n	n	consume	# -> "set_box_dimen"
+dump			n	n	inval # -> "stop"
+edef			n	n	consume # -> "def"
+else			yes	n	inval # -> "fi_or_else"
+end			n	n	inval # -> "stop"
+endcsname		n	n	inval
+endgroup		n	n	inval
+endinput		n	n	inval # -> "input"
+endtemplate		yes	n	inval
+eqno			n	n	inval
+errmessage		n	n	inval # -> "message"
+errorstopmode		n	n	consume	# -> "set_interaction"
+expandafter		yes	n	inval
+fi			yes	n	inval # -> "fi_or_else"
+firstmark		n	n	inval	# -> "top_bot_mark"
+font			n	n	consume	# "def_font" command
+fontdimen		n	n	consume	# "assign_font_dimen" cmd
+fontname		yes	n	inval	# -> "convert"
+futurelet		n	n	consume	# -> "let"
+gdef			n	n	consume # -> "def"
+global			n	n	cont	# -> "prefix"
+halign			n	n	inval
+hbox			n	n	inval	# -> "make_box"
+hfil			n	n	inval	# -> "hskip"
+hfill			n	n	inval	# -> "hskip"
+hfilneg			n	n	inval	# -> "hskip"
+hrule			n	n	inval
+hskip			n	n	inval
+hss			n	n	inval	# -> "hskip"
+ht			n	n	consume	# -> "set_box_dimen"
+hyphenation		n	n	consume # -> "hyph_data"
+hyphenchar		n	n	consume # -> "assign_font_int"
+if			yes	yes	inval
+ifcase			yes	yes	inval	# -> "if"
+ifcat			yes	yes	inval	# -> "if"
+ifdim			yes	yes	inval	# -> "if"
+ifeof			yes	yes	inval	# -> "if"
+iffalse			yes	yes	inval	# -> "if"
+ifhbox			yes	yes	inval	# -> "if"
+ifhmode			yes	yes	inval	# -> "if"
+ifinner			yes	yes	inval	# -> "if"
+ifmmode			yes	yes	inval	# -> "if"
+ifnum			yes	yes	inval	# -> "if"
+ifodd			yes	yes	inval	# -> "if"
+iftrue			yes	yes	inval	# -> "if"
+ifvbox			yes	yes	inval	# -> "if"
+ifvmode			yes	yes	inval	# -> "if"
+ifvoid			yes	yes	inval	# -> "if"
+ifx			yes	yes	inval	# -> "if"
+ignorespaces		n	n	inval
+immediate		n	n	inval # -> *"extension"
+indent			n	n	inval # -> "start_par"
+input			n	n	inval
+inputlineno		n	n	inval	# -> "last_item"
+insert			n	n	inval
+insertpenalties		n	n	consume # -> "set_page_int"
+jobname			yes	n	inval	# -> "convert"
+kern			n	n	inval
+lastbox			n	n	inval	# -> "make_box"
+lastkern		n	n	inval	# -> "last_item"
+lastpenalty		n	n	inval	# -> "last_item"
+lastskip		n	n	inval	# -> "last_item"
+lccode			n	n	consume # -> "def_code"
+leaders			n	n	inval # -> "leader_ship"
+left			n	n	inval	# -> "left_right"
+leqno			n	n	inval	# -> "eqno"
+let			n	n	consume
+limits			n	n	inval # -> "limit_switch"
+long			n	n	cont	# -> "prefix"
+lower			n	n	inval	# -> "vmove"
+lowercase		n	n	inval	# -> "caseshift"
+mark			n	n	inval
+mathaccent		n	n	inval
+mathbin			n	n	inval	# -> "math_comp"
+mathchar		n	n	inval	# "math_char_num" command
+mathchardef		n	n	consume	# -> "shorthand_def"
+mathchoice		n	n	inval
+mathclose		n	n	inval	# -> "math_comp"
+mathcode		n	n	consume # -> "def_code"
+mathinner		n	n	inval	# -> "math_comp"
+mathop			n	n	inval	# -> "math_comp"
+mathopen		n	n	inval	# -> "math_comp"
+mathord			n	n	inval	# -> "math_comp"
+mathpunct		n	n	inval	# -> "math_comp"
+mathrel			n	n	inval	# -> "math_comp"
+meaning			yes	n	inval	# -> "convert"
+message			n	n	inval
+mkern			n	n	inval
+moveleft		n	n	inval # -> "hmove"
+moveright		n	n	inval # -> "hmove"
+mskip			n	n	inval
+multiply		n	n	consume
+muskip			n	n	consume # -> "register"
+muskipdef		n	n	consume	# -> "shorthand_def"
+noalign			n	n	inval
+noboundary		n	n	inval
+noexpand		yes	n	inval
+noindent		n	n	inval # -> "start_par"
+nolimits		n	n	inval # -> "limit_switch"
+nonscript		n	n	inval
+nonstopmode		n	n	consume	# -> "set_interaction"
+nullfont		n	n	consume # -> "set_font"
+number			yes	n	inval	# -> "convert"
+omit			n	n	inval
+openin			n	n	inval # -> "in_stream"
+openout			n	n	inval # -> *"extension"
+or			yes	n	inval # -> "fi_or_else"
+outer			n	n	cont	# -> "prefix"
+over			n	n	inval # -> "above"
+overline		n	n	inval	# -> "math_comp"
+overwithdelims		n	n	inval # -> "above"
+pagedepth		n	n	consume # -> "set_page_dimen"
+pagefilllstretch	n	n	consume # -> "set_page_dimen"
+pagefillstretch		n	n	consume # -> "set_page_dimen"
+pagefilstretch		n	n	consume # -> "set_page_dimen"
+pagegoal		n	n	consume # -> "set_page_dimen"
+pageshrink		n	n	consume # -> "set_page_dimen"
+pagestretch		n	n	consume # -> "set_page_dimen"
+pagetotal		n	n	consume # -> "set_page_dimen"
+par			n	n	inval	# "par_end" cmd; also: active_char,match
+parshape		n	n	consume	# "set_shape" command
+patterns		n	n	consume # -> "hyph_data"
+penalty			n	n	inval	# "break_penalty" command
+prevdepth		n	n	consume # -> "set_aux"
+prevgraf		n	n	consume	# "set_prev_graf" command
+radical			n	n	inval
+raise			n	n	inval	# -> "vmove"
+read			n	n	consume	# "read_to_cs" command
+relax			n	n	inval	# also: escape
+right			n	n	inval	# -> "left_right"
+romannumeral		yes	n	inval	# -> "convert"
+scriptfont		n	n	consume	# -> "def_family"
+scriptscriptfont	n	n	consume	# -> "def_family"
+scriptstyle		n	n	inval # -> "math_style"
+scriptscriptstyle	n	n	inval # -> "math_style"
+scrollmode		n	n	consume	# -> "set_interaction"
+setbox			n	n	consume
+setlanguage		n	n	inval # -> *"extension"
+sfcode			n	n	consume # -> "def_code"
+shipout			n	n	inval # -> "leader_ship"
+show			n	n	inval # -> "xray"
+showbox			n	n	inval # -> "xray"
+showlists		n	n	inval # -> "xray"
+showthe			n	n	inval # -> "xray"
+skewchar		n	n	consume # -> "assign_font_int"
+skip			n	n	consume # -> "register"
+skipdef			n	n	consume	# -> "shorthand_def"
+spacefactor		n	n	consume # -> "set_aux"
+span			n	n	inval	# "tab_mark" command
+special			n	n	inval # -> *"extension"
+splitbotmark		n	n	inval	# -> "top_bot_mark"
+splitfirstmark		n	n	inval	# -> "top_bot_mark"
+string			yes	n	inval	# -> "convert"
+textfont		n	n	consume	# -> "def_family"
+textstyle		n	n	inval # -> "math_style"
+the			yes	n	inval
+toks			n	n	consume	# "toks_register" command
+toksdef			n	n	consume	# -> "shorthand_def"
+topmark			yes	n	inval	# -> "top_bot_mark"
+uccode			n	n	consume # -> "def_code"
+underline		n	n	inval	# -> "math_comp"
+unhbox			n	n	inval
+unhcopy			n	n	inval # -> "unhbox"
+unkern			n	n	inval # -> "remove_item"
+unpenalty		n	n	inval # -> "remove_item"
+unskip			n	n	inval # -> "remove_item"
+unvbox			n	n	inval
+unvcopy			n	n	inval	# -> "unvbox"
+uppercase		n	n	inval	# -> "caseshift"
+vadjust			n	n	inval
+valign			n	n	inval
+vbox			n	n	inval	# -> "make_box"
+vcenter			n	n	inval
+vrule			n	n	inval
+vfil			n	n	inval	# -> "vskip"
+vfill			n	n	inval	# -> "vskip"
+vfilneg			n	n	inval	# -> "vskip"
+vskip			n	n	inval
+vsplit			n	n	inval	# -> "make_box"
+vss			n	n	inval	# -> "vskip"
+vtop			n	n	inval	# -> "make_box"
+wd			n	n	consume	# -> "set_box_dimen"
+write			n	n	inval # -> *"extension"
+xdef			n	n	consume # -> "def"
+xleaders		n	n	inval # -> "leader_ship"
