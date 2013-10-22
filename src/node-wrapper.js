@@ -2,6 +2,7 @@ exports.WEBTEX = WEBTEX = {};
 
 (function webtexWrapper () {
     'use strict';
+    var globalScope = global;
 
 $insert_files
 

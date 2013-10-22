@@ -4,6 +4,7 @@ if (typeof WEBTEX === 'undefined') {
 
 (function webtexWrapper () {
     'use strict';
+    var globalScope = (typeof window === 'undefined') ? this : window;
 
 $insert_files
 

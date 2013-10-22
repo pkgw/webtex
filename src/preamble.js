@@ -2,8 +2,6 @@
 
 'use strict';
 
-var globalScope = (typeof window === 'undefined') ? this : window;
-
 if (!globalScope.WEBTEX) {
     globalScope.WEBTEX = {};
 }
