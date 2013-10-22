@@ -4,9 +4,14 @@ python = python
 jscomponents = \
   src/preamble.js
 
-all: $(builddir)/webtex.js | $(builddir)
+all: $(builddir)/browser-webtex.js $(builddir)/node-webtex.js
 
-$(builddir)/webtex.js: generate.py src/wrapper.js $(jscomponents) | $(builddir)
+$(builddir)/browser-webtex.js: generate.py src/browser-wrapper.js $(jscomponents) \
+| $(builddir)
+	$(python) $^ $@
+
+$(builddir)/node-webtex.js: generate.py src/node-wrapper.js $(jscomponents) \
+| $(builddir)
 	$(python) $^ $@
 
 $(builddir):
