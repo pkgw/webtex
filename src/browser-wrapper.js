@@ -1,5 +1,5 @@
 if (typeof WEBTEX === 'undefined') {
-    (typeof window !== 'undefined' ? window : this).WEBTEX = {};
+    (typeof window !== 'undefined' ? window : this).WEBTEX = {Web: {}};
 }
 
 (function webtexWrapper () {
