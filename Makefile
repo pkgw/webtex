@@ -2,16 +2,21 @@ builddir = build
 python = python
 minify = java -jar yuicompressor-2.4.8.jar
 
-jscomponents = \
-  src/preamble.js
+sharedjs = \
+  src/preamble.js \
+  src/constants.js \
+  src/engine.js
+
+nodejs = \
+  src/node-io.js
 
 all: $(builddir)/browser-webtex.min.js $(builddir)/node-webtex.min.js
 
-$(builddir)/browser-webtex.js: generate.py src/browser-wrapper.js $(jscomponents) \
+$(builddir)/browser-webtex.js: generate.py src/browser-wrapper.js $(sharedjs) \
 | $(builddir)
 	$(python) $^ $@
 
-$(builddir)/node-webtex.js: generate.py src/node-wrapper.js $(jscomponents) \
+$(builddir)/node-webtex.js: generate.py src/node-wrapper.js $(sharedjs) $(nodejs) \
 | $(builddir)
 	$(python) $^ $@
 

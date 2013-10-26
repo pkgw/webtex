@@ -1,4 +1,5 @@
 exports.WEBTEX = WEBTEX = {};
+WEBTEX.Node = {};
 
 (function webtexWrapper () {
     'use strict';
