@@ -5,6 +5,7 @@ minify = java -jar yuicompressor-2.4.8.jar
 sharedjs = \
   src/preamble.js \
   src/constants.js \
+  src/types.js \
   src/engine.js
 
 browserjs = \
