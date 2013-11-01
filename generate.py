@@ -96,9 +96,13 @@ def process (data, inpath, outpath, restargs):
                     die ('unknown templating macro %s', macro)
 
                 def emit (fmt, *args):
-                    if len (args) == 1:
-                        args = args[0]
-                    text = fmt % args
+                    if not len (args):
+                        text = fmt
+                    else:
+                        if len (args) == 1:
+                            args = args[0]
+                        text = fmt % args
+
                     if not len (text):
                         print >>outf
                     else:
