@@ -42,4 +42,10 @@ $(builddir):
 clean:
 	-rm -rf $(builddir)
 
-.PHONY: all clean
+test: $(builddir)/node-webtex.min.js
+	@cd test && ./run-all-tests.sh ../$<
+
+fattest: $(builddir)/node-webtex.js # actually debuggable
+	@cd test && ./run-all-tests.sh ../$<
+
+.PHONY: all clean test
