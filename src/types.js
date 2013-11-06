@@ -2,7 +2,7 @@
 
 'use strict';
 
-TexInt = (function TexInt_closure () {
+var TexInt = WEBTEX.TexInt = (function TexInt_closure () {
     function TexInt (value) {
 	this.value = value;
     }
@@ -16,7 +16,7 @@ TexInt = (function TexInt_closure () {
 }) ();
 
 
-Scaled = (function Scaled_closure () {
+var Scaled = WEBTEX.Scaled = (function Scaled_closure () {
     function Scaled () {
 	this.value = 0;
     }
@@ -29,13 +29,19 @@ Scaled = (function Scaled_closure () {
     return Scaled;
 }) ();
 
+function mk_scaled (value) {
+    var v = new Scaled ();
+    v.value = value;
+    return v;
+}
 
-Glue = (function Glue_closure () {
+
+var Glue = (function Glue_closure () {
     function Glue () {
-	this.width = Scaled ();
-	this.stretch = Scaled ();
+	this.width = new Scaled ();
+	this.stretch = new Scaled ();
 	this.stretch_order = 0;
-	this.shrink = Scaled ();
+	this.shrink = new Scaled ();
 	this.shrink_order = 0;
     }
 
@@ -48,11 +54,11 @@ Glue = (function Glue_closure () {
 }) ();
 
 
-Box = (function Box_closure () {
+var Box = (function Box_closure () {
     function Box () {
-	this.width = Scaled ();
-	this.height = Scaled ();
-	this.depth = Scaled ();
+	this.width = new Scaled ();
+	this.height = new Scaled ();
+	this.depth = new Scaled ();
 	this.tlist = [];
     }
 
@@ -63,7 +69,7 @@ Box = (function Box_closure () {
 }) ();
 
 
-Rule = (function Rule_closure () {
+var Rule = (function Rule_closure () {
     function Rule () {
     }
 
@@ -73,7 +79,7 @@ Rule = (function Rule_closure () {
 }) ();
 
 
-Font = (function Font_closure () {
+var Font = (function Font_closure () {
     function Font (ident, scale) {
 	this.ident = ident;
 	this.scale = scale;
