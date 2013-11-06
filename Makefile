@@ -6,6 +6,7 @@ sharedjs = \
   src/preamble.js \
   src/constants.js \
   src/types.js \
+  src/util.js \
   src/engine.js
 
 browserjs = \
