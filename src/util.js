@@ -65,6 +65,34 @@
 	return [new Scaled (-w), new Scaled (-(v % dv))];
     }
 
+    function x_over_n (x, n) {
+	// x, retvals: Scaled; n: TexInt;
+
+	if (n.value == 0)
+	    throw new TexRuntimeException ('really, dividing by 0?');
+
+	var negative = false;
+
+	if (n.value < 0) {
+	    var xv = -x.value, nv = -n.value;
+	    negative = true;
+	} else {
+	    var xv = x.value, nv = n.value;
+	}
+
+	if (xv >= 0) {
+	    var rv = div (xv, nv), rem = xv % nv;
+	} else {
+	    var rv = -div (-xv, nv), rem = -((-xv) % nv);
+	}
+
+	if (negative)
+	    rem = -rem;
+
+	return [new Scaled (rv), new Scaled (rem)];
+    }
+
     WEBTEX.nx_plus_y = nx_plus_y;
     WEBTEX.xn_over_d = xn_over_d;
+    WEBTEX.x_over_n = x_over_n;
 }) ();
