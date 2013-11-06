@@ -3,6 +3,7 @@
 'use strict';
 
 var TexInt = WEBTEX.TexInt = (function TexInt_closure () {
+    // These objects are immutable.
     function TexInt (value) {
 	this.value = value;
     }
@@ -17,8 +18,9 @@ var TexInt = WEBTEX.TexInt = (function TexInt_closure () {
 
 
 var Scaled = WEBTEX.Scaled = (function Scaled_closure () {
-    function Scaled () {
-	this.value = 0;
+    // These objects are immutable.
+    function Scaled (value) {
+	this.value = value;
     }
 
     Scaled.prototype = {
@@ -29,19 +31,28 @@ var Scaled = WEBTEX.Scaled = (function Scaled_closure () {
     return Scaled;
 }) ();
 
-function mk_scaled (value) {
-    var v = new Scaled ();
-    v.value = value;
-    return v;
-}
+
+var Dimen = (function Dimen_closure () {
+    // These objects are mutable.
+    function Dimen () {
+	this.sp = new Scaled (0);
+    }
+
+    Dimen.prototype = {
+	tex_advance: function Dimen_advance (other) {
+	},
+    };
+
+    return Dimen;
+}) ();
 
 
 var Glue = (function Glue_closure () {
     function Glue () {
-	this.width = new Scaled ();
-	this.stretch = new Scaled ();
+	this.width = new Dimen ();
+	this.stretch = new Dimen ();
 	this.stretch_order = 0;
-	this.shrink = new Scaled ();
+	this.shrink = new Dimen ();
 	this.shrink_order = 0;
     }
 
@@ -56,9 +67,9 @@ var Glue = (function Glue_closure () {
 
 var Box = (function Box_closure () {
     function Box () {
-	this.width = new Scaled ();
-	this.height = new Scaled ();
-	this.depth = new Scaled ();
+	this.width = new Dimen ();
+	this.height = new Dimen ();
+	this.depth = new Dimen ();
 	this.tlist = [];
     }
 
