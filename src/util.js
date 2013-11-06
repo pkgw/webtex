@@ -33,12 +33,38 @@
 	    return new Scaled (nv * xv + yv);
 
 	throw new TexRuntimeException ('over/underflow in multi+add');
-    };
+    }
 
     function nx_plus_y (n, x, y) {
 	// n: TexInt; x, y, retval: scaled
 	return mult_and_add (n, x, y, SC_MAX - 1);
-    };
+    }
+
+    function xn_over_d (x, n, d) {
+	// x, retvals: Scaled; n, d: TexInt
+	// computes x * (n / d); n,
+
+	var positive = (x.value >= 0);
+	if (!positive)
+	    var xv = -x.value;
+	else
+	    var xv = x.value
+
+	var dv = d.value
+	var t = (xv % SC_HALF) * n.value;
+	var u = div (xv, SC_HALF) * n.value + div (t, SC_HALF);
+	var v = (u % dv) * SC_HALF + (t % SC_HALF);
+
+	if (div (u, dv) > SC_HALF)
+	    throw new TexRuntimeException ('over/underflow in xn_over_d');
+
+	var w = SC_HALF * div (u, dv) + div (v, dv);
+
+	if (positive)
+	    return [new Scaled (w), new Scaled (v % dv)];
+	return [new Scaled (-w), new Scaled (-(v % dv))];
+    }
 
     WEBTEX.nx_plus_y = nx_plus_y;
+    WEBTEX.xn_over_d = xn_over_d;
 }) ();
