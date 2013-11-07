@@ -43,6 +43,7 @@ var O_NULL = 0, // '\0'
     O_RETURN = 13, // '\r'
     O_SPACE = 32, // ' '
     O_DQUOTE = 34, // '"'
+    O_HASH = 35, // #
     O_PERCENT = 37, // '%'
     O_SQUOTE = 39, // "'"
     O_ZERO = 48, // '0'

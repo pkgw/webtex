@@ -7,6 +7,7 @@ sharedjs = \
   src/constants.js \
   src/types.js \
   src/util.js \
+  src/token.js \
   src/engine.js
 
 browserjs = \
