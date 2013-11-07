@@ -34,7 +34,12 @@ var cc_abbrev = [
 
 
 var O_NULL = 0, // '\0'
+    O_ALARM = 7, // '\a'
     O_BACKSPACE = 8, // '\b'
+    O_TAB = 9, // '\t'
+    O_NEWLINE = 10, // '\n'
+    O_VTAB = 11, // '\v'
+    O_FORMFEED = 12, // '\f'
     O_RETURN = 13, // '\r'
     O_SPACE = 32, // ' '
     O_DQUOTE = 34, // '"'
