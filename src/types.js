@@ -26,6 +26,10 @@ var Scaled = WEBTEX.Scaled = (function Scaled_closure () {
     Scaled.prototype = {
 	tex_advance: function Scaled_advance (other) {
 	},
+
+	asfloat: function Scaled_asfloat () {
+	    return WEBTEX.unscale (this.value);
+	}
     };
 
     return Scaled;
@@ -103,4 +107,135 @@ var Font = (function Font_closure () {
     };
 
     return Font;
+}) ();
+
+
+// Our "value" system
+
+var Value = (function Value_closure () {
+    function Value () {}
+
+    Value.prototype = {
+	tostr: function Value_tostr (engine, value) {
+	    return '' + value;
+	}
+    };
+
+    return Value;
+}) ();
+
+
+var RegisterValue = (function RegisterValue_closure () {
+    function RegisterValue (reg) {
+	if (reg < 0 || reg > 255)
+	    throw new TexInternalException ('illegal register ' + reg);
+	this.reg = reg;
+    }
+
+    RegisterValue.prototype = new Value ();
+
+    return RegisterValue;
+}) ();
+
+
+var ParamValue = (function ParamValue_closure () {
+    function ParamValue (name) {
+	this.name = name;
+    }
+
+    ParamValue.prototype = new Value ();
+
+    return ParamValue;
+}) ();
+
+
+var IntValue = (function IntValue_closure () {
+    function IntValue () {}
+
+    IntValue.prototype = new Value ();
+
+    IntValue.prototype.scan = function IntValue_scan (engine) {
+	return engine.scan_int ();
+    };
+
+    return IntValue;
+}) ();
+
+
+var DimenValue = (function DimenValue_closure () {
+    function DimenValue () {}
+
+    DimenValue.prototype = new Value ();
+
+    DimenValue.prototype.scan = function DimenValue_scan (engine) {
+	return engine.scan_dimen ();
+    };
+
+    DimenValue.prototype.tostr = function DimenValue_tostr (engine, value) {
+	return value.asfloat ().toFixed (3) + 'pt';
+    };
+
+    return DimenValue;
+}) ();
+
+
+var GlueValue = (function GlueValue_closure () {
+    function GlueValue () {}
+
+    GlueValue.prototype = new Value ();
+
+    GlueValue.scan = function GlueValue_scan (engine) {
+	return engine.scan_glue ();
+    };
+
+    return GlueValue;
+}) ();
+
+
+var MuGlueValue = (function MuGlueValue_closure () {
+    function MuGlueValue () {}
+
+    MuGlueValue.prototype = new Value ();
+
+    MuGlueValue.scan = function MuGlueValue_scan (engine) {
+	return engine.scan_glue ({mumode: true});
+    };
+
+    return MuGlueValue;
+}) ();
+
+
+var ToksValue = (function ToksValue_closure () {
+    function ToksValue () {}
+
+    ToksValue.prototype = new Value ();
+
+    ToksValue.scan = function ToksValue_scan (engine) {
+	engine.scan_one_optional_space ();
+
+	var tok = engine.next_tok ();
+	if (typeof tok === 'undefined')
+	    throw new TexSyntaxException ('EOF in middle of toklist assignment');
+
+	// TODO: \tokpar=<toklist register or toklist param>
+	if (!tok.iscat (C_BGROUP))
+	    throw new TexSyntaxException ('expected { in toklist assignment');
+
+	return engine.scan_tok_group (false);
+    };
+
+    ToksValue.tostr = function ToksValue_tostr (engine, value) {
+	return value.join ('|');
+    };
+
+    return ToksValue;
+}) ();
+
+
+var FontValue = (function FontValue_closure () {
+    function FontValue () {}
+
+    FontValue.prototype = new Value ();
+
+    return FontValue;
 }) ();

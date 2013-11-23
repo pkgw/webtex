@@ -13,6 +13,10 @@
 	return a / b >> 0;
     }
 
+    function unscale (v) {
+	return v * UNSCALE;
+    }
+
     function mult_and_add (n, x, y, maxanswer) {
 	// n: TexInt; x, y, retval: Scaled *or* TexInt; maxanswer: js int;
 
@@ -92,6 +96,7 @@
 	return [new Scaled (rv), new Scaled (rem)];
     }
 
+    WEBTEX.unscale = unscale;
     WEBTEX.nx_plus_y = nx_plus_y;
     WEBTEX.xn_over_d = xn_over_d;
     WEBTEX.x_over_n = x_over_n;
