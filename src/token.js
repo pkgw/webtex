@@ -6,6 +6,8 @@
 
 var Token = WEBTEX.Token = (function Token_closure () {
     var TK_CHAR = 0, TK_CSEQ = 1, TK_PARAM = 2;
+    var frozen_cs_names = {cr: 1, endgroup: 1, right: 1, fi: 1, endtemplate: 1,
+                           relax: 1, endwrite: 1, 'notexpanded:': 1, nullfont: 1};
 
     function Token () {};
 
@@ -112,6 +114,114 @@ var Token = WEBTEX.Token = (function Token_closure () {
 		return this.catcode == C_ACTIVE;
 	    return false;
 	},
+
+	is_frozen_cs: function Token_is_frozen_cs () {
+	    if (this.kind != TK_CSEQ)
+		return false;
+	    return frozen_cs_names.hasOwnProperty (this.name);
+	},
+
+	maybe_octal_value: function Token_maybe_octal_value () {
+	    if (self.kind != TK_CHAR)
+		return -1;
+	    if (self.catcode != C_OTHER)
+		return -1;
+	    var v = self.ord - O_ZERO;
+	    if (v < 0 || v > 7)
+		return -1;
+	    return v;
+	},
+
+	maybe_decimal_value: function Token_maybe_decimal_value () {
+	    if (self.kind != TK_CHAR)
+		return -1;
+	    if (self.catcode != C_OTHER)
+		return -1;
+	    var v = self.ord - O_ZERO;
+	    if (v < 0 || v > 9)
+		return -1;
+	    return v;
+	},
+
+	maybe_hex_value: function Token_maybe_hex_value () {
+	    if (self.kind != TK_CHAR)
+		return -1;
+
+	    if (self.catcode == C_LETTER) {
+		var v = self.ord - O_UC_A;
+		if (v < 0 || v > 5)
+		    return -1;
+		return v + 10;
+	    }
+
+	    if (self.catcode != C_OTHER)
+		return -1;
+
+	    var v = self.ord - O_UC_A;
+	    if (v >= 0 && v < 6)
+		return v + 10;
+
+	    v = self.ord - O_ZERO;
+	    if (v < 0 || v > 9)
+		return -1;
+	    return v;
+	},
+
+	iscmd: function Token_iscmd (engine, cmdname) {
+	    return this.cmd (engine).equiv (engine.commands[cmdname]);
+	},
+
+	assign_cmd: function Token_assign_cmd (engine, cmd) {
+	    if (self.kind == TK_CSEQ) {
+		engine.set_cseq (self.name, cmd);
+		return;
+	    }
+
+	    if (self.kind == TK_CHAR && self.catcode == C_ACTIVE) {
+		engine.set_active (self.ord, cmd);
+		return;
+	    }
+
+	    throw new TexInternalException ('cannot assign command for token ' + this);
+	},
+
+	isexpandable: function Token_isexpandable (engine) {
+	    return this.tocmd (engine).expandable;
+	},
+
+	isconditional: function Token_isconditional (engine) {
+	    return this.tocmd (engine).conditional;
+	}
+    };
+
+    Token.new_cseq = function Token_new_cseq (name) {
+	var tok = new Token ();
+	tok.kind = TK_CSEQ;
+	tok.name = name;
+	return tok;
+    };
+
+    Token.new_char = function Token_new_char (catcode, ord) {
+	if (catcode < 0 || catcode > 15)
+	    throw new TexInternalException ('illegal token catcode ' + catcode);
+	if (ord < 0 || ord > 255)
+	    throw new TexInternalException ('illegal token ord ' + ord);
+
+	var tok = new Token ();
+	tok.kind = TK_CHAR;
+	tok.catcode = catcode;
+	tok.ord = ord;
+	return tok;
+    };
+
+    Token.new_param = function Token_new_param (pnum) {
+	if (pnum < 1 || pnum > 8)
+	    throw new TexInternalException ('illegal param num ' + pnum);
+
+	var tok = new Token ();
+	tok.kind = TK_PARAM;
+	tok.pnum = pnum;
+	return tok;
     };
 
     return Token;
