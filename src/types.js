@@ -149,68 +149,63 @@ var ParamValue = (function ParamValue_closure () {
 }) ();
 
 
-var IntValue = (function IntValue_closure () {
-    function IntValue () {}
+var ConstantValue = (function ConstantValue_closure () {
+    function ConstantValue (value) {
+	this.value = value;
+    }
 
-    IntValue.prototype = new Value ();
+    ConstantValue.prototype = new Value ();
 
-    IntValue.prototype.scan = function IntValue_scan (engine) {
+    ConstantValue.prototype.get = function ConstantValue_get (engine) {
+	return this.value;
+    };
+
+    ConstantValue.prototype.set = function ConstantValue_set (engine, value) {
+	throw new TexRuntimeException ('cannot set a constant Value')
+    };
+
+    return ConstantValue;
+}) ();
+
+
+function _make_int_value (type) {
+    type.prototype.scan = function IntValue_scan (engine) {
 	return engine.scan_int ();
     };
 
-    return IntValue;
-}) ();
+    return type;
+}
 
-
-var DimenValue = (function DimenValue_closure () {
-    function DimenValue () {}
-
-    DimenValue.prototype = new Value ();
-
-    DimenValue.prototype.scan = function DimenValue_scan (engine) {
+function _make_dimen_value (type) {
+    type.prototype.scan = function DimenValue_scan (engine) {
 	return engine.scan_dimen ();
     };
 
-    DimenValue.prototype.tostr = function DimenValue_tostr (engine, value) {
+    type.prototype.tostr = function DimenValue_tostr (engine, value) {
 	return value.asfloat ().toFixed (3) + 'pt';
     };
 
-    return DimenValue;
-}) ();
+    return type;
+}
 
-
-var GlueValue = (function GlueValue_closure () {
-    function GlueValue () {}
-
-    GlueValue.prototype = new Value ();
-
-    GlueValue.scan = function GlueValue_scan (engine) {
+function _make_glue_value (type) {
+    type.prototype.scan = function GlueValue_scan (engine) {
 	return engine.scan_glue ();
     };
 
-    return GlueValue;
-}) ();
+    return type;
+}
 
-
-var MuGlueValue = (function MuGlueValue_closure () {
-    function MuGlueValue () {}
-
-    MuGlueValue.prototype = new Value ();
-
-    MuGlueValue.scan = function MuGlueValue_scan (engine) {
+function _make_muglue_value (type) {
+    type.prototype.scan = function MuGlueValue_scan (engine) {
 	return engine.scan_glue ({mumode: true});
     };
 
-    return MuGlueValue;
-}) ();
+    return type;
+}
 
-
-var ToksValue = (function ToksValue_closure () {
-    function ToksValue () {}
-
-    ToksValue.prototype = new Value ();
-
-    ToksValue.scan = function ToksValue_scan (engine) {
+function _make_toks_value (type) {
+    type.prototype.scan = function ToksValue_scan (engine) {
 	engine.scan_one_optional_space ();
 
 	var tok = engine.next_tok ();
@@ -224,18 +219,184 @@ var ToksValue = (function ToksValue_closure () {
 	return engine.scan_tok_group (false);
     };
 
-    ToksValue.tostr = function ToksValue_tostr (engine, value) {
+    type.prototype.tostr = function ToksValue_tostr (engine, value) {
 	return value.join ('|');
     };
 
-    return ToksValue;
+    return type;
+}
+
+function _make_font_value (type) {
+    return type; // TODO
+}
+
+
+var ConstantIntValue = (function ConstantIntValue_closure () {
+    function ConstantIntValue (value) { ConstantValue.apply (this, value); }
+    ConstantIntValue.prototype = new ConstantValue ();
+    return _make_int_value (ConstantIntValue);
+}) ();
+
+var ConstantDimenValue = (function ConstantDimenValue_closure () {
+    function ConstantDimenValue (value) { ConstantValue.apply (this, value); }
+    ConstantDimenValue.prototype = new ConstantValue ();
+    return _make_dimen_value (ConstantDimenValue);
+}) ();
+
+var ConstantFontValue = (function ConstantFontValue_closure () {
+    function ConstantFontValue (value) { ConstantValue.apply (this, value); }
+    ConstantFontValue.prototype = new ConstantValue ();
+    return _make_font_value (ConstantFontValue);
 }) ();
 
 
-var FontValue = (function FontValue_closure () {
-    function FontValue () {}
+var IntRegValue = (function IntRegValue_closure () {
+    function IntRegValue (reg) { RegisterValue.apply (this, reg); }
+    IntRegValue.prototype = new RegisterValue ();
 
-    FontValue.prototype = new Value ();
+    IntRegValue.prototype.get = function IntRegValue_get (engine) {
+	return engine.countreg (this.reg);
+    };
 
-    return FontValue;
+    IntRegValue.prototype.set = function IntRegValue_set (engine, value) {
+	engine.set_countreg (this.reg, value);
+    };
+
+    return _make_int_value (IntRegValue);
+}) ();
+
+var DimenRegValue = (function DimenRegValue_closure () {
+    function DimenRegValue (reg) { RegisterValue.apply (this, reg); }
+    DimenRegValue.prototype = new RegisterValue ();
+
+    DimenRegValue.prototype.get = function DimenRegValue_get (engine) {
+	return engine.dimenreg (this.reg);
+    };
+
+    DimenRegValue.prototype.set = function DimenRegValue_set (engine, value) {
+	engine.set_dimenreg (this.reg, value);
+    };
+
+    return _make_dimen_value (DimenRegValue);
+}) ();
+
+var GlueRegValue = (function GlueRegValue_closure () {
+    function GlueRegValue (reg) { RegisterValue.apply (this, reg); }
+    GlueRegValue.prototype = new RegisterValue ();
+
+    GlueRegValue.prototype.get = function GlueRegValue_get (engine) {
+	return engine.gluereg (this.reg);
+    };
+
+    GlueRegValue.prototype.set = function GlueRegValue_set (engine, value) {
+	engine.set_gluereg (this.reg, value);
+    };
+
+    return _make_glue_value (GlueRegValue);
+}) ();
+
+var MuGlueRegValue = (function MuGlueRegValue_closure () {
+    function MuGlueRegValue (reg) { RegisterValue.apply (this, reg); }
+    MuGlueRegValue.prototype = new RegisterValue ();
+
+    MuGlueRegValue.prototype.get = function MuGlueRegValue_get (engine) {
+	return engine.mugluereg (this.reg);
+    };
+
+    MuGlueRegValue.prototype.set = function MuGlueRegValue_set (engine, value) {
+	engine.set_mugluereg (this.reg, value);
+    };
+
+    return _make_muglue_value (MuGlueRegValue);
+}) ();
+
+var ToksRegValue = (function ToksRegValue_closure () {
+    function ToksRegValue (reg) { RegisterValue.apply (this, reg); }
+    ToksRegValue.prototype = new RegisterValue ();
+
+    ToksRegValue.prototype.get = function ToksRegValue_get (engine) {
+	return engine.toksreg (this.reg);
+    };
+
+    ToksRegValue.prototype.set = function ToksRegValue_set (engine, value) {
+	engine.set_toksreg (this.reg, value);
+    };
+
+    return _make_toks_value (ToksRegValue);
+}) ();
+
+
+var IntParamValue = (function IntParamValue_closure () {
+    function IntParamValue (name) { ParamValue.apply (this, name); }
+    IntParamValue.prototype = new ParamValue ();
+
+    IntParamValue.prototype.get = function IntParamValue_get (engine) {
+	return engine.countpar (this.name);
+    };
+
+    IntParamValue.prototype.set = function IntParamValue_set (engine, value) {
+	engine.set_countpar (this.name, value);
+    };
+
+    return _make_int_value (IntParamValue);
+}) ();
+
+var DimenParamValue = (function DimenParamValue_closure () {
+    function DimenParamValue (name) { ParamValue.apply (this, name); }
+    DimenParamValue.prototype = new ParamValue ();
+
+    DimenParamValue.prototype.get = function DimenParamValue_get (engine) {
+	return engine.dimenpar (this.name);
+    };
+
+    DimenParamValue.prototype.set = function DimenParamValue_set (engine, value) {
+	engine.set_dimenpar (this.name, value);
+    };
+
+    return _make_dimen_value (DimenParamValue);
+}) ();
+
+var GlueParamValue = (function GlueParamValue_closure () {
+    function GlueParamValue (name) { ParamValue.apply (this, name); }
+    GlueParamValue.prototype = new ParamValue ();
+
+    GlueParamValue.prototype.get = function GlueParamValue_get (engine) {
+	return engine.gluepar (this.name);
+    };
+
+    GlueParamValue.prototype.set = function GlueParamValue_set (engine, value) {
+	engine.set_gluepar (this.name, value);
+    };
+
+    return _make_glue_value (GlueParamValue);
+}) ();
+
+var MuGlueParamValue = (function MuGlueParamValue_closure () {
+    function MuGlueParamValue (name) { ParamValue.apply (this, name); }
+    MuGlueParamValue.prototype = new ParamValue ();
+
+    MuGlueParamValue.prototype.get = function MuGlueParamValue_get (engine) {
+	return engine.mugluepar (this.name);
+    };
+
+    MuGlueParamValue.prototype.set = function MuGlueParamValue_set (engine, value) {
+	engine.set_mugluepar (this.name, value);
+    };
+
+    return _make_muglue_value (MuGlueParamValue);
+}) ();
+
+var ToksParamValue = (function ToksParamValue_closure () {
+    function ToksParamValue (name) { ParamValue.apply (this, name); }
+    ToksParamValue.prototype = new ParamValue ();
+
+    ToksParamValue.prototype.get = function ToksParamValue_get (engine) {
+	return engine.tokspar (this.name);
+    };
+
+    ToksParamValue.prototype.set = function ToksParamValue_set (engine, value) {
+	engine.set_tokspar (this.name, value);
+    };
+
+    return _make_toks_value (ToksParamValue);
 }) ();
