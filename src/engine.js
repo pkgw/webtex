@@ -1,9 +1,13 @@
 var EquivTable = (function EquivTable_closure () {
-    function EquivTable () {
+    function EquivTable (parent) {
+	this.toplevel = parent.toplevel;
+	this._parent = parent;
+
+	init_generic_eqtb (this);
     }
 
-    EquivTable.prototype.foo = function EquivTable_foo () {
-    };
+    EquivTable.prototype = {};
+    fill_generic_eqtb_accessors (EquivTable.prototype);
 
     return EquivTable;
 })();
@@ -14,8 +18,9 @@ var TopEquivTable = (function TopEquivTable_closure () {
 	this.toplevel = this;
 	this._parent = undefined;
 
-	var i = 0;
+	init_top_eqtb (this);
 
+	var i = 0;
 	var t = this._catcodes = {};
 	for (i = 0; i < 256; i++)
 	    t[i] = C_OTHER;
@@ -78,9 +83,6 @@ var TopEquivTable = (function TopEquivTable_closure () {
 
     TopEquivTable.prototype = Object.create (EquivTable.prototype);
     TopEquivTable.prototype.constructor = TopEquivTable;
-
-    TopEquivTable.prototype.foo = function TopEquivTable_foo () {
-    };
 
     fill_top_eqtb_accessors (TopEquivTable.prototype);
 

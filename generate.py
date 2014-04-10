@@ -175,9 +175,9 @@ def mac_include_impls (emit, data, restargs):
 def mac_eqtb_generic_init (emit, data, restargs):
     for item in data.eqtbitems:
         if item.name == 'catcodes':
-            emit ('self._catcodes = list (parent._catcodes)')
-        else:
-            emit ('self._%s = {}', item.name)
+            continue
+
+        emit ('obj._%s = {};', item.name)
 
 
 def mac_eqtb_generic_accessors (emit, data, restargs):
@@ -194,22 +194,15 @@ def mac_eqtb_generic_accessors (emit, data, restargs):
         else:
             die ('unknown eqtb index kind "%s"', item.index)
 
-        if item.shname == 'catcode':
-            item.get1 = '['
-            item.get2 = ']'
-        else:
-            item.get1 = '.get ('
-            item.get2 = ')'
+        emit ('''proto.%(shname)s = function EquivTable_%(shname)s (%(idxvar)s) {
+  if (this._%(name)s.hasOwnProperty (%(idxvar)s))
+    return this._%(name)s[%(idxvar)s];
+  return this._parent.%(shname)s (%(idxvar)s);
+};
 
-        emit ('''def %(shname)s (self, %(idxvar)s):
-  val = self._%(name)s%(get1)s%(idxvar)s%(get2)s
-  if val is not None:
-    return val
-  return self._parent.%(shname)s (%(idxvar)s)
-
-def set_%(shname)s (self, %(idxvar)s, value):
-  self._%(name)s[%(idxvar)s] = value
-
+proto.set_%(shname)s = function EquivTable_set_%(shname)s (%(idxvar)s, value) {
+  self._%(name)s[%(idxvar)s] = value;
+};
 ''', item.extract ())
 
 
@@ -218,12 +211,14 @@ def mac_eqtb_toplevel_init (emit, data, restargs):
         if item.valuetype in ('catcode', 'ord', 'mathcode', 'int', 'delcode', 'dimen'):
             initval = '0'
         else:
-            initval = 'None'
+            initval = 'undefined'
 
         if item.index in ('ord', 'reg'):
-            emit ('self._%s = [%s] * 256', item.name, initval)
+            emit ('''t = obj._%s = {};
+for (i = 0; i < 256; i++)
+    t[i] = %s;''', item.name, initval)
         elif item.index == 'str':
-            emit ('self._%s = {}', item.name)
+            emit ('obj._%s = {};', item.name)
         else:
             die ('unknown eqtb index kind "%s"', item.index)
 
