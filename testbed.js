@@ -4,6 +4,7 @@ if (process.argv.length < 4) {
 }
 
 var WEBTEX = require (process.argv[2]).WEBTEX;
-
+var e = new WEBTEX.Engine ('awesomejob');
+console.log ('test: ' + e.eqtbs[0].catcode (0));
 console.log ('huzzah: ' + process.argv[3]);
 

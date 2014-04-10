@@ -8,6 +8,7 @@ sharedjs = \
   src/types.js \
   src/util.js \
   src/token.js \
+  $(builddir)/engine-helpers.js \
   src/engine.js
 
 browserjs = \
@@ -28,6 +29,11 @@ generate.py src/browser-wrapper.js $(sharedjs) $(browserjs) \
 
 $(builddir)/node-webtex.js: \
 generate.py src/node-wrapper.js $(sharedjs) $(nodejs) \
+| $(builddir)
+	$(python) $^ $@
+
+$(builddir)/%-helpers.js: \
+generate.py src/%-helpers-tmpl.js \
 | $(builddir)
 	$(python) $^ $@
 

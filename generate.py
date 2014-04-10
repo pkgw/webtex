@@ -233,23 +233,18 @@ def mac_eqtb_toplevel_accessors (emit, data, restargs):
         assert item.name[-1] == 's'
         item.shname = item.name[:-1]
 
-        item.access1 = '['
-        item.access2 = ']'
-
         if item.index == 'ord':
             item.idxvar = 'ord'
         elif item.index == 'str':
             item.idxvar = 'name'
-            item.access1 = '.get('
-            item.access2 = ')'
         elif item.index == 'reg':
             item.idxvar = 'reg'
         else:
             die ('unknown eqtb index kind "%s"', item.index)
 
-        emit ('''def %(shname)s (self, %(idxvar)s):
-  return self._%(name)s%(access1)s%(idxvar)s%(access2)s
-
+        emit ('''proto.%(shname)s = function TopEquivTable_%(shname)s (%(idxvar)s) {
+  return this._%(name)s[%(idxvar)s];
+};
 ''', item.extract ())
 
 
