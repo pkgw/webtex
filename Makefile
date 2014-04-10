@@ -8,6 +8,7 @@ sharedjs = \
   src/types.js \
   src/util.js \
   src/token.js \
+  src/ordsource.js \
   $(builddir)/engine-helpers.js \
   src/engine.js
 
