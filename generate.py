@@ -166,7 +166,7 @@ def mac_init_parameters (emit, data, restargs):
 
     for item in data.namedparams:
         setter, init = info[item.type]
-        emit ('self.%s (%r, %s)' % (setter, item.name, init))
+        emit ('this.%s (%r, %s)' % (setter, item.name, init))
 
 
 def mac_include_impls (emit, data, restargs):
@@ -241,7 +241,9 @@ def mac_eqtb_toplevel_accessors (emit, data, restargs):
             die ('unknown eqtb index kind "%s"', item.index)
 
         emit ('''proto.%(shname)s = function TopEquivTable_%(shname)s (%(idxvar)s) {
-  return this._%(name)s[%(idxvar)s];
+  if (this._%(name)s.hasOwnProperty (%(idxvar)s))
+    return this._%(name)s[%(idxvar)s];
+  return null;
 };
 ''', item.extract ())
 
@@ -261,7 +263,7 @@ def mac_eqtb_engine_wrappers (emit, data, restargs):
             die ('unknown eqtb index kind "%s"', item.index)
 
         emit ('''proto.%(shname)s = function Engine_%(shname)s (%(idxvar)s) {
-  return self.eqtb.%(shname)s (%(idxvar)s)
+  return this.eqtb.%(shname)s (%(idxvar)s)
 };
 
 proto.set_%(shname)s = function Engine_set_%(shname)s (%(idxvar)s, value) {

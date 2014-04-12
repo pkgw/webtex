@@ -10,6 +10,6 @@ var ordsrc = new WEBTEX.OrdSource (linesrc, null);
 var engine = new WEBTEX.Engine (process.argv[3], ordsrc);
 var tok;
 
-while ((tok = engine.next_tok ()) != null) {
+while ((tok = engine.next_x_tok ()) != null) {
     console.log (tok);
 }

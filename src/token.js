@@ -77,7 +77,7 @@ var Token = WEBTEX.Token = (function Token_closure () {
 	    if (this.catcode == C_ACTIVE)
 		cmd = engine.active (this.ord);
 	    else {
-		cmdclass = catcode_commands[this.catcode];
+		var cmdclass = Command.catcode_commands[this.catcode];
 		if (cmdclass === null)
 		    throw new TexInternalException ('cannot commandify ' +
 						    'token ' + this);
