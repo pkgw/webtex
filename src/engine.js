@@ -2,11 +2,9 @@ var EquivTable = (function EquivTable_closure () {
     function EquivTable (parent) {
 	this.toplevel = parent.toplevel;
 	this._parent = parent;
-
 	init_generic_eqtb (this);
     }
 
-    EquivTable.prototype = {};
     fill_generic_eqtb_accessors (EquivTable.prototype);
 
     return EquivTable;
@@ -81,8 +79,7 @@ var TopEquivTable = (function TopEquivTable_closure () {
 	    t[i] = new Box ();
     }
 
-    TopEquivTable.prototype = Object.create (EquivTable.prototype);
-    TopEquivTable.prototype.constructor = TopEquivTable;
+    inherit (TopEquivTable, EquivTable);
 
     fill_top_eqtb_accessors (TopEquivTable.prototype);
 
@@ -109,12 +106,6 @@ var Engine = (function Engine_closure () {
 	this.after_assign_token = null;
 	// ...
     }
-
-    Engine.prototype = {
-	onLineReceived: function Engine_onLineReceived (line) {
-	    console.log ("engine line: " + line);
-	},
-    };
 
     return Engine;
 })();

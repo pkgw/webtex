@@ -11,187 +11,185 @@ var Token = WEBTEX.Token = (function Token_closure () {
 
     function Token () {};
 
-    Token.prototype = {
-	_csesc: function Token__csesc (escape) {
-	    return [].map.call (this.name, ord).map (escape).join ('');
-	},
+    Token.prototype._csesc = function Token__csesc (escape) {
+	return [].map.call (this.name, ord).map (escape).join ('');
+    };
 
-	toString: function Token_toString () {
-	    if (this.kind == TK_CHAR)
-		return escchr (this.ord) + ':' + cc_abbrev[this.catcode];
-	    if (this.kind == TK_CSEQ)
-		return '<' + this._csesc (escchr) + '>';
-	    if (this.kind == TK_PARAM)
-		return '#' + this.pnum;
-	    throw new TexInternalException ('not reached');
-	},
+    Token.prototype.toString = function Token_toString () {
+	if (this.kind == TK_CHAR)
+	    return escchr (this.ord) + ':' + cc_abbrev[this.catcode];
+	if (this.kind == TK_CSEQ)
+	    return '<' + this._csesc (escchr) + '>';
+	if (this.kind == TK_PARAM)
+	    return '#' + this.pnum;
+	throw new TexInternalException ('not reached');
+    };
 
-	uitext: function Token_uitext () {
-	    if (this.kind == TK_CHAR)
-		return escchr (this.ord);
-	    if (this.kind == TK_CSEQ)
-		return '\\' + this._csesc (escchr) + ' ';
-	    if (this.kind == TK_PARAM)
-		return '#' + this.pnum;
-	    throw new TexInternalException ('not reached');
-	},
+    Token.prototype.uitext = function Token_uitext () {
+	if (this.kind == TK_CHAR)
+	    return escchr (this.ord);
+	if (this.kind == TK_CSEQ)
+	    return '\\' + this._csesc (escchr) + ' ';
+	if (this.kind == TK_PARAM)
+	    return '#' + this.pnum;
+	throw new TexInternalException ('not reached');
+    };
 
-	textext: function Token_textext (engine, ismacro) {
-	    if (this.kind == TK_CHAR) {
-		if (ismacro && this.ord == O_HASH)
-		    return '##';
-		return texchr (this.ord);
-	    }
-
-	    if (this.kind == TK_CSEQ)
-		return (texchr (engine.intpar ('escapechar')) +
-			this._csesc (texchr) + ' ');
-
-	    if (this.kind == TK_PARAM)
-		return '#' + this.pnum
-
-	    throw new TexInternalException ('not reached');
-	},
-
-	equals: function Token_equals (other) {
-	    if (other === null)
-		return false;
-	    if (!(other instanceof Token))
-		throw new TexInternalException ('Tokens can only be ' +
-						'compared to Tokens');
-	    if (other.kind != this.kind)
-		return false;
-
-	    if (this.kind == TK_CHAR)
-		return this.ord == other.ord && this.catcode == other.catcode;
-	    if (this.kind == TK_CSEQ)
-		return this.name == other.name;
-	    if (this.kind == TK_PARAM)
-		return this.pnum == other.pnum;
-	    throw new TexInternalException ('not reached');
-	},
-
-	tocmd: function Token_tocmd (engine) {
-	    var cmd = null;
-
-	    if (this.kind == TK_CHAR) {
-		if (this.catcode == C_ACTIVE)
-		    cmd = engine.active (this.ord);
-		else {
-		    cmdclass = catcode_commands[this.catcode];
-		    if (cmdclass === null)
-			throw new TexInternalException ('cannot commandify ' +
-							'token ' + this);
-		    cmd = new cmdclass (this.ord);
-		}
-	    } else if (this.kind == TK_CSEQ) {
-		cmd = engine.cseq (this.name);
-	    } else {
-		throw new TexInternalException ('cannot commandify token ' + this);
-	    }
-
-	    if (cmd === null)
-		return new CommandUnimplPrimitive (this);
-	    return cmd;
-	},
-
-	iscat: function Token_iscat (catcode) {
-	    if (this.kind != TK_CHAR)
-		return false;
-	    return this.catcode == catcode;
-	},
-
-	isotherchar: function Token_isotherchar (ord) {
-	    if (this.kind != TK_CHAR || this.catcode != C_OTHER)
-		return false;
-	    return this.ord == ord;
-	},
-
-	iscslike: function Token_iscslike () {
-	    if (this.kind == TK_CSEQ)
-		return true;
-	    if (this.kind == TK_CHAR)
-		return this.catcode == C_ACTIVE;
-	    return false;
-	},
-
-	is_frozen_cs: function Token_is_frozen_cs () {
-	    if (this.kind != TK_CSEQ)
-		return false;
-	    return frozen_cs_names.hasOwnProperty (this.name);
-	},
-
-	maybe_octal_value: function Token_maybe_octal_value () {
-	    if (self.kind != TK_CHAR)
-		return -1;
-	    if (self.catcode != C_OTHER)
-		return -1;
-	    var v = self.ord - O_ZERO;
-	    if (v < 0 || v > 7)
-		return -1;
-	    return v;
-	},
-
-	maybe_decimal_value: function Token_maybe_decimal_value () {
-	    if (self.kind != TK_CHAR)
-		return -1;
-	    if (self.catcode != C_OTHER)
-		return -1;
-	    var v = self.ord - O_ZERO;
-	    if (v < 0 || v > 9)
-		return -1;
-	    return v;
-	},
-
-	maybe_hex_value: function Token_maybe_hex_value () {
-	    if (self.kind != TK_CHAR)
-		return -1;
-
-	    if (self.catcode == C_LETTER) {
-		var v = self.ord - O_UC_A;
-		if (v < 0 || v > 5)
-		    return -1;
-		return v + 10;
-	    }
-
-	    if (self.catcode != C_OTHER)
-		return -1;
-
-	    var v = self.ord - O_UC_A;
-	    if (v >= 0 && v < 6)
-		return v + 10;
-
-	    v = self.ord - O_ZERO;
-	    if (v < 0 || v > 9)
-		return -1;
-	    return v;
-	},
-
-	iscmd: function Token_iscmd (engine, cmdname) {
-	    return this.cmd (engine).equiv (engine.commands[cmdname]);
-	},
-
-	assign_cmd: function Token_assign_cmd (engine, cmd) {
-	    if (self.kind == TK_CSEQ) {
-		engine.set_cseq (self.name, cmd);
-		return;
-	    }
-
-	    if (self.kind == TK_CHAR && self.catcode == C_ACTIVE) {
-		engine.set_active (self.ord, cmd);
-		return;
-	    }
-
-	    throw new TexInternalException ('cannot assign command for token ' + this);
-	},
-
-	isexpandable: function Token_isexpandable (engine) {
-	    return this.tocmd (engine).expandable;
-	},
-
-	isconditional: function Token_isconditional (engine) {
-	    return this.tocmd (engine).conditional;
+    Token.prototype.textext = function Token_textext (engine, ismacro) {
+	if (this.kind == TK_CHAR) {
+	    if (ismacro && this.ord == O_HASH)
+		return '##';
+	    return texchr (this.ord);
 	}
+
+	if (this.kind == TK_CSEQ)
+	    return (texchr (engine.intpar ('escapechar')) +
+		    this._csesc (texchr) + ' ');
+
+	if (this.kind == TK_PARAM)
+	    return '#' + this.pnum
+
+	throw new TexInternalException ('not reached');
+    };
+
+    Token.prototype.equals = function Token_equals (other) {
+	if (other === null)
+	    return false;
+	if (!(other instanceof Token))
+	    throw new TexInternalException ('Tokens can only be ' +
+					    'compared to Tokens');
+	if (other.kind != this.kind)
+	    return false;
+
+	if (this.kind == TK_CHAR)
+	    return this.ord == other.ord && this.catcode == other.catcode;
+	if (this.kind == TK_CSEQ)
+	    return this.name == other.name;
+	if (this.kind == TK_PARAM)
+	    return this.pnum == other.pnum;
+	throw new TexInternalException ('not reached');
+    };
+
+    Token.prototype.tocmd = function Token_tocmd (engine) {
+	var cmd = null;
+
+	if (this.kind == TK_CHAR) {
+	    if (this.catcode == C_ACTIVE)
+		cmd = engine.active (this.ord);
+	    else {
+		cmdclass = catcode_commands[this.catcode];
+		if (cmdclass === null)
+		    throw new TexInternalException ('cannot commandify ' +
+						    'token ' + this);
+		cmd = new cmdclass (this.ord);
+	    }
+	} else if (this.kind == TK_CSEQ) {
+	    cmd = engine.cseq (this.name);
+	} else {
+	    throw new TexInternalException ('cannot commandify token ' + this);
+	}
+
+	if (cmd === null)
+	    return new CommandUnimplPrimitive (this);
+	return cmd;
+    };
+
+    Token.prototype.iscat = function Token_iscat (catcode) {
+	if (this.kind != TK_CHAR)
+	    return false;
+	return this.catcode == catcode;
+    };
+
+    Token.prototype.isotherchar = function Token_isotherchar (ord) {
+	if (this.kind != TK_CHAR || this.catcode != C_OTHER)
+	    return false;
+	return this.ord == ord;
+    };
+
+    Token.prototype.iscslike = function Token_iscslike () {
+	if (this.kind == TK_CSEQ)
+	    return true;
+	if (this.kind == TK_CHAR)
+	    return this.catcode == C_ACTIVE;
+	return false;
+    };
+
+    Token.prototype.is_frozen_cs = function Token_is_frozen_cs () {
+	if (this.kind != TK_CSEQ)
+	    return false;
+	return frozen_cs_names.hasOwnProperty (this.name);
+    };
+
+    Token.prototype.maybe_octal_value = function Token_maybe_octal_value () {
+	if (self.kind != TK_CHAR)
+	    return -1;
+	if (self.catcode != C_OTHER)
+	    return -1;
+	var v = self.ord - O_ZERO;
+	if (v < 0 || v > 7)
+	    return -1;
+	return v;
+    };
+
+    Token.prototype.maybe_decimal_value = function Token_maybe_decimal_value () {
+	if (self.kind != TK_CHAR)
+	    return -1;
+	if (self.catcode != C_OTHER)
+	    return -1;
+	var v = self.ord - O_ZERO;
+	if (v < 0 || v > 9)
+	    return -1;
+	return v;
+    };
+
+    Token.prototype.maybe_hex_value = function Token_maybe_hex_value () {
+	if (self.kind != TK_CHAR)
+	    return -1;
+
+	if (self.catcode == C_LETTER) {
+	    var v = self.ord - O_UC_A;
+	    if (v < 0 || v > 5)
+		return -1;
+	    return v + 10;
+	}
+
+	if (self.catcode != C_OTHER)
+	    return -1;
+
+	var v = self.ord - O_UC_A;
+	if (v >= 0 && v < 6)
+	    return v + 10;
+
+	v = self.ord - O_ZERO;
+	if (v < 0 || v > 9)
+	    return -1;
+	return v;
+    };
+
+    Token.prototype.iscmd = function Token_iscmd (engine, cmdname) {
+	return this.cmd (engine).equiv (engine.commands[cmdname]);
+    };
+
+    Token.prototype.assign_cmd = function Token_assign_cmd (engine, cmd) {
+	if (self.kind == TK_CSEQ) {
+	    engine.set_cseq (self.name, cmd);
+	    return;
+	}
+
+	if (self.kind == TK_CHAR && self.catcode == C_ACTIVE) {
+	    engine.set_active (self.ord, cmd);
+	    return;
+	}
+
+	throw new TexInternalException ('cannot assign command for token ' + this);
+    };
+
+    Token.prototype.isexpandable = function Token_isexpandable (engine) {
+	return this.tocmd (engine).expandable;
+    };
+
+    Token.prototype.isconditional = function Token_isconditional (engine) {
+	return this.tocmd (engine).conditional;
     };
 
     Token.new_cseq = function Token_new_cseq (name) {

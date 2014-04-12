@@ -8,9 +8,7 @@ var TexInt = WEBTEX.TexInt = (function TexInt_closure () {
 	this.value = value;
     }
 
-    TexInt.prototype = {
-	tex_advance: function TexInt_advance (other) {
-	},
+    TexInt.prototype.tex_advance = function TexInt_advance (other) {
     };
 
     return TexInt;
@@ -23,13 +21,11 @@ var Scaled = WEBTEX.Scaled = (function Scaled_closure () {
 	this.value = value;
     }
 
-    Scaled.prototype = {
-	tex_advance: function Scaled_advance (other) {
-	},
+    Scaled.prototype.tex_advance = function Scaled_advance (other) {
+    };
 
-	asfloat: function Scaled_asfloat () {
-	    return WEBTEX.unscale (this.value);
-	}
+    Scaled.prototype.asfloat = function Scaled_asfloat () {
+	return WEBTEX.unscale (this.value);
     };
 
     return Scaled;
@@ -42,9 +38,7 @@ var Dimen = (function Dimen_closure () {
 	this.sp = new Scaled (0);
     }
 
-    Dimen.prototype = {
-	tex_advance: function Dimen_advance (other) {
-	},
+    Dimen.prototype.tex_advance = function Dimen_advance (other) {
     };
 
     return Dimen;
@@ -60,9 +54,7 @@ var Glue = (function Glue_closure () {
 	this.shrink_order = 0;
     }
 
-    Glue.prototype = {
-	tex_advance: function Glue_advance (other) {
-	},
+    Glue.prototype.tex_advance = function Glue_advance (other) {
     };
 
     return Glue;
@@ -77,18 +69,16 @@ var Box = (function Box_closure () {
 	this.tlist = [];
     }
 
-    Box.prototype = {
-    };
-
     return Box;
 }) ();
 
 
 var Rule = (function Rule_closure () {
     function Rule () {
+	Box.call (this);
     }
 
-    Rule.prototype = new Box ();
+    inherit (Rule, Box);
 
     return Rule;
 }) ();
@@ -103,9 +93,6 @@ var Font = (function Font_closure () {
 	this.skewchar = null;
     }
 
-    Font.prototype = {
-    };
-
     return Font;
 }) ();
 
@@ -115,10 +102,8 @@ var Font = (function Font_closure () {
 var Value = (function Value_closure () {
     function Value () {}
 
-    Value.prototype = {
-	tostr: function Value_tostr (engine, value) {
-	    return '' + value;
-	}
+    Value.prototype.tostr = function Value_tostr (engine, value) {
+	return '' + value;
     };
 
     return Value;
@@ -129,10 +114,11 @@ var RegisterValue = (function RegisterValue_closure () {
     function RegisterValue (reg) {
 	if (reg < 0 || reg > 255)
 	    throw new TexInternalException ('illegal register ' + reg);
+	Value.call (this);
 	this.reg = reg;
     }
 
-    RegisterValue.prototype = new Value ();
+    inherit (RegisterValue, Value);
 
     return RegisterValue;
 }) ();
@@ -140,10 +126,11 @@ var RegisterValue = (function RegisterValue_closure () {
 
 var ParamValue = (function ParamValue_closure () {
     function ParamValue (name) {
+	Value.call (this);
 	this.name = name;
     }
 
-    ParamValue.prototype = new Value ();
+    inherit (ParamValue, Value);
 
     return ParamValue;
 }) ();
@@ -151,10 +138,11 @@ var ParamValue = (function ParamValue_closure () {
 
 var ConstantValue = (function ConstantValue_closure () {
     function ConstantValue (value) {
+	Value.call (this);
 	this.value = value;
     }
 
-    ConstantValue.prototype = new Value ();
+    inherit (ConstantValue, Value);
 
     ConstantValue.prototype.get = function ConstantValue_get (engine) {
 	return this.value;
@@ -173,7 +161,7 @@ function _make_int_value (type) {
 	return engine.scan_int ();
     };
 
-    return type;
+    return type; // convenience.
 }
 
 function _make_dimen_value (type) {
@@ -232,27 +220,27 @@ function _make_font_value (type) {
 
 
 var ConstantIntValue = (function ConstantIntValue_closure () {
-    function ConstantIntValue (value) { ConstantValue.apply (this, value); }
-    ConstantIntValue.prototype = new ConstantValue ();
+    function ConstantIntValue (value) { ConstantValue.call (this, value); }
+    inherit (ConstantIntValue, ConstantValue);
     return _make_int_value (ConstantIntValue);
 }) ();
 
 var ConstantDimenValue = (function ConstantDimenValue_closure () {
-    function ConstantDimenValue (value) { ConstantValue.apply (this, value); }
-    ConstantDimenValue.prototype = new ConstantValue ();
+    function ConstantDimenValue (value) { ConstantValue.call (this, value); }
+    inherit (ConstantDimenValue, ConstantValue);
     return _make_dimen_value (ConstantDimenValue);
 }) ();
 
 var ConstantFontValue = (function ConstantFontValue_closure () {
-    function ConstantFontValue (value) { ConstantValue.apply (this, value); }
-    ConstantFontValue.prototype = new ConstantValue ();
+    function ConstantFontValue (value) { ConstantValue.call (this, value); }
+    inherit (ConstantFontValue, ConstantValue);
     return _make_font_value (ConstantFontValue);
 }) ();
 
 
 var IntRegValue = (function IntRegValue_closure () {
-    function IntRegValue (reg) { RegisterValue.apply (this, reg); }
-    IntRegValue.prototype = new RegisterValue ();
+    function IntRegValue (reg) { RegisterValue.call (this, reg); }
+    inherit (IntRegValue, RegisterValue);
 
     IntRegValue.prototype.get = function IntRegValue_get (engine) {
 	return engine.countreg (this.reg);
@@ -266,8 +254,8 @@ var IntRegValue = (function IntRegValue_closure () {
 }) ();
 
 var DimenRegValue = (function DimenRegValue_closure () {
-    function DimenRegValue (reg) { RegisterValue.apply (this, reg); }
-    DimenRegValue.prototype = new RegisterValue ();
+    function DimenRegValue (reg) { RegisterValue.call (this, reg); }
+    inherit (DimenRegValue, RegisterValue);
 
     DimenRegValue.prototype.get = function DimenRegValue_get (engine) {
 	return engine.dimenreg (this.reg);
@@ -281,8 +269,8 @@ var DimenRegValue = (function DimenRegValue_closure () {
 }) ();
 
 var GlueRegValue = (function GlueRegValue_closure () {
-    function GlueRegValue (reg) { RegisterValue.apply (this, reg); }
-    GlueRegValue.prototype = new RegisterValue ();
+    function GlueRegValue (reg) { RegisterValue.call (this, reg); }
+    inherit (GlueRegValue, RegisterValue);
 
     GlueRegValue.prototype.get = function GlueRegValue_get (engine) {
 	return engine.gluereg (this.reg);
@@ -296,8 +284,8 @@ var GlueRegValue = (function GlueRegValue_closure () {
 }) ();
 
 var MuGlueRegValue = (function MuGlueRegValue_closure () {
-    function MuGlueRegValue (reg) { RegisterValue.apply (this, reg); }
-    MuGlueRegValue.prototype = new RegisterValue ();
+    function MuGlueRegValue (reg) { RegisterValue.call (this, reg); }
+    inherit (MuGlueRegValue, RegisterValue);
 
     MuGlueRegValue.prototype.get = function MuGlueRegValue_get (engine) {
 	return engine.mugluereg (this.reg);
@@ -311,8 +299,8 @@ var MuGlueRegValue = (function MuGlueRegValue_closure () {
 }) ();
 
 var ToksRegValue = (function ToksRegValue_closure () {
-    function ToksRegValue (reg) { RegisterValue.apply (this, reg); }
-    ToksRegValue.prototype = new RegisterValue ();
+    function ToksRegValue (reg) { RegisterValue.call (this, reg); }
+    inherit (ToksRegValue, RegisterValue);
 
     ToksRegValue.prototype.get = function ToksRegValue_get (engine) {
 	return engine.toksreg (this.reg);
@@ -327,8 +315,8 @@ var ToksRegValue = (function ToksRegValue_closure () {
 
 
 var IntParamValue = (function IntParamValue_closure () {
-    function IntParamValue (name) { ParamValue.apply (this, name); }
-    IntParamValue.prototype = new ParamValue ();
+    function IntParamValue (name) { ParamValue.call (this, name); }
+    inherit (IntParamValue, ParamValue);
 
     IntParamValue.prototype.get = function IntParamValue_get (engine) {
 	return engine.countpar (this.name);
@@ -342,8 +330,8 @@ var IntParamValue = (function IntParamValue_closure () {
 }) ();
 
 var DimenParamValue = (function DimenParamValue_closure () {
-    function DimenParamValue (name) { ParamValue.apply (this, name); }
-    DimenParamValue.prototype = new ParamValue ();
+    function DimenParamValue (name) { ParamValue.call (this, name); }
+    inherit (DimenParamValue, ParamValue);
 
     DimenParamValue.prototype.get = function DimenParamValue_get (engine) {
 	return engine.dimenpar (this.name);
@@ -357,8 +345,8 @@ var DimenParamValue = (function DimenParamValue_closure () {
 }) ();
 
 var GlueParamValue = (function GlueParamValue_closure () {
-    function GlueParamValue (name) { ParamValue.apply (this, name); }
-    GlueParamValue.prototype = new ParamValue ();
+    function GlueParamValue (name) { ParamValue.call (this, name); }
+    inherit (GlueParamValue, ParamValue);
 
     GlueParamValue.prototype.get = function GlueParamValue_get (engine) {
 	return engine.gluepar (this.name);
@@ -372,8 +360,8 @@ var GlueParamValue = (function GlueParamValue_closure () {
 }) ();
 
 var MuGlueParamValue = (function MuGlueParamValue_closure () {
-    function MuGlueParamValue (name) { ParamValue.apply (this, name); }
-    MuGlueParamValue.prototype = new ParamValue ();
+    function MuGlueParamValue (name) { ParamValue.call (this, name); }
+    inherit (MuGlueParamValue, ParamValue);
 
     MuGlueParamValue.prototype.get = function MuGlueParamValue_get (engine) {
 	return engine.mugluepar (this.name);
@@ -387,8 +375,8 @@ var MuGlueParamValue = (function MuGlueParamValue_closure () {
 }) ();
 
 var ToksParamValue = (function ToksParamValue_closure () {
-    function ToksParamValue (name) { ParamValue.apply (this, name); }
-    ToksParamValue.prototype = new ParamValue ();
+    function ToksParamValue (name) { ParamValue.call (this, name); }
+    inherit (ToksParamValue, ParamValue);
 
     ToksParamValue.prototype.get = function ToksParamValue_get (engine) {
 	return engine.tokspar (this.name);

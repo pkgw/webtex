@@ -58,14 +58,18 @@ function shadow (obj, prop, value) {
 }
 
 
-function inherit (sub, base, prototype) {
-    sub.prototype = Object.create (base.prototype);
-    sub.prototype.constructor = sub;
-
-    for (var prop in prototype) {
-	sub.prototype[prop] = prototype[prop];
-    }
-};
+function inherit (ctor, superCtor) {
+    /* Copying node.js */
+    ctor.super_ = superCtor;
+    ctor.prototype = Object.create (superCtor.prototype, {
+	constructor: {
+	    value: ctor,
+	    enumerable: false,
+	    writable: true,
+	    configurable: true
+	}
+    });
+}
 
 
 /* Errors */
