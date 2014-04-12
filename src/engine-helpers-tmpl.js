@@ -43,7 +43,7 @@ function fill_cseq_commands (engine) {
 	else {
 	    var val = WEBTEX.commands[escname];
 
-	    if (typeof (val) != 'function')
+	    if (val.prototype instanceof Command)
 		cmd = new val ();
 	    else {
 		cmd = new Command ();

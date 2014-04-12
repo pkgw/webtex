@@ -129,7 +129,7 @@ var Engine = (function Engine_closure () {
 
     proto.step = function Engine_step () {
 	var tok = this.next_x_tok ();
-	if (tok === null)
+	if (tok == null)
 	    return false; // no more tokens
 
 	var cmd = tok.tocmd (this);
@@ -140,7 +140,7 @@ var Engine = (function Engine_closure () {
 	else if (cmd.assign_flag_mode != AFM_CONTINUE)
 	    this.assign_flags = 0;
 
-	if (result !== null)
+	if (result != null)
 	    this.mode_accum (result);
 
 	return true;
