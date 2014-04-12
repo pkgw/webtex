@@ -54,7 +54,7 @@ var Token = WEBTEX.Token = (function Token_closure () {
 	},
 
 	equals: function Token_equals (other) {
-	    if (other === undefined)
+	    if (other === null)
 		return false;
 	    if (!(other instanceof Token))
 		throw new TexInternalException ('Tokens can only be ' +
@@ -72,14 +72,14 @@ var Token = WEBTEX.Token = (function Token_closure () {
 	},
 
 	tocmd: function Token_tocmd (engine) {
-	    var cmd = undefined;
+	    var cmd = null;
 
 	    if (this.kind == TK_CHAR) {
 		if (this.catcode == C_ACTIVE)
 		    cmd = engine.active (this.ord);
 		else {
 		    cmdclass = catcode_commands[this.catcode];
-		    if (cmdclass === undefined)
+		    if (cmdclass === null)
 			throw new TexInternalException ('cannot commandify ' +
 							'token ' + this);
 		    cmd = new cmdclass (this.ord);
@@ -90,7 +90,7 @@ var Token = WEBTEX.Token = (function Token_closure () {
 		throw new TexInternalException ('cannot commandify token ' + this);
 	    }
 
-	    if (cmd === undefined)
+	    if (cmd === null)
 		return new CommandUnimplPrimitive (this);
 	    return cmd;
 	},

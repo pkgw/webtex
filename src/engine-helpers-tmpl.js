@@ -1,5 +1,5 @@
 function init_generic_eqtb (obj) {
-    var i = 0, t = undefined;
+    var i = 0, t = null;
 
     // Makes more sense to special-case this here than the generator.
     t = obj._catcodes = {};
@@ -14,7 +14,7 @@ function fill_generic_eqtb_accessors (proto) {
 }
 
 function init_top_eqtb (obj) {
-    var i = 0, t = undefined;
+    var i = 0, t = null;
 
     $eqtb_toplevel_init
 }

@@ -16,7 +16,7 @@ var EquivTable = (function EquivTable_closure () {
 var TopEquivTable = (function TopEquivTable_closure () {
     function TopEquivTable () {
 	this.toplevel = this;
-	this._parent = undefined;
+	this._parent = null;
 
 	init_top_eqtb (this);
 
@@ -106,7 +106,7 @@ var Engine = (function Engine_closure () {
 	this.boxop_stack = [];
 
 	this.assign_flags = 0;
-	this.after_assign_token = undefined;
+	this.after_assign_token = null;
 	// ...
     }
 

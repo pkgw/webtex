@@ -37,15 +37,15 @@ WEBTEX.Node.FSLineSource = (function FSLineSource_closure () {
     proto.get = function FSLineSource_get () {
 	if (this.cachedlines.length)
 	    return this.cachedlines.shift ();
-	if (typeof this.fd === 'undefined')
-	    return undefined;
+	if (this.fd === null)
+	    return null;
 
 	while (1) {
 	    var n = fs.readSync (this.fd, this.buf, 0, this.buf.length, null);
 	    if (n == 0) {
 		fs.close (this.fd);
-		this.fd = undefined;
-		return undefined;
+		this.fd = null;
+		return null;
 	    }
 
 	    var chunk = this.remainder + this.buf.asciiSlice (0, n);

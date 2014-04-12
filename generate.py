@@ -211,7 +211,7 @@ def mac_eqtb_toplevel_init (emit, data, restargs):
         if item.valuetype in ('catcode', 'ord', 'mathcode', 'int', 'delcode', 'dimen'):
             initval = '0'
         else:
-            initval = 'undefined'
+            initval = 'null'
 
         if item.index in ('ord', 'reg'):
             emit ('''t = obj._%s = {};

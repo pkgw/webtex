@@ -99,8 +99,8 @@ var Font = (function Font_closure () {
 	this.ident = ident;
 	this.scale = scale;
 	this.dimens = {};
-	this.hyphenchar = undefined;
-	this.skewchar = undefined;
+	this.hyphenchar = null;
+	this.skewchar = null;
     }
 
     Font.prototype = {
@@ -209,7 +209,7 @@ function _make_toks_value (type) {
 	engine.scan_one_optional_space ();
 
 	var tok = engine.next_tok ();
-	if (typeof tok === 'undefined')
+	if (tok === null)
 	    throw new TexSyntaxException ('EOF in middle of toklist assignment');
 
 	// TODO: \tokpar=<toklist register or toklist param>

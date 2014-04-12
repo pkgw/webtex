@@ -4,21 +4,21 @@ var OrdSource = WEBTEX.OrdSource = (function OrdSource_closure () {
     function OrdSource (linesource) {
 	this.linesource = linesource;
 	this.pushed = [];
-	this.curords = undefined;
-	this.curindex = undefined;
+	this.curords = null;
+	this.curindex = null;
     }
 
     var proto = OrdSource.prototype = {};
 
     proto._ensure_line = function OrdSource__ensure_line () {
 	// Returns True if more characters are available.
-	if (typeof this.linesource === 'undefined')
+	if (this.linesource === null)
 	    return false;
-	if (typeof this.curords !== 'undefined')
+	if (this.curords !== null)
 	    return true;
 
 	var l = this.linesource.get ();
-	if (typeof l === 'undefined') {
+	if (l === null) {
 	    console.log ('<<! EOF');
 	    return false;
 	}
@@ -43,14 +43,14 @@ var OrdSource = WEBTEX.OrdSource = (function OrdSource_closure () {
 	// TODO, maybe: implement corner cases with pushed characters. Unsure
 	// if they're ever needed.
 
-	if (typeof this.linesource === 'undefined')
-	    return [undefined, undefined, undefined];
+	if (this.linesource === null)
+	    return [null, null, null];
 
 	if (this.pushed.length)
 	    throw new TexRuntimeException ('peek3 corner case');
 
 	if (!this._ensure_line ())
-	    return [undefined, undefined, undefined];
+	    return [null, null, null];
 
 	if (this.curindex + 3 <= this.curords.length)
 	    // Easy case.
@@ -62,19 +62,19 @@ var OrdSource = WEBTEX.OrdSource = (function OrdSource_closure () {
     };
 
     proto._next_lowlevel = function OrdSource__next_lowlevel () {
-	if (typeof this.linesource === 'undefined')
-	    return undefined;
+	if (this.linesource === null)
+	    return null;
 
 	if (this.pushed.length)
 	    return this.pushed.pop ();
 
 	if (!this._ensure_line ())
-	    return undefined;
+	    return null;
 
 	var o = this.curords[this.curindex];
 	this.curindex++;
 	if (this.curindex >= this.curords.length)
-	    this.curords = this.curindex = undefined;
+	    this.curords = this.curindex = null;
 	return o;
     };
 
@@ -89,8 +89,8 @@ var OrdSource = WEBTEX.OrdSource = (function OrdSource_closure () {
 
     proto.next = function OrdSource_next (catcodes) {
 	var o = this._next_lowlevel ();
-	if (typeof o === 'undefined')
-	    return undefined;
+	if (o === null)
+	    return null;
 
 	var cc = catcodes[o];
 	if (cc != C_SUPER)
@@ -122,7 +122,7 @@ var OrdSource = WEBTEX.OrdSource = (function OrdSource_closure () {
     };
 
     proto.iseol = function OrdSource_iseol () {
-	if (typeof this.linesource === 'undefined')
+	if (this.linesource === null)
 	    throw new TexRuntimeError ('unexpected iseol context');
 
 	if (!this._ensure_line ())
@@ -132,10 +132,10 @@ var OrdSource = WEBTEX.OrdSource = (function OrdSource_closure () {
     };
 
     proto.discard_line = function OrdSource_discard_line () {
-	if (typeof this.linesource === 'undefined')
+	if (this.linesource === null)
 	    throw new TexRuntimeError ('unexpected discard_line context');
 
-	this.curords = this.curindex = undefined;
+	this.curords = this.curindex = null;
     };
 
     return OrdSource;
