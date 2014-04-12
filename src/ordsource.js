@@ -92,7 +92,7 @@ var OrdSource = WEBTEX.OrdSource = (function OrdSource_closure () {
 	if (typeof o === 'undefined')
 	    return undefined;
 
-	cc = catcodes[o];
+	var cc = catcodes[o];
 	if (cc != C_SUPER)
 	    return o;
 
