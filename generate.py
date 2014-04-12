@@ -138,7 +138,10 @@ def mac_command_info (emit, data, restargs):
         else:
             die ('unexpected command "afm" setting %r', item.afm)
 
-        emit ('(%r, %r, %r, %r, %s),', item.name, item.escname, item.expand, item.cond, afm)
+        emit ('[%r, %r, %s, %s, %s],', item.name, item.escname,
+              repr (item.expand).lower (),
+              repr (item.cond).lower (),
+              afm)
 
 
 def mac_parameter_info (emit, data, restargs):
@@ -201,7 +204,7 @@ def mac_eqtb_generic_accessors (emit, data, restargs):
 };
 
 proto.set_%(shname)s = function EquivTable_set_%(shname)s (%(idxvar)s, value) {
-  self._%(name)s[%(idxvar)s] = value;
+  this._%(name)s[%(idxvar)s] = value;
 };
 ''', item.extract ())
 
@@ -257,18 +260,18 @@ def mac_eqtb_engine_wrappers (emit, data, restargs):
         else:
             die ('unknown eqtb index kind "%s"', item.index)
 
-        emit ('''def %(shname)s (self, %(idxvar)s):
-  return self._eqtbs[-1].%(shname)s (%(idxvar)s)
+        emit ('''proto.%(shname)s = function Engine_%(shname)s (%(idxvar)s) {
+  return self.eqtb.%(shname)s (%(idxvar)s)
+};
 
-def set_%(shname)s (self, %(idxvar)s, value):
-  if self.assign_flags & AF_GLOBAL:
-    self._eqtbs[0].set_%(shname)s (%(idxvar)s, value)
-  else:
-    self._eqtbs[-1].set_%(shname)s (%(idxvar)s, value)
-  self.maybe_insert_after_assign_token ()
-
+proto.set_%(shname)s = function Engine_set_%(shname)s (%(idxvar)s, value) {
+  if (this.assign_flags & AF_GLOBAL)
+    this.eqtb.toplevel.set_%(shname)s (%(idxvar)s, value);
+  else
+    this.eqtb.set_%(shname)s (%(idxvar)s, value);
+  this.maybe_insert_after_assign_token ()
+};
 ''', item.extract ())
-
 
 
 # Driver.

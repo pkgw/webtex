@@ -22,3 +22,40 @@ function init_top_eqtb (obj) {
 function fill_top_eqtb_accessors (proto) {
     $eqtb_toplevel_accessors
 }
+
+
+function fill_engine_eqtb_wrappers (proto, AF_GLOBAL) {
+    $eqtb_engine_wrappers
+}
+
+var command_info = [
+    $command_info
+];
+
+function fill_cseq_commands (engine) {
+    command_info.forEach (function (item) {
+	var name = item[0], escname = item[1], expand = item[2],
+	    cond = item[3], afm = item[4];
+	var cmd = null;
+
+	if (!WEBTEX.commands.hasOwnProperty (escname))
+	    cmd = new CommandUnimplPrimitive ();
+	else {
+	    var val = WEBTEX.commands[escname];
+
+	    if (typeof (val) != 'function')
+		cmd = new val ();
+	    else {
+		cmd = new Command ();
+		cmd.invoke = val;
+	    }
+	}
+
+	cmd.name = name;
+	cmd.expandable = expand;
+	cmd.conditional = cond;
+	cmd.assign_flag_mode = afm;
+	engine.commands[name] = cmd;
+	engine.set_cseq (name, cmd);
+    });
+}

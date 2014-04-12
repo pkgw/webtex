@@ -89,6 +89,7 @@ var TopEquivTable = (function TopEquivTable_closure () {
 
 var Engine = (function Engine_closure () {
     var TS_BEGINNING = 0, TS_MIDDLE = 1, TS_SKIPPING = 2;
+    var AF_GLOBAL = 1 << 0;
 
     function Engine (jobname, initial_ordsrc) {
 	this.jobname = jobname;
@@ -106,9 +107,23 @@ var Engine = (function Engine_closure () {
 	this.assign_flags = 0;
 	this.after_assign_token = null;
 	// ...
+
+	this.commands = {};
+	fill_cseq_commands (this);
     }
 
     var proto = Engine.prototype;
+    fill_engine_eqtb_wrappers (proto, AF_GLOBAL);
+
+    // Infrastructure.
+
+    proto.debug = function Engine_debug (text) {
+	log ('{' + text + '}');
+    };
+
+    proto.warn = function Engine_warn (text) {
+	log ('!! ' + text);
+    };
 
     // Tokenization. I'd like to separate this out into its own class,
     // but there are just too many interactions between this subsystem and
@@ -118,7 +133,7 @@ var Engine = (function Engine_closure () {
 	this.pushed_tokens.push (tok);
     };
 
-    proto._tokenize_next_tok = function Engine__tokenize_next_tok () {
+    proto.next_tok = function Engine_next_tok () {
 	if (this.pushed_tokens.length)
 	    return this.pushed_tokens.pop ();
 
@@ -129,7 +144,7 @@ var Engine = (function Engine_closure () {
 	    this.ordsrc = this.ordsrc.parent;
 	    if (this.ordsrc === null)
 		return null;
-	    return this._tokenize_next_tok ();
+	    return this.next_tok ();
 	}
 
 	var cc = catcodes[o];
@@ -183,36 +198,65 @@ var Engine = (function Engine_closure () {
 	    if (prev_ts == TS_MIDDLE)
 		return Token.new_char (C_SPACE, O_SPACE);
 	    // TS_SKIPPING:
-	    return this._tokenize_next_tok ();
+	    return this.next_tok ();
 	}
 
 	if (cc == C_IGNORE)
-	    return this._tokenize_next_tok ();
+	    return this.next_tok ();
 
 	if (cc == C_SPACE) {
 	    if (this.tokenizer_state == TS_MIDDLE) {
 		this.tokenizer_state = TS_SKIPPING;
 		return Token.new_char (C_SPACE, O_SPACE);
 	    }
-	    return this._tokenize_next_tok ();
+	    return this.next_tok ();
 	}
 
 	if (cc == C_COMMENT) {
 	    this.ordsrc.discard_line ();
 	    this.tokenizer_state = TS_SKIPPING;
-	    return this._tokenize_next_tok ();
+	    return this.next_tok ();
 	}
 
 	if (cc == C_INVALID) {
-	    log ('read invalid character ' + escchr (o));
-	    return this._tokenize_next_tok ();
+	    this.warn ('read invalid character ' + escchr (o));
+	    return this.next_tok ();
 	}
 
 	// TODO: endinput
 	throw new TexInternalError ('not reached');
     };
 
-    proto.next_tok = proto._tokenize_next_tok; // may diverge in the future
+    proto.next_x_tok = function Engine_next_x_tok () {
+	while (1) {
+	    var tok = this.next_tok ();
+	    if (tok === null)
+		return null;
+
+	    var cmd = tok.tocmd (this);
+	    if (!cmd.expandable)
+		return tok;
+
+	    if (cmd.samecmd (this.commands['noexpand'])) {
+		tok = this.next_tok ();
+		this.debug ('noexpand: ' + tok);
+		return tok;
+	    }
+
+	    // The core source of recursion:
+	    cmd.invoke (this);
+	}
+    };
+
+    // Miscellaneous
+
+    proto.maybe_insert_after_assign_token =
+	function Engine_maybe_insert_after_assign_token () {
+	    if (this.after_assign_token !== null) {
+		this.push (this.after_assign_token);
+		this.after_assign_token = null;
+	    }
+	};
 
     return Engine;
 })();
