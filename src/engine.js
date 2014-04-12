@@ -125,6 +125,27 @@ var Engine = (function Engine_closure () {
 	log ('!! ' + text);
     };
 
+    // Driving everything
+
+    proto.step = function Engine_step () {
+	var tok = this.next_x_tok ();
+	if (tok === null)
+	    return false; // no more tokens
+
+	var cmd = tok.tocmd (this);
+	var result = cmd.invoke (this);
+
+	if (cmd.assign_flag_mode == AFM_INVALID && this.assign_flags)
+	    this.warn ('assignment flags applied to inapplicable command ' + cmd);
+	else if (cmd.assign_flag_mode != AFM_CONTINUE)
+	    this.assign_flags = 0;
+
+	if (result !== null)
+	    this.mode_accum (result);
+
+	return true;
+    };
+
     // Tokenization. I'd like to separate this out into its own class,
     // but there are just too many interactions between this subsystem and
     // the rest of the engine.

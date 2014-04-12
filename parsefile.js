@@ -8,8 +8,5 @@ var WEBTEX = require (process.argv[2]).WEBTEX;
 var linesrc = new WEBTEX.Node.FSLineSource (process.argv[3]);
 var ordsrc = new WEBTEX.OrdSource (linesrc, null);
 var engine = new WEBTEX.Engine (process.argv[3], ordsrc);
-var tok;
 
-while ((tok = engine.next_x_tok ()) != null) {
-    console.log (tok);
-}
+while (engine.step ()) { /* nothing */ }
