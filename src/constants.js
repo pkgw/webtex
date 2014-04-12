@@ -32,6 +32,12 @@ var cc_abbrev = [
     'oth', 'act', 'cmt', 'inv',
 ];
 
+var cc_ischar = [
+    0, 1, 1, 1,
+    1, 0, 1, 1,
+    1, 0, 0, 1,
+    1, 1, 0, 0,
+];
 
 var O_NULL = 0, // '\0'
     O_ALARM = 7, // '\a'

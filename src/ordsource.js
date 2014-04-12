@@ -1,7 +1,8 @@
 'use strict;'
 
 var OrdSource = WEBTEX.OrdSource = (function OrdSource_closure () {
-    function OrdSource (linesource) {
+    function OrdSource (linesource, parent) {
+	this.parent = parent;
 	this.linesource = linesource;
 	this.pushed = [];
 	this.curords = null;
@@ -128,7 +129,7 @@ var OrdSource = WEBTEX.OrdSource = (function OrdSource_closure () {
 	if (!this._ensure_line ())
 	    return false;
 
-	return (this.curindex == self.curords.length - 1);
+	return (this.curindex == this.curords.length - 1);
     };
 
     proto.discard_line = function OrdSource_discard_line () {

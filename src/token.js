@@ -121,46 +121,46 @@ var Token = WEBTEX.Token = (function Token_closure () {
     };
 
     Token.prototype.maybe_octal_value = function Token_maybe_octal_value () {
-	if (self.kind != TK_CHAR)
+	if (this.kind != TK_CHAR)
 	    return -1;
-	if (self.catcode != C_OTHER)
+	if (this.catcode != C_OTHER)
 	    return -1;
-	var v = self.ord - O_ZERO;
+	var v = this.ord - O_ZERO;
 	if (v < 0 || v > 7)
 	    return -1;
 	return v;
     };
 
     Token.prototype.maybe_decimal_value = function Token_maybe_decimal_value () {
-	if (self.kind != TK_CHAR)
+	if (this.kind != TK_CHAR)
 	    return -1;
-	if (self.catcode != C_OTHER)
+	if (this.catcode != C_OTHER)
 	    return -1;
-	var v = self.ord - O_ZERO;
+	var v = this.ord - O_ZERO;
 	if (v < 0 || v > 9)
 	    return -1;
 	return v;
     };
 
     Token.prototype.maybe_hex_value = function Token_maybe_hex_value () {
-	if (self.kind != TK_CHAR)
+	if (this.kind != TK_CHAR)
 	    return -1;
 
-	if (self.catcode == C_LETTER) {
-	    var v = self.ord - O_UC_A;
+	if (this.catcode == C_LETTER) {
+	    var v = this.ord - O_UC_A;
 	    if (v < 0 || v > 5)
 		return -1;
 	    return v + 10;
 	}
 
-	if (self.catcode != C_OTHER)
+	if (this.catcode != C_OTHER)
 	    return -1;
 
-	var v = self.ord - O_UC_A;
+	var v = this.ord - O_UC_A;
 	if (v >= 0 && v < 6)
 	    return v + 10;
 
-	v = self.ord - O_ZERO;
+	v = this.ord - O_ZERO;
 	if (v < 0 || v > 9)
 	    return -1;
 	return v;
@@ -171,13 +171,13 @@ var Token = WEBTEX.Token = (function Token_closure () {
     };
 
     Token.prototype.assign_cmd = function Token_assign_cmd (engine, cmd) {
-	if (self.kind == TK_CSEQ) {
-	    engine.set_cseq (self.name, cmd);
+	if (this.kind == TK_CSEQ) {
+	    engine.set_cseq (this.name, cmd);
 	    return;
 	}
 
-	if (self.kind == TK_CHAR && self.catcode == C_ACTIVE) {
-	    engine.set_active (self.ord, cmd);
+	if (this.kind == TK_CHAR && this.catcode == C_ACTIVE) {
+	    engine.set_active (this.ord, cmd);
 	    return;
 	}
 

@@ -5,7 +5,11 @@ if (process.argv.length < 4) {
 
 var WEBTEX = require (process.argv[2]).WEBTEX;
 
-var engine = new WEBTEX.Engine ('jobname');
-WEBTEX.Node.readFileLines (process.argv[3],
-			   {encoding: 'ascii'},
-			   engine.onLineReceived);
+var linesrc = new WEBTEX.Node.FSLineSource (process.argv[3]);
+var ordsrc = new WEBTEX.OrdSource (linesrc, null);
+var engine = new WEBTEX.Engine (process.argv[3], ordsrc);
+var tok;
+
+while ((tok = engine.next_tok ()) != null) {
+    console.log (tok);
+}

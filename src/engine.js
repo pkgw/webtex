@@ -90,13 +90,14 @@ var TopEquivTable = (function TopEquivTable_closure () {
 var Engine = (function Engine_closure () {
     var TS_BEGINNING = 0, TS_MIDDLE = 1, TS_SKIPPING = 2;
 
-    function Engine (jobname) {
+    function Engine (jobname, initial_ordsrc) {
 	this.jobname = jobname;
 
+	this.ordsrc = initial_ordsrc;
 	this.tokenizer_state = TS_BEGINNING;
 	this.pushed_tokens = [];
 
-	this.eqtbs = [new TopEquivTable ()];
+	this.eqtb = new TopEquivTable ();
 	this.mode_stack = [M_VERT];
 	this.build_stack = [[]];
 	this.group_exit_stack = [];
@@ -106,6 +107,112 @@ var Engine = (function Engine_closure () {
 	this.after_assign_token = null;
 	// ...
     }
+
+    var proto = Engine.prototype;
+
+    // Tokenization. I'd like to separate this out into its own class,
+    // but there are just too many interactions between this subsystem and
+    // the rest of the engine.
+
+    proto.push = function Engine_push (tok) {
+	this.pushed_tokens.push (tok);
+    };
+
+    proto._tokenize_next_tok = function Engine__tokenize_next_tok () {
+	if (this.pushed_tokens.length)
+	    return this.pushed_tokens.pop ();
+
+	var catcodes = this.eqtb._catcodes;
+	var o = this.ordsrc.next (catcodes);
+
+	if (o === null) {
+	    this.ordsrc = this.ordsrc.parent;
+	    if (this.ordsrc === null)
+		return null;
+	    return this._tokenize_next_tok ();
+	}
+
+	var cc = catcodes[o];
+
+	if (cc == C_ESCAPE) {
+	    if (this.ordsrc.iseol ())
+		return Token.new_cseq ('');
+
+	    o = this.ordsrc.next (catcodes);
+	    cc = catcodes[o];
+	    var csname = String.fromCharCode (o);
+
+	    if (cc != C_LETTER) {
+		if (cc == C_SPACE)
+		    this.tokenizer_state = TS_SKIPPING;
+		else
+		    this.tokenizer_state = TS_MIDDLE;
+		return Token.new_cseq (csname);
+	    }
+
+	    while (1) {
+		o = this.ordsrc.next (catcodes);
+		if (o === null)
+		    break;
+
+		cc = catcodes[o];
+		if (cc != C_LETTER) {
+		    this.ordsrc.push_ord (o);
+		    break;
+		}
+
+		csname += String.fromCharCode (o);
+	    }
+
+	    this.tokenizer_state = TS_SKIPPING;
+	    return Token.new_cseq (csname);
+	}
+
+	if (cc_ischar[cc]) {
+	    this.tokenizer_state = TS_MIDDLE;
+	    return Token.new_char (cc, o);
+	}
+
+	if (cc == C_EOL) {
+	    this.ordsrc.discard_line ();
+	    var prev_ts = this.tokenizer_state;
+	    this.tokenizer_state = TS_BEGINNING;
+
+	    if (prev_ts == TS_BEGINNING)
+		return Token.new_cseq ('par');
+	    if (prev_ts == TS_MIDDLE)
+		return Token.new_char (C_SPACE, O_SPACE);
+	    // TS_SKIPPING:
+	    return this._tokenize_next_tok ();
+	}
+
+	if (cc == C_IGNORE)
+	    return this._tokenize_next_tok ();
+
+	if (cc == C_SPACE) {
+	    if (this.tokenizer_state == TS_MIDDLE) {
+		this.tokenizer_state = TS_SKIPPING;
+		return Token.new_char (C_SPACE, O_SPACE);
+	    }
+	    return this._tokenize_next_tok ();
+	}
+
+	if (cc == C_COMMENT) {
+	    this.ordsrc.discard_line ();
+	    this.tokenizer_state = TS_SKIPPING;
+	    return this._tokenize_next_tok ();
+	}
+
+	if (cc == C_INVALID) {
+	    log ('read invalid character ' + escchr (o));
+	    return this._tokenize_next_tok ();
+	}
+
+	// TODO: endinput
+	throw new TexInternalError ('not reached');
+    };
+
+    proto.next_tok = proto._tokenize_next_tok; // may diverge in the future
 
     return Engine;
 })();
