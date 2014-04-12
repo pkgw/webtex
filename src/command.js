@@ -2,7 +2,6 @@
 
 var Command = WEBTEX.Command = (function Command_closure () {
     function Command () {
-	this.name = '<unset command name>';
 	this.expandable = false;
 	this.conditional = false;
 	this.boxlike = false;
@@ -10,6 +9,8 @@ var Command = WEBTEX.Command = (function Command_closure () {
     }
 
     var proto = Command.prototype;
+
+    proto.name = '<unset command name>';
 
     proto.invoke = function Command_invoke (engine) {
 	throw new TexInternalError ('tried to evaluate undefined/un-evaluatable ' +
@@ -54,11 +55,12 @@ var CharacterCommand = (function CharacterCommand_closure () {
     function CharacterCommand (ord) {
 	Command.call (this);
 	this.ord = ord;
-	this.desc = "undescribed command";
     }
 
     inherit (CharacterCommand, Command);
     var proto = CharacterCommand.prototype;
+
+    proto.desc = 'undescribed command';
 
     proto.samecmd = function CharacterCommand_samecmd (other) {
 	if (other === null)
@@ -94,16 +96,156 @@ var BeginGroupCommand = (function BeginGroupCommand_closure () {
     return BeginGroupCommand;
 })();
 
-// XXXX
-var EndGroupCommand = BeginGroupCommand;
-var MathShiftCommand = BeginGroupCommand;
-var AlignTabCommand = BeginGroupCommand;
-var MacroParameterCommand = BeginGroupCommand;
-var SuperCommand = BeginGroupCommand;
-var SubCommand = BeginGroupCommand;
-var SpacerCommand = BeginGroupCommand;
-var InsertLetterCommand = BeginGroupCommand;
-var InsertOtherCommand = BeginGroupCommand;
+var EndGroupCommand = (function EndGroupCommand_closure () {
+    function EndGroupCommand (ord) {
+	CharacterCommand.call (this, ord);
+
+    }
+
+    inherit (EndGroupCommand, CharacterCommand);
+    var proto = EndGroupCommand.prototype;
+
+    proto.name = '<end-group>';
+    proto.desc = 'end-group character';
+
+    proto.invoke = function EndGroupCommand_invoke (engine) {
+	return engine.handle_egroup ();
+    };
+
+    return EndGroupCommand;
+})();
+
+var MathShiftCommand = (function MathShiftCommand_closure () {
+    function MathShiftCommand (ord) {
+	CharacterCommand.call (this, ord);
+    }
+
+    inherit (MathShiftCommand, CharacterCommand);
+    var proto = MathShiftCommand.prototype;
+
+    proto.name = '<math-shift>';
+    proto.desc = 'math shift character';
+
+    return MathShiftCommand;
+})();
+
+var AlignTabCommand = (function AlignTabCommand_closure () {
+    function AlignTabCommand (ord) {
+	CharacterCommand.call (this, ord);
+    }
+
+    inherit (AlignTabCommand, CharacterCommand);
+    var proto = AlignTabCommand.prototype;
+
+    proto.name = '<align-tab>';
+    proto.desc = 'alignment tab character';
+
+    return AlignTabCommand;
+})();
+
+var MacroParameterCommand = (function MacroParameterCommand_closure () {
+    function MacroParameterCommand (ord) {
+	CharacterCommand.call (this, ord);
+    }
+
+    inherit (MacroParameterCommand, CharacterCommand);
+    var proto = MacroParameterCommand.prototype;
+
+    proto.name = '<macro-parameter>';
+    proto.desc = 'macro parameter character';
+
+    return MacroParameterCommand;
+})();
+
+var SuperCommand = (function SuperCommand_closure () {
+    function SuperCommand (ord) {
+	CharacterCommand.call (this, ord);
+    }
+
+    inherit (SuperCommand, CharacterCommand);
+    var proto = SuperCommand.prototype;
+
+    proto.name = '<superscript>';
+    proto.desc = 'superscript character';
+
+    return SuperCommand;
+})();
+
+var SubCommand = (function SubCommand_closure () {
+    function SubCommand (ord) {
+	CharacterCommand.call (this, ord);
+    }
+
+    inherit (SubCommand, CharacterCommand);
+    var proto = SubCommand.prototype;
+
+    proto.name = '<subscript>';
+    proto.desc = 'subscript character';
+
+    return SubCommand;
+})();
+
+var SpacerCommand = (function SpacerCommand_closure () {
+    function SpacerCommand (ord) {
+	// Note that ord is overridden!
+	CharacterCommand.call (this, O_SPACE);
+    }
+
+    inherit (SpacerCommand, CharacterCommand);
+    var proto = SpacerCommand.prototype;
+
+    proto.name = '<space>';
+    proto.desc = 'blank space';
+
+    proto.invoke = function Spacer_invoke (engine) {
+	if (engine.mode == M_VERT || engine.mode == M_IVERT)
+	    engine.debug ('spacer: ignored, vertical model');
+	else
+	    engine.debug ('spacer ...');
+    };
+
+    return SpacerCommand;
+})();
+
+var InsertLetterCommand = (function InsertLetterCommand_closure () {
+    function InsertLetterCommand (ord) {
+	CharacterCommand.call (this, ord);
+    }
+
+    inherit (InsertLetterCommand, CharacterCommand);
+    var proto = InsertLetterCommand.prototype;
+
+    proto.name = '<insert-letter>';
+    proto.desc = 'the letter';
+
+    proto.invoke = function InsertLetter_invoke (engine) {
+	engine.ensure_horizontal ();
+	engine.debug ('accum letter ' + escchr (this.ord));
+	engine.mode_accum (this.ord);
+    };
+
+    return InsertLetterCommand;
+})();
+
+var InsertOtherCommand = (function InsertOtherCommand_closure () {
+    function InsertOtherCommand (ord) {
+	CharacterCommand.call (this, ord);
+    }
+
+    inherit (InsertOtherCommand, CharacterCommand);
+    var proto = InsertOtherCommand.prototype;
+
+    proto.name = '<insert-other>';
+    proto.desc = 'the character';
+
+    proto.invoke = function InsertOther_invoke (engine) {
+	engine.ensure_horizontal ();
+	engine.debug ('accum other ' + escchr (this.ord));
+	engine.mode_accum (this.ord);
+    };
+
+    return InsertOtherCommand;
+})();
 
 Command.catcode_commands = [
     null/*esc*/, BeginGroupCommand, EndGroupCommand, MathShiftCommand,
