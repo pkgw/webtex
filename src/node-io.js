@@ -21,3 +21,46 @@ WEBTEX.Node.readFileLines = (function readFileLines (path, options, onLineReceiv
 
     rs.resume ();
 });
+
+WEBTEX.Node.FSLineSource = (function FSLineSource_closure () {
+    var fs = require ('fs');
+
+    function FSLineSource (path) {
+	this.fd = fs.openSync (path, 'r');
+	this.buf = new Buffer (2048);
+	this.cachedlines = [];
+	this.remainder = '';
+    }
+
+    var proto = FSLineSource.prototype;
+
+    proto.get = function FSLineSource_get () {
+	if (this.cachedlines.length)
+	    return this.cachedlines.shift ();
+	if (typeof this.fd === 'undefined')
+	    return undefined;
+
+	while (1) {
+	    var n = fs.readSync (this.fd, this.buf, 0, this.buf.length, null);
+	    if (n == 0) {
+		fs.close (this.fd);
+		this.fd = undefined;
+		return undefined;
+	    }
+
+	    var chunk = this.remainder + this.buf.asciiSlice (0, n);
+	    var lines = chunk.split ("\n");
+	    if (lines.length > 1)
+		break;
+
+	    this.remainder = chunk;
+	}
+
+	var ret = lines.shift ();
+	this.remainder = lines.pop ();
+	this.cachedlines = lines;
+	return ret;
+    }
+
+    return FSLineSource;
+})();

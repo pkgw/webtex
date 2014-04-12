@@ -8,7 +8,7 @@ var OrdSource = WEBTEX.OrdSource = (function OrdSource_closure () {
 	this.curindex = undefined;
     }
 
-    proto = OrdSource.prototype = {};
+    var proto = OrdSource.prototype = {};
 
     proto._ensure_line = function OrdSource__ensure_line () {
 	// Returns True if more characters are available.
