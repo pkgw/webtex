@@ -3,13 +3,55 @@
 'use strict';
 
 var TexInt = WEBTEX.TexInt = (function TexInt_closure () {
+    var INT_MAX = 2147483647; // 2**31 - 1
+
     // These objects are immutable.
     function TexInt (value) {
-	this.value = value;
+	if (value instanceof TexInt) {
+	    this.value = value;
+	} else if (typeof value != 'number') {
+	    throw new TexInternalException ('non-numeric TexInt value ' + value);
+	} else if (value % 1 != 0) {
+	    throw new TexInternalException ('non-integer TexInt value ' + value);
+	} else {
+	    this.value = value | 0;
+	}
+
+	if (Math.abs (this.value) > INT_MAX)
+	    throw new TexRuntimeException ('out-of-range TexInt value ' + value);
     }
 
+    TexInt.xcheck = function TexInt_xcheck (value) {
+	/* This function checks that its input could be a valid TeX integer,
+	 * though it's agnostic as to whether it's a TexInt instance or a
+	 * JS-native number. It returns that input as a JS integer; I call
+	 * these checked values "tex-int"s. This simplifies a lot of math with
+	 * Scaleds where it'd be irritating to keep on converting JS ints to
+	 * TexInts for temporary manipulations. */
+
+	if (value instanceof TexInt)
+	    return value.value;
+
+	if (typeof value != 'number')
+	    throw new TexInternalException ('non-numeric tex-int value ' + value);
+	if (value % 1 != 0)
+	    throw new TexInternalException ('non-integer tex-int value ' + value);
+
+	value = value | 0; // magic coercion to trustworthy int representation.
+
+	if (Math.abs (value) > INT_MAX)
+	    throw new TexRuntimeException ('out-of-range tex-int value ' + value);
+
+	return value;
+    };
+
     TexInt.prototype.toString = function TexInt_toString () {
-	return '<' + this.value + '>';
+	return '<' + this.value + '|i>';
+    };
+
+    TexInt.prototype.intproduct = function TexInt_intproduct (k) {
+	k = TexInt.xcheck (k);
+	return new TexInt (this.value * k);
     };
 
     TexInt.prototype.tex_advance = function TexInt_advance (other) {
@@ -33,20 +75,171 @@ var TexInt = WEBTEX.TexInt = (function TexInt_closure () {
 
 
 var Scaled = WEBTEX.Scaled = (function Scaled_closure () {
+    var SC_HALF  = 0x8000,     // 2**15 = 32768      = '100000
+        SC_UNITY = 0x10000,    // 2**16 = 65536      = '200000
+        SC_TWO   = 0x20000,    // 2**17 = 131072     = '400000
+        SC_MAX   = 0x40000000, // 2**30 = 1073741824 = '10000000000
+        UNSCALE  = Math.pow (2, -16),
+        INT_MAX = 2147483647; // 2**31 - 1 ; XXX redundant with above.
+
     // These objects are immutable.
     function Scaled (value) {
-	this.value = value;
+	if (value instanceof Scaled)
+	    this.value = value.value;
+	else
+	    this.value = TexInt.xcheck (value);
     }
+
+    // Math library.
+
+    function div (a, b) {
+	return a / b >> 0;
+    }
+
+    function mult_and_add (n, x, y, maxanswer) {
+	// n: tex-int
+	// x, y, retval: Scaled
+	// maxanswer: js int
+
+	if (n < 0) {
+	    var xv = -x.value;
+	    n = -n;
+	} else {
+	    var xv = x.value;
+	}
+
+	if (n == 0)
+	    return y;
+
+	var yv = y.value;
+
+	if (xv <= div (maxanswer - yv, n) && -xv <= div (maxanswer + yv, n))
+	    return new Scaled (n * xv + yv);
+	throw new TexRuntimeException ('over/underflow in mult+add');
+    }
+
+    Scaled.new_from_parts = function Scaled_new_from_parts (nonfrac, frac) {
+	nonfrac = TexInt.xcheck (nonfrac);
+	frac = TexInt.xcheck (frac);
+	return new Scaled (nonfrac * SC_UNITY + frac);
+    };
+
+    Scaled.new_parts_product =
+	function Scaled_new_parts_product (num, denom, nonfrac, frac) {
+	    // equivalent to `new_from_parts (nonfrac, frac) * (num/denom)` with
+	    // better precision than you'd get naively.
+	    num = TexInt.xcheck (num);
+	    denom = TexInt.xcheck (denom);
+	    nonfrac = TexInt.xcheck (nonfrac);
+	    frac = TexInt.xcheck (frac);
+
+	    var s = new Scaled (nonfrac);
+	    var t = s.times_n_over_d (num, denom); // -> [result, remainder]
+	    frac = div ((num * frac + SC_UNITY * t[1]), denom);
+	    nonfrac = t[0] + div (frac, SC_UNITY);
+	    frac = mod (frac, SC_UNITY);
+	    return Scaled.new_from_parts (nonfrac, frac);
+	};
+
+    Scaled.prototype.times_n_plus_y = function Scaled_times_n_plus_y (n, y) {
+	// OO interpretation of nx_plus_y.
+	// n: tex-int
+	// y: Scaled
+	// returns: Scaled(n*this+y)
+
+	n = TexInt.xcheck (n);
+	if (!(y instanceof Scaled))
+	    throw new TexInternalException ('nx+y called with non-Scaled y: ' + y);
+	return mult_and_add (n, this, y, SC_MAX - 1);
+    };
+
+    Scaled.prototype.times_n_over_d = function Scaled_times_n_over_d (n, d) {
+	// OO interpretation of xn_over_d.
+	// n: tex-int
+	// d: tex-int
+	// returns: [Scaled(result), Scaled(remainder)]
+	//   where the remainder is relevant if the low-significance digits
+	//   of (this*n/d) must be rounded off.
+
+	n = TexInt.xcheck (n);
+	d = TexInt.xcheck (d);
+
+	var positive = (this.value >= 0);
+	if (positive)
+	    var xv = this.value
+	else
+	    var xv = -this.value;
+
+	var t = (xv % SC_HALF) * n;
+	var u = div (xv, SC_HALF) * n + div (t, SC_HALF);
+	var v = (u % d) * SC_HALF + (t % SC_HALF);
+
+	if (div (u, d) > SC_HALF)
+	    throw new TexRuntimeException ('over/underflow in xn_over_d');
+
+	var w = SC_HALF * div (u, d) + div (v, d);
+
+	if (positive)
+	    return [new Scaled (w), new Scaled (v % d)];
+	return [new Scaled (-w), new Scaled (-(v % d))];
+    };
+
+    Scaled.prototype.over_n = function Scaled_over_n (n) {
+	// OO version of x_over_n.
+	// n: tex-int
+	// returns: [Scaled(x/n), Scaled(remainder)]
+	//   where the remainder is relevant if the low-significance digits
+	//   of (this/n) must be rounded off.
+
+	n = TexInt.xcheck (n);
+	if (n.value == 0)
+	    throw new TexRuntimeException ('really, dividing by 0?');
+
+	var negative = false;
+
+	if (n < 0) {
+	    var xv = -this.value;
+	    n = -n;
+	    negative = true;
+	} else {
+	    var xv = this.value;
+	}
+
+	if (xv >= 0) {
+	    var rv = div (xv, n), rem = xv % n;
+	} else {
+	    var rv = -div (-xv, n), rem = -((-xv) % n);
+	}
+
+	if (negative)
+	    rem = -rem;
+
+	return [new Scaled (rv), new Scaled (rem)];
+    };
+
+    Scaled.prototype.times_parts = function Scaled_times_parts (nonfrac, frac) {
+	nonfrac = TexInt.xcheck (nonfrac);
+	frac = TexInt.xcheck (frac);
+	var res = this.times_n_over_d (frac, SC_UNITY)[0];
+	return this.times_n_plus_y (nonfrac, res);
+    };
+
+    // Higher-level stuff.
+
+    Scaled.prototype.toString = function Scaled_toString () {
+	return '<~' + this.asfloat ().toFixed (6) + '|s>';
+    };
+
+    Scaled.prototype.intproduct = function Scaled_intproduct (k) {
+	k = TexInt.xcheck (k);
+	return this.times_parts (k, 0);
+    };
 
     Scaled.prototype.tex_advance = function Scaled_advance (other) {
     };
 
-    Scaled.prototype.asint = function Scaled_asint () {
-	return this.value;
-    };
-
     Scaled.prototype.asfloat = function Scaled_asfloat () {
-	return WEBTEX.unscale (this.value);
+	return this.value * UNSCALE;
     };
 
     return Scaled;
@@ -54,10 +247,25 @@ var Scaled = WEBTEX.Scaled = (function Scaled_closure () {
 
 
 var Dimen = (function Dimen_closure () {
+    var MAX_SCALED = 0x40000000; // 2**30 = 1073741824 = '10000000000
+
     // These objects are mutable.
     function Dimen () {
 	this.sp = new Scaled (0);
     }
+
+    Dimen.new_product = function Dimen_new_product (k, x) {
+	// k: tex-int
+	// x: Scaled
+	k = TexInt.xcheck (k);
+	if (!(x instanceof Scaled))
+	    throw new TexInternalException ('expected Scaled value, got ' + x);
+
+	var d = new Dimen ();
+	d.sp = x.times_n_plus_y (k, 0);
+	if (Math.abs (d.sp.value) > MAX_SCALED)
+	    throw new TexRuntimeException ('dimension out of range: ' + x);
+    };
 
     Dimen.prototype.tex_advance = function Dimen_advance (other) {
     };

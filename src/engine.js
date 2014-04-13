@@ -454,10 +454,12 @@ var Engine = (function Engine_closure () {
     };
 
     proto.scan_char_code = function Engine_scan_char_code () {
+	// note: returns JS integer, not TexInt.
 	return this.scan_int ().rangecheck (this, 0, 255).value;
     };
 
     proto.scan_int_4bit = function Engine_scan_int_4bit () {
+	// note: returns JS integer, not TexInt.
 	return this.scan_int ().rangecheck (this, 0, 15).value;
     };
 
@@ -474,16 +476,14 @@ var Engine = (function Engine_closure () {
 	if (v != null) {
 	    if (mumode)
 		throw new TexRuntimeException ('not implemented');
-	    else {
-		var d = new Dimen ();
-		d.sp = new Scaled (negfactor * v.asint ());
-		return d;
-	    }
+	    else
+		return Dimen.new_product (negfactor, v);
 	}
 
 	var frac = 0, radix = 10, nonfrac = 0;
 
 	if (tok.isotherchar (O_PERIOD) || tok.isotherchar (O_COMMA)) {
+	    /* nothing */
 	} else {
 	    this.push (tok);
 	    nonfrac = this.scan_int ().value;
@@ -509,7 +509,7 @@ var Engine = (function Engine_closure () {
 		}
 		digits.push (v);
 	    }
-	    frac = Math.round_decimals (digits);
+	    frac = WEBTEX.round_decimals (digits);
 	}
 
 	if (this.scan_keyword ('true'))
@@ -521,8 +521,7 @@ var Engine = (function Engine_closure () {
 
 	if (val != null) {
 	    var v = val.get (this);
-	    result = Math.nx_plus_y (nonfrac, v,
-				     Math.xn_over_d (v, frac, Math.SC_UNITY)[0]);
+	    result = v.frac_product (nonfrac, frac);
 	} else {
 	    this.push (tok);
 
@@ -531,30 +530,28 @@ var Engine = (function Engine_closure () {
 		while (this.scan_keyword ('l')) {
 		    inf_order += 1;
 		    if (inf_order > 3)
-			throw new TexSyntaxException ('illegal infinity value "fillll" ' +
-						  'or higher');
+			throw new TexSyntaxException ('illegal infinity value ' +
+						      '"fillll" or higher');
 		}
-		result = nonfrac * Math.SC_UNITY + frac;
+		result = Scaled.new_from_parts (nonfrac, frac);
 	    } else if (mumode) {
 		if (this.scan_keyword ('mu'))
-		    result = nonfrac * Math.SC_UNITY + frac;
+		    result = Scaled.new_from_parts (nonfrac, frac);
 		else
-		    throw new TexRuntimeException ('this quantity must have dimensions ' +
-					       'of "mu"');
+		    throw new TexRuntimeException ('this quantity must have ' +
+						   'dimensions of "mu"');
 	    } else if (this.scan_keyword ('em')) {
 		this.warn ('faking font em-width');
-		v = 18 * Math.SC_UNITY;
-		result = Math.nx_plus_y (nonfrac, v,
-					 Math.xn_over_d (v, frac, SC_UNITY)[0]);
+		v = Scaled.new_from_parts (18, 0);
+		result = v.times_parts (nonfrac, frac);
 	    } else if (this.scan_keyword ('ex')) {
 		this.warn ('faking font ex-width');
-		v = 12 * Math.SC_UNITY;
-		result = Math.nx_plus_y (nonfrac, v,
-					 Math.xn_over_d (v, frac, SC_UNITY)[0]);
+		v = Scaled.new_from_parts (12, 0);
+		result = v.times_parts (nonfrac, frac);
 	    } else if (this.scan_keyword ('sp')) {
-		result = nonfrac;
+		result = new Scaled (nonfrac);
 	    } else if (this.scan_keyword ('pt')) {
-		result = nonfrac * SC_UNITY + frac;
+		result = Scaled.new_from_parts (nonfrac, frac);
 	    } else {
 		var num, denom;
 
@@ -585,24 +582,17 @@ var Engine = (function Engine_closure () {
 					      'didn\'t find it; next is ' + tok);
 		}
 
-		var t = Math.xn_over_d (nonfrac, num, denom);
-		frac = Math.div ((num * frac + SC_UNITY * t[1]), denom);
-		nonfrac = t[0] + Math.div (frac, Math.SC_UNITY);
-		frac = Math.mod (frac, SC_UNITY);
-		// "attach_fraction" label:
-		result = nonfrac * SC_UNITY + frac;
+		result = Scaled.new_parts_product (num, denom, nonfrac, frac);
 	    }
 	}
 
 	// TODO this isn't always done.
 	this.scan_one_optional_space ();
 
-	if (Math.abs (result) >= Math.SC_MAX)
-	    throw new TexRuntimeException ('dimension out of range: ' + result);
-
+	result = Dimen.new_product (negfactor, result);
 	if (infmode)
-	    return [negfactor * result, inf_order];
-	return negfactor * result;
+	    return [result, inf_order];
+	return result;
     };
 
     proto.scan_glue = function Engine_scan_glue (mumode) {
@@ -612,12 +602,11 @@ var Engine = (function Engine_closure () {
 	var v = tok.tocmd (this).asvalue (this);
 	if (v != null)
 	    // TODO: more care with type compatibility
-	    return negfactor * v.get (this);
+	    return v.get (this).intproduct (negfactor);
 
 	var g = new Glue ();
 	this.push (tok);
-	g.width = this.scan_dimen (mumode, false);
-	g.width *= negfactor;
+	g.width = this.scan_dimen (mumode, false).intproduct (negfactor);
 
 	if (this.scan_keyword ('plus')) {
 	    t = this.scan_dimen (mumode, true);
