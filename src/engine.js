@@ -458,6 +458,14 @@ var Engine = (function Engine_closure () {
 	return this.scan_int ().rangecheck (this, 0, 255).value;
     };
 
+    proto.scan_register_num = function Engine_scan_register () {
+	// note: returns JS integer, not TexInt.
+	var v = this.scan_int ().value;
+	if (v < 0 || v > 255)
+	    throw new TexRuntimeException ('illegal register number ' + v);
+	return v;
+    };
+
     proto.scan_int_4bit = function Engine_scan_int_4bit () {
 	// note: returns JS integer, not TexInt.
 	return this.scan_int ().rangecheck (this, 0, 15).value;
