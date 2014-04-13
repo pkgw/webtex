@@ -52,6 +52,9 @@ var O_NULL = 0, // '\0'
     O_HASH = 35, // #
     O_PERCENT = 37, // '%'
     O_SQUOTE = 39, // "'"
+    O_PLUS = 43, // '+'
+    O_COMMA = 44, // ','
+    O_MINUS = 45, // '-'
     O_PERIOD = 46, // '.'
     O_ZERO = 48, // '0'
     O_EQUALS = 61, // '='

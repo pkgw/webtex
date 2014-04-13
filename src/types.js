@@ -8,7 +8,24 @@ var TexInt = WEBTEX.TexInt = (function TexInt_closure () {
 	this.value = value;
     }
 
+    TexInt.prototype.toString = function TexInt_toString () {
+	return '<' + this.value + '>';
+    };
+
     TexInt.prototype.tex_advance = function TexInt_advance (other) {
+    };
+
+    TexInt.prototype.asint = function TexInt_asint () {
+	return this.value;
+    };
+
+    TexInt.prototype.rangecheck = function TexInt_rangecheck (engine, min, max) {
+	if (this.value >= min && this.value <= max)
+	    return this;
+
+	engine.warn ('expected integer in [' + min + ', ' + max + ']; got ' +
+		     this.value + '; using 0');
+	return TexInt (0);
     };
 
     return TexInt;
@@ -22,6 +39,10 @@ var Scaled = WEBTEX.Scaled = (function Scaled_closure () {
     }
 
     Scaled.prototype.tex_advance = function Scaled_advance (other) {
+    };
+
+    Scaled.prototype.asint = function Scaled_asint () {
+	return this.value;
     };
 
     Scaled.prototype.asfloat = function Scaled_asfloat () {
@@ -39,6 +60,10 @@ var Dimen = (function Dimen_closure () {
     }
 
     Dimen.prototype.tex_advance = function Dimen_advance (other) {
+    };
+
+    Dimen.prototype.asint = function Dimen_asint () {
+	return this.sp.value;
     };
 
     return Dimen;

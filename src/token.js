@@ -94,6 +94,10 @@ var Token = WEBTEX.Token = (function Token_closure () {
 	return cmd;
     };
 
+    Token.prototype.ischar = function Token_ischar () {
+	return this.kind == TK_CHAR;
+    };
+
     Token.prototype.iscat = function Token_iscat (catcode) {
 	if (this.kind != TK_CHAR)
 	    return false;
