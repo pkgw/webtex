@@ -127,9 +127,9 @@ lccode			n	n	consume # -> "def_code"
 leaders			n	n	inval # -> "leader_ship"
 left			n	n	inval	# -> "left_right"
 leqno			n	n	inval	# -> "eqno"
-let			n	n	consume
+_let			n	n	consume
 limits			n	n	inval # -> "limit_switch"
-long			n	n	cont	# -> "prefix"
+_long			n	n	cont	# -> "prefix"
 lower			n	n	inval	# -> "vmove"
 lowercase		n	n	inval	# -> "caseshift"
 mark			n	n	inval

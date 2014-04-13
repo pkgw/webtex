@@ -58,6 +58,8 @@ _load_pname_escapes = {
     '_space_': ' ',
     '_dash_': '-',
     '_fslash_': '/',
+    '_let': 'let',
+    '_long': 'long',
 }
 
 def load_all ():

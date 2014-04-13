@@ -90,3 +90,81 @@ commands.toksdef = function cmd_toksdef (engine) {
     engine.debug ('toksdef ' + cstok + ' -> {\\toks' + val + '}');
     cstok.assign_cmd (engine, new GivenToksCommand (val));
 };
+
+
+// Non-specific definition infrastructure
+
+commands.global = function cmd_global (engine) {
+    engine.debug ('global');
+    engine.assign_flags |= AF_GLOBAL;
+};
+
+commands.outer = function cmd_outer (engine) {
+    // I think it's OK to make this a noop.
+    engine.debug ('outer');
+};
+
+commands._long = function cmd_long (engine) {
+    // I think it's OK to make this a noop.
+    engine.debug ('long');
+};
+
+commands._let = function cmd_let (engine) {
+    var cstok = engine.scan_r_token ();
+
+    // Note that we don't use scan_optional_equals here since it
+    // expands things.
+
+    while (true) {
+	var tok = engine.next_tok ();
+	if (tok == null)
+	    throw new TexSyntaxException ('EOF in \\let');
+	if (tok.iscat (C_SPACE))
+	    continue
+	if (tok.isotherchar (O_EQUALS)) {
+	    var equiv = engine.next_tok ();
+	    if (equiv.iscat (C_SPACE))
+		equiv = engine.next_tok ();
+	    break;
+	}
+	var equiv = tok;
+	break;
+    }
+
+    engine.debug ('let ' + cstok + ' = ' + equiv);
+    cstok.assign_cmd (engine, equiv.tocmd (engine));
+};
+
+
+commands.futurelet = function cmd_futurelet (engine) {
+    var cstok = engine.scan_r_token ();
+    var thenexpand = engine.next_tok ();
+    var equiv = engine.next_tok ();
+    engine.debug ('futurelet ' + cstok + ' = ' + equiv + '; ' + thenexpand);
+    cstok.assign_cmd (engine, equiv.tocmd (engine));
+    engine.push (equiv);
+    engine.push (thenexpand);
+};
+
+
+// High-level miscellany
+
+commands.dump = function cmd_dump (engine) {
+    engine.debug ('dump');
+};
+
+commands.batchmode = function cmd_batchmode (engine) {
+    engine.debug ('batchmode');
+};
+
+commands.errorstopmode = function cmd_errorstopmode (engine) {
+    engine.debug ('errorstopmode');
+};
+
+commands.nonstopmode = function cmd_nonstopmode (engine) {
+    engine.debug ('nonstopmode');
+};
+
+commands.scrollmode = function cmd_scrollmode (engine) {
+    engine.debug ('scrollmode');
+};
