@@ -98,6 +98,10 @@ var Token = WEBTEX.Token = (function Token_closure () {
 	return this.kind == TK_CHAR;
     };
 
+    Token.prototype.isparam = function Token_isparam () {
+	return this.kind == TK_PARAM;
+    };
+
     Token.prototype.iscat = function Token_iscat (catcode) {
 	if (this.kind != TK_CHAR)
 	    return false;

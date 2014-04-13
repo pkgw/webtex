@@ -51,6 +51,196 @@ var CommandUnimplPrimitive = (function CommandUnimplPrimitive_closure () {
 })();
 
 
+var MacroCommand = (function MacroCommand_closure () {
+    function MacroCommand (origcs, tmpl, repl) {
+	Command.call (this);
+	this.origcs = origcs;
+	this.tmpl = tmpl;
+	this.repl = repl;
+    }
+
+    inherit (MacroCommand, Command);
+    var proto = MacroCommand.prototype;
+    proto.name = '<macro>';
+    proto.expandable = true;
+
+    proto.samecmd = function MacroCommand_samecmd (other) {
+	if (other === null)
+	    return false;
+	if (this.name != other.name)
+	    return false;
+	if (this.tmpl.length != other.tmpl.length)
+	    return false;
+	if (this.repl.length != other.repl.length)
+	    return false;
+
+	for (var i = 0; i < this.tmpl.length; i++)
+	    if (!this.tmpl[i].equals (other.tmpl[i]))
+		return false;
+
+	for (var i = 0; i < this.repl.length; i++)
+	    if (!this.repl[i].equals (other.repl[i]))
+		return false;
+
+	return true;
+    };
+
+    proto.invoke = function MacroCommand_invoke (engine) {
+	if (!this.tmpl.length) {
+	    engine.debug ('*macro ' + this.origcs + ' -> {' +
+			  this.repl.join (' ') + '}');
+	    for (var i = this.repl.length - 1; i >= 0; i--)
+		engine.push (this.repl[i]);
+	    return;
+	}
+
+	var tidx = 0, ntmpl = this.tmpl.length, param_vals = {};
+
+	while (tidx < ntmpl) {
+	    var ttok = this.tmpl[tidx];
+
+	    if (!ttok.isparam ()) {
+		// span of nonparameter tokens in template -- eat and make
+		// sure that the actual token stream matches.
+		var atok = engine.next_x_tok ();
+		if (!atok.equals (ttok))
+		    throw new TexRuntimeError ('macro invocation doesn\'t match ' +
+					       'template: expected ' + ttok + ', ' +
+					       'got ' + atok);
+		tidx += 1;
+		continue;
+	    }
+
+	    if (tidx == ntmpl - 1 || this.tmpl[tidx+1].isparam ()) {
+		// Undelimited parameter. Either a single token, or a group.
+		var tok = engine.next_tok ();
+		if (tok == null)
+		    throw new TexRuntimeException ('EOF in macro expansion');
+
+		if (tok.iscat (C_BGROUP))
+		    param_vals[ttok.pnum] = engine.scan_tok_group (false);
+		else if (tok.iscmd (engine, '<space>'))
+		    // TexBook pg 201: spaces are not used as undelimited args
+		    continue;
+		else
+		    param_vals[ttok.pnum] = [tok];
+
+		tidx += 1;
+		continue;
+	    }
+
+	    // Delimited parameter -- scan until we match the trailing
+	    // non-parameter tokens. Brace stripping is tricky: given
+	    // X#1Y -> #1,
+	    //  XabY     -> ab, and
+	    //  X{ab}Y   -> ab, but
+	    //  X{a}{b}Y -> {a}{b}, since otherwise you'd get "a}{b".
+
+	    var expansion = [], match_start = tidx + 1, match_end = tidx + 2;
+
+	    while (match_end < ntmpl && !this.tmpl[match_end].isparam ())
+		match_end += 1;
+
+	    var n_to_match = match_end - match_start, cur_match_idx = 0, depth = 0;
+
+	    while (cur_match_idx < n_to_match) {
+		var tok = engine.next_tok ();
+		if (tok == null)
+		    throw new TexRuntimeException ('EOF processing macro parameters');
+
+		if (depth > 0) {
+		    if (tok.iscat (C_BGROUP))
+			depth += 1;
+		    else if (tok.iscat (C_EGROUP))
+			depth -= 1;
+		    expansion.push (tok);
+		    continue;
+		}
+
+		if (tok.equals (this.tmpl[match_start + cur_match_idx])) {
+		    // We're making progress on matching the delimeters.
+		    cur_match_idx += 1;
+		    continue;
+		}
+
+		// We're not matching the template. Accumulate into the expansion.
+		for (var i = 0; i < cur_match_idx; i++)
+		    // If we were making progress on a match, those tokens
+		    // weren't getting recorded into the expansion. Rectify
+		    // that.
+		    expansion.push (this.tmpl[match_start + i]);
+
+		cur_match_idx = 0;
+		expansion.push (tok);
+	    }
+
+	    if (expansion.length > 1 && expansion[0].iscat (C_BGROUP) &&
+		expansion[expansion.length - 1].iscat (C_EGROUP)) {
+		// Check if we can strip off these braces.
+		var canstrip = true, depth = 1;
+
+		for (var i = 1; i < expansion.length - 1; i++) {
+		    var tok = expansion[i];
+		    if (tok.iscat (C_BGROUP))
+			depth += 1;
+		    else if (tok.iscat (C_EGROUP)) {
+			depth -= 1;
+			if (depth == 0) {
+			    canstrip = false;
+			    break;
+			}
+		    }
+		}
+
+		if (canstrip)
+		    expansion = expansion.slice (1, expansion.length - 1);
+	    }
+
+	    param_vals[ttok.pnum] = expansion // note: don't update ttok!
+	    tidx = match_end;
+	}
+
+	// OK, we've finally accumulated all of the parameter values! We
+	// can now insert the replacement.
+
+	var fullrepl = [];
+
+	for (var i = this.repl.length - 1; i >= 0; i--) {
+	    var rtok = this.repl[i];
+
+	    if (!rtok.isparam ()) {
+		engine.push (rtok);
+		fullrepl.push (rtok);
+	    } else {
+		var ptoks = param_vals[rtok.pnum];
+		for (var j = ptoks.length - 1; j >= 0; j--) {
+		    engine.push (ptoks[j]);
+		    fullrepl.push (ptoks[j]);
+		}
+	    }
+	}
+
+	engine.debug ('*macro ' + this.origcs + ' ...');
+	for (var i = 1; i < 9; i++)
+	    if (param_vals.hasOwnProperty (i))
+		engine.debug ('   #' + i + ' = {' + param_vals[i].join (' ') + '}');
+	fullrepl = fullrepl.reverse ();
+	engine.debug (' -> {' + fullrepl.join (' ') + '}');
+    };
+
+    proto.texmeaning = function MacroCommand_texmeaning (engine) {
+	var s = 'macro:';
+	function tt (t) {return t.textext (engine, true); }
+	s += [].map.call (this.tmpl, tt).join ('');
+	s += '->';
+	s += [].map.call (this.repl, tt).join ('');
+	return s;
+    };
+
+    return MacroCommand;
+})();
+
+
 // Commands corresponding to character tokens.
 
 var CharacterCommand = (function CharacterCommand_closure () {

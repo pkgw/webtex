@@ -147,6 +147,152 @@ commands.futurelet = function cmd_futurelet (engine) {
 };
 
 
+function _cmd_def (engine, cname, expand_replacement) {
+    var cstok = engine.scan_r_token ();
+
+    var tmpl_toks = [], repl_toks = [], last_was_param = false,
+        end_with_lbrace = false, next_pnum = 1;
+
+    while (true) {
+	var tok = engine.next_tok ();
+	if (tok == null)
+	    throw new TexSyntaxException ('EOF in middle of \\' + cname +
+					  ' command');
+
+	if (last_was_param) {
+	    if (tok.iscat (C_BGROUP)) {
+		tmpl_toks.push (tok);
+		end_with_lbrace = true;
+		break;
+	    }
+
+	    if (tok.isotherchar (O_ZERO + next_pnum)) {
+		if (next_pnum > 8)
+		    throw new TexRuntimeException ('macros may only have 8 parameters');
+
+		tmpl_toks.push (Token.new_param (next_pnum));
+		next_pnum += 1;
+		last_was_param = false;
+		continue;
+	    }
+
+	    throw new TexSyntaxError ('unexpected token ' + tok + ' following ' +
+				      'parameter token');
+	}
+
+	if (tok.iscat (C_PARAM)) {
+	    last_was_param = true;
+	    continue;
+	}
+
+	if (tok.iscat (C_BGROUP))
+	    break;
+
+	tmpl_toks.push (tok);
+	last_was_param = false;
+    }
+
+    // We've just read in the param template and the left brace of
+    // the replacement. Now read that in.
+
+    var depth = 1;
+    last_was_param = false;
+
+    while (true) {
+	var tok = engine.next_tok ();
+	if (tok == null)
+	    throw new TexSyntaxError ('EOF in middle of \\' + cname + ' command');
+
+	if (expand_replacement) {
+	    // We can't just use next_x_tok because \the{toklist} is
+	    // not supposed to be sub-expanded (TeXBook p. 216). Yargh.
+	    if (tok.iscmd (engine, 'the')) {
+		var next = engine.next_tok ();
+		var nv = next.tocmd (engine).asvalue (engine);
+		if (nv instanceof ToksValue) {
+		    repl_toks += nv.get (engine);
+		    continue
+		} else {
+		    engine.push (next);
+		}
+	    } else if (tok.iscmd (engine, 'noexpand')) {
+		repl_toks.push (engine.next_tok ());
+		continue;
+	    } else if (tok.isexpandable (engine)) {
+		tok.tocmd (engine).invoke (engine);
+		continue;
+	    }
+	}
+
+	if (last_was_param) {
+	    if (tok.iscat (C_PARAM)) {
+		repl_toks.push (tok);
+		last_was_param = false;
+		continue;
+	    }
+
+	    if (tok.iscat (C_OTHER) && tok.ord > O_ZERO &&
+		tok.ord < O_ZERO + next_pnum) {
+		repl_toks.push (Token.new_param (tok.ord - O_ZERO));
+		last_was_param = false;
+		continue;
+	    }
+
+	    throw new TexSyntaxException ('unexpected token ' + tok + ' following ' +
+					  'parameter token');
+	}
+
+	if (tok.iscat (C_PARAM)) {
+	    last_was_param = true;
+	    continue;
+	}
+
+	if (tok.iscat (C_BGROUP))
+	    depth += 1;
+	else if (tok.iscat (C_EGROUP)) {
+	    depth -= 1;
+	    if (depth == 0)
+		break;
+	}
+
+	repl_toks.push (tok);
+	last_was_param = false;
+    }
+
+    if (end_with_lbrace)
+	repl_toks.push (tmpl_toks[tmpl_toks.length - 1]);
+
+    engine.debug ([cname, cstok, '~', '{' + tmpl_toks.join (' ') + '}',
+		   '->', '{' + repl_toks.join (' ') + '}'].join (' '));
+    cstok.assign_cmd (engine, new MacroCommand (cstok, tmpl_toks, repl_toks));
+}
+
+
+commands.def = function cmd_def (engine) {
+    return _cmd_def (engine, 'def', false);
+};
+
+commands.gdef = function cmd_gdef (engine) {
+    engine.assign_flags |= AF_GLOBAL;
+    return _cmd_def (engine, 'gdef', false);
+};
+
+commands.edef = function cmd_edef (engine) {
+    return _cmd_def (engine, 'edef', true);
+};
+
+commands.xdef = function cmd_xdef (engine) {
+    engine.assign_flags |= AF_GLOBAL;
+    return _cmd_def (engine, 'xdef', true);
+};
+
+commands.afterassignment = function cmd_afterassignment (engine) {
+    var tok = engine.next_tok ();
+    engine.set_after_assign_token (tok);
+    engine.debug ('afterassignment <- ' + tok);
+};
+
+
 // High-level miscellany
 
 commands.dump = function cmd_dump (engine) {
