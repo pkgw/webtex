@@ -293,6 +293,45 @@ commands.afterassignment = function cmd_afterassignment (engine) {
 };
 
 
+// User interaction, I/O
+
+commands.message = function cmd_message (engine) {
+    var tok = engine.next_tok ();
+    if (tok == null)
+	throw new TexSyntaxException ('EOF in middle of \\message');
+
+    if (!tok.iscat (C_BGROUP))
+	throw new TexSyntaxException ('expected { immediately after \\message');
+
+    var toks = engine.scan_tok_group ();
+    engine.debug ('message ~' +
+		  toks.map (function (t) { return t.uitext (); }).join (''));
+};
+
+
+commands.errmessage = function cmd_errmessage (engine) {
+    var tok = engine.next_tok ();
+    if (tok == null)
+	throw new TexSyntaxException ('EOF in middle of \\errmessage');
+
+    if (!tok.iscat (C_BGROUP))
+	throw new TexSyntaxException ('expected { immediately after \\errmessage');
+
+    var toks = engine.scan_tok_group ();
+    text = toks.map (function (t) { return t.uitext (); }).join ('');
+    engine.debug ('errmessage ~' + text);
+    throw new TexRuntimeException ('TeX-triggered error: ' + text);
+};
+
+
+commands.immediate = function cmd_immediate (engine) {
+    /* This causes a following \openout, \write, or \closeout to take effect
+     * immediately, rather than waiting until page shipout. I suspect that I'll
+     * need to distinguish these eventually, but for now, this is a noop. */
+    engine.debug ('immediate');
+};
+
+
 // High-level miscellany
 
 commands.dump = function cmd_dump (engine) {

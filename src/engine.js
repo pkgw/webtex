@@ -665,7 +665,12 @@ var Engine = (function Engine_closure () {
 	    getter = this.next_tok;
 
 	while (true) {
-	    var tok = getter ();
+	    var tok;
+	    if (expand)
+		tok = this.next_x_tok ();
+	    else
+		tok = this.next_tok ();
+
 	    if (tok == null)
 		throw new TexSyntaxException ('EOF in middle of a group');
 
