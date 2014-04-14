@@ -25,10 +25,134 @@ commands.catcode = (function CatcodeCommand_closure () {
 
     proto.asvalue = function CatcodeCommand_asvalue (engine) {
 	var ord = engine.scan_char_code ();
-	return ConstantIntValue (engine.catcode (ord));
+	return ConstantIntValue (new TexInt (engine.catcode (ord)));
     };
 
     return CatcodeCommand;
+})();
+
+
+commands.mathcode = (function MathcodeCommand_closure () {
+    function MathcodeCommand () { Command.call (this); }
+    inherit (MathcodeCommand, Command);
+    var proto = MathcodeCommand.prototype;
+
+    proto.invoke = function MathcodeCommand_invoke (engine) {
+	var ord = engine.scan_char_code ();
+	engine.scan_optional_equals ();
+	var mcode = engine.scan_int ().value;
+	if (mcode > 0x8000)
+	    throw new TexRuntimeException ('mathcode value should be in range ' +
+					   '[0,0x8000]; got ' + mcode);
+	engine.debug ('mathcode ' + escchr (ord) + '=' + ord + ' -> '
+		      + mcode);
+	engine.set_mathcode (ord, mcode);
+    };
+
+    proto.asvalue = function MathcodeCommand_asvalue (engine) {
+	var ord = engine.scan_char_code ();
+	return ConstantIntValue (new TexInt (engine.mathcode (ord)));
+    };
+
+    return MathcodeCommand;
+})();
+
+
+commands.sfcode = (function SfcodeCommand_closure () {
+    function SfcodeCommand () { Command.call (this); }
+    inherit (SfcodeCommand, Command);
+    var proto = SfcodeCommand.prototype;
+
+    proto.invoke = function SfcodeCommand_invoke (engine) {
+	var ord = engine.scan_char_code ();
+	engine.scan_optional_equals ();
+	var sfcode = engine.scan_int ().value;
+	if (sfcode > 0x7FFF)
+	    throw new TexRuntimeException ('sfcode value should be in range ' +
+					   '[0,0x7FFF]; got ' + sfcode);
+	engine.debug ('sfcode ' + escchr (ord) + '=' + ord + ' -> '
+		      + sfcode);
+	engine.set_sfcode (ord, sfcode);
+    };
+
+    proto.asvalue = function SfcodeCommand_asvalue (engine) {
+	var ord = engine.scan_char_code ();
+	return ConstantIntValue (new TexInt (engine.sfcode (ord)));
+    };
+
+    return SfcodeCommand;
+})();
+
+
+commands.lccode = (function LccodeCommand_closure () {
+    function LccodeCommand () { Command.call (this); }
+    inherit (LccodeCommand, Command);
+    var proto = LccodeCommand.prototype;
+
+    proto.invoke = function LccodeCommand_invoke (engine) {
+	var ord = engine.scan_char_code ();
+	engine.scan_optional_equals ();
+	var lccode = engine.scan_char_code ();
+	engine.debug ('lccode ' + escchr (ord) + '=' + ord + ' -> '
+		      + escchr (lccode) + '=' + lccode);
+	engine.set_lccode (ord, lccode);
+    };
+
+    proto.asvalue = function LccodeCommand_asvalue (engine) {
+	var ord = engine.scan_char_code ();
+	return ConstantIntValue (new TexInt (engine.lccode (ord)));
+    };
+
+    return LccodeCommand;
+})();
+
+
+commands.uccode = (function UccodeCommand_closure () {
+    function UccodeCommand () { Command.call (this); }
+    inherit (UccodeCommand, Command);
+    var proto = UccodeCommand.prototype;
+
+    proto.invoke = function UccodeCommand_invoke (engine) {
+	var ord = engine.scan_char_code ();
+	engine.scan_optional_equals ();
+	var uccode = engine.scan_char_code ();
+	engine.debug ('uccode ' + escchr (ord) + '=' + ord + ' -> '
+		      + escchr (uccode) + '=' + uccode);
+	engine.set_uccode (ord, uccode);
+    };
+
+    proto.asvalue = function UccodeCommand_asvalue (engine) {
+	var ord = engine.scan_char_code ();
+	return ConstantIntValue (new TexInt (engine.uccode (ord)));
+    };
+
+    return UccodeCommand;
+})();
+
+
+commands.delcode = (function DelcodeCommand_closure () {
+    function DelcodeCommand () { Command.call (this); }
+    inherit (DelcodeCommand, Command);
+    var proto = DelcodeCommand.prototype;
+
+    proto.invoke = function DelcodeCommand_invoke (engine) {
+	var ord = engine.scan_char_code ();
+	engine.scan_optional_equals ();
+	var delcode = engine.scan_int ().value;
+	if (delcode >0xFFFFFF)
+	    throw new TexRuntimeException ('delcode value should be in range ' +
+					   '[0,0xFFFFFF]; got ' + delcode);
+	engine.debug ('delcode ' + escchr (ord) + '=' + ord + ' -> '
+		      + escchr (delcode) + '=' + delcode);
+	engine.set_delcode (ord, delcode);
+    };
+
+    proto.asvalue = function DelcodeCommand_asvalue (engine) {
+	var ord = engine.scan_char_code ();
+	return ConstantIntValue (new TexInt (engine.delcode (ord)));
+    };
+
+    return DelcodeCommand;
 })();
 
 
