@@ -18,7 +18,7 @@ var Command = WEBTEX.Command = (function Command_closure () {
     };
 
     proto.samecmd = function Command_samecmd (other) {
-	if (other === null)
+	if (other == null)
 	    return false;
 	return this.name == other.name;
     };
@@ -65,7 +65,7 @@ var MacroCommand = (function MacroCommand_closure () {
     proto.expandable = true;
 
     proto.samecmd = function MacroCommand_samecmd (other) {
-	if (other === null)
+	if (other == null)
 	    return false;
 	if (this.name != other.name)
 	    return false;
@@ -255,7 +255,7 @@ var CharacterCommand = (function CharacterCommand_closure () {
     proto.desc = 'undescribed command';
 
     proto.samecmd = function CharacterCommand_samecmd (other) {
-	if (other === null)
+	if (other == null)
 	    return false;
 	if (this.name != other.name)
 	    return false;
@@ -268,6 +268,7 @@ var CharacterCommand = (function CharacterCommand_closure () {
 
     return CharacterCommand;
 })();
+
 
 var BeginGroupCommand = (function BeginGroupCommand_closure () {
     function BeginGroupCommand (ord) {
@@ -288,6 +289,7 @@ var BeginGroupCommand = (function BeginGroupCommand_closure () {
     return BeginGroupCommand;
 })();
 
+
 var EndGroupCommand = (function EndGroupCommand_closure () {
     function EndGroupCommand (ord) {
 	CharacterCommand.call (this, ord);
@@ -307,6 +309,7 @@ var EndGroupCommand = (function EndGroupCommand_closure () {
     return EndGroupCommand;
 })();
 
+
 var MathShiftCommand = (function MathShiftCommand_closure () {
     function MathShiftCommand (ord) {
 	CharacterCommand.call (this, ord);
@@ -320,6 +323,7 @@ var MathShiftCommand = (function MathShiftCommand_closure () {
 
     return MathShiftCommand;
 })();
+
 
 var AlignTabCommand = (function AlignTabCommand_closure () {
     function AlignTabCommand (ord) {
@@ -335,6 +339,7 @@ var AlignTabCommand = (function AlignTabCommand_closure () {
     return AlignTabCommand;
 })();
 
+
 var MacroParameterCommand = (function MacroParameterCommand_closure () {
     function MacroParameterCommand (ord) {
 	CharacterCommand.call (this, ord);
@@ -348,6 +353,7 @@ var MacroParameterCommand = (function MacroParameterCommand_closure () {
 
     return MacroParameterCommand;
 })();
+
 
 var SuperCommand = (function SuperCommand_closure () {
     function SuperCommand (ord) {
@@ -363,6 +369,7 @@ var SuperCommand = (function SuperCommand_closure () {
     return SuperCommand;
 })();
 
+
 var SubCommand = (function SubCommand_closure () {
     function SubCommand (ord) {
 	CharacterCommand.call (this, ord);
@@ -376,6 +383,7 @@ var SubCommand = (function SubCommand_closure () {
 
     return SubCommand;
 })();
+
 
 var SpacerCommand = (function SpacerCommand_closure () {
     function SpacerCommand (ord) {
@@ -399,6 +407,7 @@ var SpacerCommand = (function SpacerCommand_closure () {
     return SpacerCommand;
 })();
 
+
 var InsertLetterCommand = (function InsertLetterCommand_closure () {
     function InsertLetterCommand (ord) {
 	CharacterCommand.call (this, ord);
@@ -419,6 +428,7 @@ var InsertLetterCommand = (function InsertLetterCommand_closure () {
     return InsertLetterCommand;
 })();
 
+
 var InsertOtherCommand = (function InsertOtherCommand_closure () {
     function InsertOtherCommand (ord) {
 	CharacterCommand.call (this, ord);
@@ -438,6 +448,7 @@ var InsertOtherCommand = (function InsertOtherCommand_closure () {
 
     return InsertOtherCommand;
 })();
+
 
 Command.catcode_commands = [
     null/*esc*/, BeginGroupCommand, EndGroupCommand, MathShiftCommand,
@@ -516,7 +527,7 @@ var GivenMathcharCommand = (function GivenMathcharCommand_closure () {
 
 
 var GivenRegisterCommand = (function GivenRegisterCommand_closure () {
-    function GivenRegisterCommand (Register) {
+    function GivenRegisterCommand (register) {
 	Command.call (this);
 	if (register < 0 || register > 255)
 	    throw new ValueError ('illegal register number ' + register);
@@ -558,14 +569,14 @@ var GivenRegisterCommand = (function GivenRegisterCommand_closure () {
 
 
 var GivenCountCommand = (function GivenCountCommand_closure () {
-    function GivenCountCommand (reg) { GivenRegisterCommand.call (reg); }
+    function GivenCountCommand (reg) { GivenRegisterCommand.call (this, reg); }
     inherit (GivenCountCommand, GivenRegisterCommand);
     var proto = GivenCountCommand.prototype;
     proto.name = '<given-count>';
     proto.desc = 'count';
 
     proto.asvalue = function GivenCountCommand_asvalue (engine) {
-	return IntRegValue (this.register);
+	return new IntRegValue (this.register);
     };
 
     return GivenCountCommand;
@@ -573,14 +584,14 @@ var GivenCountCommand = (function GivenCountCommand_closure () {
 
 
 var GivenDimenCommand = (function GivenDimenCommand_closure () {
-    function GivenDimenCommand (reg) { GivenRegisterCommand.call (reg); }
+    function GivenDimenCommand (reg) { GivenRegisterCommand.call (this, reg); }
     inherit (GivenDimenCommand, GivenRegisterCommand);
     var proto = GivenDimenCommand.prototype;
     proto.name = '<given-dimen>';
     proto.desc = 'dimen';
 
     proto.asvalue = function GivenDimenCommand_asvalue (engine) {
-	return DimenRegValue (this.register);
+	return new DimenRegValue (this.register);
     };
 
     return GivenDimenCommand;
@@ -588,14 +599,14 @@ var GivenDimenCommand = (function GivenDimenCommand_closure () {
 
 
 var GivenGlueCommand = (function GivenGlueCommand_closure () {
-    function GivenGlueCommand (reg) { GivenRegisterCommand.call (reg); }
+    function GivenGlueCommand (reg) { GivenRegisterCommand.call (this, reg); }
     inherit (GivenGlueCommand, GivenRegisterCommand);
     var proto = GivenGlueCommand.prototype;
     proto.name = '<given-glue>';
     proto.desc = 'glue';
 
     proto.asvalue = function GivenGlueCommand_asvalue (engine) {
-	return GlueRegValue (this.register);
+	return new GlueRegValue (this.register);
     };
 
     return GivenGlueCommand;
@@ -603,14 +614,14 @@ var GivenGlueCommand = (function GivenGlueCommand_closure () {
 
 
 var GivenMuglueCommand = (function GivenMuglueCommand_closure () {
-    function GivenMuglueCommand (reg) { GivenRegisterCommand.call (reg); }
+    function GivenMuglueCommand (reg) { GivenRegisterCommand.call (this, reg); }
     inherit (GivenMuglueCommand, GivenRegisterCommand);
     var proto = GivenMuglueCommand.prototype;
     proto.name = '<given-muglue>';
     proto.desc = 'muglue';
 
     proto.asvalue = function GivenMuglueCommand_asvalue (engine) {
-	return MuglueRegValue (this.register);
+	return new MuglueRegValue (this.register);
     };
 
     return GivenMuglueCommand;
@@ -618,14 +629,14 @@ var GivenMuglueCommand = (function GivenMuglueCommand_closure () {
 
 
 var GivenToksCommand = (function GivenToksCommand_closure () {
-    function GivenToksCommand (reg) { GivenRegisterCommand.call (reg); }
+    function GivenToksCommand (reg) { GivenRegisterCommand.call (this, reg); }
     inherit (GivenToksCommand, GivenRegisterCommand);
     var proto = GivenToksCommand.prototype;
     proto.name = '<given-toks>';
     proto.desc = 'toks';
 
     proto.asvalue = function GivenToksCommand_asvalue (engine) {
-	return ToksRegValue (this.register);
+	return new ToksRegValue (this.register);
     };
 
     return GivenToksCommand;

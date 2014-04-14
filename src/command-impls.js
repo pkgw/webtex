@@ -7,6 +7,110 @@ commands.par = function cmd_par (engine) {
 };
 
 
+// Register access: \count, etc.
+
+commands.count = (function CountCommand_closure () {
+    function CountCommand () { Command.call (this); }
+    inherit (CountCommand, Command);
+    var proto = CountCommand.prototype;
+    proto.name = 'count';
+
+    proto.invoke = function CountCommand_invoke (engine) {
+	var reg = engine.scan_char_code ();
+	return new GivenCountCommand (reg).invoke (engine);
+    };
+
+    proto.asvalue = function CountCommand_asvalue (engine) {
+	var reg = engine.scan_char_code ();
+	return new IntRegValue (reg);
+    };
+
+    return CountCommand;
+})();
+
+
+commands.dimen = (function DimenCommand_closure () {
+    function DimenCommand () { Command.call (this); }
+    inherit (DimenCommand, Command);
+    var proto = DimenCommand.prototype;
+    proto.name = 'dimen';
+
+    proto.invoke = function DimenCommand_invoke (engine) {
+	var reg = engine.scan_char_code ();
+	return new GivenDimenCommand (reg).invoke (engine);
+    };
+
+    proto.asvalue = function DimenCommand_asvalue (engine) {
+	var reg = engine.scan_char_code ();
+	return new DimenRegValue (reg);
+    };
+
+    return DimenCommand;
+})();
+
+
+commands.skip = (function SkipCommand_closure () {
+    function SkipCommand () { Command.call (this); }
+    inherit (SkipCommand, Command);
+    var proto = SkipCommand.prototype;
+    proto.name = 'skip';
+
+    proto.invoke = function SkipCommand_invoke (engine) {
+	var reg = engine.scan_char_code ();
+	// Note TeX's inconsistent "glue"/"skip" terminology
+	return new GivenGlueCommand (reg).invoke (engine);
+    };
+
+    proto.asvalue = function SkipCommand_asvalue (engine) {
+	var reg = engine.scan_char_code ();
+	return new GlueRegValue (reg);
+    };
+
+    return SkipCommand;
+})();
+
+
+commands.muskip = (function MuskipCommand_closure () {
+    function MuskipCommand () { Command.call (this); }
+    inherit (MuskipCommand, Command);
+    var proto = MuskipCommand.prototype;
+    proto.name = 'muskip';
+
+    proto.invoke = function MuskipCommand_invoke (engine) {
+	var reg = engine.scan_char_code ();
+	// Note TeX's inconsistent "glue"/"skip" terminology
+	return new GivenMuglueCommand (reg).invoke (engine);
+    };
+
+    proto.asvalue = function MuskipCommand_asvalue (engine) {
+	var reg = engine.scan_char_code ();
+	return new MuGlueRegValue (reg);
+    };
+
+    return MuskipCommand;
+})();
+
+
+commands.toks = (function ToksCommand_closure () {
+    function ToksCommand () { Command.call (this); }
+    inherit (ToksCommand, Command);
+    var proto = ToksCommand.prototype;
+    proto.name = 'toks';
+
+    proto.invoke = function ToksCommand_invoke (engine) {
+	var reg = engine.scan_char_code ();
+	return new GivenToksCommand (reg).invoke (engine);
+    };
+
+    proto.asvalue = function ToksCommand_asvalue (engine) {
+	var reg = engine.scan_char_code ();
+	return new ToksRegValue (reg);
+    };
+
+    return ToksCommand;
+})();
+
+
 // Setting categories: \catcode, \mathcode, etc.
 
 commands.catcode = (function CatcodeCommand_closure () {
@@ -184,8 +288,8 @@ commands.countdef = function cmd_countdef (engine) {
     var cstok = engine.scan_r_token ();
     engine.scan_optional_equals ();
     var reg = engine.scan_register_num ();
-    engine.debug ('countdef ' + cstok + ' -> {\\count' + val + '}');
-    cstok.assign_cmd (engine, new GivenCountCommand (val));
+    engine.debug ('countdef ' + cstok + ' -> {\\count' + reg + '}');
+    cstok.assign_cmd (engine, new GivenCountCommand (reg));
 };
 
 
@@ -193,8 +297,8 @@ commands.dimendef = function cmd_dimendef (engine) {
     var cstok = engine.scan_r_token ();
     engine.scan_optional_equals ();
     var reg = engine.scan_register_num ();
-    engine.debug ('dimendef ' + cstok + ' -> {\\dimen' + val + '}');
-    cstok.assign_cmd (engine, new GivenDimenCommand (val));
+    engine.debug ('dimendef ' + cstok + ' -> {\\dimen' + reg + '}');
+    cstok.assign_cmd (engine, new GivenDimenCommand (reg));
 };
 
 
@@ -202,8 +306,8 @@ commands.skipdef = function cmd_skipdef (engine) {
     var cstok = engine.scan_r_token ();
     engine.scan_optional_equals ();
     var reg = engine.scan_register_num ();
-    engine.debug ('skipdef ' + cstok + ' -> {\\skip' + val + '}');
-    cstok.assign_cmd (engine, new GivenGlueCommand (val));
+    engine.debug ('skipdef ' + cstok + ' -> {\\skip' + reg + '}');
+    cstok.assign_cmd (engine, new GivenGlueCommand (reg));
 };
 
 
@@ -211,8 +315,8 @@ commands.toksdef = function cmd_toksdef (engine) {
     var cstok = engine.scan_r_token ();
     engine.scan_optional_equals ();
     var reg = engine.scan_register_num ();
-    engine.debug ('toksdef ' + cstok + ' -> {\\toks' + val + '}');
-    cstok.assign_cmd (engine, new GivenToksCommand (val));
+    engine.debug ('toksdef ' + cstok + ' -> {\\toks' + reg + '}');
+    cstok.assign_cmd (engine, new GivenToksCommand (reg));
 };
 
 

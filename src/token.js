@@ -175,7 +175,7 @@ var Token = WEBTEX.Token = (function Token_closure () {
     };
 
     Token.prototype.iscmd = function Token_iscmd (engine, cmdname) {
-	return this.cmd (engine).equiv (engine.commands[cmdname]);
+	return this.tocmd (engine).samecmd (engine.commands[cmdname]);
     };
 
     Token.prototype.assign_cmd = function Token_assign_cmd (engine, cmd) {
