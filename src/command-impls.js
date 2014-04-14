@@ -534,6 +534,149 @@ commands.afterassignment = function cmd_afterassignment (engine) {
 };
 
 
+// Conditionals
+
+commands._if = function cmd_if (engine) {
+    var t1 = engine.next_x_tok (), t2 = engine.next_x_tok ();
+
+    // The comparison rules here are a bit funky.
+
+    function key (tok) {
+	if (tok.ischar ())
+	    return tok.catcode * 1000 + tok.ord;
+	if (tok.iscslike ()) { // active chars will be caught by above
+	    var cmd = tok.tocmd (engine);
+	    if (cmd instanceof CharGivenCommand)
+		throw new TexInternalError ('not implemented');
+	    return 16 * 1000 + 256;
+	}
+	throw new TexRuntimeError ('illegal comparison subject ' + tok);
+    }
+
+    var result = (key (t1) == key (t2));
+    engine.debug ('if ' + t1 + ' ~ ' + t2 + ' => ' + result);
+    engine.handle_if (result);
+};
+
+
+commands.ifx = function cmd_ifx (engine) {
+    var t1 = engine.next_tok (), t2 = engine.next_tok (), result;
+
+    if (t1.kind != t2.kind)
+	result = false;
+    else if (t1.ischar ())
+	result = (t1.ord == t2.ord);
+    else {
+	var cmd1 = t1.tocmd (engine), cmd2 = t2.tocmd (engine);
+	result = cmd1.samecmd (cmd2);
+    }
+
+    engine.debug ('ifx ' + t1 + ' ~ ' + t2 + ' => ' + result);
+    engine.handle_if (result);
+};
+
+
+commands.ifnum = function cmd_ifnum (engine) {
+    var val1 = engine.scan_int ().value;
+
+    while (true) {
+	var tok = engine.next_x_tok ();
+	if (tok == null)
+	    throw new TexSyntaxException ('EOF inside \\ifnum');
+	if (!tok.iscat (C_SPACE))
+	    break;
+    }
+
+    // It's a little futzy to not check the validity of tok before
+    // reading val2.
+    var val2 = engine.scan_int ().value, result;
+
+    if (tok.isotherchar (O_LESS))
+	result = (val1 < val2);
+    else if (tok.isotherchar (O_GREATER))
+	result = (val1 > val2);
+    else if (tok.isotherchar (O_EQUALS))
+	result = (val1 == val2);
+    else
+	throw new TexSyntaxException ('expected <,=,> in \\ifnum but got ' + tok);
+
+    engine.debug (['ifnum', val1, tok, val2, '?'].join (' '));
+    engine.handle_if (result);
+};
+
+
+commands.ifodd = function cmd_ifodd (engine) {
+    var val = engine.scan_int ().value;
+    var result = (val % 2 == 1);
+    engine.debug ('ifodd ' + val + '?');
+    engine.handle_if (result);
+};
+
+
+commands.ifdim = function cmd_ifdim (engine) {
+    var val1 = engine.scan_dimen ();
+
+    while (1) {
+	var tok = engine.next_x_tok ();
+	if (tok == null)
+	    throw new TexSyntaxException ('EOF inside \\ifdim');
+	if (tok.iscat (C_SPACE))
+	    break;
+    }
+
+    var val2 = engine.scan_dimen (), result;
+
+    if (tok.isotherchar (O_LESS))
+	result = (val1.sp.value < val2.sp.value);
+    else if (tok.isotherchar (O_GREATER))
+	result = (val1.sp.value > val2.sp.value);
+    else if (tok.isotherchar (O_EQUALS))
+	result = (val1.sp.value == val2.sp.value);
+    else
+	throw new TexSyntaxException ('expected <,=,> in \\ifdim but got ' + tok);
+
+    engine.debug (['ifdim', val1, tok, val2, '?'].join (' '));
+    engine.handle_if (result);
+};
+
+
+commands.iffalse = function cmd_iffalse (engine) {
+    engine.debug ('iffalse');
+    engine.handle_if (false);
+};
+
+
+commands.iftrue = function cmd_iftrue (engine) {
+    engine.debug ('iftrue');
+    engine.handle_if (true);
+};
+
+
+commands.ifcase = function cmd_ifcase (engine) {
+    var val = engine.scan_int ().value;
+    engine.debug ('ifcase ' + val);
+    engine.handle_if_case (val);
+};
+
+
+commands._else = function cmd_else (engine) {
+    engine.debug ('else [non-eaten]');
+    engine.handle_else ();
+};
+
+
+commands.or = function cmd_or (engine) {
+    engine.debug ('or [non-eaten]');
+    engine.handle_or ();
+};
+
+
+commands.fi = function cmd_fi (engine) {
+    engine.debug ('fi [non-eaten]');
+    engine.handle_fi ();
+};
+
+
 // User interaction, I/O
 
 commands.message = function cmd_message (engine) {

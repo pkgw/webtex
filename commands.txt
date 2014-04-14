@@ -64,7 +64,7 @@ divide			n	n	consume
 dp			n	n	consume	# -> "set_box_dimen"
 dump			n	n	inval # -> "stop"
 edef			n	n	consume # -> "def"
-else			yes	n	inval # -> "fi_or_else"
+_else			yes	n	inval # -> "fi_or_else"
 end			n	n	inval # -> "stop"
 endcsname		n	n	inval
 endgroup		n	n	inval
@@ -93,7 +93,7 @@ hss			n	n	inval	# -> "hskip"
 ht			n	n	consume	# -> "set_box_dimen"
 hyphenation		n	n	consume # -> "hyph_data"
 hyphenchar		n	n	consume # -> "assign_font_int"
-if			yes	yes	inval
+_if			yes	yes	inval
 ifcase			yes	yes	inval	# -> "if"
 ifcat			yes	yes	inval	# -> "if"
 ifdim			yes	yes	inval	# -> "if"
