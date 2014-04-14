@@ -49,12 +49,17 @@ var TexInt = WEBTEX.TexInt = (function TexInt_closure () {
 	return '<' + this.value + '|i>';
     };
 
+    TexInt.prototype.clone = function TexInt_clone () {
+	return new TexInt (this.value);
+    };
+
     TexInt.prototype.intproduct = function TexInt_intproduct (k) {
 	k = TexInt.xcheck (k);
 	return new TexInt (this.value * k);
     };
 
-    TexInt.prototype.tex_advance = function TexInt_advance (other) {
+    TexInt.prototype.advance = function TexInt_advance (other) {
+	return new TexInt (this.value + other.value);
     };
 
     TexInt.prototype.asint = function TexInt_asint () {
@@ -230,12 +235,17 @@ var Scaled = WEBTEX.Scaled = (function Scaled_closure () {
 	return '<~' + this.asfloat ().toFixed (6) + '|s>';
     };
 
+    Scaled.prototype.clone = function Scaled_clone () {
+	return new Scaled (this.value);
+    };
+
     Scaled.prototype.intproduct = function Scaled_intproduct (k) {
 	k = TexInt.xcheck (k);
 	return this.times_parts (k, 0);
     };
 
-    Scaled.prototype.tex_advance = function Scaled_advance (other) {
+    Scaled.prototype.advance = function Scaled_advance (other) {
+	return new Scaled (this.value + other.value);
     };
 
     Scaled.prototype.asfloat = function Scaled_asfloat () {
@@ -267,7 +277,16 @@ var Dimen = (function Dimen_closure () {
 	    throw new TexRuntimeException ('dimension out of range: ' + x);
     };
 
-    Dimen.prototype.tex_advance = function Dimen_advance (other) {
+    Dimen.prototype.clone = function Dimen_clone () {
+	var d = new Dimen ();
+	d.sp = this.sp.clone ();
+	return d;
+    };
+
+    Dimen.prototype.advance = function Dimen_advance (other) {
+	var d = new Dimen ();
+	d.sp = d.sp.advance (other);
+	return d;
     };
 
     Dimen.prototype.asint = function Dimen_asint () {
@@ -287,7 +306,22 @@ var Glue = (function Glue_closure () {
 	this.shrink_order = 0;
     }
 
-    Glue.prototype.tex_advance = function Glue_advance (other) {
+    Glue.prototype.clone = function Glue_clone () {
+	var g = new Glue ();
+	g.width = this.width.clone ();
+	g.stretch = this.stretch.clone ();
+	g.stretch_order = this.stretch_order;
+	g.shrink = this.shrink.clone ();
+	g.shrink_order = this.shrink_order;
+	return g;
+    };
+
+    Glue.prototype.advance = function Glue_advance (other) {
+	var g = this.clone ();
+	g.width = this.width.advance (other.width);
+	g.stretch = this.stretch.advance (other.stretch);
+	g.shrink = this.shrink.advance (other.shrink);
+	return g;
     };
 
     return Glue;

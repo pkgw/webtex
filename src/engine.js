@@ -327,7 +327,7 @@ var Engine = (function Engine_closure () {
 	var i = 0, scanned = [];
 
 	while (i < n) {
-	    tok = this.next_x_tok ();
+	    var tok = this.next_x_tok ();
 	    if (tok == null)
 		break;
 

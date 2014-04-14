@@ -111,6 +111,19 @@ commands.toks = (function ToksCommand_closure () {
 })();
 
 
+// Register manipulation: \advance, etc.
+
+commands.advance = function cmd_advance (engine) {
+    var tok = engine.next_x_tok ();
+    var cmd = tok.tocmd (engine);
+    var val = cmd.asvalue (engine); // might eat tokens
+    engine.scan_keyword ('by');
+    var cur = val.get (engine);
+    var delta = val.scan (engine);
+    engine.debug ('advance ' + cmd + ' = ' + cur + ' + ' + delta);
+    val.set (engine, cur.advance (delta));
+};
+
 // Setting categories: \catcode, \mathcode, etc.
 
 commands.catcode = (function CatcodeCommand_closure () {
