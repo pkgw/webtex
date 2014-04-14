@@ -396,7 +396,7 @@ var Engine = (function Engine_closure () {
 
 	var v = tok.tocmd (this).asvalue (this);
 	if (v != null)
-	    return new TexInt (negfactor * v.get (this).asint ());
+	    return v.get (this).intproduct (negfactor);
 
 	// Looks like we have a literal integer
 
@@ -520,14 +520,14 @@ var Engine = (function Engine_closure () {
 		}
 		digits.push (v);
 	    }
-	    frac = WEBTEX.round_decimals (digits);
+	    frac = Scaled.new_from_decimals (digits);
 	}
 
 	if (this.scan_keyword ('true'))
 	    throw new TexRuntimeException ('not implemented true-dimens');
 
 	tok = this.chomp_spaces ();
-	val = tok.tocmd (this).asvalue (this);
+	var val = tok.tocmd (this).asvalue (this);
 	var result = null;
 
 	if (val != null) {
@@ -713,6 +713,15 @@ var Engine = (function Engine_closure () {
 
 	return name;
     };
+
+
+    proto.scan_streamnum = function Engine_scan_streamnum () {
+	var snum = this.scan_int ().value;
+	if (snum < 0 || snum > 15)
+	    return 16; // NOTE: our little convention
+	return snum;
+    };
+
 
     // Conditionals
 

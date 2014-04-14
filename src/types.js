@@ -53,17 +53,13 @@ var TexInt = WEBTEX.TexInt = (function TexInt_closure () {
 	return new TexInt (this.value);
     };
 
-    TexInt.prototype.intproduct = function TexInt_intproduct (k) {
-	k = TexInt.xcheck (k);
-	return new TexInt (this.value * k);
-    };
-
     TexInt.prototype.advance = function TexInt_advance (other) {
 	return new TexInt (this.value + other.value);
     };
 
-    TexInt.prototype.asint = function TexInt_asint () {
-	return this.value;
+    TexInt.prototype.intproduct = function TexInt_intproduct (k) {
+	k = TexInt.xcheck (k);
+	return new TexInt (this.value * k);
     };
 
     TexInt.prototype.rangecheck = function TexInt_rangecheck (engine, min, max) {
@@ -144,6 +140,14 @@ var Scaled = WEBTEX.Scaled = (function Scaled_closure () {
 	    nonfrac = t[0] + div (frac, SC_UNITY);
 	    frac = mod (frac, SC_UNITY);
 	    return Scaled.new_from_parts (nonfrac, frac);
+	};
+
+    Scaled.new_from_decimals =
+	function Scaled_new_from_decimals (digarray) {
+	    var a = 0;
+	    while (digarray.length)
+		a = div (a + digarray.pop () * SC_TWO, 10);
+	    return div (a + 1, 2);
 	};
 
     Scaled.prototype.times_n_plus_y = function Scaled_times_n_plus_y (n, y) {
@@ -239,13 +243,13 @@ var Scaled = WEBTEX.Scaled = (function Scaled_closure () {
 	return new Scaled (this.value);
     };
 
+    Scaled.prototype.advance = function Scaled_advance (other) {
+	return new Scaled (this.value + other.value);
+    };
+
     Scaled.prototype.intproduct = function Scaled_intproduct (k) {
 	k = TexInt.xcheck (k);
 	return this.times_parts (k, 0);
-    };
-
-    Scaled.prototype.advance = function Scaled_advance (other) {
-	return new Scaled (this.value + other.value);
     };
 
     Scaled.prototype.asfloat = function Scaled_asfloat () {
@@ -272,9 +276,14 @@ var Dimen = (function Dimen_closure () {
 	    throw new TexInternalException ('expected Scaled value, got ' + x);
 
 	var d = new Dimen ();
-	d.sp = x.times_n_plus_y (k, 0);
+	d.sp = x.times_n_plus_y (k, new Scaled (0));
 	if (Math.abs (d.sp.value) > MAX_SCALED)
 	    throw new TexRuntimeException ('dimension out of range: ' + x);
+	return d;
+    };
+
+    Dimen.prototype.toString = function Dimen_toString () {
+	return this.sp.asfloat ().toFixed (3) + 'pt';
     };
 
     Dimen.prototype.clone = function Dimen_clone () {
@@ -289,8 +298,11 @@ var Dimen = (function Dimen_closure () {
 	return d;
     };
 
-    Dimen.prototype.asint = function Dimen_asint () {
-	return this.sp.value;
+    Dimen.prototype.intproduct = function Dimen_intproduct (k) {
+	k = TexInt.xcheck (k);
+	var d = new Dimen ();
+	d.sp = this.sp.intproduct (k);
+	return d;
     };
 
     return Dimen;
@@ -321,6 +333,15 @@ var Glue = (function Glue_closure () {
 	g.width = this.width.advance (other.width);
 	g.stretch = this.stretch.advance (other.stretch);
 	g.shrink = this.shrink.advance (other.shrink);
+	return g;
+    };
+
+    Glue.prototype.intproduct = function Glue_intproduct (k) {
+	k = TexInt.xcheck (k);
+	var g = this.clone ();
+	g.width = this.width.intproduct (k);
+	g.stretch = this.stretch.intproduct (k);
+	g.shrink = this.shrink.intproduct (k);
 	return g;
     };
 
@@ -369,7 +390,9 @@ var Font = (function Font_closure () {
 var Value = (function Value_closure () {
     function Value () {}
 
-    Value.prototype.tostr = function Value_tostr (engine, value) {
+    Value.prototype.stringify = function Value_stringify (engine, value) {
+	/* This function is needed for Values whose instances don't have an
+	 * appropriate toString() method. */
 	return '' + value;
     };
 
@@ -436,10 +459,6 @@ function _make_dimen_value (type) {
 	return engine.scan_dimen ();
     };
 
-    type.prototype.tostr = function DimenValue_tostr (engine, value) {
-	return value.asfloat ().toFixed (3) + 'pt';
-    };
-
     return type;
 }
 
@@ -474,7 +493,7 @@ function _make_toks_value (type) {
 	return engine.scan_tok_group (false);
     };
 
-    type.prototype.tostr = function ToksValue_tostr (engine, value) {
+    type.prototype.stringify = function ToksValue_stringify (engine, value) {
 	return value.join ('|');
     };
 

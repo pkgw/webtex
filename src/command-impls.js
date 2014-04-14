@@ -716,6 +716,90 @@ commands.immediate = function cmd_immediate (engine) {
 };
 
 
+commands.write = function cmd_write (engine) {
+    var streamnum = engine.scan_streamnum (), tok = engine.next_tok ();
+    if (tok == null)
+	throw new TexSyntaxException ('EOF in middle of \\write command');
+    if (!tok.iscat (C_BGROUP))
+	throw new TexSyntaxException ('expected { immediately after \\write');
+
+    var toks = engine.scan_tok_group (false);
+    var s = toks.map (function (t) { t.uitext (); }).join ('');
+    engine.debug ('write:' + streamnum + ' ' + s);
+};
+
+
+commands.input = function cmd_input (engine) {
+    var fn = engine.scan_file_name ();
+    engine.debug ('input ' + fn);
+    engine.handle_input (fn);
+};
+
+
+commands.endinput = function cmd_endinput (engine) {
+    engine.debug ('endinput');
+    engine.handle_endinput ();
+};
+
+
+commands.openout = function cmd_openout (engine) {
+    var snum = engine.scan_streamnum ();
+    engine.scan_optional_equals ();
+    var fn = engine.scan_file_name ();
+    engine.debug ('openout ' + snum + ' = ' + fn + ' [noop]');
+};
+
+
+commands.closeout = function cmd_closeout (engine) {
+    var snum = engine.scan_streamnum ();
+    engine.debug ('closeout ' + snum + ' [noop]');
+};
+
+
+commands.openin = function cmd_openin (engine) {
+    var snum = engine.scan_streamnum ();
+    engine.scan_optional_equals ();
+    var fn = engine.scan_file_name ();
+
+    if (snum == 16)
+	throw new TexRuntimeException ('attempted terminal input');
+
+    engine.set_infile (snum, null);
+
+    engine.debug ('openin ' + snum + ' = ' + fn);
+    var f = engine.try_open_infile (fn);
+    if (f == null)
+	// File existence is tested by \openin..\ifeof, so this should
+	// be a warning only.
+	engine.warn ('failed to \\openin ' + fn);
+
+    engine.set_infile (snum, f);
+};
+
+
+commands.closein = function cmd_closein (engine) {
+    var snum = engine.scan_streamnum ();
+    if (snum == 16)
+	throw new TexRuntimeException ('attempted close of illegal stream');
+
+    // I think this is all we need ...
+    engine.set_infile (snum, null);
+};
+
+
+commands.ifeof = function cmd_ifeof (engine) {
+    var snum = engine.scan_streamnum (), result;
+
+    if (snum == 16)
+	result = false;
+    else
+	result = (engine.infile (snum) == null);
+
+    engine.debug ('ifeof ' + snum + ' -> ' + result);
+    engine_handle_if (result);
+};
+
+
 // High-level miscellany
 
 commands.dump = function cmd_dump (engine) {

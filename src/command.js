@@ -553,7 +553,7 @@ var GivenRegisterCommand = (function GivenRegisterCommand_closure () {
 	engine.scan_optional_equals ();
 	var newval = v.scan (engine);
 	engine.debug (this.desc + ' #' + this.register + ' = ' +
-		      v.tostr (engine, newval));
+		      v.stringify (engine, newval));
 	v.set (engine, newval);
     };
 
