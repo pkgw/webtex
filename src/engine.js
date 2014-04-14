@@ -713,6 +713,10 @@ var Engine = (function Engine_closure () {
 
     // Miscellaneous
 
+    proto.set_global_assign_mode = function Engine_set_global_assign_mode () {
+	this.assign_flags |= AF_GLOBAL;
+    };
+
     proto.maybe_insert_after_assign_token =
 	function Engine_maybe_insert_after_assign_token () {
 	    if (this.after_assign_token !== null) {

@@ -324,7 +324,7 @@ commands.toksdef = function cmd_toksdef (engine) {
 
 commands.global = function cmd_global (engine) {
     engine.debug ('global');
-    engine.assign_flags |= AF_GLOBAL;
+    engine.set_global_assign_mode ();
 };
 
 commands.outer = function cmd_outer (engine) {
@@ -501,7 +501,7 @@ commands.def = function cmd_def (engine) {
 };
 
 commands.gdef = function cmd_gdef (engine) {
-    engine.assign_flags |= AF_GLOBAL;
+    engine.set_global_assign_mode ();
     return _cmd_def (engine, 'gdef', false);
 };
 
@@ -510,7 +510,7 @@ commands.edef = function cmd_edef (engine) {
 };
 
 commands.xdef = function cmd_xdef (engine) {
-    engine.assign_flags |= AF_GLOBAL;
+    engine.set_global_assign_mode ();
     return _cmd_def (engine, 'xdef', true);
 };
 
