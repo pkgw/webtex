@@ -137,7 +137,7 @@ var Scaled = WEBTEX.Scaled = (function Scaled_closure () {
 	    var s = new Scaled (nonfrac);
 	    var t = s.times_n_over_d (num, denom); // -> [result, remainder]
 	    frac = div ((num * frac + SC_UNITY * t[1]), denom);
-	    nonfrac = t[0] + div (frac, SC_UNITY);
+	    nonfrac = t[0].value + div (frac, SC_UNITY);
 	    frac = frac % SC_UNITY;
 	    return Scaled.new_from_parts (nonfrac, frac);
 	};
