@@ -18,65 +18,39 @@ var TopEquivTable = (function TopEquivTable_closure () {
 
 	init_top_eqtb (this);
 
-	var i = 0;
-	var t = this._catcodes = {};
-	for (i = 0; i < 256; i++)
-	    t[i] = C_OTHER;
-	t[O_NULL] = C_IGNORE;
-	t[O_BACKSPACE] = C_INVALID;
-	t[O_RETURN] = C_EOL;
-	t[O_SPACE] = C_SPACE;
-	t[O_PERCENT] = C_COMMENT;
-	t[O_BACKSLASH] = C_ESCAPE;
-	for (var i = O_UC_A; i < O_UC_A + 26; i++)
-	    t[i] = C_LETTER;
-	for (var i = O_LC_A; i < O_LC_A + 26; i++)
-	    t[i] = C_LETTER;
+	for (var i = 0; i < 256; i++) {
+	    this._catcodes[i] = C_OTHER;
+	    this._mathcodes[i] = i;
+	    this._sfcodes[i] = 1000;
+	    this._delcodes[i] = -1;
+	    this._glueregs[i] = new Glue ();
+	    this._tokregs[i] = [];
+	    this._boxregs[i] = new Box ();
+	}
 
-	t = this._mathcodes = {};
-	for (var i = 0; i < 256; i++)
-	    t[i] = i;
-	for (var i = O_UC_A; i < O_UC_A + 26; i++)
-	    t[i] = i + 0x7100;
-	for (var i = O_LC_A; i < O_LC_A + 26; i++)
-	    t[i] = i + 0x7100;
+	for (var i = 0; i < 26; i++) {
+	    this._catcodes[O_LC_A + i] = C_LETTER;
+	    this._catcodes[O_UC_A + i] = C_LETTER;
+	    this._mathcodes[O_LC_A + i] = O_LC_A + i + 0x7100;
+	    this._mathcodes[O_UC_A + i] = O_UC_A + i + 0x7100;
+	    this._uccodes[O_UC_A + i] = O_UC_A + i;
+	    this._uccodes[O_LC_A + i] = O_UC_A + i;
+	    this._lccodes[O_UC_A + i] = O_LC_A + i;
+	    this._lccodes[O_LC_A + i] = O_LC_A + i;
+	    this._sfcodes[O_UC_A + i] = 999;
+	}
+
 	for (var i = O_ZERO; i < O_ZERO + 10; i++)
-	    t[i] = i + 0x7000;
+	    this._mathcodes[i] = i + 0x7000;
 
-	t = this._uccodes = {};
-	for (var i = 0; i < 26; i++) {
-	    t[O_UC_A + i] = O_UC_A + i;
-	    t[O_LC_A + i] = O_UC_A + i;
-	}
+	this._catcodes[O_NULL] = C_IGNORE;
+	this._catcodes[O_BACKSPACE] = C_INVALID;
+	this._catcodes[O_RETURN] = C_EOL;
+	this._catcodes[O_SPACE] = C_SPACE;
+	this._catcodes[O_PERCENT] = C_COMMENT;
+	this._catcodes[O_BACKSLASH] = C_ESCAPE;
 
-	t = this._lccodes = {};
-	for (var i = 0; i < 26; i++) {
-	    t[O_UC_A + i] = O_LC_A + i;
-	    t[O_LC_A + i] = O_LC_A + i;
-	}
-
-	t = this._sfcodes = {};
-	for (var i = 0; i < 256; i++)
-	    t[i] = 1000;
-	for (var i = O_UC_A; i < O_UC_A + 26; i++)
-	    t[i] = 999;
-
-	t = this._delcodes = {};
-	for (var i = 0; i < 256; i++)
-	    t[i] = -1;
-	t[O_PERIOD] = 0;
-
-	t = this._glueregs = {};
-	for (var i = 0; i < 256; i++)
-	    t[i] = new Glue ();
-
-	t = this._tokregs = {};
-	for (var i = 0; i < 256; i++)
-	    t[i] = [];
-
-	t = this._boxregs = {};
-	for (var i = 0; i < 256; i++)
-	    t[i] = new Box ();
+	this._delcodes[O_PERIOD] = 0;
     }
 
     inherit (TopEquivTable, EquivTable);
@@ -107,12 +81,35 @@ var Engine = (function Engine_closure () {
 
 	this.assign_flags = 0;
 	this.after_assign_token = null;
-	// ...
 
 	this.conditional_stack = [];
 
+	this.infiles = [];
+	for (var i = 0; i < 16; i++)
+	    this.infiles[i] = null;
+
 	this.commands = {};
 	fill_cseq_commands (this);
+
+	engine_init_parameters (this);
+
+	// T:TP sec 240; has to go after $init_parameters
+	this.set_intpar ('mag', 1000);
+	this.set_intpar ('tolerance', 1000);
+	this.set_intpar ('hangafter', 1);
+	this.set_intpar ('maxdeadcycles', 25);
+	this.set_intpar ('escapechar', O_BACKSLASH);
+	this.set_intpar ('endlinechar', O_RETURN);
+
+	var d = new Date ();
+	this.set_intpar ('year', d.getYear ());
+	this.set_intpar ('month', d.getMonth ());
+	this.set_intpar ('day', d.getDay ());
+	this.set_intpar ('time', d.getHours () * 60 + d.getMinutes ());
+
+	//nf = new Font ('nullfont', -1000);
+	//this.set_font ('<null>', nf);
+	//this.set_font ('<current>', nf);
     }
 
     var proto = Engine.prototype;
@@ -191,7 +188,7 @@ var Engine = (function Engine_closure () {
     proto.handle_bgroup = function Engine_handle_bgroup () {
 	this.debug ('< --> simple>');
 	this.nest_eqtb ();
-	this.group_exit_stack.push (this.unnest_eqtb);
+	this.group_exit_stack.push (this.unnest_eqtb.bind (this));
     };
 
     proto.handle_egroup = function Engine_handle_egroup () {
@@ -232,6 +229,15 @@ var Engine = (function Engine_closure () {
 
     proto.push = function Engine_push (tok) {
 	this.pushed_tokens.push (tok);
+    };
+
+    proto.push_string = function Engine_push_string (text) {
+	for (var i = text.length - 1; i >= 0; i--) {
+	    if (text[i])
+		this.push (Token.new_char (C_SPACE, O_SPACE));
+	    else
+		this.push (Token.new_char (C_OTHER, text.charCodeAt (i)));
+	}
     };
 
     proto.next_tok = function Engine_next_tok () {

@@ -59,3 +59,8 @@ function fill_cseq_commands (engine) {
 	engine.set_cseq (name, cmd);
     });
 }
+
+
+function engine_init_parameters (engine) {
+    $init_parameters
+}

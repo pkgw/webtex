@@ -161,16 +161,16 @@ def mac_parameter_info (emit, data, restargs):
 
 
 def mac_init_parameters (emit, data, restargs):
-    info = {'glue': ('set_gluepar', 'Glue ()'),
-            'muglue': ('set_mugluepar', 'Glue ()'),
+    info = {'glue': ('set_gluepar', 'new Glue ()'),
+            'muglue': ('set_mugluepar', 'new Glue ()'),
             'toklist': ('set_tokpar', '[]'),
-            'int': ('set_intpar', '0'),
-            'dimen': ('set_dimenpar', '0'),
+            'int': ('set_intpar', 'new TexInt (0)'),
+            'dimen': ('set_dimenpar', 'new Dimen (0)'),
         }
 
     for item in data.namedparams:
         setter, init = info[item.type]
-        emit ('this.%s (%r, %s)' % (setter, item.name, init))
+        emit ('engine.%s (%r, %s);' % (setter, item.name, init))
 
 
 def mac_include_impls (emit, data, restargs):
@@ -215,7 +215,8 @@ proto.set_%(shname)s = function EquivTable_set_%(shname)s (%(idxvar)s, value) {
 
 def mac_eqtb_toplevel_init (emit, data, restargs):
     for item in data.eqtbitems:
-        if item.valuetype in ('catcode', 'ord', 'mathcode', 'int', 'delcode', 'dimen'):
+        if item.valuetype in ('catcode', 'ord', 'mathcode', 'int', 'delcode',
+                              'dimen', 'sfcode'):
             initval = '0'
         else:
             initval = 'null'
@@ -267,7 +268,7 @@ def mac_eqtb_engine_wrappers (emit, data, restargs):
             die ('unknown eqtb index kind "%s"', item.index)
 
         emit ('''proto.%(shname)s = function Engine_%(shname)s (%(idxvar)s) {
-  return this.eqtb.%(shname)s (%(idxvar)s)
+  return this.eqtb.%(shname)s (%(idxvar)s);
 };
 
 proto.set_%(shname)s = function Engine_set_%(shname)s (%(idxvar)s, value) {
@@ -275,7 +276,7 @@ proto.set_%(shname)s = function Engine_set_%(shname)s (%(idxvar)s, value) {
     this.eqtb.toplevel.set_%(shname)s (%(idxvar)s, value);
   else
     this.eqtb.set_%(shname)s (%(idxvar)s, value);
-  this.maybe_insert_after_assign_token ()
+  this.maybe_insert_after_assign_token ();
 };
 ''', item.extract ())
 

@@ -677,6 +677,53 @@ commands.fi = function cmd_fi (engine) {
 };
 
 
+// Miscellaneous text manipulation
+
+function _change_case (engine, isupper) {
+    if (isupper)
+	var cmdname = 'uppercase', casecode = engine.uccode;
+    else
+	var cmdname = 'lowercase', casecode = engine.lccode;
+
+    var tok = engine.next_tok ();
+    if (tok == null)
+	throw new TexSyntaxException ('EOF in middle of \\' + cmdname);
+    if (!tok.iscat (C_BGROUP))
+	throw new TexSyntaxException ('expected { immediately after \\' + cmdname);
+
+    var oldtoks = engine.scan_tok_group (false), newtoks = [];
+
+    for (var i = 0; i < oldtoks.length; i++) {
+	var tok = oldtoks[i];
+
+	if (tok.ischar ()) {
+	    var neword = casecode.call (engine, tok.ord);
+	    if (neword == 0)
+		neword = tok.ord;
+	    newtoks.push (Token.new_char (tok.catcode, neword));
+	} else
+	    newtoks.push (tok);
+    }
+
+    engine.debug ([cmdname, '~' + oldtoks.join (''), '->',
+		   '~' + newtoks.join ('')].join (' '));
+
+    while (newtoks.length)
+	engine.push (newtoks.pop ());
+}
+
+
+commands.uppercase = function cmd_uppercase (engine) {
+    _change_case (engine, true);
+};
+
+
+commands.lowercase = function cmd_lowercase (engine) {
+    _change_case (engine, false);
+};
+
+
+
 // User interaction, I/O
 
 commands.message = function cmd_message (engine) {
