@@ -204,7 +204,7 @@ def mac_eqtb_generic_accessors (emit, data, restargs):
         emit ('''proto.%(shname)s = function EquivTable_%(shname)s (%(idxvar)s) {
   if (this._%(name)s.hasOwnProperty (%(idxvar)s))
     return this._%(name)s[%(idxvar)s];
-  return this._parent.%(shname)s (%(idxvar)s);
+  return this.parent.%(shname)s (%(idxvar)s);
 };
 
 proto.set_%(shname)s = function EquivTable_set_%(shname)s (%(idxvar)s, value) {

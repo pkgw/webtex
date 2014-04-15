@@ -1,7 +1,7 @@
 var EquivTable = (function EquivTable_closure () {
     function EquivTable (parent) {
 	this.toplevel = parent.toplevel;
-	this._parent = parent;
+	this.parent = parent;
 	init_generic_eqtb (this);
     }
 
@@ -14,7 +14,7 @@ var EquivTable = (function EquivTable_closure () {
 var TopEquivTable = (function TopEquivTable_closure () {
     function TopEquivTable () {
 	this.toplevel = this;
-	this._parent = null;
+	this.parent = null;
 
 	init_top_eqtb (this);
 
@@ -147,6 +147,83 @@ var Engine = (function Engine_closure () {
 	    this.mode_accum (result);
 
 	return true;
+    };
+
+    // Mode and grouping stuff.
+
+    proto.nest_eqtb = function Engine_nest_eqtb () {
+	this.eqtb = new EquivTable (this.eqtb);
+    };
+
+    proto.unnest_eqtb = function Engine_unnest_eqtb () {
+	this.eqtb = this.eqtb.parent;
+    };
+
+    proto.mode = function Engine_mode () {
+	return this.mode_stack[this.mode_stack.length - 1];
+    };
+
+    proto.enter_mode = function Engine_enter_mode (mode) {
+	this.debug ('<enter ' + mode_abbrev[mode] + ' mode>');
+	this.mode_stack.push (mode);
+	this.build_stack.push ([]);
+    };
+
+    proto.leave_mode = function Engine_leave_mode () {
+	var oldmode = this.mode_stack.pop ();
+	var tlist = this.build_stack.pop ();
+	this.debug ('<leave ' + mode_abbrev[oldmode] + ' mode: ' +
+		    tlist.length + ' items>');
+	return tlist;
+    };
+
+    proto.ensure_horizontal = function Engine_ensure_horizontal () {
+	if (this.mode () == M_VERT)
+	    this.enter_mode (M_HORZ);
+	else if (this.mode () == M_IVERT)
+	    this.enter_mode (M_RHORZ);
+    };
+
+    proto.mode_accum = function Engine_mode_accum (item) {
+	this.build_stack[this.build_stack.length - 1].push (item);
+    };
+
+    proto.handle_bgroup = function Engine_handle_bgroup () {
+	this.debug ('< --> simple>');
+	this.nest_eqtb ();
+	this.group_exit_stack.push (this.unnest_eqtb);
+    };
+
+    proto.handle_egroup = function Engine_handle_egroup () {
+	if (!this.group_exit_stack.length)
+	    throw new TexRuntimeError ('ending a group that wasn\'t started');
+	return (this.group_exit_stack.pop ()) (this);
+    };
+
+    proto.handle_begingroup = function Engine_handle_begingroup () {
+	this.debug ('< --> semi-simple>');
+	this.nest_eqtb ();
+
+	function end_semisimple (eng) {
+	    throw new TexRuntimeError ('expected \\endgroup but got something ' +
+				       'else');
+	}
+	end_semisimple.is_semisimple = true;
+
+	this.group_exit_stack.push (end_semisimple);
+    };
+
+    proto.handle_endgroup = function Engine_handle_endgroup () {
+	if (!this.group_exit_stack.length)
+	    throw new TexRuntimeException ('stray \\endgroup');
+
+	ender = this.group_exit_stack.pop ();
+	if (ender.is_semisimple === true)
+	    throw new TexRuntimeException ('got \\endgroup when should have ' +
+					   'gotten other group-ender');
+
+	this.debug ('< <-- semi-simple>');
+	this.unnest_eqtb ();
     };
 
     // Tokenization. I'd like to separate this out into its own class,
