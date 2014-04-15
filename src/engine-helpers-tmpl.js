@@ -64,3 +64,18 @@ function fill_cseq_commands (engine) {
 function engine_init_parameters (engine) {
     $init_parameters
 }
+
+
+var parameter_info = [
+    $parameter_info
+];
+
+
+function engine_init_param_cseqs (engine) {
+    for (var i = 0; i < parameter_info.length; i++) {
+	var name = parameter_info[i][0], ctor = parameter_info[i][1];
+	var cmd = new ctor (name);
+	engine.commands[name] = cmd;
+	engine.set_cseq (name, cmd);
+    }
+}

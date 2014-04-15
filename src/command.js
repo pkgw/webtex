@@ -35,6 +35,9 @@ var Command = WEBTEX.Command = (function Command_closure () {
 })();
 
 
+// The implementations in this file don't get bound to specific
+// control sequences by default.
+
 var CommandUnimplPrimitive = (function CommandUnimplPrimitive_closure () {
     function CommandUnimplPrimitive () {
 	Command.call (this);
@@ -640,4 +643,104 @@ var GivenToksCommand = (function GivenToksCommand_closure () {
     };
 
     return GivenToksCommand;
+})();
+
+
+// Commands for named parameters
+
+var NamedParamCommand = (function NamedParamCommand_closure () {
+    function NamedParamCommand (name) {
+	Command.call (this);
+	this.name = name;
+    }
+
+    inherit (NamedParamCommand, Command);
+    var proto = NamedParamCommand.prototype;
+    proto.name = '<unnamed param>';
+    proto.desc = '<undescribed>';
+
+    proto.invoke = function NamedParamCommand_invoke (engine) {
+	var v = this.asvalue (engine);
+	engine.scan_optional_equals ();
+	var newval = v.scan (engine);
+	engine.debug ([this.desc, this.name, '=',
+		       v.stringify (engine, newval)].join (' '));
+	v.set (engine, newval);
+    };
+
+    proto.asvalue = function NamedParamCommand_asvalue (engine) {
+	throw new TexInternalError ('not implemented');
+    };
+
+    return NamedParamCommand;
+})();
+
+
+var NamedIntCommand = (function NamedIntCommand_closure () {
+    function NamedIntCommand (name) { NamedParamCommand.call (this, name); }
+    inherit (NamedIntCommand, NamedParamCommand);
+    var proto = NamedIntCommand.prototype;
+    proto.desc = 'intpar';
+
+    proto.asvalue = function NamedIntCommand_asvalue (engine) {
+	return new IntParamValue (this.name);
+    };
+
+    return NamedIntCommand;
+})();
+
+
+var NamedDimenCommand = (function NamedDimenCommand_closure () {
+    function NamedDimenCommand (name) { NamedParamCommand.call (this, name); }
+    inherit (NamedDimenCommand, NamedParamCommand);
+    var proto = NamedDimenCommand.prototype;
+    proto.desc = 'dimenpar';
+
+    proto.asvalue = function NamedDimenCommand_asvalue (engine) {
+	return new DimenParamValue (this.name);
+    };
+
+    return NamedDimenCommand;
+})();
+
+
+var NamedGlueCommand = (function NamedGlueCommand_closure () {
+    function NamedGlueCommand (name) { NamedParamCommand.call (this, name); }
+    inherit (NamedGlueCommand, NamedParamCommand);
+    var proto = NamedGlueCommand.prototype;
+    proto.desc = 'gluepar';
+
+    proto.asvalue = function NamedGlueCommand_asvalue (engine) {
+	return new GlueParamValue (this.name);
+    };
+
+    return NamedGlueCommand;
+})();
+
+
+var NamedMuGlueCommand = (function NamedMuGlueCommand_closure () {
+    function NamedMuGlueCommand (name) { NamedParamCommand.call (this, name); }
+    inherit (NamedMuGlueCommand, NamedParamCommand);
+    var proto = NamedMuGlueCommand.prototype;
+    proto.desc = 'mugluepar';
+
+    proto.asvalue = function NamedMuGlueCommand_asvalue (engine) {
+	return new MuGlueParamValue (this.name);
+    };
+
+    return NamedMuGlueCommand;
+})();
+
+
+var NamedToksCommand = (function NamedToksCommand_closure () {
+    function NamedToksCommand (name) { NamedParamCommand.call (this, name); }
+    inherit (NamedToksCommand, NamedParamCommand);
+    var proto = NamedToksCommand.prototype;
+    proto.desc = 'tokspar';
+
+    proto.asvalue = function NamedToksCommand_asvalue (engine) {
+	return new ToksParamValue (this.name);
+    };
+
+    return NamedToksCommand;
 })();

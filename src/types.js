@@ -138,7 +138,7 @@ var Scaled = WEBTEX.Scaled = (function Scaled_closure () {
 	    var t = s.times_n_over_d (num, denom); // -> [result, remainder]
 	    frac = div ((num * frac + SC_UNITY * t[1]), denom);
 	    nonfrac = t[0] + div (frac, SC_UNITY);
-	    frac = mod (frac, SC_UNITY);
+	    frac = frac % SC_UNITY;
 	    return Scaled.new_from_parts (nonfrac, frac);
 	};
 
@@ -605,11 +605,11 @@ var IntParamValue = (function IntParamValue_closure () {
     inherit (IntParamValue, ParamValue);
 
     IntParamValue.prototype.get = function IntParamValue_get (engine) {
-	return engine.countpar (this.name);
+	return engine.intpar (this.name);
     };
 
     IntParamValue.prototype.set = function IntParamValue_set (engine, value) {
-	engine.set_countpar (this.name, value);
+	engine.set_intpar (this.name, value);
     };
 
     return _make_int_value (IntParamValue);
@@ -665,11 +665,11 @@ var ToksParamValue = (function ToksParamValue_closure () {
     inherit (ToksParamValue, ParamValue);
 
     ToksParamValue.prototype.get = function ToksParamValue_get (engine) {
-	return engine.tokspar (this.name);
+	return engine.tokpar (this.name);
     };
 
     ToksParamValue.prototype.set = function ToksParamValue_set (engine, value) {
-	engine.set_tokspar (this.name, value);
+	engine.set_tokpar (this.name, value);
     };
 
     return _make_toks_value (ToksParamValue);

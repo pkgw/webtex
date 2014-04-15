@@ -90,8 +90,8 @@ var Engine = (function Engine_closure () {
 
 	this.commands = {};
 	fill_cseq_commands (this);
-
 	engine_init_parameters (this);
+	engine_init_param_cseqs (this);
 
 	// T:TP sec 240; has to go after $init_parameters
 	this.set_intpar ('mag', 1000);
