@@ -53,6 +53,22 @@ var TexInt = WEBTEX.TexInt = (function TexInt_closure () {
 	return new TexInt (this.value);
     };
 
+    TexInt.prototype.as_int = function TexInt_as_int () {
+	return this; // NOTE: ok since TexInts are immutable
+    };
+
+    TexInt.prototype.as_scaled = function TexInt_as_scaled () {
+	return null;
+    };
+
+    TexInt.prototype.as_dimen = function TexInt_as_dimen () {
+	return null;
+    };
+
+    TexInt.prototype.as_glue = function TexInt_as_glue () {
+	return null;
+    };
+
     TexInt.prototype.advance = function TexInt_advance (other) {
 	return new TexInt (this.value + other.value);
     };
@@ -243,6 +259,22 @@ var Scaled = WEBTEX.Scaled = (function Scaled_closure () {
 	return new Scaled (this.value);
     };
 
+    Scaled.prototype.as_int = function Scaled_as_int () {
+	return new TexInt (this.value);
+    };
+
+    Scaled.prototype.as_scaled = function Scaled_as_scaled () {
+	return this; // NOTE: ok since Scaleds are immutable.
+    };
+
+    Scaled.prototype.as_dimen = function Scaled_as_dimen () {
+	return null;
+    };
+
+    Scaled.prototype.as_glue = function Scaled_as_glue () {
+	return null;
+    };
+
     Scaled.prototype.advance = function Scaled_advance (other) {
 	return new Scaled (this.value + other.value);
     };
@@ -278,7 +310,7 @@ var Dimen = (function Dimen_closure () {
 	var d = new Dimen ();
 	d.sp = x.times_n_plus_y (k, new Scaled (0));
 	if (Math.abs (d.sp.value) > MAX_SCALED)
-	    throw new TexRuntimeException ('dimension out of range: ' + x);
+	    throw new TexRuntimeException ('dimension out of range: ' + d);
 	return d;
     };
 
@@ -290,6 +322,22 @@ var Dimen = (function Dimen_closure () {
 	var d = new Dimen ();
 	d.sp = this.sp.clone ();
 	return d;
+    };
+
+    Dimen.prototype.as_int = function Dimen_as_int () {
+	return this.sp.as_int ();
+    };
+
+    Dimen.prototype.as_scaled = function Dimen_as_scaled () {
+	return this.sp; // NOTE: ok since Scaleds are immutable.
+    };
+
+    Dimen.prototype.as_dimen = function Dimen_as_dimen () {
+	return this.clone ();
+    };
+
+    Dimen.prototype.as_glue = function Dimen_as_glue () {
+	return null;
     };
 
     Dimen.prototype.advance = function Dimen_advance (other) {
@@ -326,6 +374,22 @@ var Glue = (function Glue_closure () {
 	g.shrink = this.shrink.clone ();
 	g.shrink_order = this.shrink_order;
 	return g;
+    };
+
+    Glue.prototype.as_int = function Glue_as_int () {
+	return this.width.as_int ();
+    };
+
+    Glue.prototype.as_scaled = function Glue_as_scaled () {
+	return this.width.as_scaled ();
+    };
+
+    Glue.prototype.as_dimen = function Glue_as_dimen () {
+	return this.width.clone ();
+    };
+
+    Glue.prototype.as_glue = function Glue_as_glue () {
+	return this.clone ();
     };
 
     Glue.prototype.advance = function Glue_advance (other) {

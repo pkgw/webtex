@@ -27,6 +27,34 @@ var Command = WEBTEX.Command = (function Command_closure () {
 	return null;
     };
 
+    proto.as_int = function Command_as_int (engine) {
+	var v = this.asvalue (engine);
+	if (v == null)
+	    return null;
+	return v.get (engine).as_int ();
+    };
+
+    proto.as_scaled = function Command_as_scaled (engine) {
+	var v = this.asvalue (engine);
+	if (v == null)
+	    return null;
+	return v.get (engine).as_scaled ();
+    };
+
+    proto.as_dimen = function Command_as_dimen (engine) {
+	var v = this.asvalue (engine);
+	if (v == null)
+	    return null;
+	return v.get (engine).as_dimen ();
+    };
+
+    proto.as_glue = function Command_as_glue (engine) {
+	var v = this.asvalue (engine);
+	if (v == null)
+	    return null;
+	return v.get (engine).as_glue ();
+    };
+
     proto.texmeaning = function Command_texmeaning (engine) {
 	return texchr (engine.intpar ('escapechar')) + this.name;
     };

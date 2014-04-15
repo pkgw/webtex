@@ -477,9 +477,9 @@ var Engine = (function Engine_closure () {
 	    throw new TexSyntaxException ('unhandled alpha number token ' + tok);
 	}
 
-	var v = tok.tocmd (this).asvalue (this);
+	var v = tok.tocmd (this).as_int (this);
 	if (v != null)
-	    return v.get (this).intproduct (negfactor);
+	    return v.intproduct (negfactor);
 
 	// Looks like we have a literal integer
 
@@ -558,64 +558,75 @@ var Engine = (function Engine_closure () {
     };
 
     proto.scan_dimen = function Engine_scan_dimen (mumode, infmode) {
-	/* `infmode` says whether infinities are allowed. If true, the
-	 * return value is [scaled, infinity_order] rather than just the
-	 * scaled dimension. */
+	/* `infmode` says whether infinities are allowed. If true, the return
+	 * value is [dimen, infinity_order] rather than just the dimension. */
 	var t = this._scan_signs ();
-	var negfactor = t[0], tok = t[1], inf_order = 0;
+	var negfactor = t[0], tok = t[1], inf_order = 0, val = null,
+	    frac = 0, nonfrac = null;
 
-	// FIXME: we have to react differently based on whether the
-	// value is an integer or a dimen.
 	var v = tok.tocmd (this).asvalue (this);
 	if (v != null) {
+	    v = v.get (this);
+
 	    if (mumode)
 		throw new TexRuntimeException ('not implemented');
-	    else
-		return Dimen.new_product (negfactor, v);
-	}
-
-	var frac = 0, radix = 10, nonfrac = 0;
-
-	if (tok.isotherchar (O_PERIOD) || tok.isotherchar (O_COMMA)) {
-	    /* nothing */
-	} else {
-	    this.push (tok);
-	    nonfrac = this.scan_int ().value;
-	    if (nonfrac < 0) {
-		negfactor = -negfactor;
-		nonfrac = -nonfrac;
+	    else {
+		var u = v.as_dimen ();
+		if (u != null)
+		    // We got a full-on dimen value; return it
+		    return Dimen.new_product (negfactor, u.as_scaled ());
+		// We got an int.
+		nonfrac = v.as_int ();
 	    }
-	    tok = this.next_x_tok ();
 	}
 
-	if (!tok.isotherchar (O_PERIOD) && !tok.isotherchar (O_COMMA))
-	    this.push (tok)
-	else {
-	    // We have a fractional part to deal with.
-	    var digits = [];
-	    while (true) {
-		tok = this.next_tok ();
-		var v = tok.maybe_decimal_value ();
-		if (v < 0) {
-		    if (!tok.iscat (C_SPACE))
-			this.push (tok);
-		    break;
+	if (nonfrac == null) {
+	    // We need to scan a literal number.
+	    if (tok.isotherchar (O_PERIOD) || tok.isotherchar (O_COMMA)) {
+		/* nothing */
+	    } else {
+		this.push (tok);
+		nonfrac = this.scan_int ().value;
+		if (nonfrac < 0) {
+		    negfactor = -negfactor;
+		    nonfrac = -nonfrac;
 		}
-		digits.push (v);
+		tok = this.next_x_tok ();
 	    }
-	    frac = Scaled.new_from_decimals (digits);
+
+	    if (!tok.isotherchar (O_PERIOD) && !tok.isotherchar (O_COMMA))
+		this.push (tok)
+	    else {
+		// We have a fractional part to deal with.
+		var digits = [];
+		while (true) {
+		    tok = this.next_tok ();
+		    var v = tok.maybe_decimal_value ();
+		    if (v < 0) {
+			if (!tok.iscat (C_SPACE))
+			    this.push (tok);
+			break;
+		    }
+		    digits.push (v);
+		}
+		frac = Scaled.new_from_decimals (digits);
+	    }
+	}
+
+	if (nonfrac < 0) {
+	    negfactor = -negfactor;
+	    nonfrac = -nonfrac;
 	}
 
 	if (this.scan_keyword ('true'))
 	    throw new TexRuntimeException ('not implemented true-dimens');
 
 	tok = this.chomp_spaces ();
-	var val = tok.tocmd (this).asvalue (this);
+	var val = tok.tocmd (this).as_scaled (this);
 	var result = null;
 
 	if (val != null) {
-	    var v = val.get (this);
-	    result = v.frac_product (nonfrac, frac);
+	    result = val.times_parts (nonfrac, frac);
 	} else {
 	    this.push (tok);
 
@@ -693,10 +704,9 @@ var Engine = (function Engine_closure () {
 	var t = this._scan_signs ();
 	var negfactor = t[0], tok = t[1];
 
-	var v = tok.tocmd (this).asvalue (this);
+	var v = tok.tocmd (this).as_glue (this);
 	if (v != null)
-	    // TODO: more care with type compatibility
-	    return v.get (this).intproduct (negfactor);
+	    return v.intproduct (negfactor);
 
 	var g = new Glue ();
 	this.push (tok);
