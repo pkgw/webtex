@@ -682,6 +682,106 @@ commands.fi = function cmd_fi (engine) {
 };
 
 
+// Boxes
+
+commands.hbox = (function HboxCommand_closure () {
+    function HboxCommand () { Command.call (this); }
+    inherit (HboxCommand, Command);
+    var proto = HboxCommand.prototype;
+    proto.name = 'hbox';
+    proto.boxlike = true;
+
+    proto.invoke = function HboxCommand_invoke (engine) {
+	engine.handle_hbox ();
+    };
+
+    return HboxCommand;
+})();
+
+
+commands.wd = (function WdCommand_closure () {
+    function WdCommand () { Command.call (this); }
+    inherit (WdCommand, Command);
+    var proto = WdCommand.prototype;
+    proto.name = 'wd';
+
+    proto.invoke = function WdCommand_invoke (engine) {
+	throw new TexInternalError ('not implemented bare \\wd');
+    };
+
+    proto.asvalue = function WdCommand_asvalue (engine) {
+	var reg = engine.scan_char_code ();
+	var box = engine.boxreg (reg);
+	return new ConstantDimenValue (box.width);
+    };
+
+    return WdCommand;
+})();
+
+
+commands.ht = (function HtCommand_closure () {
+    function HtCommand () { Command.call (this); }
+    inherit (HtCommand, Command);
+    var proto = HtCommand.prototype;
+    proto.name = 'ht';
+
+    proto.invoke = function HtCommand_invoke (engine) {
+	throw new TexInternalError ('not implemented bare \\ht');
+    };
+
+    proto.asvalue = function HtCommand_asvalue (engine) {
+	var reg = engine.scan_char_code ();
+	var box = engine.boxreg (reg);
+	return new ConstantDimenValue (box.height);
+    };
+
+    return HtCommand;
+})();
+
+
+commands.setbox = function cmd_setbox (engine) {
+    var reg = engine.scan_char_code ();
+    engine.scan_optional_equals ();
+    engine.debug ('setbox: queue #' + reg + ' = ...');
+    engine.handle_setbox (reg);
+};
+
+
+commands.vrule = function cmd_vrule (engine) {
+    if (engine.mode() != M_HORZ && engine.mode() != M_RHORZ)
+	throw new TexRuntimeException ('can only create \\vrule in horizontal mode');
+
+    var rule = new Rule ();
+    rule.width.sp.value = 26214; // default rule = 0.4pt; T:TP sec 463
+
+    while (true) {
+	if (engine.scan_keyword ('width'))
+	    rule.width = engine.scan_dimen ();
+	else if (engine.scan_keyword ('height'))
+	    rule.height = engine.scan_dimen ();
+	else if (engine.scan_keyword ('depth'))
+	    rule.depth = engine.scan_dimen ();
+	else
+	    break;
+    }
+
+    engine.debug ('vrule ' + rule);
+    return rule;
+};
+
+
+commands.unhbox = function cmd_unhbox (engine) {
+    engine.ensure_horizontal ();
+    var reg = engine.scan_char_code ();
+    var box = engine.boxreg (reg);
+
+    if (!box.tlist.length)
+	return
+
+    throw new TexInternalError ('see TeXbook pg. 285');
+};
+
+
 // Font
 
 commands.font = (function FontCommand_closure () {

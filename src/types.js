@@ -421,6 +421,13 @@ var Box = (function Box_closure () {
 	this.tlist = [];
     }
 
+    var proto = Box.prototype;
+
+    proto.toString = function Box_toString () {
+	return '<Box w=' + this.width + ' h=' + this.height +
+	    ' d=' + this.depth + ' #toks=' + this.tlist.length + '>';
+    };
+
     return Box;
 }) ();
 

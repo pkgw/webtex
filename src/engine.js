@@ -65,6 +65,7 @@ var Engine = (function Engine_closure () {
     var TS_BEGINNING = 0, TS_MIDDLE = 1, TS_SKIPPING = 2;
     var AF_GLOBAL = 1 << 0;
     var CS_FI = 0, CS_ELSE_FI = 1, CS_OR_ELSE_FI = 2;
+    var BO_SETBOX = 0;
 
     function Engine (jobname, initial_ordsrc) {
 	this.jobname = jobname;
@@ -154,6 +155,8 @@ var Engine = (function Engine_closure () {
 
     proto.unnest_eqtb = function Engine_unnest_eqtb () {
 	this.eqtb = this.eqtb.parent;
+	if (this.eqtb == null)
+	    throw new TexInternalException ('unnested eqtb too far');
     };
 
     proto.mode = function Engine_mode () {
@@ -949,6 +952,82 @@ var Engine = (function Engine_closure () {
 
 	// Don't care about mode, and nothing more to do.
 	this.conditional_stack.pop ();
+    };
+
+
+    // Box construction
+
+    proto.scan_box = function Engine_scan_box () {
+	var tok = null;
+
+	while (true) {
+	    tok = this.next_x_tok ();
+	    if (tok == null)
+		throw new TexSyntaxException ('EOF while scanning box');
+	    if (!tok.iscat (C_SPACE) && !tok.iscmd (this, 'relax'))
+		break;
+	}
+
+	// TODO: deal with leader_flag and hrule stuff; should accept:
+	// \box, \copy, \lastbox, \vsplit, \hbox, \vbox, \vtop
+
+	if (!tok.tocmd (this).boxlike)
+	    throw new TexRuntimeException ('expected boxlike command but got ' + tok);
+	this.push (tok);
+    };
+
+
+    proto.handle_setbox = function Engine_handle_setbox (reg) {
+        // We just scanned "\setbox NN =". We'll now expect a box-construction
+        // expression. The TeX design is such that rather than trying to read
+        // in the whole box at once, we instead remember that we were doing a
+        // setbox operation.
+
+        function set_the_box (engine, box) {
+            this.debug ('... finish setbox: #' + reg + ' = ' + box);
+            engine.set_boxreg (reg, box)
+	}
+
+        this.boxop_stack.push ([set_the_box, true]);
+        this.scan_box (); // check that we're being followed by a box.
+    };
+
+    proto.handle_hbox = function Engine_handle_hbox () {
+	var is_exact, spec;
+
+	if (this.scan_keyword ('to')) {
+	    is_exact = true;
+	    spec = this.scan_dimen ();
+	} else if (this.scan_keyword ('spread')) {
+	    is_exact = false;
+	    spec = this.scan_dimen ();
+	} else {
+	    is_exact = false;
+	    spec = new Dimen ();
+	}
+
+	function finish_box (engine) {
+	    if (!this.boxop_stack.length)
+		throw new TexRuntimeException ('what to do with bare box?');
+
+	    this.debug ('<--- hbox');
+	    this.unnest_eqtb ();
+	    var box = new Box ();
+	    box.tlist = this.leave_mode ();
+	    var t = this.boxop_stack.pop ();
+	    var boxop = t[0], isassignment = t[1];
+	};
+
+	this.scan_left_brace ();
+
+	if (this.boxop_stack && this.boxop_stack.length)
+	    // This is an assignment expression.
+	    this.maybe_insert_after_assign_token ();
+
+	this.debug ('--> hbox');
+	this.enter_mode (M_RHORZ);
+	this.nest_eqtb ();
+	this.group_exit_stack.push (finish_box.bind (this));
     };
 
 
