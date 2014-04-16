@@ -64,3 +64,22 @@ WEBTEX.Node.FSLineSource = (function FSLineSource_closure () {
 
     return FSLineSource;
 })();
+
+
+WEBTEX.IOBackend.try_open_linesource = function NodeIO_try_open_linesource (texfn) {
+    var fs = require ('fs');
+    var paths = [texfn + '.tex', texfn];
+
+    while (paths.length) {
+	var path = paths.pop (), ls = null;
+	try {
+	    path = 'deps/' + path; // XXX temporary!
+	    ls = new WEBTEX.Node.FSLineSource (path);
+	} catch (e) {
+	    if (e.code != 'ENOENT')
+		throw e;
+	}
+    }
+
+    return ls;
+};

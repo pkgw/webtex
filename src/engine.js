@@ -226,6 +226,35 @@ var Engine = (function Engine_closure () {
 	this.unnest_eqtb ();
     };
 
+    // Input nesting and other I/O
+
+    proto.handle_input = function Engine_handle_input (texfn) {
+	var ls = WEBTEX.IOBackend.try_open_linesource (texfn);
+	if (ls == null)
+	    throw new TexRuntimeException ('can\'t find any matching files for "' +
+					   texfn + '"');
+	this.ordsrc = new OrdSource (ls, this.ordsrc);
+    };
+
+    proto.handle_endinput = function Engine_handle_endinput () {
+	if (this.ordsrc.parent == null)
+	    throw new TexRuntimeException ('cannot \\endinput on lowest-level input stream');
+	this.ordsrc = this.ordsrc.parent;
+    };
+
+    proto.infile = function Engine_infile (num) {
+	if (num < 0 || num > 15)
+	    throw new TexRuntimeException ('illegal input file number ' + num);
+	return this._infiles[num];
+    };
+
+    proto.set_infile = function Engine_set_infile (num, value) {
+	if (num < 0 || num > 15)
+	    throw new TexRuntimeException ('illegal input file number ' + num);
+	this._infiles[num] = value;
+    };
+
+
     // Tokenization. I'd like to separate this out into its own class,
     // but there are just too many interactions between this subsystem and
     // the rest of the engine.

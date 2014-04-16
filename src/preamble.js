@@ -6,6 +6,8 @@ if (!globalScope.WEBTEX) {
     globalScope.WEBTEX = {};
 }
 
+WEBTEX.IOBackend = {};
+
 
 /* Diagnostic infrastructure */
 
