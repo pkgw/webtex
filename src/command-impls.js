@@ -7,6 +7,11 @@ commands.par = function cmd_par (engine) {
 };
 
 
+commands.relax = function cmd_relax (engine) {
+    engine.debug ('relax');
+};
+
+
 // Register access: \count, etc.
 
 commands.count = (function CountCommand_closure () {
