@@ -678,11 +678,11 @@ var ToksRegValue = (function ToksRegValue_closure () {
     inherit (ToksRegValue, RegisterValue);
 
     ToksRegValue.prototype.get = function ToksRegValue_get (engine) {
-	return engine.toksreg (this.reg);
+	return engine.tokreg (this.reg);
     };
 
     ToksRegValue.prototype.set = function ToksRegValue_set (engine, value) {
-	engine.set_toksreg (this.reg, value);
+	engine.set_tokreg (this.reg, value);
     };
 
     return _make_toks_value (ToksRegValue);
