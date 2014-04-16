@@ -196,7 +196,7 @@ var Engine = (function Engine_closure () {
 
     proto.handle_egroup = function Engine_handle_egroup () {
 	if (!this.group_exit_stack.length)
-	    throw new TexRuntimeError ('ending a group that wasn\'t started');
+	    throw new TexRuntimeException ('ending a group that wasn\'t started');
 	return (this.group_exit_stack.pop ()) (this);
     };
 
@@ -205,8 +205,8 @@ var Engine = (function Engine_closure () {
 	this.nest_eqtb ();
 
 	function end_semisimple (eng) {
-	    throw new TexRuntimeError ('expected \\endgroup but got something ' +
-				       'else');
+	    throw new TexRuntimeException ('expected \\endgroup but got something ' +
+					   'else');
 	}
 	end_semisimple.is_semisimple = true;
 

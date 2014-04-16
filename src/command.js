@@ -15,8 +15,8 @@ var Command = WEBTEX.Command = (function Command_closure () {
     };
 
     proto.invoke = function Command_invoke (engine) {
-	throw new TexInternalError ('tried to evaluate undefined/un-evaluatable ' +
-				    'command ' + this.name);
+	throw new TexInternalException ('tried to evaluate undefined/' +
+					'un-evaluatable command ' + this.name);
     };
 
     proto.samecmd = function Command_samecmd (other) {
@@ -137,9 +137,9 @@ var MacroCommand = (function MacroCommand_closure () {
 		// sure that the actual token stream matches.
 		var atok = engine.next_x_tok ();
 		if (!atok.equals (ttok))
-		    throw new TexRuntimeError ('macro invocation doesn\'t match ' +
-					       'template: expected ' + ttok + ', ' +
-					       'got ' + atok);
+		    throw new TexRuntimeException ('macro invocation doesn\'t match ' +
+						   'template: expected ' + ttok + ', ' +
+						   'got ' + atok);
 		tidx += 1;
 		continue;
 	    }
@@ -497,7 +497,7 @@ var GivenCharCommand = (function GivenCharCommand_closure () {
     function GivenCharCommand (ord) {
 	Command.call (this);
 	if (ord < 0 || ord > 255)
-	    throw new ValueError ('illegal character ordinal ' + ord);
+	    throw new TexInternalException ('illegal character ordinal ' + ord);
 	this.ord = ord;
     }
 
@@ -530,7 +530,7 @@ var GivenMathcharCommand = (function GivenMathcharCommand_closure () {
     function GivenMathcharCommand (mathchar) {
 	Command.call (this);
 	if (mathchar < 0 || mathchar > 32767)
-	    throw new ValueError ('illegal math character numder ' + mathchar);
+	    throw new TexInternalException ('illegal math character numder ' + mathchar);
 	this.mathchar = mathchar;
     }
 
@@ -563,7 +563,7 @@ var GivenRegisterCommand = (function GivenRegisterCommand_closure () {
     function GivenRegisterCommand (register) {
 	Command.call (this);
 	if (register < 0 || register > 255)
-	    throw new ValueError ('illegal register number ' + register);
+	    throw new TexInternalException ('illegal register number ' + register);
 	this.register = register;
     }
 
@@ -735,7 +735,7 @@ var NamedParamCommand = (function NamedParamCommand_closure () {
     };
 
     proto.asvalue = function NamedParamCommand_asvalue (engine) {
-	throw new TexInternalError ('not implemented');
+	throw new TexInternalException ('not implemented');
     };
 
     return NamedParamCommand;

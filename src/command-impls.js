@@ -522,8 +522,8 @@ function _cmd_def (engine, cname, expand_replacement) {
 		continue;
 	    }
 
-	    throw new TexSyntaxError ('unexpected token ' + tok + ' following ' +
-				      'parameter token');
+	    throw new TexSyntaxException ('unexpected token ' + tok + ' following ' +
+					  'parameter token');
 	}
 
 	if (tok.iscat (C_PARAM)) {
@@ -547,7 +547,7 @@ function _cmd_def (engine, cname, expand_replacement) {
     while (true) {
 	var tok = engine.next_tok ();
 	if (tok == null)
-	    throw new TexSyntaxError ('EOF in middle of \\' + cname + ' command');
+	    throw new TexSyntaxException ('EOF in middle of \\' + cname + ' command');
 
 	if (expand_replacement) {
 	    // We can't just use next_x_tok because \the{toklist} is
@@ -652,10 +652,10 @@ commands._if = function cmd_if (engine) {
 	if (tok.iscslike ()) { // active chars will be caught by above
 	    var cmd = tok.tocmd (engine);
 	    if (cmd instanceof CharGivenCommand)
-		throw new TexInternalError ('not implemented');
+		throw new TexInternalException ('not implemented');
 	    return 16 * 1000 + 256;
 	}
-	throw new TexRuntimeError ('illegal comparison subject ' + tok);
+	throw new TexRuntimeException ('illegal comparison subject ' + tok);
     }
 
     var result = (key (t1) == key (t2));
@@ -806,7 +806,7 @@ commands.wd = (function WdCommand_closure () {
     proto.name = 'wd';
 
     proto.invoke = function WdCommand_invoke (engine) {
-	throw new TexInternalError ('not implemented bare \\wd');
+	throw new TexInternalException ('not implemented bare \\wd');
     };
 
     proto.asvalue = function WdCommand_asvalue (engine) {
@@ -826,7 +826,7 @@ commands.ht = (function HtCommand_closure () {
     proto.name = 'ht';
 
     proto.invoke = function HtCommand_invoke (engine) {
-	throw new TexInternalError ('not implemented bare \\ht');
+	throw new TexInternalException ('not implemented bare \\ht');
     };
 
     proto.asvalue = function HtCommand_asvalue (engine) {
@@ -878,7 +878,7 @@ commands.unhbox = function cmd_unhbox (engine) {
     if (!box.tlist.length)
 	return
 
-    throw new TexInternalError ('see TeXbook pg. 285');
+    throw new TexInternalException ('see TeXbook pg. 285');
 };
 
 
@@ -899,11 +899,11 @@ commands.font = (function FontCommand_closure () {
 	if (engine.scan_keyword ('at')) {
 	    s = engine.scan_dimen ()
 	    if (s.sp.value <= 0) // FIXME: || s > SC_MAX
-		throw new TexRuntimeError ('illegal font size ' + s);
+		throw new TexRuntimeException ('illegal font size ' + s);
 	} else if (engine.scan_keyword ('scaled')) {
 	    s = -engine.scan_int ().value;
 	    if (s >= 0 || s < -32768)
-		throw new TexRuntimeError ('illegal font magnification factor ' + (-s));
+		throw new TexRuntimeException ('illegal font magnification factor ' + (-s));
 	}
 
 	var font = new Font (fn, s);

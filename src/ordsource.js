@@ -124,7 +124,7 @@ var OrdSource = WEBTEX.OrdSource = (function OrdSource_closure () {
 
     proto.iseol = function OrdSource_iseol () {
 	if (this.linesource === null)
-	    throw new TexRuntimeError ('unexpected iseol context');
+	    throw new TexRuntimeException ('unexpected iseol context');
 
 	if (!this._ensure_line ())
 	    return false;
@@ -134,7 +134,7 @@ var OrdSource = WEBTEX.OrdSource = (function OrdSource_closure () {
 
     proto.discard_line = function OrdSource_discard_line () {
 	if (this.linesource === null)
-	    throw new TexRuntimeError ('unexpected discard_line context');
+	    throw new TexRuntimeException ('unexpected discard_line context');
 
 	this.curords = this.curindex = null;
     };
