@@ -694,10 +694,11 @@ var IntParamValue = (function IntParamValue_closure () {
     inherit (IntParamValue, ParamValue);
 
     IntParamValue.prototype.get = function IntParamValue_get (engine) {
-	return engine.intpar (this.name);
+	return new TexInt (engine.intpar (this.name));
     };
 
     IntParamValue.prototype.set = function IntParamValue_set (engine, value) {
+	value = TexInt.xcheck (value);
 	engine.set_intpar (this.name, value);
     };
 

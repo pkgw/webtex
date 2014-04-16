@@ -10,6 +10,10 @@ var Command = WEBTEX.Command = (function Command_closure () {
     proto.assign_flag_mode = AFM_INVALID;
     proto.name = '<unset command name>';
 
+    proto.toString = function Command_toString () {
+	return '[' + this.name + ']';
+    };
+
     proto.invoke = function Command_invoke (engine) {
 	throw new TexInternalError ('tried to evaluate undefined/un-evaluatable ' +
 				    'command ' + this.name);
@@ -514,7 +518,7 @@ var GivenCharCommand = (function GivenCharCommand_closure () {
     };
 
     proto.texmeaning = function GivenCharCommand_texmeaning (engine) {
-	return texchar (engine.intpar ('escapechar')) + 'char' +
+	return texchr (engine.intpar ('escapechar')) + 'char' +
 	    this.ord.toString (16).toUpperCase ();
     };
 
@@ -547,7 +551,7 @@ var GivenMathcharCommand = (function GivenMathcharCommand_closure () {
     };
 
     proto.texmeaning = function GivenMathcharCommand_texmeaning (engine) {
-	return texchar (engine.intpar ('escapechar')) + 'mathchar' +
+	return texchr (engine.intpar ('escapechar')) + 'mathchar' +
 	    this.ord.toString (16).toUpperCase ();
     };
 
@@ -589,7 +593,7 @@ var GivenRegisterCommand = (function GivenRegisterCommand_closure () {
     // subclasses implement asvalue()
 
     proto.texmeaning = function GivenRegisterCommand_texmeaning (engine) {
-	return texchar (engine.intpar ('escapechar')) + this.desc +
+	return texchr (engine.intpar ('escapechar')) + this.desc +
 	    this.register;
     };
 
