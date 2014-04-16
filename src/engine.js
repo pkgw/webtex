@@ -402,7 +402,7 @@ var Engine = (function Engine_closure () {
 		return false; // didn't find an equals
 	    if (tok.iscat (C_SPACE))
 		continue;
-	    if (tok.ischar (C_OTHER, O_EQUALS))
+	    if (tok.isotherchar (O_EQUALS))
 		return true;
 
 	    // Found a non-space, non-equals.

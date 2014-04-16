@@ -577,7 +577,7 @@ function _make_toks_value (type) {
 
 	// TODO: \tokpar=<toklist register or toklist param>
 	if (!tok.iscat (C_BGROUP))
-	    throw new TexSyntaxException ('expected { in toklist assignment');
+	    throw new TexSyntaxException ('expected { in toklist assignment; got ' + tok);
 
 	return engine.scan_tok_group (false);
     };
