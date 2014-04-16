@@ -1,15 +1,13 @@
 'use strict;'
 
 var Command = WEBTEX.Command = (function Command_closure () {
-    function Command () {
-	this.expandable = false;
-	this.conditional = false;
-	this.boxlike = false;
-	this.assign_flag_mode = AFM_INVALID;
-    }
+    function Command () {}
 
     var proto = Command.prototype;
-
+    proto.expandable = false;
+    proto.conditional = false;
+    proto.boxlike = false;
+    proto.assign_flag_mode = AFM_INVALID;
     proto.name = '<unset command name>';
 
     proto.invoke = function Command_invoke (engine) {
@@ -671,6 +669,42 @@ var GivenToksCommand = (function GivenToksCommand_closure () {
     };
 
     return GivenToksCommand;
+})();
+
+
+var GivenFontCommand = (function GivenFontCommand_closure () {
+    function GivenFontCommand (font) {
+	Command.call (this);
+	this.font = font;
+    }
+
+    inherit (GivenFontCommand, Command);
+    var proto = GivenFontCommand.prototype;
+    proto.name = '<given-font>';
+    proto.assign_flags_mode = AFM_CONSUME;
+
+    proto.samecmd = function GivenFontCommand_samecmd (other) {
+	if (other == null)
+	    return false;
+	if (this.name != other.name)
+	    return false;
+	return this.font.equals (other.font);
+    };
+
+    proto.invoke = function GivenFontCommand_invoke (engine) {
+	engine.debug ('activate font ' + this.font);
+	engine.set_font ('<current>', this.font);
+    };
+
+    proto.asvalue = function GivenFontCommand_asvalue (engine) {
+	return new ConstantFontValue (this.font);
+    };
+
+    proto.texmeaning = function GivenFontCommand_texmeaning (engine) {
+	return 'select font ' + this.font.texmeaning (engine);
+    };
+
+    return GivenFontCommand;
 })();
 
 

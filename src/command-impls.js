@@ -677,6 +677,198 @@ commands.fi = function cmd_fi (engine) {
 };
 
 
+// Font
+
+commands.font = (function FontCommand_closure () {
+    function FontCommand () { Command.call (this); }
+    inherit (FontCommand, Command);
+    var proto = FontCommand.prototype;
+    proto.name = 'font';
+
+    proto.invoke = function FontCommand_invoke (engine) {
+	var cstok = engine.scan_r_token ();
+	engine.scan_optional_equals ();
+	var fn = engine.scan_file_name ();
+	var s = -1000;
+
+	if (engine.scan_keyword ('at')) {
+	    s = engine.scan_dimen ()
+	    if (s.sp.value <= 0) // FIXME: || s > SC_MAX
+		throw new TexRuntimeError ('illegal font size ' + s);
+	} else if (engine.scan_keyword ('scaled')) {
+	    s = -engine.scan_int ().value;
+	    if (s >= 0 || s < -32768)
+		throw new TexRuntimeError ('illegal font magnification factor ' + (-s));
+	}
+
+	var font = new Font (fn, s);
+	var cmd = new GivenFontCommand (font);
+	engine.debug ('font ' + cstok + ' = ' + font);
+	cstok.assign_cmd (engine, cmd);
+    };
+
+    proto.asvalue = function FontCommand_asvalue (engine) {
+	return new ConstantFontValue (engine.font ('<current>'));
+    };
+
+    return FontCommand;
+})();
+
+
+commands.nullfont = (function NullFontCommand_closure () {
+    // XXX: redundant with GivenFontCommand in several ways.
+    function NullFontCommand () { Command.call (this); }
+    inherit (NullFontCommand, Command);
+    var proto = NullFontCommand.prototype;
+    proto.name = 'nullfont';
+
+    proto.invoke = function NullFontCommand_invoke (engine) {
+	engine.debug ('activate null font');
+	engine.set_font ('<current>', engine.font ('<null>'));
+    };
+
+    proto.asvalue = function NullFontCommand_asvalue (engine) {
+	return new ConstantFontValue (engine.font ('<null>'));
+    };
+
+    proto.texmeaning = function NullFontCommand_texmeaning (engine) {
+	return 'select font nullfont';
+    };
+
+    return NullFontCommand;
+})();
+
+
+commands.fontdimen = (function FontDimenCommand_closure () {
+    // XXX: redundant with GivenFontCommand in several ways.
+    function FontDimenCommand () { Command.call (this); }
+    inherit (FontDimenCommand, Command);
+    var proto = FontDimenCommand.prototype;
+    proto.name = 'fontdimen';
+
+    proto.invoke = function FontDimenCommand_invoke (engine) {
+	var num = engine.scan_int ();
+	var tok = engine.next_tok ();
+	var font = tok.tocmd (engine).asvalue (engine);
+
+	if (!(font instanceof ConstantFontValue))
+	    throw new TexRuntimeException ('expected \\fontdimen to be followed ' +
+					   'by a font; got ' + tok);
+
+	engine.scan_optional_equals ();
+	var val = engine.scan_dimen ();
+	engine.debug (['fontdimen', font, num, '=', val].join (' '));
+	font.get (engine).dimens[num] = val;
+    };
+
+    proto.asvalue = function FontDimenCommand_asvalue (engine) {
+	var num = engine.scan_int ();
+	var tok = engine.next_tok ();
+	var font = tok.tocmd (engine).asvalue (engine);
+
+	if (!(font instanceof ConstantFontValue))
+	    throw new TexRuntimeException ('expected \\fontdimen to be followed ' +
+					   'by a font; got ' + tok);
+
+	var val = font.get (engine).dimens[num];
+	if (val == null) {
+	    engine.warn ('making up fontdimen for ' + font + ' ' + num);
+	    val = new Dimen ();
+	    val.sp = Scaled.new_from_parts (12, 0);
+	}
+
+	// FIXME: should be settable.
+	return new ConstantDimenValue (val);
+    };
+
+    return FontDimenCommand;
+})();
+
+
+commands.skewchar = function cmd_skewchar (engine) {
+    var tok = engine.next_tok ();
+    var val = tok.tocmd (engine).asvalue (engine);
+
+    if (!(val instanceof ConstantFontValue))
+	throw new TexRuntimeException ('expected \\skewchar to be followed by a font; ' +
+				       'got ' + tok);
+
+    engine.scan_optional_equals ();
+    var ord = engine.scan_char_code ();
+    engine.debug (['skewchar', val.get (engine), '=', escchr (ord)].join (' '));
+    engine.maybe_insert_after_assign_token ();
+};
+
+
+commands.hyphenchar = function cmd_hyphenchar (engine) {
+    var tok = engine.next_tok ();
+    var val = tok.tocmd (engine).asvalue (engine);
+
+    if (!(val instanceof ConstantFontValue))
+	throw new TexRuntimeException ('expected \\hyphenchar to be followed by a font; ' +
+				       'got ' + tok);
+
+    engine.scan_optional_equals ();
+    var ord = engine.scan_char_code ();
+    engine.debug (['hyphenchar', val.get (engine), '=', escchr (ord), '[noop]'].join (' '));
+    engine.maybe_insert_after_assign_token ();
+};
+
+
+function _def_family (engine, fam) {
+    var slot = engine.scan_int_4bit ();
+    engine.scan_optional_equals ();
+    var tok = engine.next_tok ();
+    var val = tok.tocmd (engine).asvalue (engine);
+
+    if (!(val instanceof ConstantFontValue))
+	throw new TexRuntimeException ('expected \\' + fam + ' to assign a font; ' +
+				       'got ' +tok);
+
+    engine.debug (['fam', slot, '=', val.get (engine), '[noop]'].join (' '));
+    engine.maybe_insert_after_assign_token ();
+};
+
+
+commands.textfont = function cmd_textfont (engine) {
+    return _def_family (engine, 'textfont');
+};
+
+commands.scriptfont = function cmd_scriptfont (engine) {
+    return _def_family (engine, 'scriptfont');
+};
+
+commands.scriptscriptfont = function cmd_scriptscriptfont (engine) {
+    return _def_family (engine, 'scriptscriptfont');
+};
+
+
+// Hyphenation
+
+commands.patterns = function cmd_patterns (engine) {
+    var tok = engine.next_tok ();
+    if (tok == null)
+	throw new TexSyntaxException ('EOF in middle of \\patterns');
+    if (!tok.iscat (C_BGROUP))
+	throw new TexSyntaxException ('expected { immediately after \\patterns');
+
+    engine.scan_tok_group (false);
+    engine.debug ('patterns [noop/ignored]');
+};
+
+
+commands.hyphenation = function cmd_hyphenation (engine) {
+    var tok = engine.next_tok ();
+    if (tok == null)
+	throw new TexSyntaxException ('EOF in middle of \\hyphenation');
+    if (!tok.iscat (C_BGROUP))
+	throw new TexSyntaxException ('expected { immediately after \\hyphenation');
+
+    engine.scan_tok_group (false);
+    engine.debug ('hyphenation [noop/ignored]');
+};
+
+
 // Miscellaneous text manipulation
 
 function _change_case (engine, isupper) {

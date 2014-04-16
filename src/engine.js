@@ -107,9 +107,9 @@ var Engine = (function Engine_closure () {
 	this.set_intpar ('day', d.getDay ());
 	this.set_intpar ('time', d.getHours () * 60 + d.getMinutes ());
 
-	//nf = new Font ('nullfont', -1000);
-	//this.set_font ('<null>', nf);
-	//this.set_font ('<current>', nf);
+	var nf = new Font ('nullfont', -1000);
+	this.set_font ('<null>', nf);
+	this.set_font ('<current>', nf);
     }
 
     var proto = Engine.prototype;
@@ -848,7 +848,7 @@ var Engine = (function Engine_closure () {
     proto.handle_if_case = function Engine_handle_if_case (value) {
 	/* \ifcase<num> has just been read in and evaluated to `value`. We
          * want to evaluate the value'th case, or an \else, or nothing. */
-	var ntoskop = value;
+	var ntoskip = value;
 
 	while (ntoskip > 0) {
 	    var found = this._if_skip_until (CS_OR_ELSE_FI);
@@ -859,7 +859,7 @@ var Engine = (function Engine_closure () {
 	    if (found == 'else') {
 		// We hit the else without finding our target case. We
 		// want to evaluate it and then eat a \fi.
-		this.conditional_stack.append (CS_FI);
+		this.conditional_stack.push (CS_FI);
 		return;
 	    }
 
@@ -869,7 +869,7 @@ var Engine = (function Engine_closure () {
 
 	// If we're here, we must have hit our desired case! We'll have to
 	// skip the rest of the cases later.
-	this.conditional_stack.append (CS_OR_ELSE_FI);
+	this.conditional_stack.push (CS_OR_ELSE_FI);
     };
 
 

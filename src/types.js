@@ -445,6 +445,24 @@ var Font = (function Font_closure () {
 	this.skewchar = null;
     }
 
+    var proto = Font.prototype;
+
+    proto.toString = function Font_toString () {
+	return '<Font ' + this.ident + '@' + this.scale + '>';
+    };
+
+    proto.equals = function Font_equals (other) {
+	if (other == null)
+	    return false;
+	if (!(other instanceof Font))
+	    throw new TexInternalException ('comparing Font to ' + other);
+	return (this.ident == other.ident) && (this.scale == other.scale);
+    };
+
+    proto.texmeaning = function Font_texmeaning (engine) {
+	return 'FIXME font texmeaning';
+    };
+
     return Font;
 }) ();
 
