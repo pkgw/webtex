@@ -7,8 +7,108 @@ commands.par = function cmd_par (engine) {
 };
 
 
+// Language infrastructure
+
 commands.relax = function cmd_relax (engine) {
     engine.debug ('relax');
+};
+
+
+commands.expandafter = function cmd_expandafter (engine) {
+    var tok1 = engine.next_tok ();
+    if (tok1 == null)
+	throw new TexSyntaxException ('EOF inside \\expandafter (1)');
+
+    // Note that we can't use next_x_tok () here since we can end up
+    // double-expanding what comes next in \expandafter A \expandafter B ...
+
+    var tok2 = engine.next_tok ();
+    if (tok2 == null)
+	throw new TexSyntaxException ('EOF inside \\expandafter (2)');
+
+    engine.debug ('*expandafter ' + tok1 + '|' + tok2 + ' ...');
+
+    var cmd2 = tok2.tocmd (engine);
+    if (cmd2.expandable)
+	cmd2.invoke (engine)
+    else
+	engine.push (tok2)
+
+    engine.push (tok1);
+};
+
+
+commands.noexpand = function cmd_noexpand (engine) {
+    throw new TexInternalException ('\\noexpand shouldn\'t get evaluated');
+};
+
+
+commands.endcsname = function cmd_endcsname (engine) {
+    throw new TexRuntimeException ('stray \\endcsname');
+};
+
+
+commands.csname = function cmd_csname (engine) {
+    var csname = '';
+
+    while (true) {
+	var tok = engine.next_x_tok ();
+	if (tok == null)
+	    throw new TexSyntaxException ('EOF in \\csname');
+	if (tok.iscmd (engine, 'endcsname'))
+	    break;
+	if (!tok.ischar ())
+	    throw new TexRuntimeException ('only character tokens should occur ' +
+					   'between \\csname and \\endcsname');
+
+	csname += String.fromCharCode (tok.ord);
+    }
+
+    var tok = Token.new_cseq (csname);
+    engine.debug ('* \\csname...\\endcsname -> ' + tok);
+    engine.push (tok);
+
+    if (engine.cseq (csname) == null)
+	tok.assign_cmd (engine, engine.commands['relax']);
+};
+
+
+commands.string = function cmd_string (engine) {
+    var tok = engine.next_tok ();
+    engine.debug ('* \\string ' + tok);
+
+    if (tok.ischar ()) {
+	engine.push (tok); // keep catcode
+	return;
+    }
+
+    if (tok.iscslike ()) { // active chars were handled above
+	var expn = tok.name, esc = engine.intpar ('escapechar');
+	if (esc >= 0 && esc < 256)
+	    expn = String.fromCharCode (esc) + expn;
+    } else
+	throw new TexRuntimeException ('don\'t know how to stringify ' + tok);
+
+    for (var i = expn.length - 1; i >= 0; i--) { // T:TP sec 464
+	if (expn[i] == ' ')
+	    engine.push (Token.new_char (C_SPACE, O_SPACE));
+	else
+	    engine.push (Token.new_char (C_OTHER, expn.charCodeAt (i)));
+    }
+};
+
+
+commands.number = function cmd_number (engine) {
+    var val = engine.scan_int ().value;
+    engine.debug ('* number ' + val);
+    expn = '' + val;
+
+    for (var i = expn.length - 1; i >= 0; i--) { // T:TP sec 464
+	if (expn[i] == ' ')
+	    engine.push (Token.new_char (C_SPACE, O_SPACE));
+	else
+	    engine.push (Token.new_char (C_OTHER, expn.charCodeAt (i)));
+    }
 };
 
 
