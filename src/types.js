@@ -366,6 +366,12 @@ var Glue = (function Glue_closure () {
 	this.shrink_order = 0;
     }
 
+    Glue.prototype.toString = function Glue_toString () {
+	return '<Glue ' + this.width + ' st=' + this.stretch + '|' +
+	    this.stretch_order + ' sh=' + this.shrink + '|' +
+	    this.shrink_order + '>';
+    };
+
     Glue.prototype.clone = function Glue_clone () {
 	var g = new Glue ();
 	g.width = this.width.clone ();
