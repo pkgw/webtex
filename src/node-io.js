@@ -67,11 +67,10 @@ WEBTEX.Node.FSLineSource = (function FSLineSource_closure () {
 
 
 WEBTEX.IOBackend.try_open_linesource = function NodeIO_try_open_linesource (texfn) {
-    var fs = require ('fs');
-    var paths = [texfn + '.tex', texfn];
+    var fs = require ('fs'), paths = [texfn + '.tex', texfn], ls = null;
 
     while (paths.length) {
-	var path = paths.pop (), ls = null;
+	var path = paths.pop ();
 	try {
 	    path = 'deps/' + path; // XXX temporary!
 	    ls = new WEBTEX.Node.FSLineSource (path);
