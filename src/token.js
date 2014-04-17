@@ -1,4 +1,4 @@
-'use strict;'
+'use strict';
 
 /* The representation of tokens is kind of awkward. I think it's
  * better to have a single class with an internal "kind" rather than

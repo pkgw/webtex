@@ -1,4 +1,4 @@
-'use strict;'
+'use strict';
 
 var OrdSource = WEBTEX.OrdSource = (function OrdSource_closure () {
     function OrdSource (linesource, parent) {

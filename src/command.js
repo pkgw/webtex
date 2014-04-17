@@ -1,4 +1,4 @@
-'use strict;'
+'use strict';
 
 var Command = WEBTEX.Command = (function Command_closure () {
     function Command () {}
