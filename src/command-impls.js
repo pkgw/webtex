@@ -916,6 +916,35 @@ commands.unhbox = function cmd_unhbox (engine) {
 };
 
 
+// "Special registers"
+//
+// ints: \prevgraf, \deadcycles, \insertpenalties, \inputlineno, \badness,
+// \parshape. In horizontal mode, also \spacefactor.
+//
+// dimens: \pagetotal, \pagegoal, \pagestretch, \pagefilstretch,
+// \pagefillstretch, \pagefilllstretch, \pageshrink, \pagedepth. In vertical
+// mode, also \prevdepth.
+
+commands.inputlineno = (function InputlinenoCommand_closure () {
+    // This is needed for LaTeX's version detection.
+    function InputlinenoCommand () { Command.call (this); }
+    inherit (InputlinenoCommand, Command);
+    var proto = InputlinenoCommand.prototype;
+    proto.name = 'inputlineno';
+
+    proto.invoke = function InputlinenoCommand_invoke (engine) {
+	throw new TexRuntimeException ('not implemented');
+    };
+
+    proto.asvalue = function InputlinenoCommand_asvalue (engine) {
+	// LaTeX considers this "undefined"
+	return new ConstantIntValue (new TexInt (-1));
+    };
+
+    return InputlinenoCommand;
+})();
+
+
 // Font
 
 commands.font = (function FontCommand_closure () {
