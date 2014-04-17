@@ -685,7 +685,7 @@ commands._if = function cmd_if (engine) {
 	    return tok.catcode * 1000 + tok.ord;
 	if (tok.iscslike ()) { // active chars will be caught by above
 	    var cmd = tok.tocmd (engine);
-	    if (cmd instanceof CharGivenCommand)
+	    if (cmd instanceof GivenCharCommand)
 		throw new TexInternalException ('not implemented');
 	    return 16 * 1000 + 256;
 	}

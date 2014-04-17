@@ -1067,6 +1067,11 @@ var Engine = (function Engine_closure () {
 	this.assign_flags |= AF_GLOBAL;
     };
 
+    proto.set_after_assign_token =
+	function Engine_set_after_assign_token (tok) {
+	    this.after_assign_token = tok;
+	};
+
     proto.maybe_insert_after_assign_token =
 	function Engine_maybe_insert_after_assign_token () {
 	    if (this.after_assign_token !== null) {
