@@ -73,6 +73,16 @@ commands.csname = function cmd_csname (engine) {
 };
 
 
+function insert_str (engine, expn) {
+    for (var i = expn.length - 1; i >= 0; i--) { // T:TP sec 464
+	if (expn[i] == ' ')
+	    engine.push (Token.new_char (C_SPACE, O_SPACE));
+	else
+	    engine.push (Token.new_char (C_OTHER, expn.charCodeAt (i)));
+    }
+}
+
+
 commands.string = function cmd_string (engine) {
     var tok = engine.next_tok ();
     engine.debug ('* \\string ' + tok);
@@ -89,26 +99,14 @@ commands.string = function cmd_string (engine) {
     } else
 	throw new TexRuntimeException ('don\'t know how to stringify ' + tok);
 
-    for (var i = expn.length - 1; i >= 0; i--) { // T:TP sec 464
-	if (expn[i] == ' ')
-	    engine.push (Token.new_char (C_SPACE, O_SPACE));
-	else
-	    engine.push (Token.new_char (C_OTHER, expn.charCodeAt (i)));
-    }
+    insert_str (engine, expn);
 };
 
 
 commands.number = function cmd_number (engine) {
     var val = engine.scan_int ().value;
     engine.debug ('* number ' + val);
-    expn = '' + val;
-
-    for (var i = expn.length - 1; i >= 0; i--) { // T:TP sec 464
-	if (expn[i] == ' ')
-	    engine.push (Token.new_char (C_SPACE, O_SPACE));
-	else
-	    engine.push (Token.new_char (C_OTHER, expn.charCodeAt (i)));
-    }
+    insert_str (engine, '' + val);
 };
 
 
@@ -1155,6 +1153,58 @@ commands.lowercase = function cmd_lowercase (engine) {
     _change_case (engine, false);
 };
 
+
+commands.the = function cmd_the (engine) {
+    /* \the<namedparam>
+     * \the<register N>
+     * \the<codename org>
+     * \the<"special register ~ named param?>
+     * \the\fontdimen<paramnum><font>
+     * \the\hyphenchar<font>
+     * \the\skewchar<font>
+     * \the\lastpenalty
+     * \the\lastkern
+     * \the\lastskip
+     * \the<chardef cseq>
+     * \the<font> -- non text: id of font
+     * \the<tokens> -- non text: inserts the tokens
+     */
+
+    var tok = engine.next_tok ();
+    if (tok == null)
+	throw new TexSyntaxException ('EOF in middle of \\the command');
+
+    var val = tok.tocmd (engine).asvalue (engine);
+    if (val == null)
+	throw new TexRuntimeException ('unable to get internal value (for ' +
+				       '\\the) from ' + tok);
+
+    if (val.is_toks_value) {
+	var toks = val.get (engine);
+	for (var i = toks.length - 1; i >= 0; i--)
+	    engine.push (toks[i]);
+	engine.debug ('the (toks) ' + tok + ' -> ' + val.stringify (engine, toks));
+	return;
+    }
+
+    var expn = val.stringify (engine, val.get (engine));
+    engine.debug ('the ' + tok + ' -> ' + expn);
+    insert_str (engine, expn);
+};
+
+
+commands.meaning = function cmd_meaning (engine) {
+    var tok = engine.next_tok ();
+    var expn = tok.tocmd (engine).texmeaning (engine);
+    engine.debug (['meaning', tok, '->', expn].join (' '));
+    insert_str (engine, expn);
+};
+
+
+commands.jobname = function cmd_jobname (engine) {
+    engine.debug ('jobname -> ' + engine.jobname);
+    insert_str (engine, engine.jobname);
+};
 
 
 // User interaction, I/O
