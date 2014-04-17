@@ -238,8 +238,7 @@ var Engine = (function Engine_closure () {
     };
 
     proto.handle_endinput = function Engine_handle_endinput () {
-	if (this.ordsrc.parent == null)
-	    throw new TexRuntimeException ('cannot \\endinput on lowest-level input stream');
+	// If this.ordsrc becomes null, the right thing happens.
 	this.ordsrc = this.ordsrc.parent;
     };
 
@@ -276,11 +275,13 @@ var Engine = (function Engine_closure () {
     proto.next_tok = function Engine_next_tok () {
 	if (this.pushed_tokens.length)
 	    return this.pushed_tokens.pop ();
+	if (this.ordsrc == null)
+	    return null; // \endinput called on toplevel stream.
 
 	var catcodes = this.eqtb._catcodes;
 	var o = this.ordsrc.next (catcodes);
 
-	if (o === null) {
+	if (o == null) {
 	    this.ordsrc = this.ordsrc.parent;
 	    if (this.ordsrc === null)
 		return null;
@@ -616,7 +617,7 @@ var Engine = (function Engine_closure () {
 	if (nonfrac == null) {
 	    // We need to scan a literal number.
 	    if (tok.isotherchar (O_PERIOD) || tok.isotherchar (O_COMMA)) {
-		/* nothing */
+		nonfrac = 0;
 	    } else {
 		this.push (tok);
 		nonfrac = this.scan_int ().value;
