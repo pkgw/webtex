@@ -1,63 +1,15 @@
-/* lots of copying from Mozilla pdf.js */
-
 'use strict';
-
-if (!globalScope.WEBTEX) {
-    globalScope.WEBTEX = {};
-}
 
 WEBTEX.IOBackend = {};
 
 
-/* Diagnostic infrastructure */
-
-var log = (function () {
+var global_log = (function () {
     if ('console' in globalScope && 'log' in globalScope['console']) {
 	return globalScope['console']['log'].bind (globalScope['console']);
     } else {
 	return function noop () {};
     }
 }) ();
-
-function _make_backtrace () {
-    try {
-	throw new Error ();
-    } catch (e) {
-	return e.stack ? e.stack.split ('\n').slice (2).join ('\n') : '';
-    }
-}
-
-function error (msg) {
-    // If multiple arguments were passed, pass them all to the log function.
-    if (arguments.length > 1) {
-	var logArguments = ['Error:'];
-	logArguments.push.apply (logArguments, arguments);
-	log.apply (null, logArguments);
-	// Join the arguments into a single string for the lines below.
-	msg = [].join.call (arguments, ' ');
-    } else {
-	log ('Error: ' + msg);
-    }
-    log (_make_backtrace ());
-    //PDFJS.LogManager.notify('error', msg);
-    throw new Error (msg);
-}
-
-function assert (cond, msg) {
-    if (!cond)
-	error (msg);
-}
-
-
-/* Object system helpers */
-
-function shadow (obj, prop, value) {
-    Object.defineProperty (obj, prop, { value: value,
-					enumerable: true,
-					configurable: true,
-					writable: false });
-    return value;
-}
 
 
 function inherit (ctor, superCtor) {

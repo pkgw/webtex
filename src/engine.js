@@ -119,11 +119,11 @@ var Engine = (function Engine_closure () {
     // Infrastructure.
 
     proto.debug = function Engine_debug (text) {
-	log ('{' + text + '}');
+	global_log ('{' + text + '}');
     };
 
     proto.warn = function Engine_warn (text) {
-	log ('!! ' + text);
+	global_log ('!! ' + text);
     };
 
     // Driving everything
