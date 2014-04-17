@@ -1187,7 +1187,7 @@ commands.the = function cmd_the (engine) {
 	return;
     }
 
-    var expn = val.stringify (engine, val.get (engine));
+    var expn = val.get (engine).to_texstr ();
     engine.debug ('the ' + tok + ' -> ' + expn);
     insert_str (engine, expn);
 };

@@ -245,13 +245,13 @@ var Engine = (function Engine_closure () {
     proto.infile = function Engine_infile (num) {
 	if (num < 0 || num > 15)
 	    throw new TexRuntimeException ('illegal input file number ' + num);
-	return this._infiles[num];
+	return this.infiles[num];
     };
 
     proto.set_infile = function Engine_set_infile (num, value) {
 	if (num < 0 || num > 15)
 	    throw new TexRuntimeException ('illegal input file number ' + num);
-	this._infiles[num] = value;
+	this.infiles[num] = value;
     };
 
 

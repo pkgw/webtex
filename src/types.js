@@ -49,6 +49,10 @@ var TexInt = WEBTEX.TexInt = (function TexInt_closure () {
 	return '<' + this.value + '|i>';
     };
 
+    TexInt.prototype.to_texstr = function TexInt_to_texstr () {
+	return '' + this.value;
+    };
+
     TexInt.prototype.clone = function TexInt_clone () {
 	return new TexInt (this.value);
     };
@@ -325,6 +329,10 @@ var Dimen = (function Dimen_closure () {
     };
 
     Dimen.prototype.toString = function Dimen_toString () {
+	return this.sp.asfloat ().toFixed (3) + 'pt';
+    };
+
+    Dimen.prototype.to_texstr = function Dimen_to_texstr () {
 	return this.sp.asfloat ().toFixed (3) + 'pt';
     };
 
