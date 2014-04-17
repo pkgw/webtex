@@ -247,7 +247,7 @@ commands.catcode = (function CatcodeCommand_closure () {
 
     proto.asvalue = function CatcodeCommand_asvalue (engine) {
 	var ord = engine.scan_char_code ();
-	return ConstantIntValue (new TexInt (engine.catcode (ord)));
+	return new ConstantIntValue (new TexInt (engine.catcode (ord)));
     };
 
     return CatcodeCommand;
@@ -273,7 +273,7 @@ commands.mathcode = (function MathcodeCommand_closure () {
 
     proto.asvalue = function MathcodeCommand_asvalue (engine) {
 	var ord = engine.scan_char_code ();
-	return ConstantIntValue (new TexInt (engine.mathcode (ord)));
+	return new ConstantIntValue (new TexInt (engine.mathcode (ord)));
     };
 
     return MathcodeCommand;
@@ -299,7 +299,7 @@ commands.sfcode = (function SfcodeCommand_closure () {
 
     proto.asvalue = function SfcodeCommand_asvalue (engine) {
 	var ord = engine.scan_char_code ();
-	return ConstantIntValue (new TexInt (engine.sfcode (ord)));
+	return new ConstantIntValue (new TexInt (engine.sfcode (ord)));
     };
 
     return SfcodeCommand;
@@ -322,7 +322,7 @@ commands.lccode = (function LccodeCommand_closure () {
 
     proto.asvalue = function LccodeCommand_asvalue (engine) {
 	var ord = engine.scan_char_code ();
-	return ConstantIntValue (new TexInt (engine.lccode (ord)));
+	return new ConstantIntValue (new TexInt (engine.lccode (ord)));
     };
 
     return LccodeCommand;
@@ -345,7 +345,7 @@ commands.uccode = (function UccodeCommand_closure () {
 
     proto.asvalue = function UccodeCommand_asvalue (engine) {
 	var ord = engine.scan_char_code ();
-	return ConstantIntValue (new TexInt (engine.uccode (ord)));
+	return new ConstantIntValue (new TexInt (engine.uccode (ord)));
     };
 
     return UccodeCommand;
@@ -371,7 +371,7 @@ commands.delcode = (function DelcodeCommand_closure () {
 
     proto.asvalue = function DelcodeCommand_asvalue (engine) {
 	var ord = engine.scan_char_code ();
-	return ConstantIntValue (new TexInt (engine.delcode (ord)));
+	return new ConstantIntValue (new TexInt (engine.delcode (ord)));
     };
 
     return DelcodeCommand;
