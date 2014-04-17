@@ -759,7 +759,7 @@ commands.ifdim = function cmd_ifdim (engine) {
 	var tok = engine.next_x_tok ();
 	if (tok == null)
 	    throw new TexSyntaxException ('EOF inside \\ifdim');
-	if (tok.iscat (C_SPACE))
+	if (!tok.iscat (C_SPACE))
 	    break;
     }
 
