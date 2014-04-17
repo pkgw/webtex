@@ -217,8 +217,8 @@ var Engine = (function Engine_closure () {
 	if (!this.group_exit_stack.length)
 	    throw new TexRuntimeException ('stray \\endgroup');
 
-	ender = this.group_exit_stack.pop ();
-	if (ender.is_semisimple === true)
+	var ender = this.group_exit_stack.pop ();
+	if (ender.is_semisimple !== true)
 	    throw new TexRuntimeException ('got \\endgroup when should have ' +
 					   'gotten other group-ender');
 

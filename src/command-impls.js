@@ -1297,13 +1297,13 @@ commands.openin = function cmd_openin (engine) {
     engine.set_infile (snum, null);
 
     engine.debug ('openin ' + snum + ' = ' + fn);
-    var f = engine.try_open_infile (fn);
-    if (f == null)
+    var ls = WEBTEX.IOBackend.try_open_linesource (fn);
+    if (ls == null)
 	// File existence is tested by \openin..\ifeof, so this should
 	// be a warning only.
 	engine.warn ('failed to \\openin ' + fn);
 
-    engine.set_infile (snum, f);
+    engine.set_infile (snum, ls);
 };
 
 
@@ -1326,7 +1326,7 @@ commands.ifeof = function cmd_ifeof (engine) {
 	result = (engine.infile (snum) == null);
 
     engine.debug ('ifeof ' + snum + ' -> ' + result);
-    engine_handle_if (result);
+    engine.handle_if (result);
 };
 
 
