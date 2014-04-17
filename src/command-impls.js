@@ -229,6 +229,7 @@ commands.advance = function cmd_advance (engine) {
     val.set (engine, cur.advance (delta));
 };
 
+
 // Setting categories: \catcode, \mathcode, etc.
 
 commands.catcode = (function CatcodeCommand_closure () {
@@ -636,6 +637,17 @@ commands.afterassignment = function cmd_afterassignment (engine) {
     var tok = engine.next_tok ();
     engine.set_after_assign_token (tok);
     engine.debug ('afterassignment <- ' + tok);
+};
+
+
+// Grouping
+
+commands.begingroup = function cmd_begingroup (engine) {
+    engine.handle_begingroup ();
+};
+
+commands.endgroup = function cmd_endgroup (engine) {
+    engine.handle_endgroup ();
 };
 
 
