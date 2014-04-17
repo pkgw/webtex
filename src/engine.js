@@ -93,6 +93,7 @@ var Engine = (function Engine_closure () {
 	fill_cseq_commands (this);
 	engine_init_parameters (this);
 	engine_init_param_cseqs (this);
+	this.commands['<space>'] = new Command.catcode_commands[C_SPACE] (O_SPACE);
 
 	// T:TP sec 240; has to go after $init_parameters
 	this.set_intpar ('mag', 1000);
