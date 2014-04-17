@@ -230,6 +230,30 @@ commands.advance = function cmd_advance (engine) {
 };
 
 
+commands.divide = function cmd_divide (engine) {
+    var tok = engine.next_x_tok ();
+    var cmd = tok.tocmd (engine);
+    var val = cmd.asvalue (engine); // might eat tokens
+    engine.scan_keyword ('by');
+    var cur = val.get (engine);
+    var denom = engine.scan_int ();
+    engine.debug ('divide ' + cmd + ' = ' + cur + ' / ' + denom);
+    val.set (engine, cur.intdivide (denom));
+};
+
+
+commands.multiply = function cmd_multiply (engine) {
+    var tok = engine.next_x_tok ();
+    var cmd = tok.tocmd (engine);
+    var val = cmd.asvalue (engine); // might eat tokens
+    engine.scan_keyword ('by');
+    var cur = val.get (engine);
+    var factor = engine.scan_int ();
+    engine.debug ('multiply ' + cmd + ' = ' + cur + ' * ' + factor);
+    val.set (engine, cur.intproduct (factor));
+};
+
+
 // Setting categories: \catcode, \mathcode, etc.
 
 commands.catcode = (function CatcodeCommand_closure () {
@@ -556,7 +580,7 @@ function _cmd_def (engine, cname, expand_replacement) {
 	    if (tok.iscmd (engine, 'the')) {
 		var next = engine.next_tok ();
 		var nv = next.tocmd (engine).asvalue (engine);
-		if (nv instanceof ToksValue) {
+		if (nv.is_toks_value === true) {
 		    repl_toks += nv.get (engine);
 		    continue
 		} else {

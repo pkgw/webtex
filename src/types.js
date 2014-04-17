@@ -78,6 +78,11 @@ var TexInt = WEBTEX.TexInt = (function TexInt_closure () {
 	return new TexInt (this.value * k);
     };
 
+    TexInt.prototype.intdivide = function TexInt_intdivide (k) {
+	k = TexInt.xcheck (k);
+	return new TexInt (this.value / k >> 0);
+    };
+
     TexInt.prototype.rangecheck = function TexInt_rangecheck (engine, min, max) {
 	if (this.value >= min && this.value <= max)
 	    return this;
@@ -284,6 +289,11 @@ var Scaled = WEBTEX.Scaled = (function Scaled_closure () {
 	return this.times_parts (k, 0);
     };
 
+    Scaled.prototype.intdivide = function Scaled_intdivide (k) {
+	k = TexInt.xcheck (k);
+	return this.clone ().over_n (k);
+    };
+
     Scaled.prototype.asfloat = function Scaled_asfloat () {
 	return this.value * UNSCALE;
     };
@@ -353,6 +363,13 @@ var Dimen = (function Dimen_closure () {
 	return d;
     };
 
+    Dimen.prototype.intdivide = function Dimen_intdivide (k) {
+	k = TexInt.xcheck (k);
+	var d = this.clone ();
+	d.sp = this.sp.intdivide (k);
+	return d;
+    };
+
     return Dimen;
 }) ();
 
@@ -412,6 +429,15 @@ var Glue = (function Glue_closure () {
 	g.width = this.width.intproduct (k);
 	g.stretch = this.stretch.intproduct (k);
 	g.shrink = this.shrink.intproduct (k);
+	return g;
+    };
+
+    Glue.prototype.intdivide = function Glue_intdivide (k) {
+	k = TexInt.xcheck (k);
+	var g = this.clone ();
+	g.width = this.width.intdivide (k);
+	g.stretch = this.stretch.intdivide (k);
+	g.shrink = this.shrink.intdivide (k);
 	return g;
     };
 
@@ -591,6 +617,8 @@ function _make_toks_value (type) {
     type.prototype.stringify = function ToksValue_stringify (engine, value) {
 	return value.join ('|');
     };
+
+    type.prototype.is_toks_value = true;
 
     return type;
 }
