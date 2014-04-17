@@ -579,7 +579,7 @@ function _cmd_def (engine, cname, expand_replacement) {
 		var next = engine.next_tok ();
 		var nv = next.tocmd (engine).asvalue (engine);
 		if (nv.is_toks_value === true) {
-		    repl_toks += nv.get (engine);
+		    repl_toks = repl_toks.concat (nv.get (engine));
 		    continue
 		} else {
 		    engine.push (next);
