@@ -360,7 +360,7 @@ var Dimen = (function Dimen_closure () {
 
     Dimen.prototype.advance = function Dimen_advance (other) {
 	var d = new Dimen ();
-	d.sp = d.sp.advance (other);
+	d.sp = d.sp.advance (other.as_scaled ());
 	return d;
     };
 
