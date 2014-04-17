@@ -39,7 +39,7 @@ function fill_cseq_commands (engine) {
 	var cmd = null;
 
 	if (!WEBTEX.commands.hasOwnProperty (escname))
-	    cmd = new CommandUnimplPrimitive ();
+	    cmd = new CommandUnimplPrimitive (name);
 	else {
 	    var val = WEBTEX.commands[escname];
 

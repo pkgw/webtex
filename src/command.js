@@ -69,8 +69,9 @@ var Command = WEBTEX.Command = (function Command_closure () {
 // control sequences by default.
 
 var CommandUnimplPrimitive = (function CommandUnimplPrimitive_closure () {
-    function CommandUnimplPrimitive () {
+    function CommandUnimplPrimitive (name) {
 	Command.call (this);
+	this.name = name;
     }
 
     inherit (CommandUnimplPrimitive, Command);
@@ -78,9 +79,32 @@ var CommandUnimplPrimitive = (function CommandUnimplPrimitive_closure () {
 
     proto.invoke = function CommandUnimplPrimitive_invoke (engine) {
 	throw new TexRuntimeException ('unimplemented primitive \\' + this.name);
-    }
+    };
 
     return CommandUnimplPrimitive;
+})();
+
+
+var UndefinedCommand = (function UndefinedCommand_closure () {
+    function UndefinedCommand (name) {
+	Command.call (this);
+	this.name = name;
+    }
+
+    inherit (UndefinedCommand, Command);
+    var proto = UndefinedCommand.prototype;
+
+    proto.invoke = function UndefinedCommand_invoke (engine) {
+	throw new TexRuntimeException ('trying to invoke undefined command \\' + this.name);
+    };
+
+    proto.samecmd = function UndefinedCommand_samecmd (other) {
+	if (other == null)
+	    return false;
+	return (other instanceof UndefinedCommand);
+    };
+
+    return UndefinedCommand;
 })();
 
 

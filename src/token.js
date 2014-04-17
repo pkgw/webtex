@@ -71,7 +71,7 @@ var Token = WEBTEX.Token = (function Token_closure () {
     };
 
     Token.prototype.tocmd = function Token_tocmd (engine) {
-	var cmd = null;
+	var cmd = null, name = '<unexpected token command>';
 
 	if (this.kind == TK_CHAR) {
 	    if (this.catcode == C_ACTIVE)
@@ -82,15 +82,17 @@ var Token = WEBTEX.Token = (function Token_closure () {
 		    throw new TexInternalException ('cannot commandify ' +
 						    'token ' + this);
 		cmd = new cmdclass (this.ord);
+		name = '[char ' + String.fromCharCode (this.ord) + ']';
 	    }
 	} else if (this.kind == TK_CSEQ) {
 	    cmd = engine.cseq (this.name);
+	    name = this.name;
 	} else {
 	    throw new TexInternalException ('cannot commandify token ' + this);
 	}
 
 	if (cmd === null)
-	    return new CommandUnimplPrimitive (this);
+	    return new UndefinedCommand (name);
 	return cmd;
     };
 
