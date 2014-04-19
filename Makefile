@@ -20,7 +20,11 @@ browserjs = \
 nodejs = \
   src/node-io.js
 
-all: \
+standard: \
+  $(builddir)/browser-webtex.js \
+  $(builddir)/node-webtex.js \
+
+minified: \
   $(builddir)/browser-webtex.min.js \
   $(builddir)/node-webtex.min.js \
   $(builddir)/browser-autoload.min.js
