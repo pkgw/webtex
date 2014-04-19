@@ -82,3 +82,34 @@ WEBTEX.IOBackend.try_open_linesource = function NodeIO_try_open_linesource (texf
 
     return ls;
 };
+
+
+WEBTEX.Node.RandomAccessFile = (function RandomAccessFile_closure () {
+    var fs = require ('fs');
+
+    function RandomAccessFile (path) {
+	this.fd = fs.openSync (path, 'r');
+	this.buf = new Buffer (2048);
+    }
+
+    var proto = RandomAccessFile.prototype;
+
+    proto.read_range = function RandomAccessFile_read_range (offset, length, callback) {
+	if (this.buf.length < length)
+	    this.buf = new Buffer (length);
+
+	fs.read (this.fd, this.buf, 0, length, offset, function (err, nbytes, buf) {
+	    callback (buf.slice (0, nbytes), err);
+	});
+    };
+
+    proto.size = function RandomAccessFile_size () {
+	return fs.fstatSync (this.fd).size;
+    };
+
+    proto.close = function RandomAccessFile_close () {
+	fs.close (this.fd);
+    };
+
+    return RandomAccessFile;
+}) ();
