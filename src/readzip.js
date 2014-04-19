@@ -119,6 +119,11 @@ var ZipReader = WEBTEX.ZipReader = (function ZipReader_closure () {
 		return;
 	    }
 
+	    if (compression && compression != 8) {
+		this.error_state = 'bad Zip: I can only handle DEFLATE compression';
+		return;
+	    }
+
 	    var fn = buf.toString ('ascii', offset + 46, offset + 46 + fnlen);
 	    dirinfo[fn] = {'csize': csize,
 			   'ucsize': ucsize,
@@ -146,7 +151,29 @@ var ZipReader = WEBTEX.ZipReader = (function ZipReader_closure () {
 	var state = {'info': info, 'cb': callback};
 	state.nleft = info.csize;
 	state.curofs = info.dataofs;
-	state.buf = new Buffer (64); // XXXX TESTING
+	// The buffer must be at least 32k for zlib to work since it uses a
+	// lookback buffer of that size.
+	state.buf = new Buffer (32768);
+
+	if (info.compression) {
+	    // XXX HARDCODING node.js
+	    var zlib = require ('zlib');
+	    var inflate = zlib.createInflate ();
+	    inflate.on ('data', callback); // XXX may need custom wrapper depending on cb convention
+	    state.cb = function (buf) {
+		if (buf == null)
+		    inflate.end ();
+		else
+		    inflate.write (buf);
+	    };
+	    // zlib expects this header, but the underlying Zip inflated
+	    // stream doesn't contain it.
+	    var header = new Buffer (2);
+	    header.writeUInt8 (0x78, 0);
+	    header.writeUInt8 (0x9c, 1);
+	    inflate.write (header);
+	}
+
 	this.readfunc (state.curofs,
 		       Math.min (state.nleft, state.buf.length),
 		       function (buf, err) {
