@@ -1,3 +1,5 @@
 /build*
 /deps
+/texbundles
+/texcache
 /yuicompressor-*.jar
