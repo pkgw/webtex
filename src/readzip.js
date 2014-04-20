@@ -10,6 +10,10 @@
  * that, but the code style is very different from mine and it's very hard for
  * me to make sense of the structure. My needs are simple enough that I think
  * it'll be easier just to write a new implementation in a familiar style.
+ *
+ * NOTE: I'm completely cavalier about CRC checks, file format sanity, etc.,
+ * here. I don't think this will come back to bite me in the ass but we'll
+ * see ...
  */
 
 'use strict';
