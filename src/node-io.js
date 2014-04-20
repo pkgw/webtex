@@ -125,3 +125,33 @@ WEBTEX.Node.RandomAccessFile = (function RandomAccessFile_closure () {
 
     return RandomAccessFile;
 }) ();
+
+WEBTEX.IOBackend.makeInflater = function (datacb) {
+    var zlib = require ('zlib');
+    var inflate = zlib.createInflate ();
+
+    function ondata (buf) {
+	if (buf === null)
+	    return datacb (null);
+	return datacb (buffer_to_arraybuffer (buf));
+    }
+
+    function wt_write (arrbuf) {
+	// Need to convert ArrayBuffer to node.js Buffer.
+	return inflate.write (new Buffer (new Uint8Array (arrbuf)));
+    }
+
+    inflate.on ('data', ondata);
+    inflate.wt_write = wt_write;
+
+    // zlib expects this header, but the underlying Zip inflated stream
+    // doesn't contain it. Zlib also expects a 4-byte CRC trailer that isn't
+    // in the Zip file stream, but doesn't seem to care if we don't provide
+    // it.
+    var header = new Buffer (2);
+    header.writeUInt8 (0x78, 0);
+    header.writeUInt8 (0x9c, 1);
+    inflate.write (header);
+
+    return inflate;
+}

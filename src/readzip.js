@@ -161,22 +161,13 @@ var ZipReader = WEBTEX.ZipReader = (function ZipReader_closure () {
 	state.buflen = 32768;
 
 	if (info.compression) {
-	    // XXX HARDCODING node.js
-	    var zlib = require ('zlib');
-	    var inflate = zlib.createInflate ();
-	    inflate.on ('data', callback); // XXX may need custom wrapper depending on cb convention
+	    var inflate = WEBTEX.IOBackend.makeInflater (callback);
 	    state.cb = function (buf) {
 		if (buf == null)
 		    inflate.end ();
 		else
-		    inflate.write (buf);
+		    inflate.wt_write (buf);
 	    };
-	    // zlib expects this header, but the underlying Zip inflated
-	    // stream doesn't contain it.
-	    var header = new Buffer (2);
-	    header.writeUInt8 (0x78, 0);
-	    header.writeUInt8 (0x9c, 1);
-	    inflate.write (header);
 	}
 
 	this.readfunc (state.curofs,

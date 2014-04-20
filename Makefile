@@ -19,7 +19,8 @@ browserjs = \
   src/browser-api.js
 
 browserprejs = \
-  src/promise-0.1.1.js
+  src/promise-0.1.1.js \
+  src/inflate.js \
 
 nodejs = \
   src/node-io.js
