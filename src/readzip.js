@@ -127,9 +127,8 @@ var ZipReader = WEBTEX.ZipReader = (function ZipReader_closure () {
 		return;
 	    }
 
-	    var fnslice = new Uint8Array (buf, offset + 46, offset + 46 + fnlen);
+	    var fnslice = new Uint8Array (buf, offset + 46, fnlen);
 	    var fn = String.fromCharCode.apply (null, fnslice);
-	    console.log (fn);
 
 	    dirinfo[fn] = {'csize': csize,
 			   'ucsize': ucsize,
@@ -159,7 +158,7 @@ var ZipReader = WEBTEX.ZipReader = (function ZipReader_closure () {
 	state.curofs = info.dataofs;
 	// The buffer must be at least 32k for zlib to work since it uses a
 	// lookback buffer of that size.
-	state.buf = new Buffer (32768);
+	state.buflen = 32768;
 
 	if (info.compression) {
 	    // XXX HARDCODING node.js
@@ -181,7 +180,7 @@ var ZipReader = WEBTEX.ZipReader = (function ZipReader_closure () {
 	}
 
 	this.readfunc (state.curofs,
-		       Math.min (state.nleft, state.buf.length),
+		       Math.min (state.nleft, state.buflen),
 		       function (buf, err) {
 			   this._cb_do_stream (buf, err, state);
 		       }.bind (this));
@@ -198,14 +197,14 @@ var ZipReader = WEBTEX.ZipReader = (function ZipReader_closure () {
 	}
 
 	state.cb (buf);
-	state.nleft -= buf.length;
-	state.curofs += buf.length;
+	state.nleft -= buf.byteLength;
+	state.curofs += buf.byteLength;
 
 	if (state.nleft <= 0)
 	    state.cb (null) // XXX better covention
 	else {
 	    this.readfunc (state.curofs,
-			   Math.min (state.nleft, state.buf.length),
+			   Math.min (state.nleft, state.buflen),
 			   function (buf, err) {
 			       this._cb_do_stream (buf, err, state)
 			   }.bind (this));
