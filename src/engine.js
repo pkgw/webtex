@@ -231,11 +231,11 @@ var Engine = (function Engine_closure () {
     // Input nesting and other I/O
 
     proto.handle_input = function Engine_handle_input (texfn) {
-	var ls = WEBTEX.IOBackend.try_open_linesource (texfn);
-	if (ls == null)
+	var lb = WEBTEX.IOBackend.try_open_linebuffer (texfn);
+	if (lb == null)
 	    throw new TexRuntimeException ('can\'t find any matching files for "' +
 					   texfn + '"');
-	this.ordsrc = new OrdSource (ls, this.ordsrc);
+	this.ordsrc = new OrdSource (lb, this.ordsrc);
     };
 
     proto.handle_endinput = function Engine_handle_endinput () {

@@ -21,48 +21,27 @@ WEBTEX.Node.make_fs_linebuffer = (function make_fs_linebuffer (path) {
 });
 
 
-WEBTEX.Node.FSLineSource = (function FSLineSource_closure () {
+WEBTEX.IOBackend.try_open_linebuffer = function NodeIO_try_open_linebuffer (texfn) {
+    // XXX temporary hack for trying restart-based parsing. We need to move to
+    // fetching the data from a bundle on-demand. In the meantime, we're
+    // performing a racy check for file existence because createReadStream throws
+    // its exception asynchronously.
     var fs = require ('fs');
+    var paths = [texfn + '.tex', texfn];
 
-    function FSLineSource (path) {
-	this.fd = fs.openSync (path, 'r');
-	this.buf = new Buffer (2048);
-	this.cachedlines = [];
-	this.remainder = '';
-    }
+    while (paths.length) {
+	var path = paths.pop ();
+	path = 'deps/' + path; // XXX temporary!
 
-    var proto = FSLineSource.prototype;
-
-    proto.get = function FSLineSource_get () {
-	if (this.cachedlines.length)
-	    return this.cachedlines.shift ();
-	if (this.fd === null)
-	    return null;
-
-	while (1) {
-	    var n = fs.readSync (this.fd, this.buf, 0, this.buf.length, null);
-	    if (n == 0) {
-		fs.close (this.fd);
-		this.fd = null;
-		return null;
-	    }
-
-	    var chunk = this.remainder + this.buf.asciiSlice (0, n);
-	    var lines = chunk.split ("\n");
-	    if (lines.length > 1)
-		break;
-
-	    this.remainder = chunk;
+	try {
+	    fs.statSync (path);
+	    return WEBTEX.Node.make_fs_linebuffer (path);
+	} catch (e) {
+	    if (e.code != 'ENOENT')
+		throw e;
 	}
-
-	var ret = lines.shift ();
-	this.remainder = lines.pop ();
-	this.cachedlines = lines;
-	return ret;
     }
-
-    return FSLineSource;
-})();
+};
 
 
 function buffer_to_arraybuffer (buf) {
@@ -75,24 +54,6 @@ function buffer_to_arraybuffer (buf) {
 
     return ab;
 }
-
-WEBTEX.IOBackend.try_open_linesource = function NodeIO_try_open_linesource (texfn) {
-    var fs = require ('fs'), paths = [texfn + '.tex', texfn], ls = null;
-
-    while (paths.length) {
-	var path = paths.pop ();
-	try {
-	    path = 'deps/' + path; // XXX temporary!
-	    ls = new WEBTEX.Node.FSLineSource (path);
-	} catch (e) {
-	    if (e.code != 'ENOENT')
-		throw e;
-	}
-    }
-
-    return ls;
-};
-
 
 WEBTEX.Node.RandomAccessFile = (function RandomAccessFile_closure () {
     var fs = require ('fs');
@@ -124,6 +85,7 @@ WEBTEX.Node.RandomAccessFile = (function RandomAccessFile_closure () {
 
     return RandomAccessFile;
 }) ();
+
 
 WEBTEX.IOBackend.makeInflater = function (datacb) {
     var zlib = require ('zlib');

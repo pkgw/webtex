@@ -1326,13 +1326,13 @@ commands.openin = function cmd_openin (engine) {
     engine.set_infile (snum, null);
 
     engine.debug ('openin ' + snum + ' = ' + fn);
-    var ls = WEBTEX.IOBackend.try_open_linesource (fn);
-    if (ls == null)
+    var lb = WEBTEX.IOBackend.try_open_linebuffer (fn);
+    if (lb == null)
 	// File existence is tested by \openin..\ifeof, so this should
 	// be a warning only.
 	engine.warn ('failed to \\openin ' + fn);
 
-    engine.set_infile (snum, ls);
+    engine.set_infile (snum, lb);
 };
 
 
