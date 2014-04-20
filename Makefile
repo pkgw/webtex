@@ -18,6 +18,9 @@ sharedjs = \
 browserjs = \
   src/browser-api.js
 
+browserprejs = \
+  src/promise-0.1.1.js
+
 nodejs = \
   src/node-io.js
 
@@ -31,7 +34,7 @@ minified: \
   $(builddir)/browser-autoload.min.js
 
 $(builddir)/browser-webtex.js: \
-generate.py src/browser-wrapper.js $(sharedjs) $(browserjs) \
+generate.py src/browser-wrapper.js $(browserprejs) $(sharedjs) $(browserjs) \
 | $(builddir)
 	$(python) $^ $@
 
