@@ -21,6 +21,7 @@ browserjs = \
 browserprejs = \
   src/promise-0.1.1.js \
   src/inflate.js \
+  src/network.js
 
 nodejs = \
   src/node-io.js
