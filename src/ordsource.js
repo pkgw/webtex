@@ -1,9 +1,19 @@
 'use strict';
 
 var OrdSource = WEBTEX.OrdSource = (function OrdSource_closure () {
-    function OrdSource (linesource, parent) {
+    var map = Array.prototype.map;
+    var lc_hex_ords = (function () {
+	var o = [], i = 0;
+	for (i = 0; i < 10; i++)
+	    o.push (O_ZERO + i);
+	for (i = 0; i < 6; i++)
+	    o.push (O_LC_A + i);
+	return o;
+    }) ();
+
+    function OrdSource (linebuffer, parent) {
 	this.parent = parent;
-	this.linesource = linesource;
+	this.linebuffer = linebuffer;
 	this.pushed = [];
 	this.curords = null;
 	this.curindex = null;
@@ -12,21 +22,24 @@ var OrdSource = WEBTEX.OrdSource = (function OrdSource_closure () {
     var proto = OrdSource.prototype = {};
 
     proto._ensure_line = function OrdSource__ensure_line () {
-	// Returns True if more characters are available.
-	if (this.linesource === null)
-	    return false;
+	// Returns true if more characters are available.
+	if (this.linebuffer === null)
+	    return EOF;
 	if (this.curords !== null)
 	    return true;
 
-	var l = this.linesource.get ();
-	if (l === null) {
+	var l = this.linebuffer.get ();
+	if (l === NeedMoreData)
+	    return NeedMoreData;
+
+	if (l === EOF) {
 	    console.log ('<<! EOF');
-	    return false;
+	    this.linebuffer = null;
+	    return EOF;
 	}
 
 	l = l.replace (/ *$/, ''); // note: just spaces, not any whitespace
 
-	var map = Array.prototype.map;
 	this.curords = map.call (l, function (x) { return x.charCodeAt (0); });
 	this.curords.push (O_RETURN);
 	this.curindex = 0;
@@ -44,14 +57,11 @@ var OrdSource = WEBTEX.OrdSource = (function OrdSource_closure () {
 	// TODO, maybe: implement corner cases with pushed characters. Unsure
 	// if they're ever needed.
 
-	if (this.linesource === null)
-	    return [null, null, null];
+	if (this.linebuffer === null)
+	    return [EOF, EOF, EOF];
 
 	if (this.pushed.length)
 	    throw new TexRuntimeException ('peek3 corner case');
-
-	if (!this._ensure_line ())
-	    return [null, null, null];
 
 	if (this.curindex + 3 <= this.curords.length)
 	    // Easy case.
@@ -59,18 +69,16 @@ var OrdSource = WEBTEX.OrdSource = (function OrdSource_closure () {
 
 	// Assume we're not doing a ^^X escape across a newline. These
 	// values won't propagate out of next().
-	return [-1, -1, -1]
+	return [-1, -1, -1];
     };
 
     proto._next_lowlevel = function OrdSource__next_lowlevel () {
-	if (this.linesource === null)
-	    return null;
-
 	if (this.pushed.length)
 	    return this.pushed.pop ();
 
-	if (!this._ensure_line ())
-	    return null;
+	var rv = this._ensure_line ();
+	if (rv === NeedMoreData || rv === EOF)
+	    return rv;
 
 	var o = this.curords[this.curindex];
 	this.curindex++;
@@ -79,19 +87,10 @@ var OrdSource = WEBTEX.OrdSource = (function OrdSource_closure () {
 	return o;
     };
 
-    var lc_hex_ords = (function () {
-	var o = [], i = 0;
-	for (i = 0; i < 10; i++)
-	    o.push (O_ZERO + i);
-	for (i = 0; i < 6; i++)
-	    o.push (O_LC_A + i);
-	return o;
-    })();
-
     proto.next = function OrdSource_next (catcodes) {
 	var o = this._next_lowlevel ();
-	if (o === null)
-	    return null;
+	if (o === NeedMoreData || o === EOF)
+	    return o;
 
 	var cc = catcodes[o];
 	if (cc != C_SUPER)
@@ -123,17 +122,16 @@ var OrdSource = WEBTEX.OrdSource = (function OrdSource_closure () {
     };
 
     proto.iseol = function OrdSource_iseol () {
-	if (this.linesource === null)
+	if (this.linebuffer === null)
 	    throw new TexRuntimeException ('unexpected iseol context');
-
-	if (!this._ensure_line ())
-	    return false;
-
+	if (this.curindex == null)
+	    throw new TexInternalException ('iseol() should only be called in ' +
+					    'middle of a line');
 	return (this.curindex == this.curords.length - 1);
     };
 
     proto.discard_line = function OrdSource_discard_line () {
-	if (this.linesource === null)
+	if (this.linebuffer === null)
 	    throw new TexRuntimeException ('unexpected discard_line context');
 
 	this.curords = this.curindex = null;

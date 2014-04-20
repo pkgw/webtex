@@ -8,6 +8,7 @@ sharedjs = \
   src/types.js \
   src/util.js \
   src/token.js \
+  src/linebuffer.js \
   src/ordsource.js \
   src/command.js \
   src/command-impls.js \

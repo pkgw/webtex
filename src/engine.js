@@ -73,6 +73,7 @@ var Engine = (function Engine_closure () {
 	this.ordsrc = initial_ordsrc;
 	this.tokenizer_state = TS_BEGINNING;
 	this.pushed_tokens = [];
+	this.recent_tokens = [];
 
 	this.eqtb = new TopEquivTable ();
 	this.mode_stack = [M_VERT];
@@ -131,8 +132,8 @@ var Engine = (function Engine_closure () {
 
     proto.step = function Engine_step () {
 	var tok = this.next_x_tok ();
-	if (tok == null)
-	    return false; // no more tokens
+	if (tok === NeedMoreData || tok === EOF)
+	    return tok;
 
 	var cmd = tok.tocmd (this);
 	var result = cmd.invoke (this);
@@ -272,20 +273,23 @@ var Engine = (function Engine_closure () {
 	}
     };
 
-    proto.next_tok = function Engine_next_tok () {
+    proto._next_tok_simple = function Engine__next_tok_simple () {
 	if (this.pushed_tokens.length)
 	    return this.pushed_tokens.pop ();
 	if (this.ordsrc == null)
-	    return null; // \endinput called on toplevel stream.
+	    return EOF; // \endinput called on toplevel stream.
 
 	var catcodes = this.eqtb._catcodes;
 	var o = this.ordsrc.next (catcodes);
 
-	if (o == null) {
+	if (o === NeedMoreData)
+	    return o;
+
+	if (o == EOF) {
 	    this.ordsrc = this.ordsrc.parent;
 	    if (this.ordsrc === null)
-		return null;
-	    return this.next_tok ();
+		return EOF;
+	    return this._next_tok_simple ();
 	}
 
 	var cc = catcodes[o];
@@ -295,6 +299,11 @@ var Engine = (function Engine_closure () {
 		return Token.new_cseq ('');
 
 	    o = this.ordsrc.next (catcodes);
+	    if (o === EOF || o === NeedMoreData)
+		// We buffer things line-by-line so these conditions should
+		// never happen -- cseq's can't span between lines.
+		throw new TexRuntimeException ('unexpectly ran out of data (1)');
+
 	    cc = catcodes[o];
 	    var csname = String.fromCharCode (o);
 
@@ -308,8 +317,8 @@ var Engine = (function Engine_closure () {
 
 	    while (1) {
 		o = this.ordsrc.next (catcodes);
-		if (o === null)
-		    break;
+		if (o === EOF || o === NeedMoreData)
+		    throw new TexRuntimeException ('unexpectly ran out of data (1)');
 
 		cc = catcodes[o];
 		if (cc != C_LETTER) {
@@ -339,40 +348,50 @@ var Engine = (function Engine_closure () {
 	    if (prev_ts == TS_MIDDLE)
 		return Token.new_char (C_SPACE, O_SPACE);
 	    // TS_SKIPPING:
-	    return this.next_tok ();
+	    return this._next_tok_simple ();
 	}
 
 	if (cc == C_IGNORE)
-	    return this.next_tok ();
+	    return this._next_tok_simple ();
 
 	if (cc == C_SPACE) {
 	    if (this.tokenizer_state == TS_MIDDLE) {
 		this.tokenizer_state = TS_SKIPPING;
 		return Token.new_char (C_SPACE, O_SPACE);
 	    }
-	    return this.next_tok ();
+	    return this._next_tok_simple ();
 	}
 
 	if (cc == C_COMMENT) {
 	    this.ordsrc.discard_line ();
 	    this.tokenizer_state = TS_SKIPPING;
-	    return this.next_tok ();
+	    return this._next_tok_simple ();
 	}
 
 	if (cc == C_INVALID) {
 	    this.warn ('read invalid character ' + escchr (o));
-	    return this.next_tok ();
+	    return this._next_tok_simple ();
 	}
 
 	// TODO: endinput
 	throw new TexInternalException ('not reached');
     };
 
+    proto.next_tok = function Engine_next_tok () {
+	var tok = this._next_tok_simple ();
+
+	if (tok === NeedMoreData || tok === EOF)
+	    return tok;
+
+	this.recent_tokens.push (tok);
+	return tok;
+    };
+
     proto.next_x_tok = function Engine_next_x_tok () {
 	while (1) {
 	    var tok = this.next_tok ();
-	    if (tok === null)
-		return null;
+	    if (tok === NeedMoreData || tok === EOF)
+		return tok;
 
 	    var cmd = tok.tocmd (this);
 	    if (!cmd.expandable)
@@ -394,7 +413,9 @@ var Engine = (function Engine_closure () {
 
     proto.scan_one_optional_space = function Engine_scan_one_optional_space () {
 	var tok = this.next_tok ();
-	if (tok == null || tok.iscat (C_SPACE))
+	if (tok === NeedMoreData)
+	    throw new NeedMoreDataException ();
+	if (tok == EOF || tok.iscat (C_SPACE))
 	    return;
 	this.push (tok);
     };

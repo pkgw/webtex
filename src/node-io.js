@@ -1,26 +1,25 @@
 'use strict';
 
-WEBTEX.Node.readFileLines = (function readFileLines (path, options, onLineReceived) {
+WEBTEX.Node.make_fs_linebuffer = (function make_fs_linebuffer (path) {
     var fs = require ('fs');
-    var rs = fs.createReadStream (path, options);
-    var last = '';
+    var rs = fs.createReadStream (path, {encoding: 'ascii'});
+    var lb = new LineBuffer ();
 
     rs.on ('data', function (chunk) {
-	var lines, i;
-
-	lines = (last + chunk).split ("\n");
-	for (i = 0; i < lines.length - 1; i++) {
-	    onLineReceived (lines[i]);
-	}
-	last = lines[i];
+	lb.feed_data (chunk);
     });
 
     rs.on ('end', function () {
-	    onLineReceived (last);
+	lb.end ();
     });
 
-    rs.resume ();
+    rs.on ('error', function (err) {
+	throw err;
+    });
+
+    return lb;
 });
+
 
 WEBTEX.Node.FSLineSource = (function FSLineSource_closure () {
     var fs = require ('fs');

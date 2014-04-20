@@ -68,3 +68,21 @@ var TexInternalException = (function TexInternalExceptionClosure () {
     inherit (TexInternalException, Error);
     return TexInternalException;
 }) ();
+
+
+/* Dealing with processing restarts */
+
+var NeedMoreData = WEBTEX.NeedMoreData = {toString: function () { return 'NeedMoreData'; }};
+var EOF = WEBTEX.EOF = {toString: function () { return 'EOF'; }};
+
+var NeedMoreDataException = (function NeedMoreDataExceptionClosure () {
+    function NeedMoreDataException () {
+	var tmp = Error.apply (this, arguments);
+	tmp.name = this.name = 'NeedMoreDataException';
+	this.message = tmp.message;
+	this.stack = tmp.stack;
+    }
+
+    inherit (NeedMoreDataException, Error);
+    return NeedMoreDataException;
+}) ();
