@@ -66,6 +66,17 @@ WEBTEX.Node.FSLineSource = (function FSLineSource_closure () {
 })();
 
 
+function buffer_to_arraybuffer (buf) {
+    var ab = new ArrayBuffer (buffer.length);
+    var view = new Uint8Array (ab);
+
+    // Apparently there's no better way to do this until Node 0.12.
+    for (var i = 0; i < buffer.length; i++)
+        view[i] = buffer[i];
+
+    return ab;
+}
+
 WEBTEX.IOBackend.try_open_linesource = function NodeIO_try_open_linesource (texfn) {
     var fs = require ('fs'), paths = [texfn + '.tex', texfn], ls = null;
 
@@ -99,7 +110,8 @@ WEBTEX.Node.RandomAccessFile = (function RandomAccessFile_closure () {
 	    this.buf = new Buffer (length);
 
 	fs.read (this.fd, this.buf, 0, length, offset, function (err, nbytes, buf) {
-	    callback (buf.slice (0, nbytes), err);
+	    ab = buffer_to_arraybuffer (buf.slice (0, nbytes));
+	    callback (ab, err);
 	});
     };
 

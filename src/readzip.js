@@ -18,10 +18,6 @@
 
 'use strict';
 
-// XXX XXX we are assuming node.js buffer API for the low-level data
-// packing/unpacking. Blobs (e.g.) look to be similar, but we need to find a
-// way to have one API for everything!
-
 var ZipReader = WEBTEX.ZipReader = (function ZipReader_closure () {
     var ZIP_EOCDR_MAGIC = 0x06054b50;
     var ZIP_DIREC_MAGIC = 0x02014b50;
@@ -49,13 +45,15 @@ var ZipReader = WEBTEX.ZipReader = (function ZipReader_closure () {
 	    return;
 	}
 
-	if (buf.readUInt32LE (0) != ZIP_EOCDR_MAGIC) {
+	var dv = new DataView (buf);
+
+	if (dv.getUint32 (0, true) != ZIP_EOCDR_MAGIC) {
 	    this.error_state = 'EOCDR wrong magic';
 	    return;
 	}
 
-	this._nfiles = buf.readUInt16LE (8);
-	this._cdofs = buf.readUInt32LE (16);
+	this._nfiles = dv.getUint16 (8, true);
+	this._cdofs = dv.getUint32 (16, true);
 
 	if (this._cdofs > this.zipsize - 22) {
 	    this.error_state = 'EOCDR directory offset invalid: ofs ' +
@@ -77,34 +75,35 @@ var ZipReader = WEBTEX.ZipReader = (function ZipReader_closure () {
 	    return;
 	}
 
+	var dv = new DataView (buf);
 	var dirinfo = {};
 	var offset = 0;
 
 	for (var i = 0; i < this._nfiles; i++) {
-	    var magic = buf.readUInt32LE (offset);
+	    var magic = dv.getUint32 (offset, true);
 	    if (magic != ZIP_DIREC_MAGIC) {
 		this.error_state = 'bad Zip: wrong magic number in entry';
 		return;
 	    }
 
-	    var flags = buf.readUInt16LE (offset + 8);
+	    var flags = dv.getUint16 (offset + 8, true);
 	    if (flags & 0x1) {
 		this.error_state = 'bad Zip: encrypted entries';
 		return;
 	    }
 
-	    if (offset + 46 > buf.length) {
+	    if (offset + 46 > buf.byteLength) {
 		this.error_state = 'bad Zip: overlarge central directory';
 		return;
 	    }
 
-	    var compression = buf.readUInt16LE (offset + 10),
-	        csize = buf.readUInt32LE (offset + 20),
-	        ucsize = buf.readUInt32LE (offset + 24),
-	        fnlen = buf.readUInt16LE (offset + 28),
-	        extralen = buf.readUInt16LE (offset + 30),
-	        cmntlen = buf.readUInt16LE (offset + 32),
-	        recofs = buf.readUInt32LE (offset + 42);
+	    var compression = dv.getUint16 (offset + 10, true),
+	        csize = dv.getUint32 (offset + 20, true),
+	        ucsize = dv.getUint32 (offset + 24, true),
+	        fnlen = dv.getUint16 (offset + 28, true),
+	        extralen = dv.getUint16 (offset + 30, true),
+	        cmntlen = dv.getUint16 (offset + 32, true),
+	        recofs = dv.getUint32 (offset + 42, true);
 
 	    var dataofs = recofs + 30 + fnlen + extralen;
 
@@ -118,7 +117,7 @@ var ZipReader = WEBTEX.ZipReader = (function ZipReader_closure () {
 		return;
 	    }
 
-	    if (offset + 46 + fnlen + extralen + cmntlen > buf.length) {
+	    if (offset + 46 + fnlen + extralen + cmntlen > buf.byteLength) {
 		this.error_state = 'bad Zip: overlarge central directory (2)';
 		return;
 	    }
@@ -128,7 +127,10 @@ var ZipReader = WEBTEX.ZipReader = (function ZipReader_closure () {
 		return;
 	    }
 
-	    var fn = buf.toString ('ascii', offset + 46, offset + 46 + fnlen);
+	    var fnslice = new Uint8Array (buf, offset + 46, offset + 46 + fnlen);
+	    var fn = String.fromCharCode.apply (null, fnslice);
+	    console.log (fn);
+
 	    dirinfo[fn] = {'csize': csize,
 			   'ucsize': ucsize,
 			   'compression': compression,
