@@ -265,7 +265,7 @@ var Engine = (function Engine_closure () {
 
     proto.push_string = function Engine_push_string (text) {
 	for (var i = text.length - 1; i >= 0; i--) {
-	    if (text[i])
+	    if (text[i] == ' ')
 		this.push (Token.new_char (C_SPACE, O_SPACE));
 	    else
 		this.push (Token.new_char (C_OTHER, text.charCodeAt (i)));
