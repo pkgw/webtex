@@ -67,8 +67,9 @@ var Engine = (function Engine_closure () {
     var CS_FI = 0, CS_ELSE_FI = 1, CS_OR_ELSE_FI = 2;
     var BO_SETBOX = 0;
 
-    function Engine (jobname, initial_ordsrc) {
+    function Engine (jobname, initial_ordsrc, bundle) {
 	this.jobname = jobname;
+	this.bundle = bundle;
 
 	this.ordsrc = initial_ordsrc;
 	this.tokenizer_state = TS_BEGINNING;
@@ -245,7 +246,7 @@ var Engine = (function Engine_closure () {
     // Input nesting and other I/O
 
     proto.handle_input = function Engine_handle_input (texfn) {
-	var lb = WEBTEX.IOBackend.try_open_linebuffer (texfn);
+	var lb = this.bundle.try_open_linebuffer (texfn);
 	if (lb == null)
 	    throw new TexRuntimeException ('can\'t find any matching files for "' +
 					   texfn + '"');

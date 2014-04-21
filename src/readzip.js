@@ -33,13 +33,13 @@ var ZipReader = WEBTEX.ZipReader = (function ZipReader_closure () {
 	this.error_state = null;
 	this.dirinfo = null;
 
-	// TODO: read header, check Zip-ness, check for ZIP64.
+	// TODO: read header, check Zip-ness
 	readfunc (zipsize - 22, 22, this._cb_read_EOCDR.bind (this));
     }
 
     var proto = ZipReader.prototype;
 
-    proto._cb_read_EOCDR = function ZipReader__cb_read_EOCDR (buf, err) {
+    proto._cb_read_EOCDR = function ZipReader__cb_read_EOCDR (err, buf) {
 	if (err != null) {
 	    this.error_state = 'EOCDR read error: ' + err;
 	    return;
@@ -66,7 +66,7 @@ var ZipReader = WEBTEX.ZipReader = (function ZipReader_closure () {
 		       this._cb_read_directory.bind (this));
     };
 
-    proto._cb_read_directory = function ZipReader__cb_read_directory (buf, err) {
+    proto._cb_read_directory = function ZipReader__cb_read_directory (err, buf) {
 	if (this.error_state != null)
 	    return;
 
@@ -140,16 +140,21 @@ var ZipReader = WEBTEX.ZipReader = (function ZipReader_closure () {
 	this.dirinfo = dirinfo;
     };
 
+    proto.has_entry = function ZipReader_has_entry (entname) {
+	if (this.error_state != null)
+	    throw new TexRuntimeException ('previous Zip error: ' + this.error_state);
+	if (this.dirinfo == null)
+	    return NeedMoreData;
+
+	return this.dirinfo.hasOwnProperty (entname);
+    };
+
     proto.stream_entry = function ZipReader_stream_entry (entname, callback) {
 	if (this.error_state != null)
 	    throw new TexRuntimeException ('previous Zip error: ' + this.error_state);
 	if (this.dirinfo == null)
-	    // XXX ugggh not sure how we deal with these issues without descending
-	    // into nested callback hell.
-	    throw new TexRuntimeException ('eek haven\'t yet read in Zip info');
-
+	    throw NeedMoreData;
 	if (!this.dirinfo.hasOwnProperty (entname))
-	    // XXX tell this to the callback?
 	    throw new TexRuntimeException ('no such Zip entry ' + entname);
 
 	var info = this.dirinfo[entname];
@@ -162,7 +167,12 @@ var ZipReader = WEBTEX.ZipReader = (function ZipReader_closure () {
 
 	if (info.compression) {
 	    var inflate = WEBTEX.IOBackend.makeInflater (callback);
-	    state.cb = function (buf) {
+	    state.cb = function (err, buf) {
+		if (err != null) {
+		    callback (err, null);
+		    return;
+		}
+
 		if (buf == null)
 		    inflate.end ();
 		else
@@ -172,32 +182,34 @@ var ZipReader = WEBTEX.ZipReader = (function ZipReader_closure () {
 
 	this.readfunc (state.curofs,
 		       Math.min (state.nleft, state.buflen),
-		       function (buf, err) {
-			   this._cb_do_stream (buf, err, state);
+		       function (err, buf) {
+			   this._cb_do_stream (err, buf, state);
 		       }.bind (this));
     };
 
-    proto._cb_do_stream = function ZipReader__cb_do_stream (buf, err, state) {
-	if (this.error_state != null)
-	    // XXX tell the callback there was an error!
-	    return;
-
-	if (err != null) {
-	    this.error_state = 'Zip entry read error: ' + err;
+    proto._cb_do_stream = function ZipReader__cb_do_stream (err, buf, state) {
+	if (this.error_state != null) {
+	    state.cb (this.error_state, null);
 	    return;
 	}
 
-	state.cb (buf);
+	if (err != null) {
+	    this.error_state = 'Zip entry read error: ' + err;
+	    state.cb (err, null);
+	    return;
+	}
+
+	state.cb (err, buf);
 	state.nleft -= buf.byteLength;
 	state.curofs += buf.byteLength;
 
 	if (state.nleft <= 0)
-	    state.cb (null) // XXX better covention
+	    state.cb (null, null) // XXX better convention?
 	else {
 	    this.readfunc (state.curofs,
 			   Math.min (state.nleft, state.buflen),
-			   function (buf, err) {
-			       this._cb_do_stream (buf, err, state)
+			   function (err, buf) {
+			       this._cb_do_stream (err, buf, state)
 			   }.bind (this));
 	}
     };

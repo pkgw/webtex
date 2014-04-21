@@ -14,7 +14,9 @@ sharedjs = \
   src/command-impls.js \
   $(builddir)/engine-helpers.js \
   src/engine.js \
-  src/readzip.js
+  src/readzip.js \
+  src/bundle.js
+
 
 browserjs = \
   src/browser-api.js

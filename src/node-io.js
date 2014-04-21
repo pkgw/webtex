@@ -71,7 +71,7 @@ WEBTEX.Node.RandomAccessFile = (function RandomAccessFile_closure () {
 
 	fs.read (this.fd, this.buf, 0, length, offset, function (err, nbytes, buf) {
 	    var ab = buffer_to_arraybuffer (buf.slice (0, nbytes));
-	    callback (ab, err);
+	    callback (err, ab);
 	});
     };
 
@@ -91,18 +91,14 @@ WEBTEX.IOBackend.makeInflater = function (datacb) {
     var zlib = require ('zlib');
     var inflate = zlib.createInflate ();
 
-    function ondata (buf) {
-	if (buf === null)
-	    return datacb (null);
-	return datacb (buffer_to_arraybuffer (buf));
-    }
-
     function wt_write (arrbuf) {
 	// Need to convert ArrayBuffer to node.js Buffer.
 	return inflate.write (new Buffer (new Uint8Array (arrbuf)));
     }
 
-    inflate.on ('data', ondata);
+    inflate.on ('data', function (buf) { datacb (null, buffer_to_arraybuffer (buf)); });
+    inflate.on ('end', function () { datacb (null, null); });
+    inflate.on ('error', function (err) { datacb (err, null); });
     inflate.wt_write = wt_write;
 
     // zlib expects this header, but the underlying Zip inflated stream

@@ -1,1 +1,3 @@
+hyphen-base
+latex
 plain
