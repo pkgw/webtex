@@ -159,7 +159,7 @@ var MacroCommand = (function MacroCommand_closure () {
 	    if (!ttok.isparam ()) {
 		// span of nonparameter tokens in template -- eat and make
 		// sure that the actual token stream matches.
-		var atok = engine.next_x_tok ();
+		var atok = engine.next_x_tok_throw ();
 		if (!atok.equals (ttok))
 		    throw new TexRuntimeException ('macro invocation doesn\'t match ' +
 						   'template: expected ' + ttok + ', ' +
@@ -170,9 +170,7 @@ var MacroCommand = (function MacroCommand_closure () {
 
 	    if (tidx == ntmpl - 1 || this.tmpl[tidx+1].isparam ()) {
 		// Undelimited parameter. Either a single token, or a group.
-		var tok = engine.next_tok ();
-		if (tok == null)
-		    throw new TexRuntimeException ('EOF in macro expansion');
+		var tok = engine.next_tok_throw ();
 
 		if (tok.iscat (C_BGROUP))
 		    param_vals[ttok.pnum] = engine.scan_tok_group (false);
@@ -201,9 +199,7 @@ var MacroCommand = (function MacroCommand_closure () {
 	    var n_to_match = match_end - match_start, cur_match_idx = 0, depth = 0;
 
 	    while (cur_match_idx < n_to_match) {
-		var tok = engine.next_tok ();
-		if (tok == null)
-		    throw new TexRuntimeException ('EOF processing macro parameters');
+		var tok = engine.next_tok_throw ();
 
 		if (depth > 0) {
 		    if (tok.iscat (C_BGROUP))

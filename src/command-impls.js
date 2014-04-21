@@ -15,16 +15,11 @@ commands.relax = function cmd_relax (engine) {
 
 
 commands.expandafter = function cmd_expandafter (engine) {
-    var tok1 = engine.next_tok ();
-    if (tok1 == null)
-	throw new TexSyntaxException ('EOF inside \\expandafter (1)');
-
     // Note that we can't use next_x_tok () here since we can end up
     // double-expanding what comes next in \expandafter A \expandafter B ...
 
-    var tok2 = engine.next_tok ();
-    if (tok2 == null)
-	throw new TexSyntaxException ('EOF inside \\expandafter (2)');
+    var tok1 = engine.next_tok_throw ();
+    var tok2 = engine.next_tok_throw ();
 
     engine.debug ('*expandafter ' + tok1 + '|' + tok2 + ' ...');
 
@@ -84,7 +79,7 @@ function insert_str (engine, expn) {
 
 
 commands.string = function cmd_string (engine) {
-    var tok = engine.next_tok ();
+    var tok = engine.next_tok_throw ();
     engine.debug ('* \\string ' + tok);
 
     if (tok.ischar ()) {
@@ -485,15 +480,13 @@ commands._let = function cmd_let (engine) {
     // expands things.
 
     while (true) {
-	var tok = engine.next_tok ();
-	if (tok == null)
-	    throw new TexSyntaxException ('EOF in \\let');
+	var tok = engine.next_tok_throw ();
 	if (tok.iscat (C_SPACE))
 	    continue
 	if (tok.isotherchar (O_EQUALS)) {
-	    var equiv = engine.next_tok ();
+	    var equiv = engine.next_tok_throw ();
 	    if (equiv.iscat (C_SPACE))
-		equiv = engine.next_tok ();
+		equiv = engine.next_tok_throw ();
 	    break;
 	}
 	var equiv = tok;
@@ -507,8 +500,8 @@ commands._let = function cmd_let (engine) {
 
 commands.futurelet = function cmd_futurelet (engine) {
     var cstok = engine.scan_r_token ();
-    var thenexpand = engine.next_tok ();
-    var equiv = engine.next_tok ();
+    var thenexpand = engine.next_tok_throw ();
+    var equiv = engine.next_tok_throw ();
     engine.debug ('futurelet ' + cstok + ' = ' + equiv + '; ' + thenexpand);
     cstok.assign_cmd (engine, equiv.tocmd (engine));
     engine.push (equiv);
@@ -523,10 +516,7 @@ function _cmd_def (engine, cname, expand_replacement) {
         end_with_lbrace = false, next_pnum = 1;
 
     while (true) {
-	var tok = engine.next_tok ();
-	if (tok == null)
-	    throw new TexSyntaxException ('EOF in middle of \\' + cname +
-					  ' command');
+	var tok = engine.next_tok_throw ();
 
 	if (last_was_param) {
 	    if (tok.iscat (C_BGROUP)) {
@@ -568,15 +558,13 @@ function _cmd_def (engine, cname, expand_replacement) {
     last_was_param = false;
 
     while (true) {
-	var tok = engine.next_tok ();
-	if (tok == null)
-	    throw new TexSyntaxException ('EOF in middle of \\' + cname + ' command');
+	var tok = engine.next_tok_throw ();
 
 	if (expand_replacement) {
 	    // We can't just use next_x_tok because \the{toklist} is
 	    // not supposed to be sub-expanded (TeXBook p. 216). Yargh.
 	    if (tok.iscmd (engine, 'the')) {
-		var next = engine.next_tok ();
+		var next = engine.next_tok_throw ();
 		var nv = next.tocmd (engine).asvalue (engine);
 		if (nv.is_toks_value === true) {
 		    repl_toks = repl_toks.concat (nv.get (engine));
@@ -585,7 +573,7 @@ function _cmd_def (engine, cname, expand_replacement) {
 		    engine.push (next);
 		}
 	    } else if (tok.iscmd (engine, 'noexpand')) {
-		repl_toks.push (engine.next_tok ());
+		repl_toks.push (engine.next_tok_throw ());
 		continue;
 	    } else if (tok.isexpandable (engine)) {
 		tok.tocmd (engine).invoke (engine);
@@ -656,7 +644,7 @@ commands.xdef = function cmd_xdef (engine) {
 };
 
 commands.afterassignment = function cmd_afterassignment (engine) {
-    var tok = engine.next_tok ();
+    var tok = engine.next_tok_throw ();
     engine.set_after_assign_token (tok);
     engine.debug ('afterassignment <- ' + tok);
 };
@@ -699,7 +687,7 @@ commands._if = function cmd_if (engine) {
 
 
 commands.ifx = function cmd_ifx (engine) {
-    var t1 = engine.next_tok (), t2 = engine.next_tok (), result;
+    var t1 = engine.next_tok_throw (), t2 = engine.next_tok_throw (), result;
 
     if (t1.kind != t2.kind)
 	result = false;
@@ -1016,7 +1004,7 @@ commands.fontdimen = (function FontDimenCommand_closure () {
 
     proto.invoke = function FontDimenCommand_invoke (engine) {
 	var num = engine.scan_int ();
-	var tok = engine.next_tok ();
+	var tok = engine.next_tok_throw ();
 	var font = tok.tocmd (engine).asvalue (engine);
 
 	if (!(font instanceof ConstantFontValue))
@@ -1031,7 +1019,7 @@ commands.fontdimen = (function FontDimenCommand_closure () {
 
     proto.asvalue = function FontDimenCommand_asvalue (engine) {
 	var num = engine.scan_int ();
-	var tok = engine.next_tok ();
+	var tok = engine.next_tok_throw ();
 	var font = tok.tocmd (engine).asvalue (engine);
 
 	if (!(font instanceof ConstantFontValue))
@@ -1054,7 +1042,7 @@ commands.fontdimen = (function FontDimenCommand_closure () {
 
 
 commands.skewchar = function cmd_skewchar (engine) {
-    var tok = engine.next_tok ();
+    var tok = engine.next_tok_throw ();
     var val = tok.tocmd (engine).asvalue (engine);
 
     if (!(val instanceof ConstantFontValue))
@@ -1069,7 +1057,7 @@ commands.skewchar = function cmd_skewchar (engine) {
 
 
 commands.hyphenchar = function cmd_hyphenchar (engine) {
-    var tok = engine.next_tok ();
+    var tok = engine.next_tok_throw ();
     var val = tok.tocmd (engine).asvalue (engine);
 
     if (!(val instanceof ConstantFontValue))
@@ -1086,7 +1074,7 @@ commands.hyphenchar = function cmd_hyphenchar (engine) {
 function _def_family (engine, fam) {
     var slot = engine.scan_int_4bit ();
     engine.scan_optional_equals ();
-    var tok = engine.next_tok ();
+    var tok = engine.next_tok_throw ();
     var val = tok.tocmd (engine).asvalue (engine);
 
     if (!(val instanceof ConstantFontValue))
@@ -1114,7 +1102,7 @@ commands.scriptscriptfont = function cmd_scriptscriptfont (engine) {
 // Hyphenation
 
 commands.patterns = function cmd_patterns (engine) {
-    var tok = engine.next_tok ();
+    var tok = engine.next_tok_throw ();
     if (tok == null)
 	throw new TexSyntaxException ('EOF in middle of \\patterns');
     if (!tok.iscat (C_BGROUP))
@@ -1126,7 +1114,7 @@ commands.patterns = function cmd_patterns (engine) {
 
 
 commands.hyphenation = function cmd_hyphenation (engine) {
-    var tok = engine.next_tok ();
+    var tok = engine.next_tok_throw ();
     if (tok == null)
 	throw new TexSyntaxException ('EOF in middle of \\hyphenation');
     if (!tok.iscat (C_BGROUP))
@@ -1145,7 +1133,7 @@ function _change_case (engine, isupper) {
     else
 	var cmdname = 'lowercase', casecode = engine.lccode;
 
-    var tok = engine.next_tok ();
+    var tok = engine.next_tok_throw ();
     if (tok == null)
 	throw new TexSyntaxException ('EOF in middle of \\' + cmdname);
     if (!tok.iscat (C_BGROUP))
@@ -1199,10 +1187,7 @@ commands.the = function cmd_the (engine) {
      * \the<tokens> -- non text: inserts the tokens
      */
 
-    var tok = engine.next_tok ();
-    if (tok == null)
-	throw new TexSyntaxException ('EOF in middle of \\the command');
-
+    var tok = engine.next_tok_throw ();
     var val = tok.tocmd (engine).asvalue (engine);
     if (val == null)
 	throw new TexRuntimeException ('unable to get internal value (for ' +
@@ -1223,7 +1208,7 @@ commands.the = function cmd_the (engine) {
 
 
 commands.meaning = function cmd_meaning (engine) {
-    var tok = engine.next_tok ();
+    var tok = engine.next_tok_throw ();
     var expn = tok.tocmd (engine).texmeaning (engine);
     engine.debug (['meaning', tok, '->', expn].join (' '));
     insert_str (engine, expn);
@@ -1239,9 +1224,7 @@ commands.jobname = function cmd_jobname (engine) {
 // User interaction, I/O
 
 commands.message = function cmd_message (engine) {
-    var tok = engine.next_tok ();
-    if (tok == null)
-	throw new TexSyntaxException ('EOF in middle of \\message');
+    var tok = engine.next_tok_throw ();
 
     if (!tok.iscat (C_BGROUP))
 	throw new TexSyntaxException ('expected { immediately after \\message');
@@ -1253,9 +1236,7 @@ commands.message = function cmd_message (engine) {
 
 
 commands.errmessage = function cmd_errmessage (engine) {
-    var tok = engine.next_tok ();
-    if (tok == null)
-	throw new TexSyntaxException ('EOF in middle of \\errmessage');
+    var tok = engine.next_tok_throw ();
 
     if (!tok.iscat (C_BGROUP))
 	throw new TexSyntaxException ('expected { immediately after \\errmessage');
@@ -1276,9 +1257,7 @@ commands.immediate = function cmd_immediate (engine) {
 
 
 commands.write = function cmd_write (engine) {
-    var streamnum = engine.scan_streamnum (), tok = engine.next_tok ();
-    if (tok == null)
-	throw new TexSyntaxException ('EOF in middle of \\write command');
+    var streamnum = engine.scan_streamnum (), tok = engine.next_tok_throw ();
     if (!tok.iscat (C_BGROUP))
 	throw new TexSyntaxException ('expected { immediately after \\write');
 

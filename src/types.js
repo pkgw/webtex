@@ -612,8 +612,8 @@ function _make_toks_value (type) {
 	engine.scan_one_optional_space ();
 
 	var tok = engine.next_tok ();
-	if (tok === null)
-	    throw new TexSyntaxException ('EOF in middle of toklist assignment');
+	if (tok === NeedMoreData || tok === EOF)
+	    throw tok;
 
 	// TODO: \tokpar=<toklist register or toklist param>
 	if (!tok.iscat (C_BGROUP))

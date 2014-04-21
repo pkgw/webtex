@@ -73,6 +73,7 @@ var Engine = (function Engine_closure () {
 	this.ordsrc = initial_ordsrc;
 	this.tokenizer_state = TS_BEGINNING;
 	this.pushed_tokens = [];
+	this.current_tokens = [];
 	this.recent_tokens = [];
 
 	this.eqtb = new TopEquivTable ();
@@ -135,9 +136,22 @@ var Engine = (function Engine_closure () {
 	if (tok === NeedMoreData || tok === EOF)
 	    return tok;
 
-	var cmd = tok.tocmd (this);
-	var result = cmd.invoke (this);
-
+	try {
+	    var cmd = tok.tocmd (this);
+	    var result = cmd.invoke (this);
+	} catch (e) {
+	    if (e === NeedMoreData) {
+		this.debug ('NeedMoreData: restarting with ' +
+			    this.current_tokens.join (' '));
+		this.recent_tokens = this.current_tokens;
+		return NeedMoreData;
+	    }
+	    if (e === EOF)
+		throw new TexRuntimeException ('unexpected EOF while parsing');
+	    throw e;
+	} finally {
+	    this.current_tokens = [];
+	}
 	if (cmd.assign_flag_mode == AFM_INVALID && this.assign_flags)
 	    this.warn ('assignment flags applied to inapplicable command ' + cmd);
 	else if (cmd.assign_flag_mode != AFM_CONTINUE)
@@ -274,6 +288,8 @@ var Engine = (function Engine_closure () {
     };
 
     proto._next_tok_simple = function Engine__next_tok_simple () {
+	if (this.recent_tokens.length)
+	    return this.recent_tokens.shift ();
 	if (this.pushed_tokens.length)
 	    return this.pushed_tokens.pop ();
 	if (this.ordsrc == null)
@@ -379,11 +395,11 @@ var Engine = (function Engine_closure () {
 
     proto.next_tok = function Engine_next_tok () {
 	var tok = this._next_tok_simple ();
-
+	//console.log ('T: ' + tok);
 	if (tok === NeedMoreData || tok === EOF)
 	    return tok;
 
-	this.recent_tokens.push (tok);
+	this.current_tokens.push (tok);
 	return tok;
     };
 
@@ -408,13 +424,29 @@ var Engine = (function Engine_closure () {
 	}
     };
 
+    proto.next_tok_throw = function Engine_next_tok_throw () {
+	var tok = this.next_tok ();
+	if (tok === NeedMoreData || tok === EOF)
+	    throw tok;
+	return tok;
+    };
+
+    proto.next_x_tok_throw = function Engine_next_x_tok_throw () {
+	var tok = this.next_x_tok ();
+	if (tok === NeedMoreData || tok === EOF)
+	    throw tok;
+	return tok;
+    };
+
     // "Scanning" -- this is slightly higher-level than tokenization, and
-    // can usually end up kicking off recursive parsing and evaluation.
+    // can usually end up kicking off recursive parsing and evaluation. If
+    // more data are needed, this functions throw exceptions rather than
+    // returning NeedMoreData.
 
     proto.scan_one_optional_space = function Engine_scan_one_optional_space () {
 	var tok = this.next_tok ();
 	if (tok === NeedMoreData)
-	    throw new NeedMoreDataException ();
+	    throw tok;
 	if (tok == EOF || tok.iscat (C_SPACE))
 	    return;
 	this.push (tok);
@@ -424,6 +456,8 @@ var Engine = (function Engine_closure () {
 	// T:TP sec. 406.
 	while (1) {
 	    var tok = this.next_x_tok ();
+	    if (tok === NeedMoreData)
+		throw tok;
 	    if (!tok.iscmd (this, '<space>'))
 		return tok;
 	}
@@ -431,9 +465,7 @@ var Engine = (function Engine_closure () {
 
     proto.scan_left_brace = function Engine_scan_left_brace () {
 	while (1) {
-	    var tok = this.next_x_tok ();
-	    if (tok == null)
-		throw new TexSyntaxException ('EOF while expecting left brace');
+	    var tok = this.next_x_tok_throw ();
 
 	    if (tok.iscat (C_SPACE))
 		continue;
@@ -448,10 +480,8 @@ var Engine = (function Engine_closure () {
 
     proto.scan_optional_equals = function Engine_scan_optional_equals () {
 	while (1) {
-	    var tok = this.next_x_tok ();
+	    var tok = this.next_x_tok_throw ();
 
-	    if (tok == null)
-		return false; // didn't find an equals
 	    if (tok.iscat (C_SPACE))
 		continue;
 	    if (tok.isotherchar (O_EQUALS))
@@ -469,7 +499,9 @@ var Engine = (function Engine_closure () {
 
 	while (i < n) {
 	    var tok = this.next_x_tok ();
-	    if (tok == null)
+	    if (tok === NeedMoreData)
+		throw tok;
+	    if (tok === EOF)
 		break;
 
 	    scanned.push (tok);
@@ -500,9 +532,7 @@ var Engine = (function Engine_closure () {
 	var negfactor = 1;
 
 	while (1) {
-	    var tok = this.next_x_tok ();
-	    if (tok == null)
-		throw new TexSyntaxException ('EOF scanning a signed quantity');
+	    var tok = this.next_x_tok_throw ();
 
 	    if (tok.iscat (C_SPACE)) {
 	    } else if (tok.isotherchar (O_PLUS)) {
@@ -520,6 +550,8 @@ var Engine = (function Engine_closure () {
 
 	if (tok.isotherchar (O_BACKTICK)) {
 	    tok = this.next_tok ();
+	    if (tok === NeedMoreData)
+		throw tok;
 
 	    if (tok.ischar ())
 		// FIXME: possible align_state futzing
@@ -543,7 +575,11 @@ var Engine = (function Engine_closure () {
 	if (tok.isotherchar (O_SQUOTE)) {
 	    // Octal.
 	    tok = this.next_x_tok ();
-	    while (tok != null) {
+	    while (true) {
+		if (tok === NeedMoreData)
+		    throw tok;
+		if (tok === EOF)
+		    break;
 		var v = tok.maybe_octal_value ();
 		if (v < 0) {
 		    this.push (tok);
@@ -556,7 +592,11 @@ var Engine = (function Engine_closure () {
 	} else if (tok.isotherchar (O_DQUOTE)) {
 	    // Hexadecimal
 	    tok = this.next_x_tok ();
-	    while (tok != null) {
+	    while (true) {
+		if (tok === NeedMoreData)
+		    throw tok;
+		if (tok === EOF)
+		    break;
 		var v = tok.maybe_hex_value ();
 		if (v < 0) {
 		    this.push (tok);
@@ -568,7 +608,11 @@ var Engine = (function Engine_closure () {
 	    }
 	} else {
 	    // Decimal
-	    while (tok != null) {
+	    while (true) {
+		if (tok === NeedMoreData)
+		    throw tok;
+		if (tok === EOF)
+		    break;
 		var v = tok.maybe_decimal_value ();
 		if (v < 0) {
 		    this.push (tok);
@@ -649,13 +693,22 @@ var Engine = (function Engine_closure () {
 		tok = this.next_x_tok ();
 	    }
 
-	    if (!tok.isotherchar (O_PERIOD) && !tok.isotherchar (O_COMMA))
+	    if (tok == NeedMoreData) {
+		throw tok;
+	    } else if (tok == EOF) {
+		/* nothing */
+	    } else if (!tok.isotherchar (O_PERIOD) && !tok.isotherchar (O_COMMA)) {
 		this.push (tok)
-	    else {
+	    } else {
 		// We have a fractional part to deal with.
 		var digits = [];
 		while (true) {
 		    tok = this.next_tok ();
+		    if (tok === NeedMoreData)
+			throw tok;
+		    if (tok === EOF)
+			break;
+
 		    var v = tok.maybe_decimal_value ();
 		    if (v < 0) {
 			if (!tok.iscat (C_SPACE))
@@ -811,19 +864,14 @@ var Engine = (function Engine_closure () {
 	var depth = 1, toks = [], getter = null;
 
 	if (expand)
-	    getter = this.next_x_tok;
+	    getter = this.next_x_tok.bind (this);
 	else
-	    getter = this.next_tok;
+	    getter = this.next_tok.bind (this);
 
 	while (true) {
-	    var tok;
-	    if (expand)
-		tok = this.next_x_tok ();
-	    else
-		tok = this.next_tok ();
-
-	    if (tok == null)
-		throw new TexSyntaxException ('EOF in middle of a group');
+	    var tok = getter ();
+	    if (tok === NeedMoreData || tok === EOF)
+		throw tok;
 
 	    if (tok.iscat (C_BGROUP))
 		depth += 1;
@@ -844,7 +892,9 @@ var Engine = (function Engine_closure () {
 	var tok = this.chomp_spaces ();
 
 	while (1) {
-	    if (tok == null)
+	    if (tok === NeedMoreData)
+		throw tok;
+	    if (tok === EOF)
 		break;
 
 	    if (!tok.ischar ()) {
@@ -932,9 +982,7 @@ var Engine = (function Engine_closure () {
 	var depth = 0;
 
 	while (true) {
-	    var tok = this.next_tok ();
-	    if (tok == null)
-		throw new TexSyntaxException ('EOF inside \\if');
+	    var tok = this.next_tok_throw ();
 
 	    if (tok.iscmd (this, 'else')) {
 		if (depth == 0) {
@@ -1013,9 +1061,7 @@ var Engine = (function Engine_closure () {
 	var tok = null;
 
 	while (true) {
-	    tok = this.next_x_tok ();
-	    if (tok == null)
-		throw new TexSyntaxException ('EOF while scanning box');
+	    tok = this.next_x_tok_throw ();
 	    if (!tok.iscat (C_SPACE) && !tok.iscmd (this, 'relax'))
 		break;
 	}
