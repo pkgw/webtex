@@ -12,7 +12,8 @@ WEBTEX.Web.promise_engine ('plain', inputurl, bundleurl)
 		setImmediate (iterate);
 	    else if (rv === WEBTEX.NeedMoreData)
 		setTimeout (iterate, 10);
-	    // otherwise, EOF and we're done.
+	    else // EOF
+		console.log ('testbed: done parsing');
 	}
 
 	iterate ();

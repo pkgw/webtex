@@ -2142,6 +2142,7 @@ var JSInflater = (function() {
 	};
 	that.end = function() {
 	    z.inflateEnd();
+	    that.data_callback (null, null);
 	};
     }
 

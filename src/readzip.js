@@ -159,6 +159,7 @@ var ZipReader = WEBTEX.ZipReader = (function ZipReader_closure () {
 
 	var info = this.dirinfo[entname];
 	var state = {'info': info, 'cb': callback};
+	state.entname = entname;
 	state.nleft = info.csize;
 	state.curofs = info.dataofs;
 	// The buffer must be at least 32k for zlib to work since it uses a

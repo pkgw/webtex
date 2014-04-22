@@ -2,7 +2,7 @@ var http = require ('http');
 var connect = require ('connect');
 
 var port = 17394;
-var maxage = 8640000000; // 100 d in ms
+var maxage = 0; // ms; always freshly load everything.
 var app = connect ().use (connect.static (__dirname, {maxAge: maxage}));
 
 http.createServer (app).listen (port);
