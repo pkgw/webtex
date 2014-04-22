@@ -601,7 +601,7 @@ var ConstantValref = (function ConstantValref_closure () {
 }) ();
 
 
-function _make_int_value (type) {
+function _make_int_valref (type) {
     type.prototype.scan = function IntValref_scan (engine) {
 	return engine.scan_int ();
     };
@@ -609,7 +609,7 @@ function _make_int_value (type) {
     return type; // convenience.
 }
 
-function _make_dimen_value (type) {
+function _make_dimen_valref (type) {
     type.prototype.scan = function DimenValref_scan (engine) {
 	return engine.scan_dimen ();
     };
@@ -617,7 +617,7 @@ function _make_dimen_value (type) {
     return type;
 }
 
-function _make_glue_value (type) {
+function _make_glue_valref (type) {
     type.prototype.scan = function GlueValref_scan (engine) {
 	return engine.scan_glue ();
     };
@@ -625,7 +625,7 @@ function _make_glue_value (type) {
     return type;
 }
 
-function _make_muglue_value (type) {
+function _make_muglue_valref (type) {
     type.prototype.scan = function MuGlueValref_scan (engine) {
 	return engine.scan_glue ({mumode: true});
     };
@@ -633,7 +633,7 @@ function _make_muglue_value (type) {
     return type;
 }
 
-function _make_toks_value (type) {
+function _make_toks_valref (type) {
     type.prototype.scan = function ToksValref_scan (engine) {
 	engine.scan_one_optional_space ();
 
@@ -657,7 +657,7 @@ function _make_toks_value (type) {
     return type;
 }
 
-function _make_font_value (type) {
+function _make_font_valref (type) {
     return type; // TODO
 }
 
@@ -665,19 +665,19 @@ function _make_font_value (type) {
 var ConstantIntValref = (function ConstantIntValref_closure () {
     function ConstantIntValref (value) { ConstantValref.call (this, value); }
     inherit (ConstantIntValref, ConstantValref);
-    return _make_int_value (ConstantIntValref);
+    return _make_int_valref (ConstantIntValref);
 }) ();
 
 var ConstantDimenValref = (function ConstantDimenValref_closure () {
     function ConstantDimenValref (value) { ConstantValref.call (this, value); }
     inherit (ConstantDimenValref, ConstantValref);
-    return _make_dimen_value (ConstantDimenValref);
+    return _make_dimen_valref (ConstantDimenValref);
 }) ();
 
 var ConstantFontValref = (function ConstantFontValref_closure () {
     function ConstantFontValref (value) { ConstantValref.call (this, value); }
     inherit (ConstantFontValref, ConstantValref);
-    return _make_font_value (ConstantFontValref);
+    return _make_font_valref (ConstantFontValref);
 }) ();
 
 
@@ -693,7 +693,7 @@ var IntRegValref = (function IntRegValref_closure () {
 	engine.set_countreg (this.reg, value);
     };
 
-    return _make_int_value (IntRegValref);
+    return _make_int_valref (IntRegValref);
 }) ();
 
 var DimenRegValref = (function DimenRegValref_closure () {
@@ -708,7 +708,7 @@ var DimenRegValref = (function DimenRegValref_closure () {
 	engine.set_dimenreg (this.reg, value);
     };
 
-    return _make_dimen_value (DimenRegValref);
+    return _make_dimen_valref (DimenRegValref);
 }) ();
 
 var GlueRegValref = (function GlueRegValref_closure () {
@@ -723,7 +723,7 @@ var GlueRegValref = (function GlueRegValref_closure () {
 	engine.set_gluereg (this.reg, value);
     };
 
-    return _make_glue_value (GlueRegValref);
+    return _make_glue_valref (GlueRegValref);
 }) ();
 
 var MuGlueRegValref = (function MuGlueRegValref_closure () {
@@ -738,7 +738,7 @@ var MuGlueRegValref = (function MuGlueRegValref_closure () {
 	engine.set_mugluereg (this.reg, value);
     };
 
-    return _make_muglue_value (MuGlueRegValref);
+    return _make_muglue_valref (MuGlueRegValref);
 }) ();
 
 var ToksRegValref = (function ToksRegValref_closure () {
@@ -753,7 +753,7 @@ var ToksRegValref = (function ToksRegValref_closure () {
 	engine.set_tokreg (this.reg, value);
     };
 
-    return _make_toks_value (ToksRegValref);
+    return _make_toks_valref (ToksRegValref);
 }) ();
 
 
@@ -770,7 +770,7 @@ var IntParamValref = (function IntParamValref_closure () {
 	engine.set_intpar (this.name, value);
     };
 
-    return _make_int_value (IntParamValref);
+    return _make_int_valref (IntParamValref);
 }) ();
 
 var DimenParamValref = (function DimenParamValref_closure () {
@@ -785,7 +785,7 @@ var DimenParamValref = (function DimenParamValref_closure () {
 	engine.set_dimenpar (this.name, value);
     };
 
-    return _make_dimen_value (DimenParamValref);
+    return _make_dimen_valref (DimenParamValref);
 }) ();
 
 var GlueParamValref = (function GlueParamValref_closure () {
@@ -800,7 +800,7 @@ var GlueParamValref = (function GlueParamValref_closure () {
 	engine.set_gluepar (this.name, value);
     };
 
-    return _make_glue_value (GlueParamValref);
+    return _make_glue_valref (GlueParamValref);
 }) ();
 
 var MuGlueParamValref = (function MuGlueParamValref_closure () {
@@ -815,7 +815,7 @@ var MuGlueParamValref = (function MuGlueParamValref_closure () {
 	engine.set_mugluepar (this.name, value);
     };
 
-    return _make_muglue_value (MuGlueParamValref);
+    return _make_muglue_valref (MuGlueParamValref);
 }) ();
 
 var ToksParamValref = (function ToksParamValref_closure () {
@@ -830,5 +830,5 @@ var ToksParamValref = (function ToksParamValref_closure () {
 	engine.set_tokpar (this.name, value);
     };
 
-    return _make_toks_value (ToksParamValref);
+    return _make_toks_valref (ToksParamValref);
 }) ();
