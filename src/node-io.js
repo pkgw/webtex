@@ -12,7 +12,7 @@ function buffer_to_arraybuffer (buf) {
 }
 
 
-WEBTEX.Node.make_fs_linebuffer = (function make_fs_linebuffer (path) {
+function make_fs_linebuffer (path) {
     var fs = require ('fs');
     var rs = fs.createReadStream (path, {encoding: 'ascii'});
     var lb = new LineBuffer ();
@@ -30,10 +30,10 @@ WEBTEX.Node.make_fs_linebuffer = (function make_fs_linebuffer (path) {
     });
 
     return lb;
-});
+}
 
 
-WEBTEX.Node.RandomAccessFile = (function RandomAccessFile_closure () {
+var RandomAccessFile = (function RandomAccessFile_closure () {
     var fs = require ('fs');
 
     function RandomAccessFile (path) {
@@ -90,3 +90,16 @@ WEBTEX.IOBackend.makeInflater = function (datacb) {
 
     return inflate;
 }
+
+
+function promise_engine (jobname, inputpath, bundlepath) {
+    var f = new RandomAccessFile (bundlepath);
+    var z = new ZipReader (f.read_range.bind (f), f.size ());
+    var bundle = new Bundle (z);
+
+    var lb = make_fs_linebuffer (inputpath);
+    return Promise.resolve (new Engine (jobname, lb, bundle));
+};
+
+
+WEBTEX.Node.promise_engine = promise_engine;

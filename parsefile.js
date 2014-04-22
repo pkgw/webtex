@@ -5,21 +5,17 @@ if (process.argv.length < 4) {
 
 var WEBTEX = require (process.argv[2]).WEBTEX;
 
-var f = new WEBTEX.Node.RandomAccessFile ('texbundles/default.zip');
-var z = new WEBTEX.ZipReader (f.read_range.bind (f), f.size ());
-var bundle = new WEBTEX.Bundle (z);
+WEBTEX.Node.promise_engine (process.argv[3], process.argv[3], 'texbundles/default.zip')
+    .then (function (engine) {
+	function iterate () {
+	    var rv = engine.step ();
 
-var linebuf = WEBTEX.Node.make_fs_linebuffer (process.argv[3]);
-var engine = new WEBTEX.Engine (process.argv[3], linebuf, bundle);
+	    if (rv === true)
+		setImmediate (iterate);
+	    else if (rv === WEBTEX.NeedMoreData)
+		setTimeout (iterate, 10);
+	    // otherwise, EOF and we're done.
+	}
 
-function iterate () {
-    var rv = engine.step ();
-
-    if (rv === true)
-	setImmediate (iterate);
-    else if (rv === WEBTEX.NeedMoreData)
-	setTimeout (iterate, 10);
-    // otherwise, EOF and we're done.
-}
-
-iterate ();
+	iterate ();
+    });

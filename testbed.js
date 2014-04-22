@@ -1,22 +1,19 @@
 'use strict';
 
-var url = 'texbundles/default.zip';
-WEBTEX.Web.make_random_access_url (url).then (function (rau) {
-    var z = new WEBTEX.ZipReader (rau.read_range.bind (rau), rau.size ());
-    return new WEBTEX.Bundle (z);
-}).then (function (bundle) {
-    setTimeout (function () {
-	var lb = bundle.try_open_linebuffer ('xetex.ini');
+var bundleurl = 'texbundles/default.zip';
+var inputurl = 'test/tex/plain.tex';
 
-	function iterate() {
-	    var l = lb.get ();
-	    if (l === WEBTEX.EOF)
-		return;
-	    if (l !== WEBTEX.NeedMoreData)
-		console.log (l);
-	    setTimeout (iterate, 1);
+WEBTEX.Web.promise_engine ('plain', inputurl, bundleurl)
+    .then (function (engine) {
+	function iterate () {
+	    var rv = engine.step ();
+
+	    if (rv === true)
+		setImmediate (iterate);
+	    else if (rv === WEBTEX.NeedMoreData)
+		setTimeout (iterate, 10);
+	    // otherwise, EOF and we're done.
 	}
 
 	iterate ();
-    }, 1000);
-});
+    });
