@@ -146,8 +146,7 @@ var MacroCommand = (function MacroCommand_closure () {
 	if (!this.tmpl.length) {
 	    engine.debug ('*macro ' + this.origcs + ' -> {' +
 			  this.repl.join (' ') + '}');
-	    for (var i = this.repl.length - 1; i >= 0; i--)
-		engine.push (this.repl[i]);
+	    engine.push_toks (this.repl);
 	    return;
 	}
 
@@ -254,20 +253,18 @@ var MacroCommand = (function MacroCommand_closure () {
 	}
 
 	// OK, we've finally accumulated all of the parameter values! We
-	// can now insert the replacement.
+	// can now build the replacement.
 
 	var fullrepl = [];
 
-	for (var i = this.repl.length - 1; i >= 0; i--) {
+	for (var i = 0; i < this.repl.length; i++) {
 	    var rtok = this.repl[i];
 
 	    if (!rtok.isparam ()) {
-		engine.push (rtok);
 		fullrepl.push (rtok);
 	    } else {
 		var ptoks = param_vals[rtok.pnum];
-		for (var j = ptoks.length - 1; j >= 0; j--) {
-		    engine.push (ptoks[j]);
+		for (var j = 0; j < ptoks.length; j++) {
 		    fullrepl.push (ptoks[j]);
 		}
 	    }
@@ -277,8 +274,8 @@ var MacroCommand = (function MacroCommand_closure () {
 	for (var i = 1; i < 9; i++)
 	    if (param_vals.hasOwnProperty (i))
 		engine.debug ('   #' + i + ' = {' + param_vals[i].join (' ') + '}');
-	fullrepl = fullrepl.reverse ();
 	engine.debug (' -> {' + fullrepl.join (' ') + '}');
+	engine.push_toks (fullrepl);
     };
 
     proto.texmeaning = function MacroCommand_texmeaning (engine) {

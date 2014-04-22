@@ -281,13 +281,17 @@ var Engine = (function Engine_closure () {
 	this.inputstack.push_toklist ([tok]);
     };
 
+    proto.push_toks = function Engine_push (toks) {
+	this.inputstack.push_toklist (toks);
+    };
+
     proto.push_string = function Engine_push_string (text) {
-	for (var i = text.length - 1; i >= 0; i--) {
-	    if (text[i] == ' ')
-		this.push (Token.new_char (C_SPACE, O_SPACE));
-	    else
-		this.push (Token.new_char (C_OTHER, text.charCodeAt (i)));
-	}
+	var toks = [].map.call (text, function (c) {
+	    if (c == ' ')
+		return Token.new_char (C_SPACE, O_SPACE);
+	    return Token.new_char (C_OTHER, c.charCodeAt (0));
+	});
+	this.inputstack.push_toklist (toks);
     };
 
     proto.next_tok = function Engine_next_tok () {
@@ -412,10 +416,7 @@ var Engine = (function Engine_closure () {
 	    return true; // got it
 
 	// optional keyword not found; push back scanned tokens
-
-	while (scanned.length)
-	    this.push (scanned.pop ());
-
+	this.push_toks (scanned);
 	return false;
     };
 

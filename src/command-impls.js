@@ -25,9 +25,9 @@ commands.expandafter = function cmd_expandafter (engine) {
 
     var cmd2 = tok2.tocmd (engine);
     if (cmd2.expandable)
-	cmd2.invoke (engine)
+	cmd2.invoke (engine);
     else
-	engine.push (tok2)
+	engine.push (tok2);
 
     engine.push (tok1);
 };
@@ -68,16 +68,6 @@ commands.csname = function cmd_csname (engine) {
 };
 
 
-function insert_str (engine, expn) {
-    for (var i = expn.length - 1; i >= 0; i--) { // T:TP sec 464
-	if (expn[i] == ' ')
-	    engine.push (Token.new_char (C_SPACE, O_SPACE));
-	else
-	    engine.push (Token.new_char (C_OTHER, expn.charCodeAt (i)));
-    }
-}
-
-
 commands.string = function cmd_string (engine) {
     var tok = engine.next_tok_throw ();
     engine.debug ('* \\string ' + tok);
@@ -94,14 +84,14 @@ commands.string = function cmd_string (engine) {
     } else
 	throw new TexRuntimeException ('don\'t know how to stringify ' + tok);
 
-    insert_str (engine, expn);
+    engine.push_string (expn);
 };
 
 
 commands.number = function cmd_number (engine) {
     var val = engine.scan_int ().value;
     engine.debug ('* number ' + val);
-    insert_str (engine, '' + val);
+    engine.push_string ('' + val);
 };
 
 
@@ -504,8 +494,7 @@ commands.futurelet = function cmd_futurelet (engine) {
     var equiv = engine.next_tok_throw ();
     engine.debug ('futurelet ' + cstok + ' = ' + equiv + '; ' + thenexpand);
     cstok.assign_cmd (engine, equiv.tocmd (engine));
-    engine.push (equiv);
-    engine.push (thenexpand);
+    engine.push_toks ([thenexpand, equiv]);
 };
 
 
@@ -1155,9 +1144,7 @@ function _change_case (engine, isupper) {
 
     engine.debug ([cmdname, '~' + oldtoks.join (''), '->',
 		   '~' + newtoks.join ('')].join (' '));
-
-    while (newtoks.length)
-	engine.push (newtoks.pop ());
+    engine.push_toks (newtoks);
 }
 
 
@@ -1195,15 +1182,14 @@ commands.the = function cmd_the (engine) {
 
     if (val.is_toks_value) {
 	var toks = val.get (engine);
-	for (var i = toks.length - 1; i >= 0; i--)
-	    engine.push (toks[i]);
 	engine.debug ('the (toks) ' + tok + ' -> ' + val.stringify (engine, toks));
+	engine.push_toks (toks);
 	return;
     }
 
     var expn = val.get (engine).to_texstr ();
     engine.debug ('the ' + tok + ' -> ' + expn);
-    insert_str (engine, expn);
+    engine.push_string (expn);
 };
 
 
@@ -1211,13 +1197,13 @@ commands.meaning = function cmd_meaning (engine) {
     var tok = engine.next_tok_throw ();
     var expn = tok.tocmd (engine).texmeaning (engine);
     engine.debug (['meaning', tok, '->', expn].join (' '));
-    insert_str (engine, expn);
+    engine.push_string (expn);
 };
 
 
 commands.jobname = function cmd_jobname (engine) {
     engine.debug ('jobname -> ' + engine.jobname);
-    insert_str (engine, engine.jobname);
+    engine.push_string (engine.jobname);
 };
 
 
