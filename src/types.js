@@ -514,69 +514,69 @@ var Font = (function Font_closure () {
 }) ();
 
 
-// Our "value" system
+// Our "value reference" system
 
-var Value = (function Value_closure () {
-    function Value () {}
+var Valref = (function Valref_closure () {
+    function Valref () {}
 
-    Value.prototype.stringify = function Value_stringify (engine, value) {
+    Valref.prototype.stringify = function Valref_stringify (engine, value) {
 	/* This function is needed for Values whose instances don't have an
 	 * appropriate toString() method. */
 	return '' + value;
     };
 
-    return Value;
+    return Valref;
 }) ();
 
 
-var RegisterValue = (function RegisterValue_closure () {
-    function RegisterValue (reg) {
+var RegisterValref = (function RegisterValref_closure () {
+    function RegisterValref (reg) {
 	if (reg < 0 || reg > 255)
 	    throw new TexInternalException ('illegal register ' + reg);
-	Value.call (this);
+	Valref.call (this);
 	this.reg = reg;
     }
 
-    inherit (RegisterValue, Value);
+    inherit (RegisterValref, Valref);
 
-    return RegisterValue;
+    return RegisterValref;
 }) ();
 
 
-var ParamValue = (function ParamValue_closure () {
-    function ParamValue (name) {
-	Value.call (this);
+var ParamValref = (function ParamValref_closure () {
+    function ParamValref (name) {
+	Valref.call (this);
 	this.name = name;
     }
 
-    inherit (ParamValue, Value);
+    inherit (ParamValref, Valref);
 
-    return ParamValue;
+    return ParamValref;
 }) ();
 
 
-var ConstantValue = (function ConstantValue_closure () {
-    function ConstantValue (value) {
-	Value.call (this);
+var ConstantValref = (function ConstantValref_closure () {
+    function ConstantValref (value) {
+	Valref.call (this);
 	this.value = value;
     }
 
-    inherit (ConstantValue, Value);
+    inherit (ConstantValref, Valref);
 
-    ConstantValue.prototype.get = function ConstantValue_get (engine) {
+    ConstantValref.prototype.get = function ConstantValref_get (engine) {
 	return this.value;
     };
 
-    ConstantValue.prototype.set = function ConstantValue_set (engine, value) {
-	throw new TexRuntimeException ('cannot set a constant Value')
+    ConstantValref.prototype.set = function ConstantValref_set (engine, value) {
+	throw new TexRuntimeException ('cannot set a constant Valref')
     };
 
-    return ConstantValue;
+    return ConstantValref;
 }) ();
 
 
 function _make_int_value (type) {
-    type.prototype.scan = function IntValue_scan (engine) {
+    type.prototype.scan = function IntValref_scan (engine) {
 	return engine.scan_int ();
     };
 
@@ -584,7 +584,7 @@ function _make_int_value (type) {
 }
 
 function _make_dimen_value (type) {
-    type.prototype.scan = function DimenValue_scan (engine) {
+    type.prototype.scan = function DimenValref_scan (engine) {
 	return engine.scan_dimen ();
     };
 
@@ -592,7 +592,7 @@ function _make_dimen_value (type) {
 }
 
 function _make_glue_value (type) {
-    type.prototype.scan = function GlueValue_scan (engine) {
+    type.prototype.scan = function GlueValref_scan (engine) {
 	return engine.scan_glue ();
     };
 
@@ -600,7 +600,7 @@ function _make_glue_value (type) {
 }
 
 function _make_muglue_value (type) {
-    type.prototype.scan = function MuGlueValue_scan (engine) {
+    type.prototype.scan = function MuGlueValref_scan (engine) {
 	return engine.scan_glue ({mumode: true});
     };
 
@@ -608,7 +608,7 @@ function _make_muglue_value (type) {
 }
 
 function _make_toks_value (type) {
-    type.prototype.scan = function ToksValue_scan (engine) {
+    type.prototype.scan = function ToksValref_scan (engine) {
 	engine.scan_one_optional_space ();
 
 	var tok = engine.next_tok ();
@@ -622,7 +622,7 @@ function _make_toks_value (type) {
 	return engine.scan_tok_group (false);
     };
 
-    type.prototype.stringify = function ToksValue_stringify (engine, value) {
+    type.prototype.stringify = function ToksValref_stringify (engine, value) {
 	return value.join ('|');
     };
 
@@ -636,173 +636,173 @@ function _make_font_value (type) {
 }
 
 
-var ConstantIntValue = (function ConstantIntValue_closure () {
-    function ConstantIntValue (value) { ConstantValue.call (this, value); }
-    inherit (ConstantIntValue, ConstantValue);
-    return _make_int_value (ConstantIntValue);
+var ConstantIntValref = (function ConstantIntValref_closure () {
+    function ConstantIntValref (value) { ConstantValref.call (this, value); }
+    inherit (ConstantIntValref, ConstantValref);
+    return _make_int_value (ConstantIntValref);
 }) ();
 
-var ConstantDimenValue = (function ConstantDimenValue_closure () {
-    function ConstantDimenValue (value) { ConstantValue.call (this, value); }
-    inherit (ConstantDimenValue, ConstantValue);
-    return _make_dimen_value (ConstantDimenValue);
+var ConstantDimenValref = (function ConstantDimenValref_closure () {
+    function ConstantDimenValref (value) { ConstantValref.call (this, value); }
+    inherit (ConstantDimenValref, ConstantValref);
+    return _make_dimen_value (ConstantDimenValref);
 }) ();
 
-var ConstantFontValue = (function ConstantFontValue_closure () {
-    function ConstantFontValue (value) { ConstantValue.call (this, value); }
-    inherit (ConstantFontValue, ConstantValue);
-    return _make_font_value (ConstantFontValue);
+var ConstantFontValref = (function ConstantFontValref_closure () {
+    function ConstantFontValref (value) { ConstantValref.call (this, value); }
+    inherit (ConstantFontValref, ConstantValref);
+    return _make_font_value (ConstantFontValref);
 }) ();
 
 
-var IntRegValue = (function IntRegValue_closure () {
-    function IntRegValue (reg) { RegisterValue.call (this, reg); }
-    inherit (IntRegValue, RegisterValue);
+var IntRegValref = (function IntRegValref_closure () {
+    function IntRegValref (reg) { RegisterValref.call (this, reg); }
+    inherit (IntRegValref, RegisterValref);
 
-    IntRegValue.prototype.get = function IntRegValue_get (engine) {
+    IntRegValref.prototype.get = function IntRegValref_get (engine) {
 	return engine.countreg (this.reg);
     };
 
-    IntRegValue.prototype.set = function IntRegValue_set (engine, value) {
+    IntRegValref.prototype.set = function IntRegValref_set (engine, value) {
 	engine.set_countreg (this.reg, value);
     };
 
-    return _make_int_value (IntRegValue);
+    return _make_int_value (IntRegValref);
 }) ();
 
-var DimenRegValue = (function DimenRegValue_closure () {
-    function DimenRegValue (reg) { RegisterValue.call (this, reg); }
-    inherit (DimenRegValue, RegisterValue);
+var DimenRegValref = (function DimenRegValref_closure () {
+    function DimenRegValref (reg) { RegisterValref.call (this, reg); }
+    inherit (DimenRegValref, RegisterValref);
 
-    DimenRegValue.prototype.get = function DimenRegValue_get (engine) {
+    DimenRegValref.prototype.get = function DimenRegValref_get (engine) {
 	return engine.dimenreg (this.reg);
     };
 
-    DimenRegValue.prototype.set = function DimenRegValue_set (engine, value) {
+    DimenRegValref.prototype.set = function DimenRegValref_set (engine, value) {
 	engine.set_dimenreg (this.reg, value);
     };
 
-    return _make_dimen_value (DimenRegValue);
+    return _make_dimen_value (DimenRegValref);
 }) ();
 
-var GlueRegValue = (function GlueRegValue_closure () {
-    function GlueRegValue (reg) { RegisterValue.call (this, reg); }
-    inherit (GlueRegValue, RegisterValue);
+var GlueRegValref = (function GlueRegValref_closure () {
+    function GlueRegValref (reg) { RegisterValref.call (this, reg); }
+    inherit (GlueRegValref, RegisterValref);
 
-    GlueRegValue.prototype.get = function GlueRegValue_get (engine) {
+    GlueRegValref.prototype.get = function GlueRegValref_get (engine) {
 	return engine.gluereg (this.reg);
     };
 
-    GlueRegValue.prototype.set = function GlueRegValue_set (engine, value) {
+    GlueRegValref.prototype.set = function GlueRegValref_set (engine, value) {
 	engine.set_gluereg (this.reg, value);
     };
 
-    return _make_glue_value (GlueRegValue);
+    return _make_glue_value (GlueRegValref);
 }) ();
 
-var MuGlueRegValue = (function MuGlueRegValue_closure () {
-    function MuGlueRegValue (reg) { RegisterValue.call (this, reg); }
-    inherit (MuGlueRegValue, RegisterValue);
+var MuGlueRegValref = (function MuGlueRegValref_closure () {
+    function MuGlueRegValref (reg) { RegisterValref.call (this, reg); }
+    inherit (MuGlueRegValref, RegisterValref);
 
-    MuGlueRegValue.prototype.get = function MuGlueRegValue_get (engine) {
+    MuGlueRegValref.prototype.get = function MuGlueRegValref_get (engine) {
 	return engine.mugluereg (this.reg);
     };
 
-    MuGlueRegValue.prototype.set = function MuGlueRegValue_set (engine, value) {
+    MuGlueRegValref.prototype.set = function MuGlueRegValref_set (engine, value) {
 	engine.set_mugluereg (this.reg, value);
     };
 
-    return _make_muglue_value (MuGlueRegValue);
+    return _make_muglue_value (MuGlueRegValref);
 }) ();
 
-var ToksRegValue = (function ToksRegValue_closure () {
-    function ToksRegValue (reg) { RegisterValue.call (this, reg); }
-    inherit (ToksRegValue, RegisterValue);
+var ToksRegValref = (function ToksRegValref_closure () {
+    function ToksRegValref (reg) { RegisterValref.call (this, reg); }
+    inherit (ToksRegValref, RegisterValref);
 
-    ToksRegValue.prototype.get = function ToksRegValue_get (engine) {
+    ToksRegValref.prototype.get = function ToksRegValref_get (engine) {
 	return engine.tokreg (this.reg);
     };
 
-    ToksRegValue.prototype.set = function ToksRegValue_set (engine, value) {
+    ToksRegValref.prototype.set = function ToksRegValref_set (engine, value) {
 	engine.set_tokreg (this.reg, value);
     };
 
-    return _make_toks_value (ToksRegValue);
+    return _make_toks_value (ToksRegValref);
 }) ();
 
 
-var IntParamValue = (function IntParamValue_closure () {
-    function IntParamValue (name) { ParamValue.call (this, name); }
-    inherit (IntParamValue, ParamValue);
+var IntParamValref = (function IntParamValref_closure () {
+    function IntParamValref (name) { ParamValref.call (this, name); }
+    inherit (IntParamValref, ParamValref);
 
-    IntParamValue.prototype.get = function IntParamValue_get (engine) {
+    IntParamValref.prototype.get = function IntParamValref_get (engine) {
 	return new TexInt (engine.intpar (this.name));
     };
 
-    IntParamValue.prototype.set = function IntParamValue_set (engine, value) {
+    IntParamValref.prototype.set = function IntParamValref_set (engine, value) {
 	value = TexInt.xcheck (value);
 	engine.set_intpar (this.name, value);
     };
 
-    return _make_int_value (IntParamValue);
+    return _make_int_value (IntParamValref);
 }) ();
 
-var DimenParamValue = (function DimenParamValue_closure () {
-    function DimenParamValue (name) { ParamValue.call (this, name); }
-    inherit (DimenParamValue, ParamValue);
+var DimenParamValref = (function DimenParamValref_closure () {
+    function DimenParamValref (name) { ParamValref.call (this, name); }
+    inherit (DimenParamValref, ParamValref);
 
-    DimenParamValue.prototype.get = function DimenParamValue_get (engine) {
+    DimenParamValref.prototype.get = function DimenParamValref_get (engine) {
 	return engine.dimenpar (this.name);
     };
 
-    DimenParamValue.prototype.set = function DimenParamValue_set (engine, value) {
+    DimenParamValref.prototype.set = function DimenParamValref_set (engine, value) {
 	engine.set_dimenpar (this.name, value);
     };
 
-    return _make_dimen_value (DimenParamValue);
+    return _make_dimen_value (DimenParamValref);
 }) ();
 
-var GlueParamValue = (function GlueParamValue_closure () {
-    function GlueParamValue (name) { ParamValue.call (this, name); }
-    inherit (GlueParamValue, ParamValue);
+var GlueParamValref = (function GlueParamValref_closure () {
+    function GlueParamValref (name) { ParamValref.call (this, name); }
+    inherit (GlueParamValref, ParamValref);
 
-    GlueParamValue.prototype.get = function GlueParamValue_get (engine) {
+    GlueParamValref.prototype.get = function GlueParamValref_get (engine) {
 	return engine.gluepar (this.name);
     };
 
-    GlueParamValue.prototype.set = function GlueParamValue_set (engine, value) {
+    GlueParamValref.prototype.set = function GlueParamValref_set (engine, value) {
 	engine.set_gluepar (this.name, value);
     };
 
-    return _make_glue_value (GlueParamValue);
+    return _make_glue_value (GlueParamValref);
 }) ();
 
-var MuGlueParamValue = (function MuGlueParamValue_closure () {
-    function MuGlueParamValue (name) { ParamValue.call (this, name); }
-    inherit (MuGlueParamValue, ParamValue);
+var MuGlueParamValref = (function MuGlueParamValref_closure () {
+    function MuGlueParamValref (name) { ParamValref.call (this, name); }
+    inherit (MuGlueParamValref, ParamValref);
 
-    MuGlueParamValue.prototype.get = function MuGlueParamValue_get (engine) {
+    MuGlueParamValref.prototype.get = function MuGlueParamValref_get (engine) {
 	return engine.mugluepar (this.name);
     };
 
-    MuGlueParamValue.prototype.set = function MuGlueParamValue_set (engine, value) {
+    MuGlueParamValref.prototype.set = function MuGlueParamValref_set (engine, value) {
 	engine.set_mugluepar (this.name, value);
     };
 
-    return _make_muglue_value (MuGlueParamValue);
+    return _make_muglue_value (MuGlueParamValref);
 }) ();
 
-var ToksParamValue = (function ToksParamValue_closure () {
-    function ToksParamValue (name) { ParamValue.call (this, name); }
-    inherit (ToksParamValue, ParamValue);
+var ToksParamValref = (function ToksParamValref_closure () {
+    function ToksParamValref (name) { ParamValref.call (this, name); }
+    inherit (ToksParamValref, ParamValref);
 
-    ToksParamValue.prototype.get = function ToksParamValue_get (engine) {
+    ToksParamValref.prototype.get = function ToksParamValref_get (engine) {
 	return engine.tokpar (this.name);
     };
 
-    ToksParamValue.prototype.set = function ToksParamValue_set (engine, value) {
+    ToksParamValref.prototype.set = function ToksParamValref_set (engine, value) {
 	engine.set_tokpar (this.name, value);
     };
 
-    return _make_toks_value (ToksParamValue);
+    return _make_toks_value (ToksParamValref);
 }) ();

@@ -108,9 +108,9 @@ commands.count = (function CountCommand_closure () {
 	return new GivenCountCommand (reg).invoke (engine);
     };
 
-    proto.asvalue = function CountCommand_asvalue (engine) {
+    proto.asvalref = function CountCommand_asvalref (engine) {
 	var reg = engine.scan_char_code ();
-	return new IntRegValue (reg);
+	return new IntRegValref (reg);
     };
 
     return CountCommand;
@@ -128,9 +128,9 @@ commands.dimen = (function DimenCommand_closure () {
 	return new GivenDimenCommand (reg).invoke (engine);
     };
 
-    proto.asvalue = function DimenCommand_asvalue (engine) {
+    proto.asvalref = function DimenCommand_asvalref (engine) {
 	var reg = engine.scan_char_code ();
-	return new DimenRegValue (reg);
+	return new DimenRegValref (reg);
     };
 
     return DimenCommand;
@@ -149,9 +149,9 @@ commands.skip = (function SkipCommand_closure () {
 	return new GivenGlueCommand (reg).invoke (engine);
     };
 
-    proto.asvalue = function SkipCommand_asvalue (engine) {
+    proto.asvalref = function SkipCommand_asvalref (engine) {
 	var reg = engine.scan_char_code ();
-	return new GlueRegValue (reg);
+	return new GlueRegValref (reg);
     };
 
     return SkipCommand;
@@ -170,9 +170,9 @@ commands.muskip = (function MuskipCommand_closure () {
 	return new GivenMuglueCommand (reg).invoke (engine);
     };
 
-    proto.asvalue = function MuskipCommand_asvalue (engine) {
+    proto.asvalref = function MuskipCommand_asvalref (engine) {
 	var reg = engine.scan_char_code ();
-	return new MuGlueRegValue (reg);
+	return new MuGlueRegValref (reg);
     };
 
     return MuskipCommand;
@@ -190,9 +190,9 @@ commands.toks = (function ToksCommand_closure () {
 	return new GivenToksCommand (reg).invoke (engine);
     };
 
-    proto.asvalue = function ToksCommand_asvalue (engine) {
+    proto.asvalref = function ToksCommand_asvalref (engine) {
 	var reg = engine.scan_char_code ();
-	return new ToksRegValue (reg);
+	return new ToksRegValref (reg);
     };
 
     return ToksCommand;
@@ -204,7 +204,7 @@ commands.toks = (function ToksCommand_closure () {
 commands.advance = function cmd_advance (engine) {
     var tok = engine.next_x_tok ();
     var cmd = tok.tocmd (engine);
-    var val = cmd.asvalue (engine); // might eat tokens
+    var val = cmd.asvalref (engine); // might eat tokens
     engine.scan_keyword ('by');
     var cur = val.get (engine);
     var delta = val.scan (engine);
@@ -216,7 +216,7 @@ commands.advance = function cmd_advance (engine) {
 commands.divide = function cmd_divide (engine) {
     var tok = engine.next_x_tok ();
     var cmd = tok.tocmd (engine);
-    var val = cmd.asvalue (engine); // might eat tokens
+    var val = cmd.asvalref (engine); // might eat tokens
     engine.scan_keyword ('by');
     var cur = val.get (engine);
     var denom = engine.scan_int ();
@@ -228,7 +228,7 @@ commands.divide = function cmd_divide (engine) {
 commands.multiply = function cmd_multiply (engine) {
     var tok = engine.next_x_tok ();
     var cmd = tok.tocmd (engine);
-    var val = cmd.asvalue (engine); // might eat tokens
+    var val = cmd.asvalref (engine); // might eat tokens
     engine.scan_keyword ('by');
     var cur = val.get (engine);
     var factor = engine.scan_int ();
@@ -253,9 +253,9 @@ commands.catcode = (function CatcodeCommand_closure () {
 	engine.set_catcode (ord, ccode);
     };
 
-    proto.asvalue = function CatcodeCommand_asvalue (engine) {
+    proto.asvalref = function CatcodeCommand_asvalref (engine) {
 	var ord = engine.scan_char_code ();
-	return new ConstantIntValue (new TexInt (engine.catcode (ord)));
+	return new ConstantIntValref (new TexInt (engine.catcode (ord)));
     };
 
     return CatcodeCommand;
@@ -279,9 +279,9 @@ commands.mathcode = (function MathcodeCommand_closure () {
 	engine.set_mathcode (ord, mcode);
     };
 
-    proto.asvalue = function MathcodeCommand_asvalue (engine) {
+    proto.asvalref = function MathcodeCommand_asvalref (engine) {
 	var ord = engine.scan_char_code ();
-	return new ConstantIntValue (new TexInt (engine.mathcode (ord)));
+	return new ConstantIntValref (new TexInt (engine.mathcode (ord)));
     };
 
     return MathcodeCommand;
@@ -305,9 +305,9 @@ commands.sfcode = (function SfcodeCommand_closure () {
 	engine.set_sfcode (ord, sfcode);
     };
 
-    proto.asvalue = function SfcodeCommand_asvalue (engine) {
+    proto.asvalref = function SfcodeCommand_asvalref (engine) {
 	var ord = engine.scan_char_code ();
-	return new ConstantIntValue (new TexInt (engine.sfcode (ord)));
+	return new ConstantIntValref (new TexInt (engine.sfcode (ord)));
     };
 
     return SfcodeCommand;
@@ -328,9 +328,9 @@ commands.lccode = (function LccodeCommand_closure () {
 	engine.set_lccode (ord, lccode);
     };
 
-    proto.asvalue = function LccodeCommand_asvalue (engine) {
+    proto.asvalref = function LccodeCommand_asvalref (engine) {
 	var ord = engine.scan_char_code ();
-	return new ConstantIntValue (new TexInt (engine.lccode (ord)));
+	return new ConstantIntValref (new TexInt (engine.lccode (ord)));
     };
 
     return LccodeCommand;
@@ -351,9 +351,9 @@ commands.uccode = (function UccodeCommand_closure () {
 	engine.set_uccode (ord, uccode);
     };
 
-    proto.asvalue = function UccodeCommand_asvalue (engine) {
+    proto.asvalref = function UccodeCommand_asvalref (engine) {
 	var ord = engine.scan_char_code ();
-	return new ConstantIntValue (new TexInt (engine.uccode (ord)));
+	return new ConstantIntValref (new TexInt (engine.uccode (ord)));
     };
 
     return UccodeCommand;
@@ -377,9 +377,9 @@ commands.delcode = (function DelcodeCommand_closure () {
 	engine.set_delcode (ord, delcode);
     };
 
-    proto.asvalue = function DelcodeCommand_asvalue (engine) {
+    proto.asvalref = function DelcodeCommand_asvalref (engine) {
 	var ord = engine.scan_char_code ();
-	return new ConstantIntValue (new TexInt (engine.delcode (ord)));
+	return new ConstantIntValref (new TexInt (engine.delcode (ord)));
     };
 
     return DelcodeCommand;
@@ -554,7 +554,7 @@ function _cmd_def (engine, cname, expand_replacement) {
 	    // not supposed to be sub-expanded (TeXBook p. 216). Yargh.
 	    if (tok.iscmd (engine, 'the')) {
 		var next = engine.next_tok_throw ();
-		var nv = next.tocmd (engine).asvalue (engine);
+		var nv = next.tocmd (engine).asvalref (engine);
 		if (nv.is_toks_value === true) {
 		    repl_toks = repl_toks.concat (nv.get (engine));
 		    continue
@@ -820,10 +820,10 @@ commands.wd = (function WdCommand_closure () {
 	throw new TexInternalException ('not implemented bare \\wd');
     };
 
-    proto.asvalue = function WdCommand_asvalue (engine) {
+    proto.asvalref = function WdCommand_asvalref (engine) {
 	var reg = engine.scan_char_code ();
 	var box = engine.boxreg (reg);
-	return new ConstantDimenValue (box.width);
+	return new ConstantDimenValref (box.width);
     };
 
     return WdCommand;
@@ -840,10 +840,10 @@ commands.ht = (function HtCommand_closure () {
 	throw new TexInternalException ('not implemented bare \\ht');
     };
 
-    proto.asvalue = function HtCommand_asvalue (engine) {
+    proto.asvalref = function HtCommand_asvalref (engine) {
 	var reg = engine.scan_char_code ();
 	var box = engine.boxreg (reg);
-	return new ConstantDimenValue (box.height);
+	return new ConstantDimenValref (box.height);
     };
 
     return HtCommand;
@@ -913,9 +913,9 @@ commands.inputlineno = (function InputlinenoCommand_closure () {
 	throw new TexRuntimeException ('not implemented');
     };
 
-    proto.asvalue = function InputlinenoCommand_asvalue (engine) {
+    proto.asvalref = function InputlinenoCommand_asvalref (engine) {
 	// LaTeX considers this "undefined"
-	return new ConstantIntValue (new TexInt (-1));
+	return new ConstantIntValref (new TexInt (-1));
     };
 
     return InputlinenoCommand;
@@ -952,8 +952,8 @@ commands.font = (function FontCommand_closure () {
 	cstok.assign_cmd (engine, cmd);
     };
 
-    proto.asvalue = function FontCommand_asvalue (engine) {
-	return new ConstantFontValue (engine.font ('<current>'));
+    proto.asvalref = function FontCommand_asvalref (engine) {
+	return new ConstantFontValref (engine.font ('<current>'));
     };
 
     return FontCommand;
@@ -972,8 +972,8 @@ commands.nullfont = (function NullFontCommand_closure () {
 	engine.set_font ('<current>', engine.font ('<null>'));
     };
 
-    proto.asvalue = function NullFontCommand_asvalue (engine) {
-	return new ConstantFontValue (engine.font ('<null>'));
+    proto.asvalref = function NullFontCommand_asvalref (engine) {
+	return new ConstantFontValref (engine.font ('<null>'));
     };
 
     proto.texmeaning = function NullFontCommand_texmeaning (engine) {
@@ -994,9 +994,9 @@ commands.fontdimen = (function FontDimenCommand_closure () {
     proto.invoke = function FontDimenCommand_invoke (engine) {
 	var num = engine.scan_int ();
 	var tok = engine.next_tok_throw ();
-	var font = tok.tocmd (engine).asvalue (engine);
+	var font = tok.tocmd (engine).asvalref (engine);
 
-	if (!(font instanceof ConstantFontValue))
+	if (!(font instanceof ConstantFontValref))
 	    throw new TexRuntimeException ('expected \\fontdimen to be followed ' +
 					   'by a font; got ' + tok);
 
@@ -1006,12 +1006,12 @@ commands.fontdimen = (function FontDimenCommand_closure () {
 	font.get (engine).dimens[num] = val;
     };
 
-    proto.asvalue = function FontDimenCommand_asvalue (engine) {
+    proto.asvalref = function FontDimenCommand_asvalref (engine) {
 	var num = engine.scan_int ();
 	var tok = engine.next_tok_throw ();
-	var font = tok.tocmd (engine).asvalue (engine);
+	var font = tok.tocmd (engine).asvalref (engine);
 
-	if (!(font instanceof ConstantFontValue))
+	if (!(font instanceof ConstantFontValref))
 	    throw new TexRuntimeException ('expected \\fontdimen to be followed ' +
 					   'by a font; got ' + tok);
 
@@ -1023,7 +1023,7 @@ commands.fontdimen = (function FontDimenCommand_closure () {
 	}
 
 	// FIXME: should be settable.
-	return new ConstantDimenValue (val);
+	return new ConstantDimenValref (val);
     };
 
     return FontDimenCommand;
@@ -1032,9 +1032,9 @@ commands.fontdimen = (function FontDimenCommand_closure () {
 
 commands.skewchar = function cmd_skewchar (engine) {
     var tok = engine.next_tok_throw ();
-    var val = tok.tocmd (engine).asvalue (engine);
+    var val = tok.tocmd (engine).asvalref (engine);
 
-    if (!(val instanceof ConstantFontValue))
+    if (!(val instanceof ConstantFontValref))
 	throw new TexRuntimeException ('expected \\skewchar to be followed by a font; ' +
 				       'got ' + tok);
 
@@ -1047,9 +1047,9 @@ commands.skewchar = function cmd_skewchar (engine) {
 
 commands.hyphenchar = function cmd_hyphenchar (engine) {
     var tok = engine.next_tok_throw ();
-    var val = tok.tocmd (engine).asvalue (engine);
+    var val = tok.tocmd (engine).asvalref (engine);
 
-    if (!(val instanceof ConstantFontValue))
+    if (!(val instanceof ConstantFontValref))
 	throw new TexRuntimeException ('expected \\hyphenchar to be followed by a font; ' +
 				       'got ' + tok);
 
@@ -1064,9 +1064,9 @@ function _def_family (engine, fam) {
     var slot = engine.scan_int_4bit ();
     engine.scan_optional_equals ();
     var tok = engine.next_tok_throw ();
-    var val = tok.tocmd (engine).asvalue (engine);
+    var val = tok.tocmd (engine).asvalref (engine);
 
-    if (!(val instanceof ConstantFontValue))
+    if (!(val instanceof ConstantFontValref))
 	throw new TexRuntimeException ('expected \\' + fam + ' to assign a font; ' +
 				       'got ' +tok);
 
@@ -1175,7 +1175,7 @@ commands.the = function cmd_the (engine) {
      */
 
     var tok = engine.next_tok_throw ();
-    var val = tok.tocmd (engine).asvalue (engine);
+    var val = tok.tocmd (engine).asvalref (engine);
     if (val == null)
 	throw new TexRuntimeException ('unable to get internal value (for ' +
 				       '\\the) from ' + tok);

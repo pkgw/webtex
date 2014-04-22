@@ -25,33 +25,33 @@ var Command = WEBTEX.Command = (function Command_closure () {
 	return this.name == other.name;
     };
 
-    proto.asvalue = function Command_asvalue (engine) {
+    proto.asvalref = function Command_asvalref (engine) {
 	return null;
     };
 
     proto.as_int = function Command_as_int (engine) {
-	var v = this.asvalue (engine);
+	var v = this.asvalref (engine);
 	if (v == null)
 	    return null;
 	return v.get (engine).as_int ();
     };
 
     proto.as_scaled = function Command_as_scaled (engine) {
-	var v = this.asvalue (engine);
+	var v = this.asvalref (engine);
 	if (v == null)
 	    return null;
 	return v.get (engine).as_scaled ();
     };
 
     proto.as_dimen = function Command_as_dimen (engine) {
-	var v = this.asvalue (engine);
+	var v = this.asvalref (engine);
 	if (v == null)
 	    return null;
 	return v.get (engine).as_dimen ();
     };
 
     proto.as_glue = function Command_as_glue (engine) {
-	var v = this.asvalue (engine);
+	var v = this.asvalref (engine);
 	if (v == null)
 	    return null;
 	return v.get (engine).as_glue ();
@@ -530,8 +530,8 @@ var GivenCharCommand = (function GivenCharCommand_closure () {
 	return this.ord == other.ord;
     };
 
-    proto.asvalue = function GivenCharCommand_asvalue (engine) {
-	return new ConstantIntValue (new TexInt (this.ord));
+    proto.asvalref = function GivenCharCommand_asvalref (engine) {
+	return new ConstantIntValref (new TexInt (this.ord));
     };
 
     proto.texmeaning = function GivenCharCommand_texmeaning (engine) {
@@ -563,8 +563,8 @@ var GivenMathcharCommand = (function GivenMathcharCommand_closure () {
 	return this.mathchar == other.mathchar;
     };
 
-    proto.asvalue = function GivenMathcharCommand_asvalue (engine) {
-	return new ConstantIntValue (new TexInt (this.mathchar));
+    proto.asvalref = function GivenMathcharCommand_asvalref (engine) {
+	return new ConstantIntValref (new TexInt (this.mathchar));
     };
 
     proto.texmeaning = function GivenMathcharCommand_texmeaning (engine) {
@@ -599,7 +599,7 @@ var GivenRegisterCommand = (function GivenRegisterCommand_closure () {
     };
 
     proto.invoke = function GivenRegisterCommand_invoke (engine) {
-	var v = this.asvalue (engine);
+	var v = this.asvalref (engine);
 	engine.scan_optional_equals ();
 	var newval = v.scan (engine);
 	engine.debug (this.desc + ' #' + this.register + ' = ' +
@@ -607,7 +607,7 @@ var GivenRegisterCommand = (function GivenRegisterCommand_closure () {
 	v.set (engine, newval);
     };
 
-    // subclasses implement asvalue()
+    // subclasses implement asvalref()
 
     proto.texmeaning = function GivenRegisterCommand_texmeaning (engine) {
 	return texchr (engine.intpar ('escapechar')) + this.desc +
@@ -625,8 +625,8 @@ var GivenCountCommand = (function GivenCountCommand_closure () {
     proto.name = '<given-count>';
     proto.desc = 'count';
 
-    proto.asvalue = function GivenCountCommand_asvalue (engine) {
-	return new IntRegValue (this.register);
+    proto.asvalref = function GivenCountCommand_asvalref (engine) {
+	return new IntRegValref (this.register);
     };
 
     return GivenCountCommand;
@@ -640,8 +640,8 @@ var GivenDimenCommand = (function GivenDimenCommand_closure () {
     proto.name = '<given-dimen>';
     proto.desc = 'dimen';
 
-    proto.asvalue = function GivenDimenCommand_asvalue (engine) {
-	return new DimenRegValue (this.register);
+    proto.asvalref = function GivenDimenCommand_asvalref (engine) {
+	return new DimenRegValref (this.register);
     };
 
     return GivenDimenCommand;
@@ -655,8 +655,8 @@ var GivenGlueCommand = (function GivenGlueCommand_closure () {
     proto.name = '<given-glue>';
     proto.desc = 'glue';
 
-    proto.asvalue = function GivenGlueCommand_asvalue (engine) {
-	return new GlueRegValue (this.register);
+    proto.asvalref = function GivenGlueCommand_asvalref (engine) {
+	return new GlueRegValref (this.register);
     };
 
     return GivenGlueCommand;
@@ -670,8 +670,8 @@ var GivenMuglueCommand = (function GivenMuglueCommand_closure () {
     proto.name = '<given-muglue>';
     proto.desc = 'muglue';
 
-    proto.asvalue = function GivenMuglueCommand_asvalue (engine) {
-	return new MuglueRegValue (this.register);
+    proto.asvalref = function GivenMuglueCommand_asvalref (engine) {
+	return new MuglueRegValref (this.register);
     };
 
     return GivenMuglueCommand;
@@ -685,8 +685,8 @@ var GivenToksCommand = (function GivenToksCommand_closure () {
     proto.name = '<given-toks>';
     proto.desc = 'toks';
 
-    proto.asvalue = function GivenToksCommand_asvalue (engine) {
-	return new ToksRegValue (this.register);
+    proto.asvalref = function GivenToksCommand_asvalref (engine) {
+	return new ToksRegValref (this.register);
     };
 
     return GivenToksCommand;
@@ -717,8 +717,8 @@ var GivenFontCommand = (function GivenFontCommand_closure () {
 	engine.set_font ('<current>', this.font);
     };
 
-    proto.asvalue = function GivenFontCommand_asvalue (engine) {
-	return new ConstantFontValue (this.font);
+    proto.asvalref = function GivenFontCommand_asvalref (engine) {
+	return new ConstantFontValref (this.font);
     };
 
     proto.texmeaning = function GivenFontCommand_texmeaning (engine) {
@@ -743,7 +743,7 @@ var NamedParamCommand = (function NamedParamCommand_closure () {
     proto.desc = '<undescribed>';
 
     proto.invoke = function NamedParamCommand_invoke (engine) {
-	var v = this.asvalue (engine);
+	var v = this.asvalref (engine);
 	engine.scan_optional_equals ();
 	var newval = v.scan (engine);
 	engine.debug ([this.desc, this.name, '=',
@@ -751,7 +751,7 @@ var NamedParamCommand = (function NamedParamCommand_closure () {
 	v.set (engine, newval);
     };
 
-    proto.asvalue = function NamedParamCommand_asvalue (engine) {
+    proto.asvalref = function NamedParamCommand_asvalref (engine) {
 	throw new TexInternalException ('not implemented');
     };
 
@@ -765,8 +765,8 @@ var NamedIntCommand = (function NamedIntCommand_closure () {
     var proto = NamedIntCommand.prototype;
     proto.desc = 'intpar';
 
-    proto.asvalue = function NamedIntCommand_asvalue (engine) {
-	return new IntParamValue (this.name);
+    proto.asvalref = function NamedIntCommand_asvalref (engine) {
+	return new IntParamValref (this.name);
     };
 
     return NamedIntCommand;
@@ -779,8 +779,8 @@ var NamedDimenCommand = (function NamedDimenCommand_closure () {
     var proto = NamedDimenCommand.prototype;
     proto.desc = 'dimenpar';
 
-    proto.asvalue = function NamedDimenCommand_asvalue (engine) {
-	return new DimenParamValue (this.name);
+    proto.asvalref = function NamedDimenCommand_asvalref (engine) {
+	return new DimenParamValref (this.name);
     };
 
     return NamedDimenCommand;
@@ -793,8 +793,8 @@ var NamedGlueCommand = (function NamedGlueCommand_closure () {
     var proto = NamedGlueCommand.prototype;
     proto.desc = 'gluepar';
 
-    proto.asvalue = function NamedGlueCommand_asvalue (engine) {
-	return new GlueParamValue (this.name);
+    proto.asvalref = function NamedGlueCommand_asvalref (engine) {
+	return new GlueParamValref (this.name);
     };
 
     return NamedGlueCommand;
@@ -807,8 +807,8 @@ var NamedMuGlueCommand = (function NamedMuGlueCommand_closure () {
     var proto = NamedMuGlueCommand.prototype;
     proto.desc = 'mugluepar';
 
-    proto.asvalue = function NamedMuGlueCommand_asvalue (engine) {
-	return new MuGlueParamValue (this.name);
+    proto.asvalref = function NamedMuGlueCommand_asvalref (engine) {
+	return new MuGlueParamValref (this.name);
     };
 
     return NamedMuGlueCommand;
@@ -821,8 +821,8 @@ var NamedToksCommand = (function NamedToksCommand_closure () {
     var proto = NamedToksCommand.prototype;
     proto.desc = 'tokspar';
 
-    proto.asvalue = function NamedToksCommand_asvalue (engine) {
-	return new ToksParamValue (this.name);
+    proto.asvalref = function NamedToksCommand_asvalref (engine) {
+	return new ToksParamValref (this.name);
     };
 
     return NamedToksCommand;
