@@ -2138,7 +2138,7 @@ var JSInflater = (function() {
 		bufferIndex += chunk.length;
 	    });
 
-	    that.data_callback (array.buffer);
+	    that.data_callback (null, array.buffer);
 	};
 	that.end = function() {
 	    z.inflateEnd();

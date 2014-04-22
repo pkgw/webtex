@@ -15,7 +15,16 @@ var RandomAccessURL = (function RandomAccessURL_closure () {
 
     proto.read_range = function RandomAccessURL_read_range (offset, length, callback) {
 	this.nm.requestRange (offset, offset + length, {
-	    onDone: function (begin, chunk) {
+	    onDone: function (args) {
+		var chunk = args.chunk, begin = args.begin;
+		var totlen = begin + chunk.byteLength;
+
+		if (offset < begin)
+		    throw new TexInternalException ('unexpectedly incomplete data');
+		if (offset + length > totlen)
+		    throw new TexInternalException ('too-short data');
+
+		chunk = chunk.slice (offset - begin, offset - begin + length);
 		callback (null, chunk);
 	    },
 	    onError: function (status) {
