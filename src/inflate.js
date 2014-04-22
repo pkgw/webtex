@@ -44,7 +44,7 @@
  * and contributors of zlib.
  */
 
-(function() {
+var JSInflater = (function() {
 
     // Global
     var MAX_BITS = 15;
@@ -2145,7 +2145,5 @@
 	};
     }
 
-    WEBTEX.IOBackend.makeInflater = function (callback) {
-	return new Inflater (callback);
-    };
+    return Inflater;
 })();

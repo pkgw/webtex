@@ -20,7 +20,8 @@ sharedjs = \
 
 
 browserjs = \
-  src/browser-api.js
+  src/browser-api.js \
+  src/browser-io.js
 
 browserprejs = \
   src/promise-0.1.1.js \
