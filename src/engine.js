@@ -62,20 +62,15 @@ var TopEquivTable = (function TopEquivTable_closure () {
 
 
 var Engine = (function Engine_closure () {
-    var TS_BEGINNING = 0, TS_MIDDLE = 1, TS_SKIPPING = 2;
     var AF_GLOBAL = 1 << 0;
     var CS_FI = 0, CS_ELSE_FI = 1, CS_OR_ELSE_FI = 2;
     var BO_SETBOX = 0;
 
-    function Engine (jobname, initial_ordsrc, bundle) {
+    function Engine (jobname, initial_linebuf, bundle) {
 	this.jobname = jobname;
 	this.bundle = bundle;
 
-	this.ordsrc = initial_ordsrc;
-	this.tokenizer_state = TS_BEGINNING;
-	this.pushed_tokens = [];
-	this.current_tokens = [];
-	this.recent_tokens = [];
+	this.inputstack = new InputStack (initial_linebuf, this);
 
 	this.eqtb = new TopEquivTable ();
 	this.mode_stack = [M_VERT];
@@ -133,34 +128,42 @@ var Engine = (function Engine_closure () {
     // Driving everything
 
     proto.step = function Engine_step () {
+	var initial_is = this.inputstack.clone ();
+
 	var tok = this.next_x_tok ();
-	if (tok === NeedMoreData || tok === EOF)
+	if (tok === EOF)
 	    return tok;
+
+	if (tok === NeedMoreData) {
+	    // Reset to where we were at the beginning of the step.
+	    this.inputstack = initial_is;
+	    return tok;
+	}
 
 	try {
 	    var cmd = tok.tocmd (this);
 	    var result = cmd.invoke (this);
+	    if (result != null)
+		this.mode_accum (result);
 	} catch (e) {
 	    if (e === NeedMoreData) {
-		this.debug ('NeedMoreData: restarting with ' +
-			    this.current_tokens.join (' '));
-		this.recent_tokens = this.current_tokens;
+		this.inputstack = initial_is;
 		return NeedMoreData;
 	    }
 	    if (e === EOF)
 		throw new TexRuntimeException ('unexpected EOF while parsing');
 	    throw e;
-	} finally {
-	    this.current_tokens = [];
 	}
+
 	if (cmd.assign_flag_mode == AFM_INVALID && this.assign_flags)
 	    this.warn ('assignment flags applied to inapplicable command ' + cmd);
 	else if (cmd.assign_flag_mode != AFM_CONTINUE)
 	    this.assign_flags = 0;
 
-	if (result != null)
-	    this.mode_accum (result);
-
+	// We successfully completed this step, so we can throw away any old
+	// tokens we were holding on to. We also throw away the saved
+	// initial_is since we don't need to go back to it.
+	this.inputstack.checkpoint ();
 	return true;
     };
 
@@ -250,12 +253,11 @@ var Engine = (function Engine_closure () {
 	if (lb == null)
 	    throw new TexRuntimeException ('can\'t find any matching files for "' +
 					   texfn + '"');
-	this.ordsrc = new OrdSource (lb, this.ordsrc);
+	this.inputstack.push_linebuf (lb);
     };
 
     proto.handle_endinput = function Engine_handle_endinput () {
-	// If this.ordsrc becomes null, the right thing happens.
-	this.ordsrc = this.ordsrc.parent;
+	this.inputstack.pop_current_linebuf ();
     };
 
     proto.infile = function Engine_infile (num) {
@@ -276,7 +278,7 @@ var Engine = (function Engine_closure () {
     // the rest of the engine.
 
     proto.push = function Engine_push (tok) {
-	this.pushed_tokens.push (tok);
+	this.inputstack.push_toklist ([tok]);
     };
 
     proto.push_string = function Engine_push_string (text) {
@@ -288,120 +290,8 @@ var Engine = (function Engine_closure () {
 	}
     };
 
-    proto._next_tok_simple = function Engine__next_tok_simple () {
-	if (this.recent_tokens.length)
-	    return this.recent_tokens.shift ();
-	if (this.pushed_tokens.length)
-	    return this.pushed_tokens.pop ();
-	if (this.ordsrc == null)
-	    return EOF; // \endinput called on toplevel stream.
-
-	var catcodes = this.eqtb._catcodes;
-	var o = this.ordsrc.next (catcodes);
-
-	if (o === NeedMoreData)
-	    return o;
-
-	if (o == EOF) {
-	    this.ordsrc = this.ordsrc.parent;
-	    if (this.ordsrc === null)
-		return EOF;
-	    return this._next_tok_simple ();
-	}
-
-	var cc = catcodes[o];
-
-	if (cc == C_ESCAPE) {
-	    if (this.ordsrc.iseol ())
-		return Token.new_cseq ('');
-
-	    o = this.ordsrc.next (catcodes);
-	    if (o === EOF || o === NeedMoreData)
-		// We buffer things line-by-line so these conditions should
-		// never happen -- cseq's can't span between lines.
-		throw new TexRuntimeException ('unexpectly ran out of data (1)');
-
-	    cc = catcodes[o];
-	    var csname = String.fromCharCode (o);
-
-	    if (cc != C_LETTER) {
-		if (cc == C_SPACE)
-		    this.tokenizer_state = TS_SKIPPING;
-		else
-		    this.tokenizer_state = TS_MIDDLE;
-		return Token.new_cseq (csname);
-	    }
-
-	    while (1) {
-		o = this.ordsrc.next (catcodes);
-		if (o === EOF || o === NeedMoreData)
-		    throw new TexRuntimeException ('unexpectly ran out of data (1)');
-
-		cc = catcodes[o];
-		if (cc != C_LETTER) {
-		    this.ordsrc.push_ord (o);
-		    break;
-		}
-
-		csname += String.fromCharCode (o);
-	    }
-
-	    this.tokenizer_state = TS_SKIPPING;
-	    return Token.new_cseq (csname);
-	}
-
-	if (cc_ischar[cc]) {
-	    this.tokenizer_state = TS_MIDDLE;
-	    return Token.new_char (cc, o);
-	}
-
-	if (cc == C_EOL) {
-	    this.ordsrc.discard_line ();
-	    var prev_ts = this.tokenizer_state;
-	    this.tokenizer_state = TS_BEGINNING;
-
-	    if (prev_ts == TS_BEGINNING)
-		return Token.new_cseq ('par');
-	    if (prev_ts == TS_MIDDLE)
-		return Token.new_char (C_SPACE, O_SPACE);
-	    // TS_SKIPPING:
-	    return this._next_tok_simple ();
-	}
-
-	if (cc == C_IGNORE)
-	    return this._next_tok_simple ();
-
-	if (cc == C_SPACE) {
-	    if (this.tokenizer_state == TS_MIDDLE) {
-		this.tokenizer_state = TS_SKIPPING;
-		return Token.new_char (C_SPACE, O_SPACE);
-	    }
-	    return this._next_tok_simple ();
-	}
-
-	if (cc == C_COMMENT) {
-	    this.ordsrc.discard_line ();
-	    this.tokenizer_state = TS_SKIPPING;
-	    return this._next_tok_simple ();
-	}
-
-	if (cc == C_INVALID) {
-	    this.warn ('read invalid character ' + escchr (o));
-	    return this._next_tok_simple ();
-	}
-
-	// TODO: endinput
-	throw new TexInternalException ('not reached');
-    };
-
     proto.next_tok = function Engine_next_tok () {
-	var tok = this._next_tok_simple ();
-	//console.log ('T: ' + tok);
-	if (tok === NeedMoreData || tok === EOF)
-	    return tok;
-
-	this.current_tokens.push (tok);
-	return tok;
+	return this.inputstack.next_tok ();
     };
 
     proto.next_x_tok = function Engine_next_x_tok () {

@@ -10,6 +10,7 @@ sharedjs = \
   src/token.js \
   src/linebuffer.js \
   src/ordsource.js \
+  src/inputstack.js \
   src/command.js \
   src/command-impls.js \
   $(builddir)/engine-helpers.js \

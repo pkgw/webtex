@@ -11,8 +11,7 @@ var OrdSource = WEBTEX.OrdSource = (function OrdSource_closure () {
 	return o;
     }) ();
 
-    function OrdSource (linebuffer, parent) {
-	this.parent = parent;
+    function OrdSource (linebuffer) {
 	this.linebuffer = linebuffer;
 	this.pushed = [];
 	this.curords = null;
