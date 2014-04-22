@@ -4,6 +4,33 @@ WEBTEX.IOBackend.makeInflater = function (callback) {
     return new JSInflater (callback);
 };
 
+function stream_url_to_linebuffer (url, lb) {
+    // XXXXXX Firefox-specific!!!
+    var xhr = new XMLHttpRequest ();
+    xhr.open ('GET', url, true);
+    xhr.responseType = 'moz-chunked-arraybuffer';
+
+    xhr.addEventListener ('progress', function (event) {
+	var t = String.fromCharCode.apply (null, new Uint8Array (xhr.response));
+	lb.feed_data (t);
+    });
+
+    xhr.addEventListener ('load', function (event) {
+	lb.end ();
+    });
+
+    xhr.addEventListener ('error', function (event) {
+	throw new TexRuntimeException ('no failure infrastructure! ' + event);
+    });
+
+    xhr.addEventListener ('abort', function (event) {
+	throw new TexRuntimeException ('no failure infrastructure! ' + event);
+    });
+
+    xhr.send (null);
+}
+
+
 var RandomAccessURL = (function RandomAccessURL_closure () {
     function RandomAccessURL (url) {
 	this.url = url;
