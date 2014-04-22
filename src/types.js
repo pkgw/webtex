@@ -521,9 +521,35 @@ var Valref = (function Valref_closure () {
 
     Valref.prototype.stringify = function Valref_stringify (engine, value) {
 	/* This function is needed for Values whose instances don't have an
-	 * appropriate toString() method. */
+	 * appropriate toString() method. It is currently only used in
+	 * debugging statements. */
 	return '' + value;
     };
+
+    Valref.prototype.get = function Valref_get (engine) {
+	/* Retrieve the actual value of this reference. Typically involves
+	 * scanning tokens in the engine. May return null if there's no value
+	 * but that situation is expected. */
+	throw new TexInternalException ('not implemented Valref.get');
+    };
+
+    Valref.prototype.set = function Valref_set (engine, value) {
+	/* Assign a new value to the storage location that this reference
+	 * represents. */
+	throw new TexInternalException ('not implemented Valref.set');
+    };
+
+    Valref.prototype.scan = function Valref_scan (engine) {
+	/* Scan a value of the kind that this object references. Note that
+	 * this is some kind of literal that the engine's ready to read;
+	 * it's not necessarily the value that this particular reference
+	 * points to. */
+	throw new TexInternalException ('not implemented Valref.scan');
+    };
+
+    Valref.prototype.is_toks_value = false;
+    /* Somewhat hacky property to help with toklist scanning. Works how
+     * it sounds. */
 
     return Valref;
 }) ();
