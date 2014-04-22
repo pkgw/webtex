@@ -1,5 +1,17 @@
 'use strict';
 
+function buffer_to_arraybuffer (buf) {
+    var ab = new ArrayBuffer (buf.length);
+    var view = new Uint8Array (ab);
+
+    // Apparently there's no better way to do this until Node 0.12.
+    for (var i = 0; i < buf.length; i++)
+        view[i] = buf[i];
+
+    return ab;
+}
+
+
 WEBTEX.Node.make_fs_linebuffer = (function make_fs_linebuffer (path) {
     var fs = require ('fs');
     var rs = fs.createReadStream (path, {encoding: 'ascii'});
@@ -20,40 +32,6 @@ WEBTEX.Node.make_fs_linebuffer = (function make_fs_linebuffer (path) {
     return lb;
 });
 
-
-WEBTEX.IOBackend.try_open_linebuffer = function NodeIO_try_open_linebuffer (texfn) {
-    // XXX temporary hack for trying restart-based parsing. We need to move to
-    // fetching the data from a bundle on-demand. In the meantime, we're
-    // performing a racy check for file existence because createReadStream throws
-    // its exception asynchronously.
-    var fs = require ('fs');
-    var paths = [texfn + '.tex', texfn];
-
-    while (paths.length) {
-	var path = paths.pop ();
-	path = 'deps/' + path; // XXX temporary!
-
-	try {
-	    fs.statSync (path);
-	    return WEBTEX.Node.make_fs_linebuffer (path);
-	} catch (e) {
-	    if (e.code != 'ENOENT')
-		throw e;
-	}
-    }
-};
-
-
-function buffer_to_arraybuffer (buf) {
-    var ab = new ArrayBuffer (buf.length);
-    var view = new Uint8Array (ab);
-
-    // Apparently there's no better way to do this until Node 0.12.
-    for (var i = 0; i < buf.length; i++)
-        view[i] = buf[i];
-
-    return ab;
-}
 
 WEBTEX.Node.RandomAccessFile = (function RandomAccessFile_closure () {
     var fs = require ('fs');
