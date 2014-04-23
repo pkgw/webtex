@@ -43,7 +43,7 @@ var Token = WEBTEX.Token = (function Token_closure () {
 	}
 
 	if (this.kind == TK_CSEQ)
-	    return (texchr (engine.intpar ('escapechar')) +
+	    return (texchr (engine.escapechar ()) +
 		    this._csesc (texchr) + ' ');
 
 	if (this.kind == TK_PARAM)

@@ -161,16 +161,16 @@ def mac_parameter_info (emit, data, restargs):
 
 
 def mac_init_parameters (emit, data, restargs):
-    info = {'glue': ('set_gluepar', 'new Glue ()'),
-            'muglue': ('set_mugluepar', 'new Glue ()'),
-            'toklist': ('set_tokpar', 'new Toklist ()'),
-            'int': ('set_intpar', 'new TexInt (0)'),
-            'dimen': ('set_dimenpar', 'new Dimen (0)'),
+    info = {'glue': ('T_GLUE', 'new Glue ()'),
+            'muglue': ('T_MUGLUE', 'new Glue ()'),
+            'toklist': ('T_TOKLIST', 'new Toklist ()'),
+            'int': ('T_INT', 'new TexInt (0)'),
+            'dimen': ('T_DIMEN', 'new Dimen (0)'),
         }
 
     for item in data.namedparams:
-        setter, init = info[item.type]
-        emit ('engine.%s (%r, %s);' % (setter, item.name, init))
+        valtype, init = info[item.type]
+        emit ('engine.set_parameter (%s, %r, %s);' % (valtype, item.name, init))
 
 
 def mac_include_impls (emit, data, restargs):

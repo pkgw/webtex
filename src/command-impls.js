@@ -78,7 +78,7 @@ commands.string = function cmd_string (engine) {
     }
 
     if (tok.iscslike ()) { // active chars were handled above
-	var expn = tok.name, esc = engine.intpar ('escapechar');
+	var expn = tok.name, esc = engine.escapechar ();
 	if (esc >= 0 && esc < 256)
 	    expn = String.fromCharCode (esc) + expn;
     } else

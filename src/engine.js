@@ -11,6 +11,13 @@ var EquivTable = (function EquivTable_closure () {
 	this._qq_registers[T_TOKLIST] = {};
 	this._qq_registers[T_BOXLIST] = {};
 
+	this._qq_parameters = {};
+	this._qq_parameters[T_INT] = {};
+	this._qq_parameters[T_DIMEN] = {};
+	this._qq_parameters[T_GLUE] = {};
+	this._qq_parameters[T_MUGLUE] = {};
+	this._qq_parameters[T_TOKLIST] = {};
+
 	init_generic_eqtb (this);
     }
 
@@ -21,6 +28,8 @@ var EquivTable = (function EquivTable_closure () {
 	/* Any valtype is OK: int, dimen, glue, nuglue, toklist, boxlist. */
 	if (reg < 0 || reg > 255)
 	    throw new TexRuntimeError ('illegal register number ' + reg);
+	if (valtype == T_INT)
+	    value = new TexInt (TexInt.xcheck (value));
 	this._qq_registers[valtype][reg] = value;
     };
 
@@ -30,6 +39,23 @@ var EquivTable = (function EquivTable_closure () {
 	if (this._qq_registers[valtype].hasOwnProperty (reg))
 	    return this._qq_registers[valtype][reg];
 	return this.parent.get_register (valtype, reg);
+    };
+
+    proto.set_parameter = function EquivTable_set_parameter (valtype, name, value) {
+	/* OK valtypes are: int, dimen, glue, nuglue, toklist. */
+	if (valtype == T_BOXLIST)
+	    throw new TexInternalError ('boxlist named parameters are forbidden');
+	if (valtype == T_INT)
+	    value = new TexInt (TexInt.xcheck (value));
+	this._qq_parameters[valtype][name] = value;
+    };
+
+    proto.get_parameter = function EquivTable_get_parameter (valtype, name) {
+	if (valtype == T_BOXLIST)
+	    throw new TexInternalError ('boxlist named parameters are forbidden');
+	if (this._qq_parameters[valtype].hasOwnProperty (name))
+	    return this._qq_parameters[valtype][name];
+	return this.parent.get_parameter (valtype, name);
     };
 
     return EquivTable;
@@ -130,18 +156,18 @@ var Engine = (function Engine_closure () {
 	this.commands['<space>'] = new Command.catcode_commands[C_SPACE] (O_SPACE);
 
 	// T:TP sec 240; has to go after $init_parameters
-	this.set_intpar ('mag', 1000);
-	this.set_intpar ('tolerance', 1000);
-	this.set_intpar ('hangafter', 1);
-	this.set_intpar ('maxdeadcycles', 25);
-	this.set_intpar ('escapechar', O_BACKSLASH);
-	this.set_intpar ('endlinechar', O_RETURN);
+	this.set_parameter (T_INT, 'mag', 1000);
+	this.set_parameter (T_INT, 'tolerance', 1000);
+	this.set_parameter (T_INT, 'hangafter', 1);
+	this.set_parameter (T_INT, 'maxdeadcycles', 25);
+	this.set_parameter (T_INT, 'escapechar', O_BACKSLASH);
+	this.set_parameter (T_INT, 'endlinechar', O_RETURN);
 
 	var d = new Date ();
-	this.set_intpar ('year', d.getYear ());
-	this.set_intpar ('month', d.getMonth ());
-	this.set_intpar ('day', d.getDay ());
-	this.set_intpar ('time', d.getHours () * 60 + d.getMinutes ());
+	this.set_parameter (T_INT, 'year', d.getYear ());
+	this.set_parameter (T_INT, 'month', d.getMonth ());
+	this.set_parameter (T_INT, 'day', d.getDay ());
+	this.set_parameter (T_INT, 'time', d.getHours () * 60 + d.getMinutes ());
 
 	var nf = new Font ('nullfont', -1000);
 	this.set_font ('<null>', nf);
@@ -157,6 +183,16 @@ var Engine = (function Engine_closure () {
 
     proto.set_register = function Engine_get_register (valtype, reg, value) {
 	var rv = this.eqtb.set_register (valtype, reg, value);
+	this.maybe_insert_after_assign_token ();
+	return rv;
+    };
+
+    proto.get_parameter = function Engine_get_parameter (valtype, name) {
+	return this.eqtb.get_parameter (valtype, name);
+    };
+
+    proto.set_parameter = function Engine_get_parameter (valtype, name, value) {
+	var rv = this.eqtb.set_parameter (valtype, name, value);
 	this.maybe_insert_after_assign_token ();
 	return rv;
     };
@@ -1118,6 +1154,10 @@ var Engine = (function Engine_closure () {
 		this.after_assign_token = null;
 	    }
 	};
+
+    proto.escapechar = function Engine_escapechar () {
+	return this.get_parameter (T_INT, 'escapechar').value;
+    };
 
     return Engine;
 })();

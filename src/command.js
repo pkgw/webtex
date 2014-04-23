@@ -58,7 +58,7 @@ var Command = WEBTEX.Command = (function Command_closure () {
     };
 
     proto.texmeaning = function Command_texmeaning (engine) {
-	return texchr (engine.intpar ('escapechar')) + this.name;
+	return texchr (engine.escapechar ()) + this.name;
     };
 
     return Command;
@@ -535,7 +535,7 @@ var GivenCharCommand = (function GivenCharCommand_closure () {
     };
 
     proto.texmeaning = function GivenCharCommand_texmeaning (engine) {
-	return texchr (engine.intpar ('escapechar')) + 'char' +
+	return texchr (engine.escapechar ()) + 'char' +
 	    this.ord.toString (16).toUpperCase ();
     };
 
@@ -568,7 +568,7 @@ var GivenMathcharCommand = (function GivenMathcharCommand_closure () {
     };
 
     proto.texmeaning = function GivenMathcharCommand_texmeaning (engine) {
-	return texchr (engine.intpar ('escapechar')) + 'mathchar' +
+	return texchr (engine.escapechar ()) + 'mathchar' +
 	    this.ord.toString (16).toUpperCase ();
     };
 
@@ -609,7 +609,7 @@ var GivenRegisterCommand = (function GivenRegisterCommand_closure () {
     // subclasses implement asvalref()
 
     proto.texmeaning = function GivenRegisterCommand_texmeaning (engine) {
-	return texchr (engine.intpar ('escapechar')) + this.desc +
+	return texchr (engine.escapechar ()) + this.desc +
 	    this.register;
     };
 
@@ -764,7 +764,8 @@ var NamedIntCommand = (function NamedIntCommand_closure () {
     proto.desc = 'intpar';
 
     proto.asvalref = function NamedIntCommand_asvalref (engine) {
-	return new IntParamValref (this.name);
+	console.log ('zzzzz ' + this.name);
+	return new ParamValref (T_INT, this.name);
     };
 
     return NamedIntCommand;
@@ -778,7 +779,7 @@ var NamedDimenCommand = (function NamedDimenCommand_closure () {
     proto.desc = 'dimenpar';
 
     proto.asvalref = function NamedDimenCommand_asvalref (engine) {
-	return new DimenParamValref (this.name);
+	return new ParamValref (T_DIMEN, this.name);
     };
 
     return NamedDimenCommand;
@@ -792,7 +793,7 @@ var NamedGlueCommand = (function NamedGlueCommand_closure () {
     proto.desc = 'gluepar';
 
     proto.asvalref = function NamedGlueCommand_asvalref (engine) {
-	return new GlueParamValref (this.name);
+	return new ParamValref (T_GLUE, this.name);
     };
 
     return NamedGlueCommand;
@@ -806,7 +807,7 @@ var NamedMuGlueCommand = (function NamedMuGlueCommand_closure () {
     proto.desc = 'mugluepar';
 
     proto.asvalref = function NamedMuGlueCommand_asvalref (engine) {
-	return new MuGlueParamValref (this.name);
+	return new ParamValref (T_MUGLUE, this.name);
     };
 
     return NamedMuGlueCommand;
@@ -820,7 +821,7 @@ var NamedToksCommand = (function NamedToksCommand_closure () {
     proto.desc = 'tokspar';
 
     proto.asvalref = function NamedToksCommand_asvalref (engine) {
-	return new ToksParamValref (this.name);
+	return new ParamValref (T_TOKLIST, this.name);
     };
 
     return NamedToksCommand;

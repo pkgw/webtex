@@ -4,15 +4,10 @@
 
 actives			ord	cmd
 cseqs			str	cmd
-gluepars		str	glue
-mugluepars		str	muglue
-tokpars			str	toklist
 catcodes		ord	catcode
 lccodes			ord	ord
 uccodes			ord	ord
 sfcodes			ord	spacefac
 mathcodes		ord	mathcode
-intpars			str	int
 delcodes		ord	delcode
-dimenpars		str	dimen
 fonts			str	font

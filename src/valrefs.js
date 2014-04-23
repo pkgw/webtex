@@ -66,12 +66,32 @@ var RegisterValref = (function RegisterValref_closure () {
 
 
 var ParamValref = (function ParamValref_closure () {
-    function ParamValref (name) {
+    function ParamValref (valtype, name) {
+	/* All valtypes are OK: int dimen glue muglue toklist boxlist */
+	if (valtype == T_BOXLIST)
+	    throw new TexInternalError ('boxlist named parameters are forbidden');
+
 	Valref.call (this);
+	this.valtype = valtype;
 	this.name = name;
+	this.is_toks_value = (valtype == T_TOKLIST); // XXX temporary
     }
 
     inherit (ParamValref, Valref);
+    var proto = ParamValref.prototype;
+
+    proto.scan = function ParamValref_scan (engine) {
+	// XXX to be removed.
+	return engine.scan_valtype (this.valtype);
+    };
+
+    proto.get = function ParamValref_get (engine) {
+	return engine.get_parameter (this.valtype, this.name);
+    };
+
+    proto.set = function ParamValref_set (engine, value) {
+	engine.set_parameter (this.valtype, this.name, value);
+    };
 
     return ParamValref;
 }) ();
@@ -171,90 +191,4 @@ var ConstantFontValref = (function ConstantFontValref_closure () {
     function ConstantFontValref (value) { ConstantValref.call (this, value); }
     inherit (ConstantFontValref, ConstantValref);
     return _make_font_valref (ConstantFontValref);
-}) ();
-
-
-var IntParamValref = (function IntParamValref_closure () {
-    function IntParamValref (name) { ParamValref.call (this, name); }
-    inherit (IntParamValref, ParamValref);
-    var proto = IntParamValref.prototype;
-
-    proto.get = function IntParamValref_get (engine) {
-	return new TexInt (engine.intpar (this.name));
-    };
-
-    proto.set = function IntParamValref_set (engine, value) {
-	value = TexInt.xcheck (value);
-	engine.set_intpar (this.name, value);
-    };
-
-    return _make_int_valref (IntParamValref);
-}) ();
-
-
-var DimenParamValref = (function DimenParamValref_closure () {
-    function DimenParamValref (name) { ParamValref.call (this, name); }
-    inherit (DimenParamValref, ParamValref);
-    var proto = DimenParamValref.prototype;
-
-    proto.get = function DimenParamValref_get (engine) {
-	return engine.dimenpar (this.name);
-    };
-
-    proto.set = function DimenParamValref_set (engine, value) {
-	engine.set_dimenpar (this.name, value);
-    };
-
-    return _make_dimen_valref (DimenParamValref);
-}) ();
-
-
-var GlueParamValref = (function GlueParamValref_closure () {
-    function GlueParamValref (name) { ParamValref.call (this, name); }
-    inherit (GlueParamValref, ParamValref);
-    var proto = GlueParamValref.prototype;
-
-    proto.get = function GlueParamValref_get (engine) {
-	return engine.gluepar (this.name);
-    };
-
-    proto.set = function GlueParamValref_set (engine, value) {
-	engine.set_gluepar (this.name, value);
-    };
-
-    return _make_glue_valref (GlueParamValref);
-}) ();
-
-
-var MuGlueParamValref = (function MuGlueParamValref_closure () {
-    function MuGlueParamValref (name) { ParamValref.call (this, name); }
-    inherit (MuGlueParamValref, ParamValref);
-    var proto = MuGlueParamValref.prototype;
-
-    proto.get = function MuGlueParamValref_get (engine) {
-	return engine.mugluepar (this.name);
-    };
-
-    proto.set = function MuGlueParamValref_set (engine, value) {
-	engine.set_mugluepar (this.name, value);
-    };
-
-    return _make_muglue_valref (MuGlueParamValref);
-}) ();
-
-
-var ToksParamValref = (function ToksParamValref_closure () {
-    function ToksParamValref (name) { ParamValref.call (this, name); }
-    inherit (ToksParamValref, ParamValref);
-    var proto = ToksParamValref.prototype;
-
-    proto.get = function ToksParamValref_get (engine) {
-	return engine.tokpar (this.name);
-    };
-
-    proto.set = function ToksParamValref_set (engine, value) {
-	engine.set_tokpar (this.name, value);
-    };
-
-    return _make_toks_valref (ToksParamValref);
 }) ();
