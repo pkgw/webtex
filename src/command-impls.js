@@ -63,7 +63,7 @@ commands.csname = function cmd_csname (engine) {
     engine.debug ('* \\csname...\\endcsname -> ' + tok);
     engine.push (tok);
 
-    if (engine.cseq (csname) == null)
+    if (engine.get_cseq (csname) == null)
 	tok.assign_cmd (engine, engine.commands['relax']);
 };
 
@@ -748,7 +748,7 @@ commands.font = (function FontCommand_closure () {
     };
 
     proto.asvalref = function FontCommand_asvalref (engine) {
-	return new ConstantValref (T_FONT, engine.font ('<current>'));
+	return new ConstantValref (T_FONT, engine.get_font ('<current>'));
     };
 
     return FontCommand;
@@ -764,11 +764,11 @@ commands.nullfont = (function NullFontCommand_closure () {
 
     proto.invoke = function NullFontCommand_invoke (engine) {
 	engine.debug ('activate null font');
-	engine.set_font ('<current>', engine.font ('<null>'));
+	engine.set_font ('<current>', engine.get_font ('<null>'));
     };
 
     proto.asvalref = function NullFontCommand_asvalref (engine) {
-	return new ConstantValref (T_FONT, engine.font ('<null>'));
+	return new ConstantValref (T_FONT, engine.get_font ('<null>'));
     };
 
     proto.texmeaning = function NullFontCommand_texmeaning (engine) {

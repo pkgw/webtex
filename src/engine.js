@@ -1,7 +1,14 @@
 var EquivTable = (function EquivTable_closure () {
     function EquivTable (parent) {
-	this.toplevel = parent.toplevel;
 	this.parent = parent;
+
+	if (parent == null) {
+	    this.toplevel = this;
+	    this._qq_catcodes = new Array (256);
+	} else {
+	    this.toplevel = parent.toplevel;
+	    this._qq_catcodes = parent._qq_catcodes.slice ();
+	}
 
 	this._qq_registers = {};
 	this._qq_registers[T_INT] = {};
@@ -18,7 +25,6 @@ var EquivTable = (function EquivTable_closure () {
 	this._qq_parameters[T_MUGLUE] = {};
 	this._qq_parameters[T_TOKLIST] = {};
 
-	this._qq_catcodes = parent._qq_catcodes.slice ();
 	this._qq_codes = {};
 	this._qq_codes[CT_LOWERCASE] = {};
 	this._qq_codes[CT_UPPERCASE] = {};
@@ -26,11 +32,15 @@ var EquivTable = (function EquivTable_closure () {
 	this._qq_codes[CT_MATH] = {};
 	this._qq_codes[CT_DELIM] = {};
 
-	init_generic_eqtb (this);
+	this._actives = {};
+	this._cseqs = {};
+	this._fonts = {};
+
+	if (parent == null)
+	    this._toplevel_init ();
     }
 
     var proto = EquivTable.prototype;
-    fill_generic_eqtb_accessors (proto);
 
     proto.set_register = function EquivTable_set_register (valtype, reg, value) {
 	if (!vt_ok_for_register[valtype])
@@ -99,20 +109,49 @@ var EquivTable = (function EquivTable_closure () {
 	return this.parent.get_code (codetype, ord);
     };
 
-    return EquivTable;
-})();
+    proto.get_active = function EquivTable_get_active (ord) {
+	if (ord < 0 || ord > 255)
+	    throw new TexRuntimeError ('illegal ordinal number ' + ord);
 
+	if (this._actives.hasOwnProperty (ord))
+	    return this._actives[ord];
+	if (this.parent == null)
+	    return null;
+	return this.parent.get_active (ord);
+    };
 
-var TopEquivTable = (function TopEquivTable_closure () {
-    function TopEquivTable () {
-	// We need some gymnastics to get the chained constructor to DTRT.
-	this.toplevel = this;
-	this._qq_catcodes = new Array (256);
-	EquivTable.call (this, this);
-	this.parent = null;
+    proto.set_active = function EquivTable_set_active (ord, value) {
+	if (ord < 0 || ord > 255)
+	    throw new TexRuntimeError ('illegal ordinal number ' + ord);
 
-	init_top_eqtb (this);
+	this._actives[ord] = value;
+    };
 
+    proto.get_cseq = function EquivTable_get_cseq (name) {
+	if (this._cseqs.hasOwnProperty (name))
+	    return this._cseqs[name];
+	if (this.parent == null)
+	    return null;
+	return this.parent.get_cseq (name);
+    };
+
+    proto.set_cseq = function EquivTable_set_cseq (name, value) {
+	this._cseqs[name] = value;
+    };
+
+    proto.get_font = function EquivTable_get_font (name) {
+	if (this._fonts.hasOwnProperty (name))
+	    return this._fonts[name];
+	if (this.parent == null)
+	    return null;
+	return this.parent.get_font (name);
+    };
+
+    proto.set_font = function EquivTable_set_font (name, value) {
+	this._fonts[name] = value;
+    };
+
+    proto._toplevel_init = function EquivTable__toplevel_init () {
 	for (var i = 0; i < 256; i++) {
 	    this._qq_catcodes[i] = C_OTHER;
 	    this._qq_codes[CT_MATH][i] = i;
@@ -148,14 +187,9 @@ var TopEquivTable = (function TopEquivTable_closure () {
 	this._qq_catcodes[O_PERCENT] = C_COMMENT;
 	this._qq_catcodes[O_BACKSLASH] = C_ESCAPE;
 	this._qq_codes[CT_DELIM][O_PERIOD] = 0;
-    }
+    };
 
-    inherit (TopEquivTable, EquivTable);
-    var proto = TopEquivTable.prototype;
-
-    fill_top_eqtb_accessors (proto);
-
-    return TopEquivTable;
+    return EquivTable;
 })();
 
 
@@ -170,7 +204,7 @@ var Engine = (function Engine_closure () {
 
 	this.inputstack = new InputStack (initial_linebuf, this);
 
-	this.eqtb = new TopEquivTable ();
+	this.eqtb = new EquivTable (null);
 	this.mode_stack = [M_VERT];
 	this.build_stack = [[]];
 	this.group_exit_stack = [];
@@ -211,7 +245,8 @@ var Engine = (function Engine_closure () {
     }
 
     var proto = Engine.prototype;
-    fill_engine_eqtb_wrappers (proto, AF_GLOBAL);
+
+    // Wrappers for the EquivTable.
 
     proto.get_register = function Engine_get_register (valtype, reg) {
 	return this.eqtb.get_register (valtype, reg);
@@ -246,6 +281,42 @@ var Engine = (function Engine_closure () {
 	    this.eqtb.toplevel.set_code (valtype, ord, value);
 	else
 	    this.eqtb.set_code (valtype, ord, value);
+	this.maybe_insert_after_assign_token ();
+    };
+
+    proto.get_active = function Engine_get_active (ord) {
+	return this.eqtb.get_active (ord);
+    };
+
+    proto.set_active = function Engine_get_active (ord, value) {
+	if (this.assign_flags & AF_GLOBAL)
+	    this.eqtb.toplevel.set_active (ord, value);
+	else
+	    this.eqtb.set_active (ord, value);
+	this.maybe_insert_after_assign_token ();
+    };
+
+    proto.get_cseq = function Engine_get_cseq (name) {
+	return this.eqtb.get_cseq (name);
+    };
+
+    proto.set_cseq = function Engine_get_cseq (name, cmd) {
+	if (this.assign_flags & AF_GLOBAL)
+	    this.eqtb.toplevel.set_cseq (name, cmd);
+	else
+	    this.eqtb.set_cseq (name, cmd);
+	this.maybe_insert_after_assign_token ();
+    };
+
+    proto.get_font = function Engine_get_font (name) {
+	return this.eqtb.get_font (name);
+    };
+
+    proto.set_font = function Engine_get_font (name, value) {
+	if (this.assign_flags & AF_GLOBAL)
+	    this.eqtb.toplevel.set_font (name, value);
+	else
+	    this.eqtb.set_font (name, value);
 	this.maybe_insert_after_assign_token ();
     };
 

@@ -1,7 +1,3 @@
 # Categories of things that are managed by the equivalents table
 #
 #name			index	valuetype
-
-actives			ord	cmd
-cseqs			str	cmd
-fonts			str	font

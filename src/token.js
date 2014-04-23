@@ -75,7 +75,7 @@ var Token = WEBTEX.Token = (function Token_closure () {
 
 	if (this.kind == TK_CHAR) {
 	    if (this.catcode == C_ACTIVE)
-		cmd = engine.active (this.ord);
+		cmd = engine.get_active (this.ord);
 	    else {
 		var cmdclass = Command.catcode_commands[this.catcode];
 		if (cmdclass === null)
@@ -85,7 +85,7 @@ var Token = WEBTEX.Token = (function Token_closure () {
 		name = '[char ' + String.fromCharCode (this.ord) + ']';
 	    }
 	} else if (this.kind == TK_CSEQ) {
-	    cmd = engine.cseq (this.name);
+	    cmd = engine.get_cseq (this.name);
 	    name = this.name;
 	} else {
 	    throw new TexInternalError ('cannot commandify token ' + this);
