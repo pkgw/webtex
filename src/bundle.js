@@ -26,7 +26,7 @@ var Bundle = (function Bundle_closure () {
 	    var lb = new LineBuffer ();
 	    this.zipreader.stream_entry (path, function (err, buf) {
 		if (err != null)
-		    throw new TexRuntimeException ('quasi-unhandled I/O error: ' + err);
+		    throw new TexRuntimeError ('quasi-unhandled I/O error: ' + err);
 
 		if (buf == null) {
 		    lb.end ();

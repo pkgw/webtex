@@ -20,11 +20,11 @@ function stream_url_to_linebuffer (url, lb) {
     });
 
     xhr.addEventListener ('error', function (event) {
-	throw new TexRuntimeException ('no failure infrastructure! ' + event);
+	throw new TexRuntimeError ('no failure infrastructure! ' + event);
     });
 
     xhr.addEventListener ('abort', function (event) {
-	throw new TexRuntimeException ('no failure infrastructure! ' + event);
+	throw new TexRuntimeError ('no failure infrastructure! ' + event);
     });
 
     xhr.send (null);
@@ -47,9 +47,9 @@ var RandomAccessURL = (function RandomAccessURL_closure () {
 		var totlen = begin + chunk.byteLength;
 
 		if (offset < begin)
-		    throw new TexInternalException ('unexpectedly incomplete data');
+		    throw new TexInternalError ('unexpectedly incomplete data');
 		if (offset + length > totlen)
-		    throw new TexInternalException ('too-short data');
+		    throw new TexInternalError ('too-short data');
 
 		chunk = chunk.slice (offset - begin, offset - begin + length);
 		callback (null, chunk);
@@ -62,7 +62,7 @@ var RandomAccessURL = (function RandomAccessURL_closure () {
 
     proto.size = function RandomAccessURL_size () {
 	if (this._size == null)
-	    throw new TexInternalException ('make_random_access_url broke?')
+	    throw new TexInternalError ('make_random_access_url broke?')
 	return this._size;
     };
 

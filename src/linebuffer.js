@@ -9,7 +9,7 @@ var LineBuffer = WEBTEX.LineBuffer = (function LineBuffer_closure () {
 
     proto.feed_data = function LineBuffer_feed_data (chunk) {
 	if (typeof chunk !== 'string')
-	    throw new TexInternalException ('LineBuffers must be fed strings; got' + chunk);
+	    throw new TexInternalError ('LineBuffers must be fed strings; got' + chunk);
 	chunk = this.remainder + chunk;
 	this.cachedlines = this.cachedlines.concat (chunk.split ("\n"));
 	this.remainder = this.cachedlines.pop ();

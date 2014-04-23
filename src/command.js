@@ -15,8 +15,8 @@ var Command = WEBTEX.Command = (function Command_closure () {
     };
 
     proto.invoke = function Command_invoke (engine) {
-	throw new TexInternalException ('tried to evaluate undefined/' +
-					'un-evaluatable command ' + this.name);
+	throw new TexInternalError ('tried to evaluate undefined/' +
+				    'un-evaluatable command ' + this.name);
     };
 
     proto.samecmd = function Command_samecmd (other) {
@@ -78,7 +78,7 @@ var CommandUnimplPrimitive = (function CommandUnimplPrimitive_closure () {
     var proto = CommandUnimplPrimitive.prototype;
 
     proto.invoke = function CommandUnimplPrimitive_invoke (engine) {
-	throw new TexRuntimeException ('unimplemented primitive \\' + this.name);
+	throw new TexRuntimeError ('unimplemented primitive \\' + this.name);
     };
 
     return CommandUnimplPrimitive;
@@ -95,7 +95,7 @@ var UndefinedCommand = (function UndefinedCommand_closure () {
     var proto = UndefinedCommand.prototype;
 
     proto.invoke = function UndefinedCommand_invoke (engine) {
-	throw new TexRuntimeException ('trying to invoke undefined command \\' + this.name);
+	throw new TexRuntimeError ('trying to invoke undefined command \\' + this.name);
     };
 
     proto.samecmd = function UndefinedCommand_samecmd (other) {
@@ -160,9 +160,9 @@ var MacroCommand = (function MacroCommand_closure () {
 		// sure that the actual token stream matches.
 		var atok = engine.next_x_tok_throw ();
 		if (!atok.equals (ttok))
-		    throw new TexRuntimeException ('macro invocation doesn\'t match ' +
-						   'template: expected ' + ttok + ', ' +
-						   'got ' + atok);
+		    throw new TexRuntimeError ('macro invocation doesn\'t match ' +
+					       'template: expected ' + ttok + ', ' +
+					       'got ' + atok);
 		tidx += 1;
 		continue;
 	    }
@@ -514,7 +514,7 @@ var GivenCharCommand = (function GivenCharCommand_closure () {
     function GivenCharCommand (ord) {
 	Command.call (this);
 	if (ord < 0 || ord > 255)
-	    throw new TexInternalException ('illegal character ordinal ' + ord);
+	    throw new TexInternalError ('illegal character ordinal ' + ord);
 	this.ord = ord;
     }
 
@@ -547,7 +547,7 @@ var GivenMathcharCommand = (function GivenMathcharCommand_closure () {
     function GivenMathcharCommand (mathchar) {
 	Command.call (this);
 	if (mathchar < 0 || mathchar > 32767)
-	    throw new TexInternalException ('illegal math character numder ' + mathchar);
+	    throw new TexInternalError ('illegal math character numder ' + mathchar);
 	this.mathchar = mathchar;
     }
 
@@ -580,7 +580,7 @@ var GivenRegisterCommand = (function GivenRegisterCommand_closure () {
     function GivenRegisterCommand (register) {
 	Command.call (this);
 	if (register < 0 || register > 255)
-	    throw new TexInternalException ('illegal register number ' + register);
+	    throw new TexInternalError ('illegal register number ' + register);
 	this.register = register;
     }
 
@@ -750,7 +750,7 @@ var NamedParamCommand = (function NamedParamCommand_closure () {
     };
 
     proto.asvalref = function NamedParamCommand_asvalref (engine) {
-	throw new TexInternalException ('not implemented');
+	throw new TexInternalError ('not implemented');
     };
 
     return NamedParamCommand;

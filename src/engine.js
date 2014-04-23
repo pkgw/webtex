@@ -151,7 +151,7 @@ var Engine = (function Engine_closure () {
 		return NeedMoreData;
 	    }
 	    if (e === EOF)
-		throw new TexRuntimeException ('unexpected EOF while parsing');
+		throw new TexRuntimeError ('unexpected EOF while parsing');
 	    throw e;
 	}
 
@@ -176,7 +176,7 @@ var Engine = (function Engine_closure () {
     proto.unnest_eqtb = function Engine_unnest_eqtb () {
 	this.eqtb = this.eqtb.parent;
 	if (this.eqtb == null)
-	    throw new TexInternalException ('unnested eqtb too far');
+	    throw new TexInternalError ('unnested eqtb too far');
     };
 
     proto.mode = function Engine_mode () {
@@ -216,7 +216,7 @@ var Engine = (function Engine_closure () {
 
     proto.handle_egroup = function Engine_handle_egroup () {
 	if (!this.group_exit_stack.length)
-	    throw new TexRuntimeException ('ending a group that wasn\'t started');
+	    throw new TexRuntimeError ('ending a group that wasn\'t started');
 	return (this.group_exit_stack.pop ()) (this);
     };
 
@@ -225,8 +225,8 @@ var Engine = (function Engine_closure () {
 	this.nest_eqtb ();
 
 	function end_semisimple (eng) {
-	    throw new TexRuntimeException ('expected \\endgroup but got something ' +
-					   'else');
+	    throw new TexRuntimeError ('expected \\endgroup but got something ' +
+				       'else');
 	}
 	end_semisimple.is_semisimple = true;
 
@@ -235,11 +235,11 @@ var Engine = (function Engine_closure () {
 
     proto.handle_endgroup = function Engine_handle_endgroup () {
 	if (!this.group_exit_stack.length)
-	    throw new TexRuntimeException ('stray \\endgroup');
+	    throw new TexRuntimeError ('stray \\endgroup');
 
 	var ender = this.group_exit_stack.pop ();
 	if (ender.is_semisimple !== true)
-	    throw new TexRuntimeException ('got \\endgroup when should have ' +
+	    throw new TexRuntimeError ('got \\endgroup when should have ' +
 					   'gotten other group-ender');
 
 	this.debug ('< <-- semi-simple>');
@@ -251,8 +251,8 @@ var Engine = (function Engine_closure () {
     proto.handle_input = function Engine_handle_input (texfn) {
 	var lb = this.bundle.try_open_linebuffer (texfn);
 	if (lb == null)
-	    throw new TexRuntimeException ('can\'t find any matching files for "' +
-					   texfn + '"');
+	    throw new TexRuntimeError ('can\'t find any matching files for "' +
+				       texfn + '"');
 	this.inputstack.push_linebuf (lb);
     };
 
@@ -262,13 +262,13 @@ var Engine = (function Engine_closure () {
 
     proto.infile = function Engine_infile (num) {
 	if (num < 0 || num > 15)
-	    throw new TexRuntimeException ('illegal input file number ' + num);
+	    throw new TexRuntimeError ('illegal input file number ' + num);
 	return this.infiles[num];
     };
 
     proto.set_infile = function Engine_set_infile (num, value) {
 	if (num < 0 || num > 15)
-	    throw new TexRuntimeException ('illegal input file number ' + num);
+	    throw new TexRuntimeError ('illegal input file number ' + num);
 	this.infiles[num] = value;
     };
 
@@ -285,7 +285,7 @@ var Engine = (function Engine_closure () {
 	if (toks instanceof Toklist)
 	    toks = toks.toks; // convenience.
 	if (!(toks instanceof Array))
-	    throw new TexInternalException ('illegal push_toks argument: ' + toks);
+	    throw new TexInternalError ('illegal push_toks argument: ' + toks);
 	this.inputstack.push_toklist (toks);
     };
 
@@ -373,7 +373,7 @@ var Engine = (function Engine_closure () {
 	    if (tok.iscat (C_BGROUP))
 		return;
 
-	    throw new TexSyntaxException ('expected left brace but found ' + tok);
+	    throw new TexSyntaxError ('expected left brace but found ' + tok);
 	}
     };
 
@@ -457,7 +457,7 @@ var Engine = (function Engine_closure () {
 	    if (csname.length == 1)
 		return new TexInt (negfactor * csname.charCodeAt (0));
 
-	    throw new TexSyntaxException ('unhandled alpha number token ' + tok);
+	    throw new TexSyntaxError ('unhandled alpha number token ' + tok);
 	}
 
 	var v = tok.tocmd (this).as_int (this);
@@ -521,7 +521,7 @@ var Engine = (function Engine_closure () {
 	}
 
 	if (!sawany)
-	    throw new TexSyntaxException ('expected to see integer expression but ' +
+	    throw new TexSyntaxError ('expected to see integer expression but ' +
 				      'got the token ' + tok);
 
 	if (val > 0x7FFFFFFF) {
@@ -543,7 +543,7 @@ var Engine = (function Engine_closure () {
 	// note: returns JS integer, not TexInt.
 	var v = this.scan_int ().value;
 	if (v < 0 || v > 255)
-	    throw new TexRuntimeException ('illegal register number ' + v);
+	    throw new TexRuntimeError ('illegal register number ' + v);
 	return v;
     };
 
@@ -564,7 +564,7 @@ var Engine = (function Engine_closure () {
 	    v = v.get (this);
 
 	    if (mumode)
-		throw new TexRuntimeException ('not implemented');
+		throw new TexRuntimeError ('not implemented');
 	    else {
 		var u = v.as_dimen ();
 		if (u != null)
@@ -623,7 +623,7 @@ var Engine = (function Engine_closure () {
 	}
 
 	if (this.scan_keyword ('true'))
-	    throw new TexRuntimeException ('not implemented true-dimens');
+	    throw new TexRuntimeError ('not implemented true-dimens');
 
 	tok = this.chomp_spaces ();
 	var val = tok.tocmd (this).as_scaled (this);
@@ -639,16 +639,16 @@ var Engine = (function Engine_closure () {
 		while (this.scan_keyword ('l')) {
 		    inf_order += 1;
 		    if (inf_order > 3)
-			throw new TexSyntaxException ('illegal infinity value ' +
-						      '"fillll" or higher');
+			throw new TexSyntaxError ('illegal infinity value ' +
+						  '"fillll" or higher');
 		}
 		result = Scaled.new_from_parts (nonfrac, frac);
 	    } else if (mumode) {
 		if (this.scan_keyword ('mu'))
 		    result = Scaled.new_from_parts (nonfrac, frac);
 		else
-		    throw new TexRuntimeException ('this quantity must have ' +
-						   'dimensions of "mu"');
+		    throw new TexRuntimeError ('this quantity must have ' +
+					       'dimensions of "mu"');
 	    } else if (this.scan_keyword ('em')) {
 		this.warn ('faking font em-width');
 		v = Scaled.new_from_parts (18, 0);
@@ -687,7 +687,7 @@ var Engine = (function Engine_closure () {
                     num = 14856;
 		    denom = 1157;
                 } else {
-                    throw new TexSyntaxException ('expected a dimen unit but ' +
+                    throw new TexSyntaxError ('expected a dimen unit but ' +
 					      'didn\'t find it; next is ' + tok);
 		}
 
@@ -737,17 +737,17 @@ var Engine = (function Engine_closure () {
 	while (true) {
 	    tok = this.next_tok ();
 	    if (tok == null)
-		throw new TexRuntimeException ('EOF when expected cseq name');
+		throw new TexRuntimeError ('EOF when expected cseq name');
 	    if (!tok.iscat (C_SPACE))
 		break;
 	}
 
 	if (!tok.iscslike ())
-	    throw new TexRuntimeException ('expected control seq or active char;' +
+	    throw new TexRuntimeError ('expected control seq or active char;' +
 				       'got ' + tok);
 
 	if (tok.is_frozen_cs ())
-	    throw new TexRuntimeException ('cannot redefined control seq ' + tok);
+	    throw new TexRuntimeError ('cannot redefined control seq ' + tok);
 
 	return tok;
     };
@@ -883,7 +883,7 @@ var Engine = (function Engine_closure () {
 	    if (tok.iscmd (this, 'else')) {
 		if (depth == 0) {
 		    if (mode == CS_FI)
-			throw new TexSyntaxException ('unexpected \\else');
+			throw new TexSyntaxError ('unexpected \\else');
 		    this.debug ('... skipped conditional ... ' + tok);
 		    return 'else';
 		}
@@ -897,7 +897,7 @@ var Engine = (function Engine_closure () {
 	    } else if (tok.iscmd (this, 'or')) {
 		if (depth == 0) {
 		    if (mode != CS_OR_ELSE_FI)
-			throw new TexSyntaxException ('unexpected \\or');
+			throw new TexSyntaxError ('unexpected \\or');
 		    this.debug ('... skipped conditional ... ' + tok);
 		    return 'or';
 		}
@@ -906,7 +906,7 @@ var Engine = (function Engine_closure () {
 	    }
 	}
 
-	throw new TexInternalException ('not reached');
+	throw new TexInternalError ('not reached');
     };
 
 
@@ -915,11 +915,11 @@ var Engine = (function Engine_closure () {
 	// to eat up alternate branches until the end.
 
 	if (!this.conditional_stack.length)
-	    throw new TexSyntaxException ('stray \\or');
+	    throw new TexSyntaxError ('stray \\or');
 
 	var mode = this.conditional_stack.pop (), skipmode = CS_OR_ELSE_FI;
 	if (mode != CS_OR_ELSE_FI)
-	    throw new TexSyntaxException ('unexpected \\or');
+	    throw new TexSyntaxError ('unexpected \\or');
 
 	while (true) {
 	    var found = this._if_skip_until (skipmode)
@@ -933,18 +933,18 @@ var Engine = (function Engine_closure () {
 
     proto.handle_else = function Engine_handle_else () {
 	if (!this.conditional_stack.length)
-	    throw new TexSyntaxException ('stray \\else');
+	    throw new TexSyntaxError ('stray \\else');
 
 	var mode = this.conditional_stack.pop ();
 	if (mode == CS_FI)
-	    throw new TexSyntaxException ('unexpected (duplicate?) \\else');
+	    throw new TexSyntaxError ('unexpected (duplicate?) \\else');
 
 	this._if_skip_until (CS_FI);
     };
 
     proto.handle_fi = function Engine_handle_fi () {
 	if (!this.conditional_stack.length)
-	    throw new TexSyntaxException ('stray \\fi');
+	    throw new TexSyntaxError ('stray \\fi');
 
 	// Don't care about mode, and nothing more to do.
 	this.conditional_stack.pop ();
@@ -966,7 +966,7 @@ var Engine = (function Engine_closure () {
 	// \box, \copy, \lastbox, \vsplit, \hbox, \vbox, \vtop
 
 	if (!tok.tocmd (this).boxlike)
-	    throw new TexRuntimeException ('expected boxlike command but got ' + tok);
+	    throw new TexRuntimeError ('expected boxlike command but got ' + tok);
 	this.push (tok);
     };
 
@@ -1002,7 +1002,7 @@ var Engine = (function Engine_closure () {
 
 	function finish_box (engine) {
 	    if (!this.boxop_stack.length)
-		throw new TexRuntimeException ('what to do with bare box?');
+		throw new TexRuntimeError ('what to do with bare box?');
 
 	    this.debug ('<--- hbox');
 	    this.unnest_eqtb ();

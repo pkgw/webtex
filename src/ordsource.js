@@ -48,7 +48,7 @@ var OrdSource = WEBTEX.OrdSource = (function OrdSource_closure () {
 
     proto.push_ord = function OrdSource_push_ord (o) {
 	if (o < 0 || o > 255)
-	    throw new TexRuntimeException ('out of bounds ordinal: ' + o);
+	    throw new TexRuntimeError ('out of bounds ordinal: ' + o);
 	this.pushed.push (o);
     };
 
@@ -60,7 +60,7 @@ var OrdSource = WEBTEX.OrdSource = (function OrdSource_closure () {
 	    return [EOF, EOF, EOF];
 
 	if (this.pushed.length)
-	    throw new TexRuntimeException ('peek3 corner case');
+	    throw new TexRuntimeError ('peek3 corner case');
 
 	if (this.curindex + 3 <= this.curords.length)
 	    // Easy case.
@@ -122,16 +122,16 @@ var OrdSource = WEBTEX.OrdSource = (function OrdSource_closure () {
 
     proto.iseol = function OrdSource_iseol () {
 	if (this.linebuffer === null)
-	    throw new TexRuntimeException ('unexpected iseol context');
+	    throw new TexRuntimeError ('unexpected iseol context');
 	if (this.curindex == null)
-	    throw new TexInternalException ('iseol() should only be called in ' +
-					    'middle of a line');
+	    throw new TexInternalError ('iseol() should only be called in ' +
+					'middle of a line');
 	return (this.curindex == this.curords.length - 1);
     };
 
     proto.discard_line = function OrdSource_discard_line () {
 	if (this.linebuffer === null)
-	    throw new TexRuntimeException ('unexpected discard_line context');
+	    throw new TexRuntimeError ('unexpected discard_line context');
 
 	this.curords = this.curindex = null;
     };

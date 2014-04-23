@@ -7,9 +7,9 @@ var ToklistInput = (function ToklistInput_closure () {
 
     proto.get_tok = function ToklistInput_get_tok (toknum) {
 	if (toknum < 0)
-	    throw new TexInternalException ('negative toknum ' + toknum);
+	    throw new TexInternalError ('negative toknum ' + toknum);
 	if (toknum > this.toks.length)
-	    throw new TexInternalException ('overlarge toknum ' + toknum);
+	    throw new TexInternalError ('overlarge toknum ' + toknum);
 
 	if (toknum == this.toks.length)
 	    return EOF;
@@ -38,10 +38,10 @@ var TokenizerInput = (function TokenizerInput_closure () {
 
     proto.get_tok = function TokenizerInput_get_tok (toknum) {
 	if (toknum < this.first_saved_toknum)
-	    throw new TexInternalException ('trying to rewind too far; want ' +
-					    'toknum ' + toknum + ', but I ' +
-					    'only remember as early as ' +
-					    this.first_saved_toknum);
+	    throw new TexInternalError ('trying to rewind too far; want ' +
+					'toknum ' + toknum + ', but I ' +
+					'only remember as early as ' +
+					this.first_saved_toknum);
 
 	var delta = toknum - this.first_saved_toknum;
 
@@ -49,7 +49,7 @@ var TokenizerInput = (function TokenizerInput_closure () {
 	    return this.saved_tokens[delta];
 
 	if (delta > this.saved_tokens.length)
-	    throw new TexInternalException ('overlarge toknum ' + toknum);
+	    throw new TexInternalError ('overlarge toknum ' + toknum);
 
 	var tok = this.tokenize_next ();
 	if (tok !== NeedMoreData && tok !== EOF)
@@ -59,14 +59,14 @@ var TokenizerInput = (function TokenizerInput_closure () {
 
     proto.checkpoint = function TokenizerInput_checkpoint (toknum) {
 	if (toknum < this.first_saved_toknum)
-	    throw new TexInternalException ('trying to checkpoint too early??');
+	    throw new TexInternalError ('trying to checkpoint too early??');
 
 	var delta = toknum - this.first_saved_toknum;
 
 	if (delta > this.saved_tokens.length)
-	    throw new TexInternalException ('overlarge toknum ' + toknum +
-					    '; delta ' + delta + '; stl ' +
-					    this.saved_tokens.length);
+	    throw new TexInternalError ('overlarge toknum ' + toknum +
+					'; delta ' + delta + '; stl ' +
+					this.saved_tokens.length);
 
 	this.saved_tokens = this.saved_tokens.slice (delta);
 	this.first_saved_toknum = toknum;
@@ -98,7 +98,7 @@ var TokenizerInput = (function TokenizerInput_closure () {
 	    if (o === EOF || o === NeedMoreData)
 		// We buffer things line-by-line so these conditions should
 		// never happen -- cseq's can't span between lines.
-		throw new TexRuntimeException ('unexpectly ran out of data (1)');
+		throw new TexRuntimeError ('unexpectly ran out of data (1)');
 
 	    cc = catcodes[o];
 	    var csname = String.fromCharCode (o);
@@ -114,7 +114,7 @@ var TokenizerInput = (function TokenizerInput_closure () {
 	    while (1) {
 		o = this.ordsrc.next (catcodes);
 		if (o === EOF || o === NeedMoreData)
-		    throw new TexRuntimeException ('unexpectly ran out of data (1)');
+		    throw new TexRuntimeError ('unexpectly ran out of data (1)');
 
 		cc = catcodes[o];
 		if (cc != C_LETTER) {
@@ -169,7 +169,7 @@ var TokenizerInput = (function TokenizerInput_closure () {
 	    return this.tokenize_next ();
 	}
 
-	throw new TexInternalException ('not reached');
+	throw new TexInternalError ('not reached');
     };
 
     return TokenizerInput;

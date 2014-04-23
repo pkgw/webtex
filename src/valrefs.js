@@ -8,13 +8,13 @@ var Valref = (function Valref_closure () {
 	/* Retrieve the actual value of this reference. Typically involves
 	 * scanning tokens in the engine. May return null if there's no value
 	 * but that situation is expected. */
-	throw new TexInternalException ('not implemented Valref.get');
+	throw new TexInternalError ('not implemented Valref.get');
     };
 
     proto.set = function Valref_set (engine, value) {
 	/* Assign a new value to the storage location that this reference
 	 * represents. */
-	throw new TexInternalException ('not implemented Valref.set');
+	throw new TexInternalError ('not implemented Valref.set');
     };
 
     proto.scan = function Valref_scan (engine) {
@@ -22,7 +22,7 @@ var Valref = (function Valref_closure () {
 	 * this is some kind of literal that the engine's ready to read;
 	 * it's not necessarily the value that this particular reference
 	 * points to. */
-	throw new TexInternalException ('not implemented Valref.scan');
+	throw new TexInternalError ('not implemented Valref.scan');
     };
 
     proto.is_toks_value = false;
@@ -36,7 +36,7 @@ var Valref = (function Valref_closure () {
 var RegisterValref = (function RegisterValref_closure () {
     function RegisterValref (reg) {
 	if (reg < 0 || reg > 255)
-	    throw new TexInternalException ('illegal register ' + reg);
+	    throw new TexInternalError ('illegal register ' + reg);
 	Valref.call (this);
 	this.reg = reg;
     }
@@ -73,7 +73,7 @@ var ConstantValref = (function ConstantValref_closure () {
     };
 
     proto.set = function ConstantValref_set (engine, value) {
-	throw new TexRuntimeException ('cannot set a constant Valref')
+	throw new TexRuntimeError ('cannot set a constant Valref')
     };
 
     return ConstantValref;
@@ -122,7 +122,7 @@ function _make_toks_valref (type) {
 
 	// TODO: \tokpar=<toklist register or toklist param>
 	if (!tok.iscat (C_BGROUP))
-	    throw new TexSyntaxException ('expected { in toklist assignment; got ' + tok);
+	    throw new TexSyntaxError ('expected { in toklist assignment; got ' + tok);
 
 	return engine.scan_tok_group (false);
     };

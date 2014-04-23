@@ -25,8 +25,8 @@ var ZipReader = WEBTEX.ZipReader = (function ZipReader_closure () {
 
     function ZipReader (readfunc, zipsize) {
 	if (zipsize < 22)
-	    throw new TexRuntimeException ('ill-formed Zip stream: only ' +
-					   zipsize + ' bytes');
+	    throw new TexRuntimeError ('ill-formed Zip stream: only ' +
+				       zipsize + ' bytes');
 
 	this.readfunc = readfunc;
 	this.zipsize = zipsize;
@@ -142,7 +142,7 @@ var ZipReader = WEBTEX.ZipReader = (function ZipReader_closure () {
 
     proto.has_entry = function ZipReader_has_entry (entname) {
 	if (this.error_state != null)
-	    throw new TexRuntimeException ('previous Zip error: ' + this.error_state);
+	    throw new TexRuntimeError ('previous Zip error: ' + this.error_state);
 	if (this.dirinfo == null)
 	    return NeedMoreData;
 
@@ -151,11 +151,11 @@ var ZipReader = WEBTEX.ZipReader = (function ZipReader_closure () {
 
     proto.stream_entry = function ZipReader_stream_entry (entname, callback) {
 	if (this.error_state != null)
-	    throw new TexRuntimeException ('previous Zip error: ' + this.error_state);
+	    throw new TexRuntimeError ('previous Zip error: ' + this.error_state);
 	if (this.dirinfo == null)
 	    throw NeedMoreData;
 	if (!this.dirinfo.hasOwnProperty (entname))
-	    throw new TexRuntimeException ('no such Zip entry ' + entname);
+	    throw new TexRuntimeError ('no such Zip entry ' + entname);
 
 	var info = this.dirinfo[entname];
 	var state = {'info': info, 'cb': callback};

@@ -28,45 +28,45 @@ function inherit (ctor, superCtor) {
 
 /* Errors */
 
-var TexSyntaxException = (function TexSyntaxExceptionClosure () {
-    function TexSyntaxException () {
+var TexSyntaxError = (function TexSyntaxErrorClosure () {
+    function TexSyntaxError () {
 	// Subclassing Errors is unusual. Error.call(this) happens
 	// to not behave as most other constructor-type functions.
 	// The pattern we use here Does What We Want.
 	var tmp = Error.apply (this, arguments);
-	tmp.name = this.name = 'TexSyntaxException';
+	tmp.name = this.name = 'TexSyntaxError';
 	this.message = tmp.message;
 	this.stack = tmp.stack;
     }
 
-    inherit (TexSyntaxException, Error);
-    return TexSyntaxException;
+    inherit (TexSyntaxError, Error);
+    return TexSyntaxError;
 }) ();
 
 
-var TexRuntimeException = (function TexRuntimeExceptionClosure () {
-    function TexRuntimeException () {
+var TexRuntimeError = (function TexRuntimeErrorClosure () {
+    function TexRuntimeError () {
 	var tmp = Error.apply (this, arguments);
-	tmp.name = this.name = 'TexRuntimeException';
+	tmp.name = this.name = 'TexRuntimeError';
 	this.message = tmp.message;
 	this.stack = tmp.stack;
     }
 
-    inherit (TexRuntimeException, Error);
-    return TexRuntimeException;
+    inherit (TexRuntimeError, Error);
+    return TexRuntimeError;
 }) ();
 
 
-var TexInternalException = (function TexInternalExceptionClosure () {
-    function TexInternalException () {
+var TexInternalError = (function TexInternalErrorClosure () {
+    function TexInternalError () {
 	var tmp = Error.apply (this, arguments);
-	tmp.name = this.name = 'TexInternalException';
+	tmp.name = this.name = 'TexInternalError';
 	this.message = tmp.message;
 	this.stack = tmp.stack;
     }
 
-    inherit (TexInternalException, Error);
-    return TexInternalException;
+    inherit (TexInternalError, Error);
+    return TexInternalError;
 }) ();
 
 

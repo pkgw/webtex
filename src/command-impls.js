@@ -34,12 +34,12 @@ commands.expandafter = function cmd_expandafter (engine) {
 
 
 commands.noexpand = function cmd_noexpand (engine) {
-    throw new TexInternalException ('\\noexpand shouldn\'t get evaluated');
+    throw new TexInternalError ('\\noexpand shouldn\'t get evaluated');
 };
 
 
 commands.endcsname = function cmd_endcsname (engine) {
-    throw new TexRuntimeException ('stray \\endcsname');
+    throw new TexRuntimeError ('stray \\endcsname');
 };
 
 
@@ -49,12 +49,12 @@ commands.csname = function cmd_csname (engine) {
     while (true) {
 	var tok = engine.next_x_tok ();
 	if (tok == null)
-	    throw new TexSyntaxException ('EOF in \\csname');
+	    throw new TexSyntaxError ('EOF in \\csname');
 	if (tok.iscmd (engine, 'endcsname'))
 	    break;
 	if (!tok.ischar ())
-	    throw new TexRuntimeException ('only character tokens should occur ' +
-					   'between \\csname and \\endcsname');
+	    throw new TexRuntimeError ('only character tokens should occur ' +
+				       'between \\csname and \\endcsname');
 
 	csname += String.fromCharCode (tok.ord);
     }
@@ -82,7 +82,7 @@ commands.string = function cmd_string (engine) {
 	if (esc >= 0 && esc < 256)
 	    expn = String.fromCharCode (esc) + expn;
     } else
-	throw new TexRuntimeException ('don\'t know how to \\string-ize ' + tok);
+	throw new TexRuntimeError ('don\'t know how to \\string-ize ' + tok);
 
     engine.push_string (expn);
 };
@@ -272,8 +272,8 @@ commands.mathcode = (function MathcodeCommand_closure () {
 	engine.scan_optional_equals ();
 	var mcode = engine.scan_int ().value;
 	if (mcode > 0x8000)
-	    throw new TexRuntimeException ('mathcode value should be in range ' +
-					   '[0,0x8000]; got ' + mcode);
+	    throw new TexRuntimeError ('mathcode value should be in range ' +
+				       '[0,0x8000]; got ' + mcode);
 	engine.debug ('mathcode ' + escchr (ord) + '=' + ord + ' -> '
 		      + mcode);
 	engine.set_mathcode (ord, mcode);
@@ -298,8 +298,8 @@ commands.sfcode = (function SfcodeCommand_closure () {
 	engine.scan_optional_equals ();
 	var sfcode = engine.scan_int ().value;
 	if (sfcode > 0x7FFF)
-	    throw new TexRuntimeException ('sfcode value should be in range ' +
-					   '[0,0x7FFF]; got ' + sfcode);
+	    throw new TexRuntimeError ('sfcode value should be in range ' +
+				       '[0,0x7FFF]; got ' + sfcode);
 	engine.debug ('sfcode ' + escchr (ord) + '=' + ord + ' -> '
 		      + sfcode);
 	engine.set_sfcode (ord, sfcode);
@@ -370,8 +370,8 @@ commands.delcode = (function DelcodeCommand_closure () {
 	engine.scan_optional_equals ();
 	var delcode = engine.scan_int ().value;
 	if (delcode >0xFFFFFF)
-	    throw new TexRuntimeException ('delcode value should be in range ' +
-					   '[0,0xFFFFFF]; got ' + delcode);
+	    throw new TexRuntimeError ('delcode value should be in range ' +
+				       '[0,0xFFFFFF]; got ' + delcode);
 	engine.debug ('delcode ' + escchr (ord) + '=' + ord + ' -> '
 		      + escchr (delcode) + '=' + delcode);
 	engine.set_delcode (ord, delcode);
@@ -403,8 +403,8 @@ commands.mathchardef = function cmd_mathchardef (engine) {
     engine.scan_optional_equals ();
     var val = engine.scan_int ().value;
     if (val < 0 || val > 32768)
-	throw new TexRuntimeException ('need mathcode in [0,0x8000] but ' +
-				       'got ' + val);
+	throw new TexRuntimeError ('need mathcode in [0,0x8000] but ' +
+				   'got ' + val);
     engine.debug ('mathchardef ' + cstok + ' -> {insmathchar ' + val + '}');
     cstok.assign_cmd (engine, new GivenMathcharCommand (val));
 };
@@ -516,7 +516,7 @@ function _cmd_def (engine, cname, expand_replacement) {
 
 	    if (tok.isotherchar (O_ZERO + next_pnum)) {
 		if (next_pnum > 8)
-		    throw new TexRuntimeException ('macros may only have 8 parameters');
+		    throw new TexRuntimeError ('macros may only have 8 parameters');
 
 		tmpl_toks.push (Token.new_param (next_pnum));
 		next_pnum += 1;
@@ -524,8 +524,8 @@ function _cmd_def (engine, cname, expand_replacement) {
 		continue;
 	    }
 
-	    throw new TexSyntaxException ('unexpected token ' + tok + ' following ' +
-					  'parameter token');
+	    throw new TexSyntaxError ('unexpected token ' + tok + ' following ' +
+				      'parameter token');
 	}
 
 	if (tok.iscat (C_PARAM)) {
@@ -584,8 +584,8 @@ function _cmd_def (engine, cname, expand_replacement) {
 		continue;
 	    }
 
-	    throw new TexSyntaxException ('unexpected token ' + tok + ' following ' +
-					  'parameter token');
+	    throw new TexSyntaxError ('unexpected token ' + tok + ' following ' +
+				      'parameter token');
 	}
 
 	if (tok.iscat (C_PARAM)) {
@@ -663,10 +663,10 @@ commands._if = function cmd_if (engine) {
 	if (tok.iscslike ()) { // active chars will be caught by above
 	    var cmd = tok.tocmd (engine);
 	    if (cmd instanceof GivenCharCommand)
-		throw new TexInternalException ('not implemented');
+		throw new TexInternalError ('not implemented');
 	    return 16 * 1000 + 256;
 	}
-	throw new TexRuntimeException ('illegal comparison subject ' + tok);
+	throw new TexRuntimeError ('illegal comparison subject ' + tok);
     }
 
     var result = (key (t1) == key (t2));
@@ -698,7 +698,7 @@ commands.ifnum = function cmd_ifnum (engine) {
     while (true) {
 	var tok = engine.next_x_tok ();
 	if (tok == null)
-	    throw new TexSyntaxException ('EOF inside \\ifnum');
+	    throw new TexSyntaxError ('EOF inside \\ifnum');
 	if (!tok.iscat (C_SPACE))
 	    break;
     }
@@ -714,7 +714,7 @@ commands.ifnum = function cmd_ifnum (engine) {
     else if (tok.isotherchar (O_EQUALS))
 	result = (val1 == val2);
     else
-	throw new TexSyntaxException ('expected <,=,> in \\ifnum but got ' + tok);
+	throw new TexSyntaxError ('expected <,=,> in \\ifnum but got ' + tok);
 
     engine.debug (['ifnum', val1, tok, val2, '?'].join (' '));
     engine.handle_if (result);
@@ -735,7 +735,7 @@ commands.ifdim = function cmd_ifdim (engine) {
     while (1) {
 	var tok = engine.next_x_tok ();
 	if (tok == null)
-	    throw new TexSyntaxException ('EOF inside \\ifdim');
+	    throw new TexSyntaxError ('EOF inside \\ifdim');
 	if (!tok.iscat (C_SPACE))
 	    break;
     }
@@ -749,7 +749,7 @@ commands.ifdim = function cmd_ifdim (engine) {
     else if (tok.isotherchar (O_EQUALS))
 	result = (val1.sp.value == val2.sp.value);
     else
-	throw new TexSyntaxException ('expected <,=,> in \\ifdim but got ' + tok);
+	throw new TexSyntaxError ('expected <,=,> in \\ifdim but got ' + tok);
 
     engine.debug (['ifdim', val1, tok, val2, '?'].join (' '));
     engine.handle_if (result);
@@ -817,7 +817,7 @@ commands.wd = (function WdCommand_closure () {
     proto.name = 'wd';
 
     proto.invoke = function WdCommand_invoke (engine) {
-	throw new TexInternalException ('not implemented bare \\wd');
+	throw new TexInternalError ('not implemented bare \\wd');
     };
 
     proto.asvalref = function WdCommand_asvalref (engine) {
@@ -837,7 +837,7 @@ commands.ht = (function HtCommand_closure () {
     proto.name = 'ht';
 
     proto.invoke = function HtCommand_invoke (engine) {
-	throw new TexInternalException ('not implemented bare \\ht');
+	throw new TexInternalError ('not implemented bare \\ht');
     };
 
     proto.asvalref = function HtCommand_asvalref (engine) {
@@ -860,7 +860,7 @@ commands.setbox = function cmd_setbox (engine) {
 
 commands.vrule = function cmd_vrule (engine) {
     if (engine.mode() != M_HORZ && engine.mode() != M_RHORZ)
-	throw new TexRuntimeException ('can only create \\vrule in horizontal mode');
+	throw new TexRuntimeError ('can only create \\vrule in horizontal mode');
 
     var rule = new Rule ();
     rule.width.sp.value = 26214; // default rule = 0.4pt; T:TP sec 463
@@ -889,7 +889,7 @@ commands.unhbox = function cmd_unhbox (engine) {
     if (!box.tlist.length)
 	return
 
-    throw new TexInternalException ('see TeXbook pg. 285');
+    throw new TexInternalError ('see TeXbook pg. 285');
 };
 
 
@@ -910,7 +910,7 @@ commands.inputlineno = (function InputlinenoCommand_closure () {
     proto.name = 'inputlineno';
 
     proto.invoke = function InputlinenoCommand_invoke (engine) {
-	throw new TexRuntimeException ('not implemented');
+	throw new TexRuntimeError ('not implemented');
     };
 
     proto.asvalref = function InputlinenoCommand_asvalref (engine) {
@@ -939,11 +939,11 @@ commands.font = (function FontCommand_closure () {
 	if (engine.scan_keyword ('at')) {
 	    s = engine.scan_dimen ()
 	    if (s.sp.value <= 0) // FIXME: || s > SC_MAX
-		throw new TexRuntimeException ('illegal font size ' + s);
+		throw new TexRuntimeError ('illegal font size ' + s);
 	} else if (engine.scan_keyword ('scaled')) {
 	    s = -engine.scan_int ().value;
 	    if (s >= 0 || s < -32768)
-		throw new TexRuntimeException ('illegal font magnification factor ' + (-s));
+		throw new TexRuntimeError ('illegal font magnification factor ' + (-s));
 	}
 
 	var font = new Font (fn, s);
@@ -997,8 +997,8 @@ commands.fontdimen = (function FontDimenCommand_closure () {
 	var font = tok.tocmd (engine).asvalref (engine);
 
 	if (!(font instanceof ConstantFontValref))
-	    throw new TexRuntimeException ('expected \\fontdimen to be followed ' +
-					   'by a font; got ' + tok);
+	    throw new TexRuntimeError ('expected \\fontdimen to be followed ' +
+				       'by a font; got ' + tok);
 
 	engine.scan_optional_equals ();
 	var val = engine.scan_dimen ();
@@ -1012,8 +1012,8 @@ commands.fontdimen = (function FontDimenCommand_closure () {
 	var font = tok.tocmd (engine).asvalref (engine);
 
 	if (!(font instanceof ConstantFontValref))
-	    throw new TexRuntimeException ('expected \\fontdimen to be followed ' +
-					   'by a font; got ' + tok);
+	    throw new TexRuntimeError ('expected \\fontdimen to be followed ' +
+				       'by a font; got ' + tok);
 
 	var val = font.get (engine).dimens[num];
 	if (val == null) {
@@ -1035,8 +1035,8 @@ commands.skewchar = function cmd_skewchar (engine) {
     var val = tok.tocmd (engine).asvalref (engine);
 
     if (!(val instanceof ConstantFontValref))
-	throw new TexRuntimeException ('expected \\skewchar to be followed by a font; ' +
-				       'got ' + tok);
+	throw new TexRuntimeError ('expected \\skewchar to be followed by a font; ' +
+				   'got ' + tok);
 
     engine.scan_optional_equals ();
     var ord = engine.scan_char_code ();
@@ -1050,8 +1050,8 @@ commands.hyphenchar = function cmd_hyphenchar (engine) {
     var val = tok.tocmd (engine).asvalref (engine);
 
     if (!(val instanceof ConstantFontValref))
-	throw new TexRuntimeException ('expected \\hyphenchar to be followed by a font; ' +
-				       'got ' + tok);
+	throw new TexRuntimeError ('expected \\hyphenchar to be followed by a font; ' +
+				   'got ' + tok);
 
     engine.scan_optional_equals ();
     var ord = engine.scan_char_code ();
@@ -1067,8 +1067,8 @@ function _def_family (engine, fam) {
     var val = tok.tocmd (engine).asvalref (engine);
 
     if (!(val instanceof ConstantFontValref))
-	throw new TexRuntimeException ('expected \\' + fam + ' to assign a font; ' +
-				       'got ' +tok);
+	throw new TexRuntimeError ('expected \\' + fam + ' to assign a font; ' +
+				   'got ' +tok);
 
     engine.debug (['fam', slot, '=', val.get (engine), '[noop]'].join (' '));
     engine.maybe_insert_after_assign_token ();
@@ -1093,9 +1093,9 @@ commands.scriptscriptfont = function cmd_scriptscriptfont (engine) {
 commands.patterns = function cmd_patterns (engine) {
     var tok = engine.next_tok_throw ();
     if (tok == null)
-	throw new TexSyntaxException ('EOF in middle of \\patterns');
+	throw new TexSyntaxError ('EOF in middle of \\patterns');
     if (!tok.iscat (C_BGROUP))
-	throw new TexSyntaxException ('expected { immediately after \\patterns');
+	throw new TexSyntaxError ('expected { immediately after \\patterns');
 
     engine.scan_tok_group (false);
     engine.debug ('patterns [noop/ignored]');
@@ -1105,9 +1105,9 @@ commands.patterns = function cmd_patterns (engine) {
 commands.hyphenation = function cmd_hyphenation (engine) {
     var tok = engine.next_tok_throw ();
     if (tok == null)
-	throw new TexSyntaxException ('EOF in middle of \\hyphenation');
+	throw new TexSyntaxError ('EOF in middle of \\hyphenation');
     if (!tok.iscat (C_BGROUP))
-	throw new TexSyntaxException ('expected { immediately after \\hyphenation');
+	throw new TexSyntaxError ('expected { immediately after \\hyphenation');
 
     engine.scan_tok_group (false);
     engine.debug ('hyphenation [noop/ignored]');
@@ -1124,9 +1124,9 @@ function _change_case (engine, isupper) {
 
     var tok = engine.next_tok_throw ();
     if (tok == null)
-	throw new TexSyntaxException ('EOF in middle of \\' + cmdname);
+	throw new TexSyntaxError ('EOF in middle of \\' + cmdname);
     if (!tok.iscat (C_BGROUP))
-	throw new TexSyntaxException ('expected { immediately after \\' + cmdname);
+	throw new TexSyntaxError ('expected { immediately after \\' + cmdname);
 
     var oldtoks = engine.scan_tok_group (false).toks, newtoks = [];
 
@@ -1177,8 +1177,8 @@ commands.the = function cmd_the (engine) {
     var tok = engine.next_tok_throw ();
     var val = tok.tocmd (engine).asvalref (engine);
     if (val == null)
-	throw new TexRuntimeException ('unable to get internal value (for ' +
-				       '\\the) from ' + tok);
+	throw new TexRuntimeError ('unable to get internal value (for ' +
+				   '\\the) from ' + tok);
 
     if (val.is_toks_value) {
 	var toks = val.get (engine);
@@ -1213,7 +1213,7 @@ commands.message = function cmd_message (engine) {
     var tok = engine.next_tok_throw ();
 
     if (!tok.iscat (C_BGROUP))
-	throw new TexSyntaxException ('expected { immediately after \\message');
+	throw new TexSyntaxError ('expected { immediately after \\message');
 
     var toks = engine.scan_tok_group ();
     engine.debug ('message ' + toks.uitext ());
@@ -1224,11 +1224,11 @@ commands.errmessage = function cmd_errmessage (engine) {
     var tok = engine.next_tok_throw ();
 
     if (!tok.iscat (C_BGROUP))
-	throw new TexSyntaxException ('expected { immediately after \\errmessage');
+	throw new TexSyntaxError ('expected { immediately after \\errmessage');
 
     var toks = engine.scan_tok_group ();
     engine.debug ('errmessage ~' + toks.uitext ());
-    throw new TexRuntimeException ('TeX-triggered error: ' + toks.uitext ());
+    throw new TexRuntimeError ('TeX-triggered error: ' + toks.uitext ());
 };
 
 
@@ -1243,7 +1243,7 @@ commands.immediate = function cmd_immediate (engine) {
 commands.write = function cmd_write (engine) {
     var streamnum = engine.scan_streamnum (), tok = engine.next_tok_throw ();
     if (!tok.iscat (C_BGROUP))
-	throw new TexSyntaxException ('expected { immediately after \\write');
+	throw new TexSyntaxError ('expected { immediately after \\write');
 
     var toks = engine.scan_tok_group (false);
     engine.debug ('write:' + streamnum + ' ' + toks.uitext ());
@@ -1283,7 +1283,7 @@ commands.openin = function cmd_openin (engine) {
     var fn = engine.scan_file_name ();
 
     if (snum == 16)
-	throw new TexRuntimeException ('attempted terminal input');
+	throw new TexRuntimeError ('attempted terminal input');
 
     engine.set_infile (snum, null);
 
@@ -1301,7 +1301,7 @@ commands.openin = function cmd_openin (engine) {
 commands.closein = function cmd_closein (engine) {
     var snum = engine.scan_streamnum ();
     if (snum == 16)
-	throw new TexRuntimeException ('attempted close of illegal stream');
+	throw new TexRuntimeError ('attempted close of illegal stream');
 
     // I think this is all we need ...
     engine.set_infile (snum, null);

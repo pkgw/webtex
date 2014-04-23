@@ -36,7 +36,7 @@
 	if (xv <= div (maxanswer - yv, nv) && -xv <= div (maxanswer + yv, nv))
 	    return new Scaled (nv * xv + yv);
 
-	throw new TexRuntimeException ('over/underflow in multi+add');
+	throw new TexRuntimeError ('over/underflow in multi+add');
     }
 
     function nx_plus_y (n, x, y) {
@@ -60,7 +60,7 @@
 	var v = (u % dv) * SC_HALF + (t % SC_HALF);
 
 	if (div (u, dv) > SC_HALF)
-	    throw new TexRuntimeException ('over/underflow in xn_over_d');
+	    throw new TexRuntimeError ('over/underflow in xn_over_d');
 
 	var w = SC_HALF * div (u, dv) + div (v, dv);
 
@@ -73,7 +73,7 @@
 	// x, retvals: Scaled; n: TexInt;
 
 	if (n.value == 0)
-	    throw new TexRuntimeException ('really, dividing by 0?');
+	    throw new TexRuntimeError ('really, dividing by 0?');
 
 	var negative = false;
 

@@ -22,7 +22,7 @@ var Token = WEBTEX.Token = (function Token_closure () {
 	    return '<' + this._csesc (escchr) + '>';
 	if (this.kind == TK_PARAM)
 	    return '#' + this.pnum;
-	throw new TexInternalException ('not reached');
+	throw new TexInternalError ('not reached');
     };
 
     Token.prototype.uitext = function Token_uitext () {
@@ -32,7 +32,7 @@ var Token = WEBTEX.Token = (function Token_closure () {
 	    return '\\' + this._csesc (escchr) + ' ';
 	if (this.kind == TK_PARAM)
 	    return '#' + this.pnum;
-	throw new TexInternalException ('not reached');
+	throw new TexInternalError ('not reached');
     };
 
     Token.prototype.textext = function Token_textext (engine, ismacro) {
@@ -49,15 +49,15 @@ var Token = WEBTEX.Token = (function Token_closure () {
 	if (this.kind == TK_PARAM)
 	    return '#' + this.pnum
 
-	throw new TexInternalException ('not reached');
+	throw new TexInternalError ('not reached');
     };
 
     Token.prototype.equals = function Token_equals (other) {
 	if (other === null)
 	    return false;
 	if (!(other instanceof Token))
-	    throw new TexInternalException ('Tokens can only be ' +
-					    'compared to Tokens');
+	    throw new TexInternalError ('Tokens can only be ' +
+					'compared to Tokens');
 	if (other.kind != this.kind)
 	    return false;
 
@@ -67,7 +67,7 @@ var Token = WEBTEX.Token = (function Token_closure () {
 	    return this.name == other.name;
 	if (this.kind == TK_PARAM)
 	    return this.pnum == other.pnum;
-	throw new TexInternalException ('not reached');
+	throw new TexInternalError ('not reached');
     };
 
     Token.prototype.tocmd = function Token_tocmd (engine) {
@@ -79,8 +79,8 @@ var Token = WEBTEX.Token = (function Token_closure () {
 	    else {
 		var cmdclass = Command.catcode_commands[this.catcode];
 		if (cmdclass === null)
-		    throw new TexInternalException ('cannot commandify ' +
-						    'token ' + this);
+		    throw new TexInternalError ('cannot commandify ' +
+						'token ' + this);
 		cmd = new cmdclass (this.ord);
 		name = '[char ' + String.fromCharCode (this.ord) + ']';
 	    }
@@ -88,7 +88,7 @@ var Token = WEBTEX.Token = (function Token_closure () {
 	    cmd = engine.cseq (this.name);
 	    name = this.name;
 	} else {
-	    throw new TexInternalException ('cannot commandify token ' + this);
+	    throw new TexInternalError ('cannot commandify token ' + this);
 	}
 
 	if (cmd === null)
@@ -191,7 +191,7 @@ var Token = WEBTEX.Token = (function Token_closure () {
 	    return;
 	}
 
-	throw new TexInternalException ('cannot assign command for token ' + this);
+	throw new TexInternalError ('cannot assign command for token ' + this);
     };
 
     Token.prototype.isexpandable = function Token_isexpandable (engine) {
@@ -211,9 +211,9 @@ var Token = WEBTEX.Token = (function Token_closure () {
 
     Token.new_char = function Token_new_char (catcode, ord) {
 	if (catcode < 0 || catcode > 15)
-	    throw new TexInternalException ('illegal token catcode ' + catcode);
+	    throw new TexInternalError ('illegal token catcode ' + catcode);
 	if (ord < 0 || ord > 255)
-	    throw new TexInternalException ('illegal token ord ' + ord);
+	    throw new TexInternalError ('illegal token ord ' + ord);
 
 	var tok = new Token ();
 	tok.kind = TK_CHAR;
@@ -224,7 +224,7 @@ var Token = WEBTEX.Token = (function Token_closure () {
 
     Token.new_param = function Token_new_param (pnum) {
 	if (pnum < 1 || pnum > 8)
-	    throw new TexInternalException ('illegal param num ' + pnum);
+	    throw new TexInternalError ('illegal param num ' + pnum);
 
 	var tok = new Token ();
 	tok.kind = TK_PARAM;
