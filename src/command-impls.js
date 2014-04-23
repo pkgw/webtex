@@ -207,7 +207,7 @@ commands.advance = function cmd_advance (engine) {
     var val = cmd.asvalref (engine); // might eat tokens
     engine.scan_keyword ('by');
     var cur = val.get (engine);
-    var delta = val.scan (engine);
+    var delta = engine.scan_valtype (val.valtype);
     engine.debug ('advance ' + cmd + ' = ' + cur + ' + ' + delta);
     val.set (engine, cur.advance (delta));
 };

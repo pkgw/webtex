@@ -601,7 +601,7 @@ var GivenRegisterCommand = (function GivenRegisterCommand_closure () {
     proto.invoke = function GivenRegisterCommand_invoke (engine) {
 	var v = this.asvalref (engine);
 	engine.scan_optional_equals ();
-	var newval = v.scan (engine);
+	var newval = engine.scan_valtype (v.valtype);
 	engine.debug (this.desc + ' #' + this.register + ' = ' + newval);
 	v.set (engine, newval);
     };
@@ -744,7 +744,7 @@ var NamedParamCommand = (function NamedParamCommand_closure () {
     proto.invoke = function NamedParamCommand_invoke (engine) {
 	var v = this.asvalref (engine);
 	engine.scan_optional_equals ();
-	var newval = v.scan (engine);
+	var newval = engine.scan_valtype (v.valtype);
 	engine.debug ([this.desc, this.name, '=', newval].join (' '));
 	v.set (engine, newval);
     };

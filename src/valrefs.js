@@ -20,14 +20,6 @@ var Valref = (function Valref_closure () {
 	throw new TexInternalError ('not implemented Valref.set');
     };
 
-    proto.scan = function Valref_scan (engine) {
-	/* Scan a value of the kind that this object references. Note that
-	 * this is some kind of literal that the engine's ready to read;
-	 * it's not necessarily the value that this particular reference
-	 * points to. */
-	throw new TexInternalError ('not implemented Valref.scan');
-    };
-
     return Valref;
 }) ();
 
@@ -46,12 +38,6 @@ var RegisterValref = (function RegisterValref_closure () {
 
     inherit (RegisterValref, Valref);
     var proto = RegisterValref.prototype;
-
-    proto.scan = function RegisterValref_scan (engine) {
-	// XXX this function will probably no longer be needed once we switch
-	// over.
-	return engine.scan_valtype (this.valtype);
-    };
 
     proto.get = function RegisterValref_get (engine) {
 	return engine.get_register (this.valtype, this.reg);
@@ -78,11 +64,6 @@ var ParamValref = (function ParamValref_closure () {
     inherit (ParamValref, Valref);
     var proto = ParamValref.prototype;
 
-    proto.scan = function ParamValref_scan (engine) {
-	// XXX to be removed.
-	return engine.scan_valtype (this.valtype);
-    };
-
     proto.get = function ParamValref_get (engine) {
 	return engine.get_parameter (this.valtype, this.name);
     };
@@ -103,11 +84,6 @@ var ConstantValref = (function ConstantValref_closure () {
 
     inherit (ConstantValref, Valref);
     var proto = ConstantValref.prototype;
-
-    proto.scan = function ConstantValref_scan (engine) {
-	// XXX to be removed.
-	return engine.scan_valtype (this.valtype);
-    };
 
     proto.get = function ConstantValref_get (engine) {
 	return this.value;
