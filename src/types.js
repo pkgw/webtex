@@ -2,6 +2,88 @@
 
 'use strict';
 
+var Value = (function Value_closure () {
+    function Value () {}
+    var proto = Value.prototype;
+
+    proto.toString = function Value_toString () {
+	/* Returns the developer-friendly stringification of this object.
+	 * Should not get back to the TeX engine. */
+	return '[Value without toString?]';
+    };
+
+    proto.to_texstr = function Value_to_texstr () {
+	/* This function returns the stringification of the value as
+	 * implemented by TeX's \the primitive. */
+	throw new TexInternalException ('not implemented Value.to_texstr');
+    };
+
+    proto.texmeaning = function Value_texmeaning () {
+	/* Returns the stringification of the value as implemented by TeX's
+	* \meaning primitive. */
+	throw new TexInternalException ('not implemented Value.texmeaning');
+    };
+
+    proto.clone = function Value_clone () {
+	/* Returns a new, identical copy of this value. */
+	throw new TexInternalException ('not implemented Value.clone');
+    };
+
+    proto.equals = function Value_equals () {
+	/* Returns whether this object has the same value as another. */
+	throw new TexInternalException ('not implemented Value.equals');
+    };
+
+    proto.as_int = function Value_as_int () {
+	/* Returns a TexInt that this value is equivalent to, or null if such
+	 * a conversion is not allowed. */
+	throw new TexInternalException ('not implemented Value.as_int');
+    };
+
+    proto.as_scaled = function Value_as_scaled () {
+	/* Returns a Scaled that this value is equivalent to, or null if such
+	 * a conversion is not allowed. Note that Scaleds are not exposed to
+	 * TeX programs; they are always wrapped by Dimens. Currently this is
+	 * only used in Engine.scan_dimen and may be superfluous. */
+	throw new TexInternalException ('not implemented Value.as_scaled');
+    };
+
+    proto.as_dimen = function Value_as_dimen () {
+	/* Returns a Dimen that this value is equivalent to, or null if such a
+	 * conversion is not allowed. This is used in Engine.scan_dimen. */
+	throw new TexInternalException ('not implemented Value.as_dimen');
+    };
+
+    proto.as_glue = function Value_as_glue () {
+	/* Returns a Glue that this value is equivalent to, or null if such a
+	 * conversion is not allowed. This is used in Engine.scan_glue. */
+	throw new TexInternalException ('not implemented Value.as_glue');
+    };
+
+    proto.advance = function Value_advance (other) {
+	/* Implement \advance for this value -- that is, addition. Returns a
+	 * new advanced value. */
+	throw new TexInternalException ('not implemented Value.advance');
+    };
+
+    proto.intproduct = function Value_intproduct (other) {
+	/* Implement \multiply for this value, which is integer
+	 * multiplication. `other` should be passed through TexInt.xcheck().
+	 * Returns a new multiplied value.*/
+	throw new TexInternalException ('not implemented Value.intproduct');
+    };
+
+    proto.intdivide = function Value_intdivide (other) {
+	/* Implement \divide for this value, which is integer division.
+	 * `other` should be passed through TexInt.xcheck(). Returns a new
+	 * divided value.*/
+	throw new TexInternalException ('not implemented Value.intdivide');
+    };
+
+    return Value;
+}) ();
+
+
 var TexInt = WEBTEX.TexInt = (function TexInt_closure () {
     var INT_MAX = 2147483647; // 2**31 - 1
 
@@ -20,6 +102,8 @@ var TexInt = WEBTEX.TexInt = (function TexInt_closure () {
 	if (Math.abs (this.value) > INT_MAX)
 	    throw new TexRuntimeException ('out-of-range TexInt value ' + value);
     }
+
+    inherit (TexInt, Value);
 
     TexInt.xcheck = function TexInt_xcheck (value) {
 	/* This function checks that its input could be a valid TeX integer,
@@ -115,6 +199,8 @@ var Scaled = WEBTEX.Scaled = (function Scaled_closure () {
 	else
 	    this.value = TexInt.xcheck (value);
     }
+
+    inherit (Scaled, Value);
 
     // Math library.
 
@@ -314,6 +400,8 @@ var Dimen = (function Dimen_closure () {
 	this.sp = new Scaled (0);
     }
 
+    inherit (Dimen, Value);
+
     Dimen.new_product = function Dimen_new_product (k, x) {
 	// k: tex-int
 	// x: Scaled
@@ -391,6 +479,8 @@ var Glue = (function Glue_closure () {
 	this.shrink_order = 0;
     }
 
+    inherit (Glue, Value);
+
     Glue.prototype.toString = function Glue_toString () {
 	return '<Glue ' + this.width + ' st=' + this.stretch + '|' +
 	    this.stretch_order + ' sh=' + this.shrink + '|' +
@@ -461,6 +551,7 @@ var Box = (function Box_closure () {
 	this.tlist = [];
     }
 
+    inherit (Box, Value);
     var proto = Box.prototype;
 
     proto.toString = function Box_toString () {
@@ -492,6 +583,7 @@ var Font = (function Font_closure () {
 	this.skewchar = null;
     }
 
+    inherit (Font, Value);
     var proto = Font.prototype;
 
     proto.toString = function Font_toString () {
