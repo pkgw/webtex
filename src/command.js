@@ -627,6 +627,31 @@ var GivenRegisterCommand = (function GivenRegisterCommand_closure () {
 })();
 
 
+var VariableRegisterCommand = (function VariableRegisterCommand_closure () {
+    function VariableRegisterCommand (name, valtype) {
+	Command.call (this);
+	this.name = name;
+	this.valtype = valtype;
+    }
+
+    inherit (VariableRegisterCommand, Command);
+    var proto = VariableRegisterCommand.prototype;
+
+    proto.invoke = function VariableRegisterCommand_invoke (engine) {
+	var reg = engine.scan_char_code ();
+	var grc = new GivenRegisterCommand (this.valtype, this.name, reg);
+	return grc.invoke (engine);
+    };
+
+    proto.asvalref = function VariableRegisterCommand_asvalref (engine) {
+	var reg = engine.scan_char_code ();
+	return new RegisterValref (this.valtype, reg);
+    };
+
+    return VariableRegisterCommand;
+})();
+
+
 var GivenFontCommand = (function GivenFontCommand_closure () {
     function GivenFontCommand (font) {
 	Command.call (this);

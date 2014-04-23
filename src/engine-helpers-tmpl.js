@@ -45,6 +45,8 @@ function fill_cseq_commands (engine) {
 
 	    if (val.prototype instanceof Command)
 		cmd = new val ();
+	    else if (val instanceof Command)
+		cmd = val;
 	    else {
 		cmd = new Command ();
 		cmd.invoke = val;

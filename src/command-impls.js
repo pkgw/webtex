@@ -95,110 +95,13 @@ commands.number = function cmd_number (engine) {
 };
 
 
-// Register access: \count, etc.
+// Register access and manipulation: \count, \advance, etc.
 
-commands.count = (function CountCommand_closure () {
-    function CountCommand () { Command.call (this); }
-    inherit (CountCommand, Command);
-    var proto = CountCommand.prototype;
-    proto.name = 'count';
-
-    proto.invoke = function CountCommand_invoke (engine) {
-	var reg = engine.scan_char_code ();
-	return new GivenRegisterCommand (T_INT, this.name, reg).invoke (engine);
-    };
-
-    proto.asvalref = function CountCommand_asvalref (engine) {
-	var reg = engine.scan_char_code ();
-	return new RegisterValref (T_INT, reg);
-    };
-
-    return CountCommand;
-})();
-
-
-commands.dimen = (function DimenCommand_closure () {
-    function DimenCommand () { Command.call (this); }
-    inherit (DimenCommand, Command);
-    var proto = DimenCommand.prototype;
-    proto.name = 'dimen';
-
-    proto.invoke = function DimenCommand_invoke (engine) {
-	var reg = engine.scan_char_code ();
-	return new GivenRegisterCommand (T_DIMEN, this.name, reg).invoke (engine);
-    };
-
-    proto.asvalref = function DimenCommand_asvalref (engine) {
-	var reg = engine.scan_char_code ();
-	return new RegisterValref (T_INT, reg);
-    };
-
-    return DimenCommand;
-})();
-
-
-commands.skip = (function SkipCommand_closure () {
-    function SkipCommand () { Command.call (this); }
-    inherit (SkipCommand, Command);
-    var proto = SkipCommand.prototype;
-    // Note TeX's inconsistent "glue"/"skip" terminology
-    proto.name = 'skip';
-
-    proto.invoke = function SkipCommand_invoke (engine) {
-	var reg = engine.scan_char_code ();
-	return new GivenRegisterCommand (T_GLUE, this.name, reg).invoke (engine);
-    };
-
-    proto.asvalref = function SkipCommand_asvalref (engine) {
-	var reg = engine.scan_char_code ();
-	return new RegisterValref (T_GLUE, reg);
-    };
-
-    return SkipCommand;
-})();
-
-
-commands.muskip = (function MuskipCommand_closure () {
-    function MuskipCommand () { Command.call (this); }
-    inherit (MuskipCommand, Command);
-    var proto = MuskipCommand.prototype;
-    proto.name = 'muskip';
-
-    proto.invoke = function MuskipCommand_invoke (engine) {
-	var reg = engine.scan_char_code ();
-	return new GivenRegisterCommand (T_MUGLUE, this.name, reg).invoke (engine);
-    };
-
-    proto.asvalref = function MuskipCommand_asvalref (engine) {
-	var reg = engine.scan_char_code ();
-	return new RegisterValref (T_MUGLUE, reg);
-    };
-
-    return MuskipCommand;
-})();
-
-
-commands.toks = (function ToksCommand_closure () {
-    function ToksCommand () { Command.call (this); }
-    inherit (ToksCommand, Command);
-    var proto = ToksCommand.prototype;
-    proto.name = 'toks';
-
-    proto.invoke = function ToksCommand_invoke (engine) {
-	var reg = engine.scan_char_code ();
-	return new GivenRegisterCommand (T_TOKLIST, this.name, reg).invoke (engine);
-    };
-
-    proto.asvalref = function ToksCommand_asvalref (engine) {
-	var reg = engine.scan_char_code ();
-	return new RegisterValref (T_TOKLIST, reg);
-    };
-
-    return ToksCommand;
-})();
-
-
-// Register manipulation: \advance, etc.
+commands.count = new VariableRegisterCommand ('count', T_INT);
+commands.dimen = new VariableRegisterCommand ('dimen', T_DIMEN);
+commands.skip = new VariableRegisterCommand ('skip', T_GLUE);
+commands.muskip = new VariableRegisterCommand ('muskip', T_MUGLUE);
+commands.toks = new VariableRegisterCommand ('toks', T_TOKLIST);
 
 commands.advance = function cmd_advance (engine) {
     var tok = engine.next_x_tok ();
