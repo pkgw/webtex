@@ -163,7 +163,7 @@ def mac_parameter_info (emit, data, restargs):
 def mac_init_parameters (emit, data, restargs):
     info = {'glue': ('set_gluepar', 'new Glue ()'),
             'muglue': ('set_mugluepar', 'new Glue ()'),
-            'toklist': ('set_tokpar', '[]'),
+            'toklist': ('set_tokpar', 'new Toklist ()'),
             'int': ('set_intpar', 'new TexInt (0)'),
             'dimen': ('set_dimenpar', 'new Dimen (0)'),
         }

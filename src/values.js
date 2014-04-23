@@ -18,19 +18,15 @@ var Value = (function Value_closure () {
 	throw new TexInternalException ('not implemented Value.to_texstr');
     };
 
-    proto.texmeaning = function Value_texmeaning () {
-	/* Returns the stringification of the value as implemented by TeX's
-	* \meaning primitive. */
-	throw new TexInternalException ('not implemented Value.texmeaning');
-    };
-
     proto.clone = function Value_clone () {
 	/* Returns a new, identical copy of this value. */
 	throw new TexInternalException ('not implemented Value.clone');
     };
 
     proto.equals = function Value_equals () {
-	/* Returns whether this object has the same value as another. */
+	/* Returns whether this object has the same value as another. So far
+	 * only used to compare fonts in GivenFontCommand.samecmd, so this may
+	 * be very overly generic. */
 	throw new TexInternalException ('not implemented Value.equals');
     };
 
@@ -578,6 +574,48 @@ var Rule = (function Rule_closure () {
 }) ();
 
 
+var Toklist = (function Toklist_closure () {
+    function Toklist (toks) {
+	if (toks == null)
+	    this.toks = [];
+	else if (toks instanceof Array) {
+	    this.toks = toks.slice ();
+	    for (var i = 0; i < toks.length; i++)
+		if (!(toks[i] instanceof Token))
+		    throw new TexInternalException ('non-token in toklist: ' + toks[i]);
+	} else
+	    throw new TexInternalException ('unexpected Toklist() argument: ' + toks);
+    }
+
+    inherit (Toklist, Value);
+    var proto = Toklist.prototype;
+
+    proto.toString = function Toklist_toString () {
+	// XXX could/should be better
+	return '|' + this.toks.join ('|') + '|';
+    };
+
+    proto.uitext = function Toklist_uitext () {
+	/* User-friendly-ish representation of a toklist. */
+	return this.toks.map (function (t) {
+	    return t.uitext ();
+	}).join ('');
+    };
+
+    proto.to_texstr = function Toklist_to_texstr () {
+	throw new TexInternalException ('\\the of toklist should be handled specially');
+    };
+
+    proto.clone = function Toklist_clone () {
+	var n = new Toklist ();
+	n.toks = this.toks.slice ();
+	return n;
+    };
+
+    return Toklist;
+}) ();
+
+
 var Font = (function Font_closure () {
     function Font (ident, scale) {
 	this.ident = ident;
@@ -600,10 +638,6 @@ var Font = (function Font_closure () {
 	if (!(other instanceof Font))
 	    throw new TexInternalException ('comparing Font to ' + other);
 	return (this.ident == other.ident) && (this.scale == other.scale);
-    };
-
-    proto.texmeaning = function Font_texmeaning (engine) {
-	return 'FIXME font texmeaning';
     };
 
     return Font;

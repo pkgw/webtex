@@ -4,13 +4,6 @@ var Valref = (function Valref_closure () {
     function Valref () {}
     var proto = Valref.prototype;
 
-    proto.stringify = function Valref_stringify (engine, value) {
-	/* This function is needed for Values whose instances don't have an
-	 * appropriate toString() method. It is currently only used in
-	 * debugging statements. */
-	return '' + value;
-    };
-
     proto.get = function Valref_get (engine) {
 	/* Retrieve the actual value of this reference. Typically involves
 	 * scanning tokens in the engine. May return null if there's no value
@@ -132,10 +125,6 @@ function _make_toks_valref (type) {
 	    throw new TexSyntaxException ('expected { in toklist assignment; got ' + tok);
 
 	return engine.scan_tok_group (false);
-    };
-
-    type.prototype.stringify = function ToksValref_stringify (engine, value) {
-	return value.join ('|');
     };
 
     type.prototype.is_toks_value = true;

@@ -281,7 +281,11 @@ var Engine = (function Engine_closure () {
 	this.inputstack.push_toklist ([tok]);
     };
 
-    proto.push_toks = function Engine_push (toks) {
+    proto.push_toks = function Engine_push_toks (toks) {
+	if (toks instanceof Toklist)
+	    toks = toks.toks; // convenience.
+	if (!(toks instanceof Array))
+	    throw new TexInternalException ('illegal push_toks argument: ' + toks);
 	this.inputstack.push_toklist (toks);
     };
 
@@ -776,7 +780,7 @@ var Engine = (function Engine_closure () {
 	    toks.push (tok);
 	}
 
-	return toks;
+	return new Toklist (toks);
     };
 
     proto.scan_file_name = function Engine_scan_file_name () {

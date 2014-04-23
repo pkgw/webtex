@@ -82,7 +82,7 @@ commands.string = function cmd_string (engine) {
 	if (esc >= 0 && esc < 256)
 	    expn = String.fromCharCode (esc) + expn;
     } else
-	throw new TexRuntimeException ('don\'t know how to stringify ' + tok);
+	throw new TexRuntimeException ('don\'t know how to \\string-ize ' + tok);
 
     engine.push_string (expn);
 };
@@ -556,7 +556,7 @@ function _cmd_def (engine, cname, expand_replacement) {
 		var next = engine.next_tok_throw ();
 		var nv = next.tocmd (engine).asvalref (engine);
 		if (nv.is_toks_value === true) {
-		    repl_toks = repl_toks.concat (nv.get (engine));
+		    repl_toks = repl_toks.concat (nv.get (engine).toks);
 		    continue
 		} else {
 		    engine.push (next);
@@ -608,8 +608,8 @@ function _cmd_def (engine, cname, expand_replacement) {
     if (end_with_lbrace)
 	repl_toks.push (tmpl_toks[tmpl_toks.length - 1]);
 
-    engine.debug ([cname, cstok, '~', '{' + tmpl_toks.join (' ') + '}',
-		   '->', '{' + repl_toks.join (' ') + '}'].join (' '));
+    engine.debug ([cname, cstok, '~', new Toklist (tmpl_toks),
+		   '->', new Toklist (repl_toks)].join (' '));
     cstok.assign_cmd (engine, new MacroCommand (cstok, tmpl_toks, repl_toks));
 }
 
@@ -1128,7 +1128,7 @@ function _change_case (engine, isupper) {
     if (!tok.iscat (C_BGROUP))
 	throw new TexSyntaxException ('expected { immediately after \\' + cmdname);
 
-    var oldtoks = engine.scan_tok_group (false), newtoks = [];
+    var oldtoks = engine.scan_tok_group (false).toks, newtoks = [];
 
     for (var i = 0; i < oldtoks.length; i++) {
 	var tok = oldtoks[i];
@@ -1142,8 +1142,8 @@ function _change_case (engine, isupper) {
 	    newtoks.push (tok);
     }
 
-    engine.debug ([cmdname, '~' + oldtoks.join (''), '->',
-		   '~' + newtoks.join ('')].join (' '));
+    engine.debug ([cmdname, '~' + new Toklist (oldtoks), '->',
+		   '~' + new Toklist (newtoks)].join (' '));
     engine.push_toks (newtoks);
 }
 
@@ -1182,7 +1182,7 @@ commands.the = function cmd_the (engine) {
 
     if (val.is_toks_value) {
 	var toks = val.get (engine);
-	engine.debug ('the (toks) ' + tok + ' -> ' + val.stringify (engine, toks));
+	engine.debug ('the (toks) ' + tok + ' -> ' + toks);
 	engine.push_toks (toks);
 	return;
     }
@@ -1216,8 +1216,7 @@ commands.message = function cmd_message (engine) {
 	throw new TexSyntaxException ('expected { immediately after \\message');
 
     var toks = engine.scan_tok_group ();
-    engine.debug ('message ~' +
-		  toks.map (function (t) { return t.uitext (); }).join (''));
+    engine.debug ('message ' + toks.uitext ());
 };
 
 
@@ -1228,9 +1227,8 @@ commands.errmessage = function cmd_errmessage (engine) {
 	throw new TexSyntaxException ('expected { immediately after \\errmessage');
 
     var toks = engine.scan_tok_group ();
-    text = toks.map (function (t) { return t.uitext (); }).join ('');
-    engine.debug ('errmessage ~' + text);
-    throw new TexRuntimeException ('TeX-triggered error: ' + text);
+    engine.debug ('errmessage ~' + toks.uitext ());
+    throw new TexRuntimeException ('TeX-triggered error: ' + toks.uitext ());
 };
 
 
@@ -1248,8 +1246,7 @@ commands.write = function cmd_write (engine) {
 	throw new TexSyntaxException ('expected { immediately after \\write');
 
     var toks = engine.scan_tok_group (false);
-    var s = toks.map (function (t) { t.uitext (); }).join ('');
-    engine.debug ('write:' + streamnum + ' ' + s);
+    engine.debug ('write:' + streamnum + ' ' + toks.uitext ());
 };
 
 

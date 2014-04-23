@@ -144,8 +144,8 @@ var MacroCommand = (function MacroCommand_closure () {
 
     proto.invoke = function MacroCommand_invoke (engine) {
 	if (!this.tmpl.length) {
-	    engine.debug ('*macro ' + this.origcs + ' -> {' +
-			  this.repl.join (' ') + '}');
+	    engine.debug ('*macro ' + this.origcs + ' -> ' +
+			  new Toklist (this.repl));
 	    engine.push_toks (this.repl);
 	    return;
 	}
@@ -172,7 +172,7 @@ var MacroCommand = (function MacroCommand_closure () {
 		var tok = engine.next_tok_throw ();
 
 		if (tok.iscat (C_BGROUP))
-		    param_vals[ttok.pnum] = engine.scan_tok_group (false);
+		    param_vals[ttok.pnum] = engine.scan_tok_group (false).toks;
 		else if (tok.iscmd (engine, '<space>'))
 		    // TexBook pg 201: spaces are not used as undelimited args
 		    continue;
@@ -273,8 +273,8 @@ var MacroCommand = (function MacroCommand_closure () {
 	engine.debug ('*macro ' + this.origcs + ' ...');
 	for (var i = 1; i < 9; i++)
 	    if (param_vals.hasOwnProperty (i))
-		engine.debug ('   #' + i + ' = {' + param_vals[i].join (' ') + '}');
-	engine.debug (' -> {' + fullrepl.join (' ') + '}');
+		engine.debug ('   #' + i + ' = ' + new Toklist (param_vals[i]));
+	engine.debug (' -> ' + new Toklist (fullrepl));
 	engine.push_toks (fullrepl);
     };
 
@@ -602,8 +602,7 @@ var GivenRegisterCommand = (function GivenRegisterCommand_closure () {
 	var v = this.asvalref (engine);
 	engine.scan_optional_equals ();
 	var newval = v.scan (engine);
-	engine.debug (this.desc + ' #' + this.register + ' = ' +
-		      v.stringify (engine, newval));
+	engine.debug (this.desc + ' #' + this.register + ' = ' + newval);
 	v.set (engine, newval);
     };
 
@@ -746,8 +745,7 @@ var NamedParamCommand = (function NamedParamCommand_closure () {
 	var v = this.asvalref (engine);
 	engine.scan_optional_equals ();
 	var newval = v.scan (engine);
-	engine.debug ([this.desc, this.name, '=',
-		       v.stringify (engine, newval)].join (' '));
+	engine.debug ([this.desc, this.name, '=', newval].join (' '));
 	v.set (engine, newval);
     };
 
