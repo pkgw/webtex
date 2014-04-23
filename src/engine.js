@@ -39,18 +39,10 @@ var EquivTable = (function EquivTable_closure () {
 var TopEquivTable = (function TopEquivTable_closure () {
     function TopEquivTable () {
 	this.toplevel = this;
+	EquivTable.call (this, this);
 	this.parent = null;
 
 	init_top_eqtb (this);
-
-	// XXX take advantage of generic EquivTable ctor
-	this._qq_registers = {};
-	this._qq_registers[T_INT] = {};
-	this._qq_registers[T_DIMEN] = {};
-	this._qq_registers[T_GLUE] = {};
-	this._qq_registers[T_MUGLUE] = {};
-	this._qq_registers[T_TOKLIST] = {};
-	this._qq_registers[T_BOXLIST] = {};
 
 	for (var i = 0; i < 256; i++) {
 	    this._catcodes[i] = C_OTHER;
