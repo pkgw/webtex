@@ -25,34 +25,40 @@ var EquivTable = (function EquivTable_closure () {
     fill_generic_eqtb_accessors (proto);
 
     proto.set_register = function EquivTable_set_register (valtype, reg, value) {
-	/* Any valtype is OK: int, dimen, glue, nuglue, toklist, boxlist. */
+	if (!vt_ok_for_register[valtype])
+	    throw new TexRuntimeError ('illegal value type for register: ' +
+				       vt_names[valtype]);
 	if (reg < 0 || reg > 255)
 	    throw new TexRuntimeError ('illegal register number ' + reg);
-	if (valtype == T_INT)
-	    value = new TexInt (TexInt.xcheck (value));
-	this._qq_registers[valtype][reg] = value;
+
+	this._qq_registers[valtype][reg] = Value.coerce (valtype, value);
     };
 
     proto.get_register = function EquivTable_get_register (valtype, reg) {
+	if (!vt_ok_for_register[valtype])
+	    throw new TexRuntimeError ('illegal value type for register: ' +
+				       vt_names[valtype]);
 	if (reg < 0 || reg > 255)
 	    throw new TexRuntimeError ('illegal register number ' + reg);
+
 	if (this._qq_registers[valtype].hasOwnProperty (reg))
 	    return this._qq_registers[valtype][reg];
 	return this.parent.get_register (valtype, reg);
     };
 
     proto.set_parameter = function EquivTable_set_parameter (valtype, name, value) {
-	/* OK valtypes are: int, dimen, glue, nuglue, toklist. */
-	if (valtype == T_BOXLIST)
-	    throw new TexInternalError ('boxlist named parameters are forbidden');
-	if (valtype == T_INT)
-	    value = new TexInt (TexInt.xcheck (value));
-	this._qq_parameters[valtype][name] = value;
+	if (!vt_ok_for_parameter[valtype])
+	    throw new TexRuntimeError ('illegal value type for parameter: ' +
+				       vt_names[valtype]);
+
+	this._qq_parameters[valtype][name] = Value.coerce (valtype, value);
     };
 
     proto.get_parameter = function EquivTable_get_parameter (valtype, name) {
-	if (valtype == T_BOXLIST)
-	    throw new TexInternalError ('boxlist named parameters are forbidden');
+	if (!vt_ok_for_parameter[valtype])
+	    throw new TexRuntimeError ('illegal value type for parameter: ' +
+				       vt_names[valtype]);
+
 	if (this._qq_parameters[valtype].hasOwnProperty (name))
 	    return this._qq_parameters[valtype][name];
 	return this.parent.get_parameter (valtype, name);

@@ -5,7 +5,13 @@ var T_INT = 0,     // a simple integer
     T_GLUE = 2,    // regular glue (AKA "skip")
     T_MUGLUE = 3,  // math-mode glue (AKA "skip")
     T_TOKLIST = 4, // a list of tokens
-    T_BOXLIST = 5; // a list (?) of boxes
+    T_BOXLIST = 5, // a list (?) of boxes
+    T_FONT = 6;    // a font.
+
+var vt_ok_for_register = [true, true, true, true, true, true, false];
+var vt_ok_for_parameter = [true, true, true, true, true, false, false];
+var vt_names = ['int', 'dimen', 'glue', 'muglue', 'toklist', 'boxlist', 'font'];
+
 
 var M_VERT = 0,  // standard vertical mode
     M_IVERT = 1, // internal vertical mode

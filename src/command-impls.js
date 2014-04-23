@@ -255,7 +255,7 @@ commands.catcode = (function CatcodeCommand_closure () {
 
     proto.asvalref = function CatcodeCommand_asvalref (engine) {
 	var ord = engine.scan_char_code ();
-	return new ConstantIntValref (new TexInt (engine.catcode (ord)));
+	return new ConstantValref (T_INT, engine.catcode (ord));
     };
 
     return CatcodeCommand;
@@ -281,7 +281,7 @@ commands.mathcode = (function MathcodeCommand_closure () {
 
     proto.asvalref = function MathcodeCommand_asvalref (engine) {
 	var ord = engine.scan_char_code ();
-	return new ConstantIntValref (new TexInt (engine.mathcode (ord)));
+	return new ConstantValref (T_INT, engine.mathcode (ord));
     };
 
     return MathcodeCommand;
@@ -307,7 +307,7 @@ commands.sfcode = (function SfcodeCommand_closure () {
 
     proto.asvalref = function SfcodeCommand_asvalref (engine) {
 	var ord = engine.scan_char_code ();
-	return new ConstantIntValref (new TexInt (engine.sfcode (ord)));
+	return new ConstantValref (T_INT, engine.sfcode (ord));
     };
 
     return SfcodeCommand;
@@ -330,7 +330,7 @@ commands.lccode = (function LccodeCommand_closure () {
 
     proto.asvalref = function LccodeCommand_asvalref (engine) {
 	var ord = engine.scan_char_code ();
-	return new ConstantIntValref (new TexInt (engine.lccode (ord)));
+	return new ConstantValref (T_INT, engine.lccode (ord));
     };
 
     return LccodeCommand;
@@ -353,7 +353,7 @@ commands.uccode = (function UccodeCommand_closure () {
 
     proto.asvalref = function UccodeCommand_asvalref (engine) {
 	var ord = engine.scan_char_code ();
-	return new ConstantIntValref (new TexInt (engine.uccode (ord)));
+	return new ConstantValref (T_INT, engine.uccode (ord));
     };
 
     return UccodeCommand;
@@ -379,7 +379,7 @@ commands.delcode = (function DelcodeCommand_closure () {
 
     proto.asvalref = function DelcodeCommand_asvalref (engine) {
 	var ord = engine.scan_char_code ();
-	return new ConstantIntValref (new TexInt (engine.delcode (ord)));
+	return new ConstantValref (T_INT, engine.delcode (ord));
     };
 
     return DelcodeCommand;
@@ -823,7 +823,7 @@ commands.wd = (function WdCommand_closure () {
     proto.asvalref = function WdCommand_asvalref (engine) {
 	var reg = engine.scan_char_code ();
 	var box = engine.get_register (T_BOXLIST, reg);
-	return new ConstantDimenValref (box.width);
+	return new ConstantValref (T_DIMEN, box.width);
     };
 
     return WdCommand;
@@ -843,7 +843,7 @@ commands.ht = (function HtCommand_closure () {
     proto.asvalref = function HtCommand_asvalref (engine) {
 	var reg = engine.scan_char_code ();
 	var box = engine.get_register (T_BOXLIST, reg);
-	return new ConstantDimenValref (box.height);
+	return new ConstantValref (T_DIMEN, box.height);
     };
 
     return HtCommand;
@@ -915,7 +915,7 @@ commands.inputlineno = (function InputlinenoCommand_closure () {
 
     proto.asvalref = function InputlinenoCommand_asvalref (engine) {
 	// LaTeX considers this "undefined"
-	return new ConstantIntValref (new TexInt (-1));
+	return new ConstantValref (T_INT, -1);
     };
 
     return InputlinenoCommand;
@@ -953,7 +953,7 @@ commands.font = (function FontCommand_closure () {
     };
 
     proto.asvalref = function FontCommand_asvalref (engine) {
-	return new ConstantFontValref (engine.font ('<current>'));
+	return new ConstantValref (T_FONT, engine.font ('<current>'));
     };
 
     return FontCommand;
@@ -973,7 +973,7 @@ commands.nullfont = (function NullFontCommand_closure () {
     };
 
     proto.asvalref = function NullFontCommand_asvalref (engine) {
-	return new ConstantFontValref (engine.font ('<null>'));
+	return new ConstantValref (T_FONT, engine.font ('<null>'));
     };
 
     proto.texmeaning = function NullFontCommand_texmeaning (engine) {
@@ -996,7 +996,7 @@ commands.fontdimen = (function FontDimenCommand_closure () {
 	var tok = engine.next_tok_throw ();
 	var font = tok.tocmd (engine).asvalref (engine);
 
-	if (!(font instanceof ConstantFontValref))
+	if (font.valtype != T_FONT)
 	    throw new TexRuntimeError ('expected \\fontdimen to be followed ' +
 				       'by a font; got ' + tok);
 
@@ -1011,7 +1011,7 @@ commands.fontdimen = (function FontDimenCommand_closure () {
 	var tok = engine.next_tok_throw ();
 	var font = tok.tocmd (engine).asvalref (engine);
 
-	if (!(font instanceof ConstantFontValref))
+	if (font.valtype != T_FONT)
 	    throw new TexRuntimeError ('expected \\fontdimen to be followed ' +
 				       'by a font; got ' + tok);
 
@@ -1023,7 +1023,7 @@ commands.fontdimen = (function FontDimenCommand_closure () {
 	}
 
 	// FIXME: should be settable.
-	return new ConstantDimenValref (val);
+	return new ConstantValref (T_DIMEN, val);
     };
 
     return FontDimenCommand;
@@ -1034,7 +1034,7 @@ commands.skewchar = function cmd_skewchar (engine) {
     var tok = engine.next_tok_throw ();
     var val = tok.tocmd (engine).asvalref (engine);
 
-    if (!(val instanceof ConstantFontValref))
+    if (val.valtype != T_FONT)
 	throw new TexRuntimeError ('expected \\skewchar to be followed by a font; ' +
 				   'got ' + tok);
 
@@ -1049,7 +1049,7 @@ commands.hyphenchar = function cmd_hyphenchar (engine) {
     var tok = engine.next_tok_throw ();
     var val = tok.tocmd (engine).asvalref (engine);
 
-    if (!(val instanceof ConstantFontValref))
+    if (val.valtype != T_FONT)
 	throw new TexRuntimeError ('expected \\hyphenchar to be followed by a font; ' +
 				   'got ' + tok);
 
@@ -1066,7 +1066,7 @@ function _def_family (engine, fam) {
     var tok = engine.next_tok_throw ();
     var val = tok.tocmd (engine).asvalref (engine);
 
-    if (!(val instanceof ConstantFontValref))
+    if (val.valtype != T_FONT)
 	throw new TexRuntimeError ('expected \\' + fam + ' to assign a font; ' +
 				   'got ' +tok);
 

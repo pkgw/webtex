@@ -531,7 +531,7 @@ var GivenCharCommand = (function GivenCharCommand_closure () {
     };
 
     proto.asvalref = function GivenCharCommand_asvalref (engine) {
-	return new ConstantIntValref (new TexInt (this.ord));
+	return new ConstantValref (T_INT, this.ord);
     };
 
     proto.texmeaning = function GivenCharCommand_texmeaning (engine) {
@@ -564,7 +564,7 @@ var GivenMathcharCommand = (function GivenMathcharCommand_closure () {
     };
 
     proto.asvalref = function GivenMathcharCommand_asvalref (engine) {
-	return new ConstantIntValref (new TexInt (this.mathchar));
+	return new ConstantValref (T_INT, this.mathchar);
     };
 
     proto.texmeaning = function GivenMathcharCommand_texmeaning (engine) {
@@ -717,7 +717,7 @@ var GivenFontCommand = (function GivenFontCommand_closure () {
     };
 
     proto.asvalref = function GivenFontCommand_asvalref (engine) {
-	return new ConstantFontValref (this.font);
+	return new ConstantValref (T_FONT, this.font);
     };
 
     proto.texmeaning = function GivenFontCommand_texmeaning (engine) {

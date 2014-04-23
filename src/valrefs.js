@@ -35,9 +35,12 @@ var Valref = (function Valref_closure () {
 
 var RegisterValref = (function RegisterValref_closure () {
     function RegisterValref (valtype, reg) {
-	/* All valtypes are OK: int dimen glue muglue toklist boxlist */
+	if (!vt_ok_for_register[valtype])
+	    throw new TexInternalError ('illegal valtype for register: ' +
+					vt_names[valtype]);
 	if (reg < 0 || reg > 255)
 	    throw new TexInternalError ('illegal register ' + reg);
+
 	Valref.call (this);
 	this.valtype = valtype;
 	this.reg = reg;
@@ -67,9 +70,9 @@ var RegisterValref = (function RegisterValref_closure () {
 
 var ParamValref = (function ParamValref_closure () {
     function ParamValref (valtype, name) {
-	/* All valtypes are OK: int dimen glue muglue toklist boxlist */
-	if (valtype == T_BOXLIST)
-	    throw new TexInternalError ('boxlist named parameters are forbidden');
+	if (!vt_ok_for_parameter[valtype])
+	    throw new TexInternalError ('illegal valtype for parameter: ' +
+					vt_names[valtype]);
 
 	Valref.call (this);
 	this.valtype = valtype;
@@ -98,13 +101,20 @@ var ParamValref = (function ParamValref_closure () {
 
 
 var ConstantValref = (function ConstantValref_closure () {
-    function ConstantValref (value) {
+    function ConstantValref (valtype, value) {
 	Valref.call (this);
-	this.value = value;
+	this.valtype = valtype;
+	this.value = Value.coerce (valtype, value);
+	this.is_toks_value = (valtype == T_TOKLIST); // XXX temporary
     }
 
     inherit (ConstantValref, Valref);
     var proto = ConstantValref.prototype;
+
+    proto.scan = function ConstantValref_scan (engine) {
+	// XXX to be removed.
+	return engine.scan_valtype (this.valtype);
+    };
 
     proto.get = function ConstantValref_get (engine) {
 	return this.value;
@@ -115,80 +125,4 @@ var ConstantValref = (function ConstantValref_closure () {
     };
 
     return ConstantValref;
-}) ();
-
-
-function _make_int_valref (type) {
-    type.prototype.scan = function IntValref_scan (engine) {
-	return engine.scan_int ();
-    };
-
-    return type; // convenience.
-}
-
-function _make_dimen_valref (type) {
-    type.prototype.scan = function DimenValref_scan (engine) {
-	return engine.scan_dimen ();
-    };
-
-    return type;
-}
-
-function _make_glue_valref (type) {
-    type.prototype.scan = function GlueValref_scan (engine) {
-	return engine.scan_glue ();
-    };
-
-    return type;
-}
-
-function _make_muglue_valref (type) {
-    type.prototype.scan = function MuGlueValref_scan (engine) {
-	return engine.scan_glue ({mumode: true});
-    };
-
-    return type;
-}
-
-function _make_toks_valref (type) {
-    type.prototype.scan = function ToksValref_scan (engine) {
-	engine.scan_one_optional_space ();
-
-	var tok = engine.next_tok ();
-	if (tok === NeedMoreData || tok === EOF)
-	    throw tok;
-
-	// TODO: \tokpar=<toklist register or toklist param>
-	if (!tok.iscat (C_BGROUP))
-	    throw new TexSyntaxError ('expected { in toklist assignment; got ' + tok);
-
-	return engine.scan_tok_group (false);
-    };
-
-    type.prototype.is_toks_value = true;
-
-    return type;
-}
-
-function _make_font_valref (type) {
-    return type; // TODO
-}
-
-
-var ConstantIntValref = (function ConstantIntValref_closure () {
-    function ConstantIntValref (value) { ConstantValref.call (this, value); }
-    inherit (ConstantIntValref, ConstantValref);
-    return _make_int_valref (ConstantIntValref);
-}) ();
-
-var ConstantDimenValref = (function ConstantDimenValref_closure () {
-    function ConstantDimenValref (value) { ConstantValref.call (this, value); }
-    inherit (ConstantDimenValref, ConstantValref);
-    return _make_dimen_valref (ConstantDimenValref);
-}) ();
-
-var ConstantFontValref = (function ConstantFontValref_closure () {
-    function ConstantFontValref (value) { ConstantValref.call (this, value); }
-    inherit (ConstantFontValref, ConstantValref);
-    return _make_font_valref (ConstantFontValref);
 }) ();

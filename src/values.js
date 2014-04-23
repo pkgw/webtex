@@ -76,6 +76,45 @@ var Value = (function Value_closure () {
 	throw new TexInternalError ('not implemented Value.intdivide');
     };
 
+    // Static functions.
+
+    Value.coerce = function Value_coerce (valtype, value) {
+	if (valtype == T_INT)
+	    return new TexInt (TexInt.xcheck (value));
+
+	if (valtype == T_DIMEN) {
+	    if (!(value instanceof Dimen))
+		throw new TexInternalError ('cannot coerce to dimen: ' + value);
+	    return value;
+	}
+
+	if (valtype == T_GLUE || valtype == T_MUGLUE) {
+	    if (!(value instanceof Glue))
+		throw new TexInternalError ('cannot coerce to (mu)glue: ' + value);
+	    return value;
+	}
+
+	if (valtype == T_TOKLIST) {
+	    if (!(value instanceof Toklist))
+		throw new TexInternalError ('cannot coerce to toklist: ' + value);
+	    return value;
+	}
+
+	if (valtype == T_BOXLIST) {
+	    if (!(value instanceof Boxlist))
+		throw new TexInternalError ('cannot coerce to boxlist: ' + value);
+	    return value;
+	}
+
+	if (valtype == T_FONT) {
+	    if (!(value instanceof Font))
+		throw new TexInternalError ('cannot coerce to font: ' + value);
+	    return value;
+	}
+
+	throw new TexInternalError ('unrecognized valtype ' + valtype);
+    };
+
     return Value;
 }) ();
 
