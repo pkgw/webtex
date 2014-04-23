@@ -104,6 +104,7 @@ var TexInt = WEBTEX.TexInt = (function TexInt_closure () {
     }
 
     inherit (TexInt, Value);
+    var proto = TexInt.prototype;
 
     TexInt.xcheck = function TexInt_xcheck (value) {
 	/* This function checks that its input could be a valid TeX integer,
@@ -129,49 +130,49 @@ var TexInt = WEBTEX.TexInt = (function TexInt_closure () {
 	return value;
     };
 
-    TexInt.prototype.toString = function TexInt_toString () {
+    proto.toString = function TexInt_toString () {
 	return '<' + this.value + '|i>';
     };
 
-    TexInt.prototype.to_texstr = function TexInt_to_texstr () {
+    proto.to_texstr = function TexInt_to_texstr () {
 	return '' + this.value;
     };
 
-    TexInt.prototype.clone = function TexInt_clone () {
+    proto.clone = function TexInt_clone () {
 	return new TexInt (this.value);
     };
 
-    TexInt.prototype.as_int = function TexInt_as_int () {
+    proto.as_int = function TexInt_as_int () {
 	return this; // NOTE: ok since TexInts are immutable
     };
 
-    TexInt.prototype.as_scaled = function TexInt_as_scaled () {
+    proto.as_scaled = function TexInt_as_scaled () {
 	return null;
     };
 
-    TexInt.prototype.as_dimen = function TexInt_as_dimen () {
+    proto.as_dimen = function TexInt_as_dimen () {
 	return null;
     };
 
-    TexInt.prototype.as_glue = function TexInt_as_glue () {
+    proto.as_glue = function TexInt_as_glue () {
 	return null;
     };
 
-    TexInt.prototype.advance = function TexInt_advance (other) {
+    proto.advance = function TexInt_advance (other) {
 	return new TexInt (this.value + other.value);
     };
 
-    TexInt.prototype.intproduct = function TexInt_intproduct (k) {
+    proto.intproduct = function TexInt_intproduct (k) {
 	k = TexInt.xcheck (k);
 	return new TexInt (this.value * k);
     };
 
-    TexInt.prototype.intdivide = function TexInt_intdivide (k) {
+    proto.intdivide = function TexInt_intdivide (k) {
 	k = TexInt.xcheck (k);
 	return new TexInt (this.value / k >> 0);
     };
 
-    TexInt.prototype.rangecheck = function TexInt_rangecheck (engine, min, max) {
+    proto.rangecheck = function TexInt_rangecheck (engine, min, max) {
 	if (this.value >= min && this.value <= max)
 	    return this;
 
@@ -201,6 +202,7 @@ var Scaled = WEBTEX.Scaled = (function Scaled_closure () {
     }
 
     inherit (Scaled, Value);
+    var proto = Scaled.prototype;
 
     // Math library.
 
@@ -261,7 +263,7 @@ var Scaled = WEBTEX.Scaled = (function Scaled_closure () {
 	    return div (a + 1, 2);
 	};
 
-    Scaled.prototype.times_n_plus_y = function Scaled_times_n_plus_y (n, y) {
+    proto.times_n_plus_y = function Scaled_times_n_plus_y (n, y) {
 	// OO interpretation of nx_plus_y.
 	// n: tex-int
 	// y: Scaled
@@ -273,7 +275,7 @@ var Scaled = WEBTEX.Scaled = (function Scaled_closure () {
 	return mult_and_add (n, this, y, SC_MAX - 1);
     };
 
-    Scaled.prototype.times_n_over_d = function Scaled_times_n_over_d (n, d) {
+    proto.times_n_over_d = function Scaled_times_n_over_d (n, d) {
 	// OO interpretation of xn_over_d.
 	// n: tex-int
 	// d: tex-int
@@ -304,7 +306,7 @@ var Scaled = WEBTEX.Scaled = (function Scaled_closure () {
 	return [new Scaled (-w), new Scaled (-(v % d))];
     };
 
-    Scaled.prototype.over_n = function Scaled_over_n (n) {
+    proto.over_n = function Scaled_over_n (n) {
 	// OO version of x_over_n.
 	// n: tex-int
 	// returns: [Scaled(x/n), Scaled(remainder)]
@@ -337,7 +339,7 @@ var Scaled = WEBTEX.Scaled = (function Scaled_closure () {
 	return [new Scaled (rv), new Scaled (rem)];
     };
 
-    Scaled.prototype.times_parts = function Scaled_times_parts (nonfrac, frac) {
+    proto.times_parts = function Scaled_times_parts (nonfrac, frac) {
 	nonfrac = TexInt.xcheck (nonfrac);
 	frac = TexInt.xcheck (frac);
 	var res = this.times_n_over_d (frac, SC_UNITY)[0];
@@ -346,45 +348,45 @@ var Scaled = WEBTEX.Scaled = (function Scaled_closure () {
 
     // Higher-level stuff.
 
-    Scaled.prototype.toString = function Scaled_toString () {
+    proto.toString = function Scaled_toString () {
 	return '<~' + this.asfloat ().toFixed (6) + '|s>';
     };
 
-    Scaled.prototype.clone = function Scaled_clone () {
+    proto.clone = function Scaled_clone () {
 	return new Scaled (this.value);
     };
 
-    Scaled.prototype.as_int = function Scaled_as_int () {
+    proto.as_int = function Scaled_as_int () {
 	return new TexInt (this.value);
     };
 
-    Scaled.prototype.as_scaled = function Scaled_as_scaled () {
+    proto.as_scaled = function Scaled_as_scaled () {
 	return this; // NOTE: ok since Scaleds are immutable.
     };
 
-    Scaled.prototype.as_dimen = function Scaled_as_dimen () {
+    proto.as_dimen = function Scaled_as_dimen () {
 	return null;
     };
 
-    Scaled.prototype.as_glue = function Scaled_as_glue () {
+    proto.as_glue = function Scaled_as_glue () {
 	return null;
     };
 
-    Scaled.prototype.advance = function Scaled_advance (other) {
+    proto.advance = function Scaled_advance (other) {
 	return new Scaled (this.value + other.value);
     };
 
-    Scaled.prototype.intproduct = function Scaled_intproduct (k) {
+    proto.intproduct = function Scaled_intproduct (k) {
 	k = TexInt.xcheck (k);
 	return this.times_parts (k, 0);
     };
 
-    Scaled.prototype.intdivide = function Scaled_intdivide (k) {
+    proto.intdivide = function Scaled_intdivide (k) {
 	k = TexInt.xcheck (k);
 	return this.clone ().over_n (k);
     };
 
-    Scaled.prototype.asfloat = function Scaled_asfloat () {
+    proto.asfloat = function Scaled_asfloat () {
 	return this.value * UNSCALE;
     };
 
@@ -401,6 +403,7 @@ var Dimen = (function Dimen_closure () {
     }
 
     inherit (Dimen, Value);
+    var proto = Dimen.prototype;
 
     Dimen.new_product = function Dimen_new_product (k, x) {
 	// k: tex-int
@@ -416,50 +419,50 @@ var Dimen = (function Dimen_closure () {
 	return d;
     };
 
-    Dimen.prototype.toString = function Dimen_toString () {
+    proto.toString = function Dimen_toString () {
 	return this.sp.asfloat ().toFixed (3) + 'pt';
     };
 
-    Dimen.prototype.to_texstr = function Dimen_to_texstr () {
+    proto.to_texstr = function Dimen_to_texstr () {
 	return this.sp.asfloat ().toFixed (3) + 'pt';
     };
 
-    Dimen.prototype.clone = function Dimen_clone () {
+    proto.clone = function Dimen_clone () {
 	var d = new Dimen ();
 	d.sp = this.sp.clone ();
 	return d;
     };
 
-    Dimen.prototype.as_int = function Dimen_as_int () {
+    proto.as_int = function Dimen_as_int () {
 	return this.sp.as_int ();
     };
 
-    Dimen.prototype.as_scaled = function Dimen_as_scaled () {
+    proto.as_scaled = function Dimen_as_scaled () {
 	return this.sp; // NOTE: ok since Scaleds are immutable.
     };
 
-    Dimen.prototype.as_dimen = function Dimen_as_dimen () {
+    proto.as_dimen = function Dimen_as_dimen () {
 	return this.clone ();
     };
 
-    Dimen.prototype.as_glue = function Dimen_as_glue () {
+    proto.as_glue = function Dimen_as_glue () {
 	return null;
     };
 
-    Dimen.prototype.advance = function Dimen_advance (other) {
+    proto.advance = function Dimen_advance (other) {
 	var d = new Dimen ();
 	d.sp = d.sp.advance (other.as_scaled ());
 	return d;
     };
 
-    Dimen.prototype.intproduct = function Dimen_intproduct (k) {
+    proto.intproduct = function Dimen_intproduct (k) {
 	k = TexInt.xcheck (k);
 	var d = new Dimen ();
 	d.sp = this.sp.intproduct (k);
 	return d;
     };
 
-    Dimen.prototype.intdivide = function Dimen_intdivide (k) {
+    proto.intdivide = function Dimen_intdivide (k) {
 	k = TexInt.xcheck (k);
 	var d = this.clone ();
 	d.sp = this.sp.intdivide (k);
@@ -480,14 +483,15 @@ var Glue = (function Glue_closure () {
     }
 
     inherit (Glue, Value);
+    var proto = Glue.prototype;
 
-    Glue.prototype.toString = function Glue_toString () {
+    proto.toString = function Glue_toString () {
 	return '<Glue ' + this.width + ' st=' + this.stretch + '|' +
 	    this.stretch_order + ' sh=' + this.shrink + '|' +
 	    this.shrink_order + '>';
     };
 
-    Glue.prototype.clone = function Glue_clone () {
+    proto.clone = function Glue_clone () {
 	var g = new Glue ();
 	g.width = this.width.clone ();
 	g.stretch = this.stretch.clone ();
@@ -497,23 +501,23 @@ var Glue = (function Glue_closure () {
 	return g;
     };
 
-    Glue.prototype.as_int = function Glue_as_int () {
+    proto.as_int = function Glue_as_int () {
 	return this.width.as_int ();
     };
 
-    Glue.prototype.as_scaled = function Glue_as_scaled () {
+    proto.as_scaled = function Glue_as_scaled () {
 	return this.width.as_scaled ();
     };
 
-    Glue.prototype.as_dimen = function Glue_as_dimen () {
+    proto.as_dimen = function Glue_as_dimen () {
 	return this.width.clone ();
     };
 
-    Glue.prototype.as_glue = function Glue_as_glue () {
+    proto.as_glue = function Glue_as_glue () {
 	return this.clone ();
     };
 
-    Glue.prototype.advance = function Glue_advance (other) {
+    proto.advance = function Glue_advance (other) {
 	var g = this.clone ();
 	g.width = this.width.advance (other.width);
 	g.stretch = this.stretch.advance (other.stretch);
@@ -521,7 +525,7 @@ var Glue = (function Glue_closure () {
 	return g;
     };
 
-    Glue.prototype.intproduct = function Glue_intproduct (k) {
+    proto.intproduct = function Glue_intproduct (k) {
 	k = TexInt.xcheck (k);
 	var g = this.clone ();
 	g.width = this.width.intproduct (k);
@@ -530,7 +534,7 @@ var Glue = (function Glue_closure () {
 	return g;
     };
 
-    Glue.prototype.intdivide = function Glue_intdivide (k) {
+    proto.intdivide = function Glue_intdivide (k) {
 	k = TexInt.xcheck (k);
 	var g = this.clone ();
 	g.width = this.width.intdivide (k);
@@ -603,324 +607,4 @@ var Font = (function Font_closure () {
     };
 
     return Font;
-}) ();
-
-
-// Our "value reference" system
-
-var Valref = (function Valref_closure () {
-    function Valref () {}
-
-    Valref.prototype.stringify = function Valref_stringify (engine, value) {
-	/* This function is needed for Values whose instances don't have an
-	 * appropriate toString() method. It is currently only used in
-	 * debugging statements. */
-	return '' + value;
-    };
-
-    Valref.prototype.get = function Valref_get (engine) {
-	/* Retrieve the actual value of this reference. Typically involves
-	 * scanning tokens in the engine. May return null if there's no value
-	 * but that situation is expected. */
-	throw new TexInternalException ('not implemented Valref.get');
-    };
-
-    Valref.prototype.set = function Valref_set (engine, value) {
-	/* Assign a new value to the storage location that this reference
-	 * represents. */
-	throw new TexInternalException ('not implemented Valref.set');
-    };
-
-    Valref.prototype.scan = function Valref_scan (engine) {
-	/* Scan a value of the kind that this object references. Note that
-	 * this is some kind of literal that the engine's ready to read;
-	 * it's not necessarily the value that this particular reference
-	 * points to. */
-	throw new TexInternalException ('not implemented Valref.scan');
-    };
-
-    Valref.prototype.is_toks_value = false;
-    /* Somewhat hacky property to help with toklist scanning. Works how
-     * it sounds. */
-
-    return Valref;
-}) ();
-
-
-var RegisterValref = (function RegisterValref_closure () {
-    function RegisterValref (reg) {
-	if (reg < 0 || reg > 255)
-	    throw new TexInternalException ('illegal register ' + reg);
-	Valref.call (this);
-	this.reg = reg;
-    }
-
-    inherit (RegisterValref, Valref);
-
-    return RegisterValref;
-}) ();
-
-
-var ParamValref = (function ParamValref_closure () {
-    function ParamValref (name) {
-	Valref.call (this);
-	this.name = name;
-    }
-
-    inherit (ParamValref, Valref);
-
-    return ParamValref;
-}) ();
-
-
-var ConstantValref = (function ConstantValref_closure () {
-    function ConstantValref (value) {
-	Valref.call (this);
-	this.value = value;
-    }
-
-    inherit (ConstantValref, Valref);
-
-    ConstantValref.prototype.get = function ConstantValref_get (engine) {
-	return this.value;
-    };
-
-    ConstantValref.prototype.set = function ConstantValref_set (engine, value) {
-	throw new TexRuntimeException ('cannot set a constant Valref')
-    };
-
-    return ConstantValref;
-}) ();
-
-
-function _make_int_valref (type) {
-    type.prototype.scan = function IntValref_scan (engine) {
-	return engine.scan_int ();
-    };
-
-    return type; // convenience.
-}
-
-function _make_dimen_valref (type) {
-    type.prototype.scan = function DimenValref_scan (engine) {
-	return engine.scan_dimen ();
-    };
-
-    return type;
-}
-
-function _make_glue_valref (type) {
-    type.prototype.scan = function GlueValref_scan (engine) {
-	return engine.scan_glue ();
-    };
-
-    return type;
-}
-
-function _make_muglue_valref (type) {
-    type.prototype.scan = function MuGlueValref_scan (engine) {
-	return engine.scan_glue ({mumode: true});
-    };
-
-    return type;
-}
-
-function _make_toks_valref (type) {
-    type.prototype.scan = function ToksValref_scan (engine) {
-	engine.scan_one_optional_space ();
-
-	var tok = engine.next_tok ();
-	if (tok === NeedMoreData || tok === EOF)
-	    throw tok;
-
-	// TODO: \tokpar=<toklist register or toklist param>
-	if (!tok.iscat (C_BGROUP))
-	    throw new TexSyntaxException ('expected { in toklist assignment; got ' + tok);
-
-	return engine.scan_tok_group (false);
-    };
-
-    type.prototype.stringify = function ToksValref_stringify (engine, value) {
-	return value.join ('|');
-    };
-
-    type.prototype.is_toks_value = true;
-
-    return type;
-}
-
-function _make_font_valref (type) {
-    return type; // TODO
-}
-
-
-var ConstantIntValref = (function ConstantIntValref_closure () {
-    function ConstantIntValref (value) { ConstantValref.call (this, value); }
-    inherit (ConstantIntValref, ConstantValref);
-    return _make_int_valref (ConstantIntValref);
-}) ();
-
-var ConstantDimenValref = (function ConstantDimenValref_closure () {
-    function ConstantDimenValref (value) { ConstantValref.call (this, value); }
-    inherit (ConstantDimenValref, ConstantValref);
-    return _make_dimen_valref (ConstantDimenValref);
-}) ();
-
-var ConstantFontValref = (function ConstantFontValref_closure () {
-    function ConstantFontValref (value) { ConstantValref.call (this, value); }
-    inherit (ConstantFontValref, ConstantValref);
-    return _make_font_valref (ConstantFontValref);
-}) ();
-
-
-var IntRegValref = (function IntRegValref_closure () {
-    function IntRegValref (reg) { RegisterValref.call (this, reg); }
-    inherit (IntRegValref, RegisterValref);
-
-    IntRegValref.prototype.get = function IntRegValref_get (engine) {
-	return engine.countreg (this.reg);
-    };
-
-    IntRegValref.prototype.set = function IntRegValref_set (engine, value) {
-	engine.set_countreg (this.reg, value);
-    };
-
-    return _make_int_valref (IntRegValref);
-}) ();
-
-var DimenRegValref = (function DimenRegValref_closure () {
-    function DimenRegValref (reg) { RegisterValref.call (this, reg); }
-    inherit (DimenRegValref, RegisterValref);
-
-    DimenRegValref.prototype.get = function DimenRegValref_get (engine) {
-	return engine.dimenreg (this.reg);
-    };
-
-    DimenRegValref.prototype.set = function DimenRegValref_set (engine, value) {
-	engine.set_dimenreg (this.reg, value);
-    };
-
-    return _make_dimen_valref (DimenRegValref);
-}) ();
-
-var GlueRegValref = (function GlueRegValref_closure () {
-    function GlueRegValref (reg) { RegisterValref.call (this, reg); }
-    inherit (GlueRegValref, RegisterValref);
-
-    GlueRegValref.prototype.get = function GlueRegValref_get (engine) {
-	return engine.gluereg (this.reg);
-    };
-
-    GlueRegValref.prototype.set = function GlueRegValref_set (engine, value) {
-	engine.set_gluereg (this.reg, value);
-    };
-
-    return _make_glue_valref (GlueRegValref);
-}) ();
-
-var MuGlueRegValref = (function MuGlueRegValref_closure () {
-    function MuGlueRegValref (reg) { RegisterValref.call (this, reg); }
-    inherit (MuGlueRegValref, RegisterValref);
-
-    MuGlueRegValref.prototype.get = function MuGlueRegValref_get (engine) {
-	return engine.mugluereg (this.reg);
-    };
-
-    MuGlueRegValref.prototype.set = function MuGlueRegValref_set (engine, value) {
-	engine.set_mugluereg (this.reg, value);
-    };
-
-    return _make_muglue_valref (MuGlueRegValref);
-}) ();
-
-var ToksRegValref = (function ToksRegValref_closure () {
-    function ToksRegValref (reg) { RegisterValref.call (this, reg); }
-    inherit (ToksRegValref, RegisterValref);
-
-    ToksRegValref.prototype.get = function ToksRegValref_get (engine) {
-	return engine.tokreg (this.reg);
-    };
-
-    ToksRegValref.prototype.set = function ToksRegValref_set (engine, value) {
-	engine.set_tokreg (this.reg, value);
-    };
-
-    return _make_toks_valref (ToksRegValref);
-}) ();
-
-
-var IntParamValref = (function IntParamValref_closure () {
-    function IntParamValref (name) { ParamValref.call (this, name); }
-    inherit (IntParamValref, ParamValref);
-
-    IntParamValref.prototype.get = function IntParamValref_get (engine) {
-	return new TexInt (engine.intpar (this.name));
-    };
-
-    IntParamValref.prototype.set = function IntParamValref_set (engine, value) {
-	value = TexInt.xcheck (value);
-	engine.set_intpar (this.name, value);
-    };
-
-    return _make_int_valref (IntParamValref);
-}) ();
-
-var DimenParamValref = (function DimenParamValref_closure () {
-    function DimenParamValref (name) { ParamValref.call (this, name); }
-    inherit (DimenParamValref, ParamValref);
-
-    DimenParamValref.prototype.get = function DimenParamValref_get (engine) {
-	return engine.dimenpar (this.name);
-    };
-
-    DimenParamValref.prototype.set = function DimenParamValref_set (engine, value) {
-	engine.set_dimenpar (this.name, value);
-    };
-
-    return _make_dimen_valref (DimenParamValref);
-}) ();
-
-var GlueParamValref = (function GlueParamValref_closure () {
-    function GlueParamValref (name) { ParamValref.call (this, name); }
-    inherit (GlueParamValref, ParamValref);
-
-    GlueParamValref.prototype.get = function GlueParamValref_get (engine) {
-	return engine.gluepar (this.name);
-    };
-
-    GlueParamValref.prototype.set = function GlueParamValref_set (engine, value) {
-	engine.set_gluepar (this.name, value);
-    };
-
-    return _make_glue_valref (GlueParamValref);
-}) ();
-
-var MuGlueParamValref = (function MuGlueParamValref_closure () {
-    function MuGlueParamValref (name) { ParamValref.call (this, name); }
-    inherit (MuGlueParamValref, ParamValref);
-
-    MuGlueParamValref.prototype.get = function MuGlueParamValref_get (engine) {
-	return engine.mugluepar (this.name);
-    };
-
-    MuGlueParamValref.prototype.set = function MuGlueParamValref_set (engine, value) {
-	engine.set_mugluepar (this.name, value);
-    };
-
-    return _make_muglue_valref (MuGlueParamValref);
-}) ();
-
-var ToksParamValref = (function ToksParamValref_closure () {
-    function ToksParamValref (name) { ParamValref.call (this, name); }
-    inherit (ToksParamValref, ParamValref);
-
-    ToksParamValref.prototype.get = function ToksParamValref_get (engine) {
-	return engine.tokpar (this.name);
-    };
-
-    ToksParamValref.prototype.set = function ToksParamValref_set (engine, value) {
-	engine.set_tokpar (this.name, value);
-    };
-
-    return _make_toks_valref (ToksParamValref);
 }) ();
