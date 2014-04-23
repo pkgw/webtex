@@ -730,8 +730,7 @@ var NamedParamCommand = (function NamedParamCommand_closure () {
     proto.invoke = function NamedParamCommand_invoke (engine) {
 	engine.scan_optional_equals ();
 	var newval = engine.scan_valtype (this.valtype);
-	engine.debug ([this.desc, this.name, '=', newval].join (' '));
-
+	engine.debug ([this.name, '=', newval].join (' '));
 	this.asvalref (engine).set (engine, newval);
     };
 
