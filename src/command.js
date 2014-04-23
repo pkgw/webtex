@@ -577,17 +577,22 @@ var GivenMathcharCommand = (function GivenMathcharCommand_closure () {
 
 
 var GivenRegisterCommand = (function GivenRegisterCommand_closure () {
-    function GivenRegisterCommand (register) {
+    function GivenRegisterCommand (valtype, desc, register) {
 	Command.call (this);
+	if (!vt_ok_for_register[valtype])
+	    throw new TexInternalError ('illegal valtype for register: ' +
+					vt_names[valtype]);
 	if (register < 0 || register > 255)
 	    throw new TexInternalError ('illegal register number ' + register);
+
+	this.valtype = valtype;
+	this.desc = desc;
 	this.register = register;
+	this.name = '<given-' + desc + '>';
     }
 
     inherit (GivenRegisterCommand, Command);
     var proto = GivenRegisterCommand.prototype;
-    proto.name = '<given-register>';
-    proto.desc = '[unassigned register type]';
     proto.assign_flag_mode = AFM_CONSUME;
 
     proto.samecmd = function GivenRegisterCommand_samecmd (other) {
@@ -595,18 +600,23 @@ var GivenRegisterCommand = (function GivenRegisterCommand_closure () {
 	    return false;
 	if (this.name != other.name)
 	    return false;
+	if (this.valtype != other.valtype)
+	    return false;
 	return this.register == other.register;
     };
 
-    proto.invoke = function GivenRegisterCommand_invoke (engine) {
-	var v = this.asvalref (engine);
-	engine.scan_optional_equals ();
-	var newval = engine.scan_valtype (v.valtype);
-	engine.debug (this.desc + ' #' + this.register + ' = ' + newval);
-	v.set (engine, newval);
+    proto.asvalref = function GivenRegisterCommand_asvalref (engine) {
+	return new RegisterValref (this.valtype, this.register);
     };
 
-    // subclasses implement asvalref()
+    proto.invoke = function GivenRegisterCommand_invoke (engine) {
+	engine.scan_optional_equals ();
+	var newval = engine.scan_valtype (this.valtype);
+	engine.debug (this.desc + ' #' + this.register + ' = ' + newval);
+
+	var v = this.asvalref (engine);
+	v.set (engine, newval);
+    };
 
     proto.texmeaning = function GivenRegisterCommand_texmeaning (engine) {
 	return texchr (engine.escapechar ()) + this.desc +
@@ -614,81 +624,6 @@ var GivenRegisterCommand = (function GivenRegisterCommand_closure () {
     };
 
     return GivenRegisterCommand;
-})();
-
-
-var GivenCountCommand = (function GivenCountCommand_closure () {
-    function GivenCountCommand (reg) { GivenRegisterCommand.call (this, reg); }
-    inherit (GivenCountCommand, GivenRegisterCommand);
-    var proto = GivenCountCommand.prototype;
-    proto.name = '<given-count>';
-    proto.desc = 'count';
-
-    proto.asvalref = function GivenCountCommand_asvalref (engine) {
-	return new RegisterValref (T_INT, this.register);
-    };
-
-    return GivenCountCommand;
-})();
-
-
-var GivenDimenCommand = (function GivenDimenCommand_closure () {
-    function GivenDimenCommand (reg) { GivenRegisterCommand.call (this, reg); }
-    inherit (GivenDimenCommand, GivenRegisterCommand);
-    var proto = GivenDimenCommand.prototype;
-    proto.name = '<given-dimen>';
-    proto.desc = 'dimen';
-
-    proto.asvalref = function GivenDimenCommand_asvalref (engine) {
-	return new RegisterValref (T_DIMEN, this.register);
-    };
-
-    return GivenDimenCommand;
-})();
-
-
-var GivenGlueCommand = (function GivenGlueCommand_closure () {
-    function GivenGlueCommand (reg) { GivenRegisterCommand.call (this, reg); }
-    inherit (GivenGlueCommand, GivenRegisterCommand);
-    var proto = GivenGlueCommand.prototype;
-    proto.name = '<given-glue>';
-    proto.desc = 'glue';
-
-    proto.asvalref = function GivenGlueCommand_asvalref (engine) {
-	return new RegisterValref (T_GLUE, this.register);
-    };
-
-    return GivenGlueCommand;
-})();
-
-
-var GivenMuglueCommand = (function GivenMuglueCommand_closure () {
-    function GivenMuglueCommand (reg) { GivenRegisterCommand.call (this, reg); }
-    inherit (GivenMuglueCommand, GivenRegisterCommand);
-    var proto = GivenMuglueCommand.prototype;
-    proto.name = '<given-muglue>';
-    proto.desc = 'muglue';
-
-    proto.asvalref = function GivenMuglueCommand_asvalref (engine) {
-	return new RegisterValref (T_MUGLUE, this.register);
-    };
-
-    return GivenMuglueCommand;
-})();
-
-
-var GivenToksCommand = (function GivenToksCommand_closure () {
-    function GivenToksCommand (reg) { GivenRegisterCommand.call (this, reg); }
-    inherit (GivenToksCommand, GivenRegisterCommand);
-    var proto = GivenToksCommand.prototype;
-    proto.name = '<given-toks>';
-    proto.desc = 'toks';
-
-    proto.asvalref = function GivenToksCommand_asvalref (engine) {
-	return new RegisterValref (T_TOKLIST, this.register);
-    };
-
-    return GivenToksCommand;
 })();
 
 

@@ -105,7 +105,7 @@ commands.count = (function CountCommand_closure () {
 
     proto.invoke = function CountCommand_invoke (engine) {
 	var reg = engine.scan_char_code ();
-	return new GivenCountCommand (reg).invoke (engine);
+	return new GivenRegisterCommand (T_INT, this.name, reg).invoke (engine);
     };
 
     proto.asvalref = function CountCommand_asvalref (engine) {
@@ -125,7 +125,7 @@ commands.dimen = (function DimenCommand_closure () {
 
     proto.invoke = function DimenCommand_invoke (engine) {
 	var reg = engine.scan_char_code ();
-	return new GivenDimenCommand (reg).invoke (engine);
+	return new GivenRegisterCommand (T_DIMEN, this.name, reg).invoke (engine);
     };
 
     proto.asvalref = function DimenCommand_asvalref (engine) {
@@ -141,12 +141,12 @@ commands.skip = (function SkipCommand_closure () {
     function SkipCommand () { Command.call (this); }
     inherit (SkipCommand, Command);
     var proto = SkipCommand.prototype;
+    // Note TeX's inconsistent "glue"/"skip" terminology
     proto.name = 'skip';
 
     proto.invoke = function SkipCommand_invoke (engine) {
 	var reg = engine.scan_char_code ();
-	// Note TeX's inconsistent "glue"/"skip" terminology
-	return new GivenGlueCommand (reg).invoke (engine);
+	return new GivenRegisterCommand (T_GLUE, this.name, reg).invoke (engine);
     };
 
     proto.asvalref = function SkipCommand_asvalref (engine) {
@@ -166,8 +166,7 @@ commands.muskip = (function MuskipCommand_closure () {
 
     proto.invoke = function MuskipCommand_invoke (engine) {
 	var reg = engine.scan_char_code ();
-	// Note TeX's inconsistent "glue"/"skip" terminology
-	return new GivenMuglueCommand (reg).invoke (engine);
+	return new GivenRegisterCommand (T_MUGLUE, this.name, reg).invoke (engine);
     };
 
     proto.asvalref = function MuskipCommand_asvalref (engine) {
@@ -187,7 +186,7 @@ commands.toks = (function ToksCommand_closure () {
 
     proto.invoke = function ToksCommand_invoke (engine) {
 	var reg = engine.scan_char_code ();
-	return new GivenToksCommand (reg).invoke (engine);
+	return new GivenRegisterCommand (T_TOKLIST, this.name, reg).invoke (engine);
     };
 
     proto.asvalref = function ToksCommand_asvalref (engine) {
@@ -415,7 +414,7 @@ commands.countdef = function cmd_countdef (engine) {
     engine.scan_optional_equals ();
     var reg = engine.scan_register_num ();
     engine.debug ('countdef ' + cstok + ' -> {\\count' + reg + '}');
-    cstok.assign_cmd (engine, new GivenCountCommand (reg));
+    cstok.assign_cmd (engine, new GivenRegisterCommand (T_INT, 'count', reg));
 };
 
 
@@ -424,7 +423,7 @@ commands.dimendef = function cmd_dimendef (engine) {
     engine.scan_optional_equals ();
     var reg = engine.scan_register_num ();
     engine.debug ('dimendef ' + cstok + ' -> {\\dimen' + reg + '}');
-    cstok.assign_cmd (engine, new GivenDimenCommand (reg));
+    cstok.assign_cmd (engine, new GivenRegisterCommand (T_DIMEN, 'dimen', reg));
 };
 
 
@@ -433,7 +432,7 @@ commands.skipdef = function cmd_skipdef (engine) {
     engine.scan_optional_equals ();
     var reg = engine.scan_register_num ();
     engine.debug ('skipdef ' + cstok + ' -> {\\skip' + reg + '}');
-    cstok.assign_cmd (engine, new GivenGlueCommand (reg));
+    cstok.assign_cmd (engine, new GivenRegisterCommand (T_GLUE, 'skip', reg));
 };
 
 
@@ -442,7 +441,7 @@ commands.toksdef = function cmd_toksdef (engine) {
     engine.scan_optional_equals ();
     var reg = engine.scan_register_num ();
     engine.debug ('toksdef ' + cstok + ' -> {\\toks' + reg + '}');
-    cstok.assign_cmd (engine, new GivenToksCommand (reg));
+    cstok.assign_cmd (engine, new GivenRegisterCommand (T_TOKLIST, 'toks', reg));
 };
 
 
