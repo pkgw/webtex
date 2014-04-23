@@ -122,7 +122,6 @@ def process (data, inpath, outpath, restargs):
 
 
 # The macros
-# TODO: port all this stuff from Python!
 
 def mac_insert_files (emit, data, restargs):
     for path in restargs:
@@ -154,6 +153,8 @@ def mac_parameter_info (emit, data, restargs):
 
 
 def mac_init_parameters (emit, data, restargs):
+    # XXX fold this into mac_parameter_info.
+
     info = {'glue': ('T_GLUE', 'new Glue ()'),
             'muglue': ('T_MUGLUE', 'new Glue ()'),
             'toklist': ('T_TOKLIST', 'new Toklist ()'),
@@ -164,114 +165,6 @@ def mac_init_parameters (emit, data, restargs):
     for item in data.namedparams:
         valtype, init = info[item.type]
         emit ('engine.set_parameter (%s, %r, %s);' % (valtype, item.name, init))
-
-
-def mac_include_impls (emit, data, restargs):
-    with open ('impls.py') as f:
-        for line in f:
-            emit ('%s', line.rstrip ())
-
-
-def mac_eqtb_generic_init (emit, data, restargs):
-    for item in data.eqtbitems:
-        if item.name == 'catcodes':
-            continue
-
-        emit ('obj._%s = {};', item.name)
-
-
-def mac_eqtb_generic_accessors (emit, data, restargs):
-    for item in data.eqtbitems:
-        assert item.name[-1] == 's'
-        item.shname = item.name[:-1]
-
-        if item.index == 'ord':
-            item.idxvar = 'ord'
-        elif item.index == 'str':
-            item.idxvar = 'name'
-        elif item.index == 'reg':
-            item.idxvar = 'reg'
-        else:
-            die ('unknown eqtb index kind "%s"', item.index)
-
-        emit ('''proto.%(shname)s = function EquivTable_%(shname)s (%(idxvar)s) {
-  if (this._%(name)s.hasOwnProperty (%(idxvar)s))
-    return this._%(name)s[%(idxvar)s];
-  return this.parent.%(shname)s (%(idxvar)s);
-};
-
-proto.set_%(shname)s = function EquivTable_set_%(shname)s (%(idxvar)s, value) {
-  this._%(name)s[%(idxvar)s] = value;
-};
-''', item.extract ())
-
-
-def mac_eqtb_toplevel_init (emit, data, restargs):
-    for item in data.eqtbitems:
-        if item.valuetype in ('catcode', 'ord', 'mathcode', 'int', 'delcode',
-                              'dimen', 'sfcode'):
-            initval = '0'
-        else:
-            initval = 'null'
-
-        if item.index in ('ord', 'reg'):
-            emit ('''t = obj._%s = {};
-for (i = 0; i < 256; i++)
-    t[i] = %s;''', item.name, initval)
-        elif item.index == 'str':
-            emit ('obj._%s = {};', item.name)
-        else:
-            die ('unknown eqtb index kind "%s"', item.index)
-
-
-def mac_eqtb_toplevel_accessors (emit, data, restargs):
-    for item in data.eqtbitems:
-        assert item.name[-1] == 's'
-        item.shname = item.name[:-1]
-
-        if item.index == 'ord':
-            item.idxvar = 'ord'
-        elif item.index == 'str':
-            item.idxvar = 'name'
-        elif item.index == 'reg':
-            item.idxvar = 'reg'
-        else:
-            die ('unknown eqtb index kind "%s"', item.index)
-
-        emit ('''proto.%(shname)s = function TopEquivTable_%(shname)s (%(idxvar)s) {
-  if (this._%(name)s.hasOwnProperty (%(idxvar)s))
-    return this._%(name)s[%(idxvar)s];
-  return null;
-};
-''', item.extract ())
-
-
-def mac_eqtb_engine_wrappers (emit, data, restargs):
-    for item in data.eqtbitems:
-        assert item.name[-1] == 's'
-        item.shname = item.name[:-1]
-
-        if item.index == 'ord':
-            item.idxvar = 'ord'
-        elif item.index == 'str':
-            item.idxvar = 'name'
-        elif item.index == 'reg':
-            item.idxvar = 'reg'
-        else:
-            die ('unknown eqtb index kind "%s"', item.index)
-
-        emit ('''proto.%(shname)s = function Engine_%(shname)s (%(idxvar)s) {
-  return this.eqtb.%(shname)s (%(idxvar)s);
-};
-
-proto.set_%(shname)s = function Engine_set_%(shname)s (%(idxvar)s, value) {
-  if (this.assign_flags & AF_GLOBAL)
-    this.eqtb.toplevel.set_%(shname)s (%(idxvar)s, value);
-  else
-    this.eqtb.set_%(shname)s (%(idxvar)s, value);
-  this.maybe_insert_after_assign_token ();
-};
-''', item.extract ())
 
 
 # Driver.
