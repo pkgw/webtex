@@ -141,151 +141,44 @@ commands.multiply = function cmd_multiply (engine) {
 
 // Setting categories: \catcode, \mathcode, etc.
 
-commands.catcode = (function CatcodeCommand_closure () {
-    function CatcodeCommand () { Command.call (this); }
-    inherit (CatcodeCommand, Command);
-    var proto = CatcodeCommand.prototype;
+var CharCodeCommand = (function CharCodeCommand_closure () {
+    function CharCodeCommand (codetype, name) {
+	Command.call (this);
+	this.codetype = codetype;
+	this.name = name;
+    }
 
-    proto.invoke = function CatcodeCommand_invoke (engine) {
+    inherit (CharCodeCommand, Command);
+    var proto = CharCodeCommand.prototype;
+
+    proto.invoke = function CharCodeCommand_invoke (engine) {
 	var ord = engine.scan_char_code ();
 	engine.scan_optional_equals ();
-	var ccode = engine.scan_int_4bit ();
-	engine.debug ('catcode ' + escchr (ord) + '=' + ord + ' -> '
-		      + ccode + '=' + cc_abbrev[ccode]);
-	engine.set_catcode (ord, ccode);
+	var code = engine.scan_int ().value;
+
+	if (code < 0 || code > ct_maxvals[this.codetype])
+	    throw new TexRuntimeException ('illegal value ' + code +
+					   ' for ' + ct_names[this.codetype]);
+
+	engine.debug (ct_names[this.codetype] + ' ' + escchr (ord) + '=' +
+		      ord + ' -> ' + code);
+	engine.set_code (this.codetype, ord, code);
     };
 
-    proto.asvalref = function CatcodeCommand_asvalref (engine) {
+    proto.asvalref = function CharCodeCommand_asvalref (engine) {
 	var ord = engine.scan_char_code ();
-	return new ConstantValref (T_INT, engine.catcode (ord));
+	return new ConstantValref (T_INT, engine.get_code (this.codetype, ord));
     };
 
-    return CatcodeCommand;
+    return CharCodeCommand;
 })();
 
-
-commands.mathcode = (function MathcodeCommand_closure () {
-    function MathcodeCommand () { Command.call (this); }
-    inherit (MathcodeCommand, Command);
-    var proto = MathcodeCommand.prototype;
-
-    proto.invoke = function MathcodeCommand_invoke (engine) {
-	var ord = engine.scan_char_code ();
-	engine.scan_optional_equals ();
-	var mcode = engine.scan_int ().value;
-	if (mcode > 0x8000)
-	    throw new TexRuntimeError ('mathcode value should be in range ' +
-				       '[0,0x8000]; got ' + mcode);
-	engine.debug ('mathcode ' + escchr (ord) + '=' + ord + ' -> '
-		      + mcode);
-	engine.set_mathcode (ord, mcode);
-    };
-
-    proto.asvalref = function MathcodeCommand_asvalref (engine) {
-	var ord = engine.scan_char_code ();
-	return new ConstantValref (T_INT, engine.mathcode (ord));
-    };
-
-    return MathcodeCommand;
-})();
-
-
-commands.sfcode = (function SfcodeCommand_closure () {
-    function SfcodeCommand () { Command.call (this); }
-    inherit (SfcodeCommand, Command);
-    var proto = SfcodeCommand.prototype;
-
-    proto.invoke = function SfcodeCommand_invoke (engine) {
-	var ord = engine.scan_char_code ();
-	engine.scan_optional_equals ();
-	var sfcode = engine.scan_int ().value;
-	if (sfcode > 0x7FFF)
-	    throw new TexRuntimeError ('sfcode value should be in range ' +
-				       '[0,0x7FFF]; got ' + sfcode);
-	engine.debug ('sfcode ' + escchr (ord) + '=' + ord + ' -> '
-		      + sfcode);
-	engine.set_sfcode (ord, sfcode);
-    };
-
-    proto.asvalref = function SfcodeCommand_asvalref (engine) {
-	var ord = engine.scan_char_code ();
-	return new ConstantValref (T_INT, engine.sfcode (ord));
-    };
-
-    return SfcodeCommand;
-})();
-
-
-commands.lccode = (function LccodeCommand_closure () {
-    function LccodeCommand () { Command.call (this); }
-    inherit (LccodeCommand, Command);
-    var proto = LccodeCommand.prototype;
-
-    proto.invoke = function LccodeCommand_invoke (engine) {
-	var ord = engine.scan_char_code ();
-	engine.scan_optional_equals ();
-	var lccode = engine.scan_char_code ();
-	engine.debug ('lccode ' + escchr (ord) + '=' + ord + ' -> '
-		      + escchr (lccode) + '=' + lccode);
-	engine.set_lccode (ord, lccode);
-    };
-
-    proto.asvalref = function LccodeCommand_asvalref (engine) {
-	var ord = engine.scan_char_code ();
-	return new ConstantValref (T_INT, engine.lccode (ord));
-    };
-
-    return LccodeCommand;
-})();
-
-
-commands.uccode = (function UccodeCommand_closure () {
-    function UccodeCommand () { Command.call (this); }
-    inherit (UccodeCommand, Command);
-    var proto = UccodeCommand.prototype;
-
-    proto.invoke = function UccodeCommand_invoke (engine) {
-	var ord = engine.scan_char_code ();
-	engine.scan_optional_equals ();
-	var uccode = engine.scan_char_code ();
-	engine.debug ('uccode ' + escchr (ord) + '=' + ord + ' -> '
-		      + escchr (uccode) + '=' + uccode);
-	engine.set_uccode (ord, uccode);
-    };
-
-    proto.asvalref = function UccodeCommand_asvalref (engine) {
-	var ord = engine.scan_char_code ();
-	return new ConstantValref (T_INT, engine.uccode (ord));
-    };
-
-    return UccodeCommand;
-})();
-
-
-commands.delcode = (function DelcodeCommand_closure () {
-    function DelcodeCommand () { Command.call (this); }
-    inherit (DelcodeCommand, Command);
-    var proto = DelcodeCommand.prototype;
-
-    proto.invoke = function DelcodeCommand_invoke (engine) {
-	var ord = engine.scan_char_code ();
-	engine.scan_optional_equals ();
-	var delcode = engine.scan_int ().value;
-	if (delcode >0xFFFFFF)
-	    throw new TexRuntimeError ('delcode value should be in range ' +
-				       '[0,0xFFFFFF]; got ' + delcode);
-	engine.debug ('delcode ' + escchr (ord) + '=' + ord + ' -> '
-		      + escchr (delcode) + '=' + delcode);
-	engine.set_delcode (ord, delcode);
-    };
-
-    proto.asvalref = function DelcodeCommand_asvalref (engine) {
-	var ord = engine.scan_char_code ();
-	return new ConstantValref (T_INT, engine.delcode (ord));
-    };
-
-    return DelcodeCommand;
-})();
+commands.catcode = new CharCodeCommand (CT_CATEGORY, 'catcode');
+commands.mathcode = new CharCodeCommand (CT_MATH, 'mathcode');
+commands.sfcode = new CharCodeCommand (CT_SPACEFAC, 'sfcode');
+commands.lccode = new CharCodeCommand (CT_LOWERCASE, 'lccode');
+commands.uccode = new CharCodeCommand (CT_UPPERCASE, 'uccode');
+commands.delcode = new CharCodeCommand (CT_DELIM, 'delcode');
 
 
 // \chardef, \mathchardef, etc.
@@ -1020,9 +913,9 @@ commands.hyphenation = function cmd_hyphenation (engine) {
 
 function _change_case (engine, isupper) {
     if (isupper)
-	var cmdname = 'uppercase', casecode = engine.uccode;
+	var cmdname = 'uppercase', codetype = CT_UPPERCASE;
     else
-	var cmdname = 'lowercase', casecode = engine.lccode;
+	var cmdname = 'lowercase', codetype = CT_LOWERCASE;
 
     var tok = engine.next_tok_throw ();
     if (tok == null)
@@ -1036,7 +929,7 @@ function _change_case (engine, isupper) {
 	var tok = oldtoks[i];
 
 	if (tok.ischar ()) {
-	    var neword = casecode.call (engine, tok.ord);
+	    var neword = engine.get_code (codetype, tok.ord);
 	    if (neword == 0)
 		neword = tok.ord;
 	    newtoks.push (Token.new_char (tok.catcode, neword));

@@ -18,6 +18,14 @@ var EquivTable = (function EquivTable_closure () {
 	this._qq_parameters[T_MUGLUE] = {};
 	this._qq_parameters[T_TOKLIST] = {};
 
+	this._qq_catcodes = parent._qq_catcodes.slice ();
+	this._qq_codes = {};
+	this._qq_codes[CT_LOWERCASE] = {};
+	this._qq_codes[CT_UPPERCASE] = {};
+	this._qq_codes[CT_SPACEFAC] = {};
+	this._qq_codes[CT_MATH] = {};
+	this._qq_codes[CT_DELIM] = {};
+
 	init_generic_eqtb (this);
     }
 
@@ -61,7 +69,34 @@ var EquivTable = (function EquivTable_closure () {
 
 	if (this._qq_parameters[valtype].hasOwnProperty (name))
 	    return this._qq_parameters[valtype][name];
+	if (this.parent == null)
+	    throw new TexRuntimeError ('undefined named parameter ' + name);
 	return this.parent.get_parameter (valtype, name);
+    };
+
+    proto.set_code = function EquivTable_set_code (codetype, ord, value) {
+	if (ord < 0 || ord > 255)
+	    throw new TexRuntimeError ('illegal ordinal number ' + ord);
+	if (value < 0 || value > ct_maxvals[codetype])
+	    throw new TexRuntimeError ('illegal ' + ct_names[codetype] +
+				       ' value ' + value);
+
+	if (codetype == CT_CATEGORY)
+	    this._qq_catcodes[ord] = value;
+	else
+	    this._qq_codes[codetype][ord] = value;
+    };
+
+    proto.get_code = function EquivTable_get_code (codetype, ord) {
+	if (ord < 0 || ord > 255)
+	    throw new TexRuntimeError ('illegal ordinal number ' + ord);
+
+	if (codetype == CT_CATEGORY)
+	    return this._qq_catcodes[ord];
+
+	if (this._qq_codes[codetype].hasOwnProperty (ord))
+	    return this._qq_codes[codetype][ord];
+	return this.parent.get_code (codetype, ord);
     };
 
     return EquivTable;
@@ -70,17 +105,21 @@ var EquivTable = (function EquivTable_closure () {
 
 var TopEquivTable = (function TopEquivTable_closure () {
     function TopEquivTable () {
+	// We need some gymnastics to get the chained constructor to DTRT.
 	this.toplevel = this;
+	this._qq_catcodes = new Array (256);
 	EquivTable.call (this, this);
 	this.parent = null;
 
 	init_top_eqtb (this);
 
 	for (var i = 0; i < 256; i++) {
-	    this._catcodes[i] = C_OTHER;
-	    this._mathcodes[i] = i;
-	    this._sfcodes[i] = 1000;
-	    this._delcodes[i] = -1;
+	    this._qq_catcodes[i] = C_OTHER;
+	    this._qq_codes[CT_MATH][i] = i;
+	    this._qq_codes[CT_SPACEFAC][i] = 1000;
+	    this._qq_codes[CT_DELIM][i] = -1;
+	    this._qq_codes[CT_LOWERCASE][i] = 0;
+	    this._qq_codes[CT_UPPERCASE][i] = 0;
 	    this._qq_registers[T_GLUE][i] = new Glue ();
 	    this._qq_registers[T_MUGLUE][i] = new Glue ();
 	    this._qq_registers[T_TOKLIST][i] = new Toklist ();
@@ -88,42 +127,33 @@ var TopEquivTable = (function TopEquivTable_closure () {
 	}
 
 	for (var i = 0; i < 26; i++) {
-	    this._catcodes[O_LC_A + i] = C_LETTER;
-	    this._catcodes[O_UC_A + i] = C_LETTER;
-	    this._mathcodes[O_LC_A + i] = O_LC_A + i + 0x7100;
-	    this._mathcodes[O_UC_A + i] = O_UC_A + i + 0x7100;
-	    this._uccodes[O_UC_A + i] = O_UC_A + i;
-	    this._uccodes[O_LC_A + i] = O_UC_A + i;
-	    this._lccodes[O_UC_A + i] = O_LC_A + i;
-	    this._lccodes[O_LC_A + i] = O_LC_A + i;
-	    this._sfcodes[O_UC_A + i] = 999;
+	    this._qq_catcodes[O_LC_A + i] = C_LETTER;
+	    this._qq_catcodes[O_UC_A + i] = C_LETTER;
+	    this._qq_codes[CT_MATH][O_LC_A + i] = O_LC_A + i + 0x7100;
+	    this._qq_codes[CT_MATH][O_UC_A + i] = O_UC_A + i + 0x7100;
+	    this._qq_codes[CT_UPPERCASE][O_UC_A + i] = O_UC_A + i;
+	    this._qq_codes[CT_UPPERCASE][O_LC_A + i] = O_UC_A + i;
+	    this._qq_codes[CT_LOWERCASE][O_UC_A + i] = O_LC_A + i;
+	    this._qq_codes[CT_LOWERCASE][O_LC_A + i] = O_LC_A + i;
+	    this._qq_codes[CT_SPACEFAC][O_UC_A + i] = 999;
 	}
 
-	for (var i = O_ZERO; i < O_ZERO + 10; i++)
-	    this._mathcodes[i] = i + 0x7000;
+	for (var i = 0; i < 10; i++)
+	    this._qq_codes[CT_MATH][O_ZERO + i] = O_ZERO + i + 0x7000;
 
-	this._catcodes[O_NULL] = C_IGNORE;
-	this._catcodes[O_BACKSPACE] = C_INVALID;
-	this._catcodes[O_RETURN] = C_EOL;
-	this._catcodes[O_SPACE] = C_SPACE;
-	this._catcodes[O_PERCENT] = C_COMMENT;
-	this._catcodes[O_BACKSLASH] = C_ESCAPE;
-
-	this._delcodes[O_PERIOD] = 0;
+	this._qq_catcodes[O_NULL] = C_IGNORE;
+	this._qq_catcodes[O_BACKSPACE] = C_INVALID;
+	this._qq_catcodes[O_RETURN] = C_EOL;
+	this._qq_catcodes[O_SPACE] = C_SPACE;
+	this._qq_catcodes[O_PERCENT] = C_COMMENT;
+	this._qq_catcodes[O_BACKSLASH] = C_ESCAPE;
+	this._qq_codes[CT_DELIM][O_PERIOD] = 0;
     }
 
     inherit (TopEquivTable, EquivTable);
     var proto = TopEquivTable.prototype;
 
     fill_top_eqtb_accessors (proto);
-
-    proto.get_register = function TopEquivTable_get_register (valtype, reg) {
-	if (reg < 0 || reg > 255)
-	    throw new TexRuntimeError ('illegal register number ' + reg);
-	if (this._qq_registers[valtype].hasOwnProperty (reg))
-	    return this._qq_registers[valtype][reg];
-	return null;
-    };
 
     return TopEquivTable;
 })();
@@ -188,9 +218,11 @@ var Engine = (function Engine_closure () {
     };
 
     proto.set_register = function Engine_get_register (valtype, reg, value) {
-	var rv = this.eqtb.set_register (valtype, reg, value);
+	if (this.assign_flags & AF_GLOBAL)
+	    this.eqtb.toplevel.set_register (valtype, reg, value);
+	else
+	    this.eqtb.set_register (valtype, reg, value);
 	this.maybe_insert_after_assign_token ();
-	return rv;
     };
 
     proto.get_parameter = function Engine_get_parameter (valtype, name) {
@@ -198,9 +230,23 @@ var Engine = (function Engine_closure () {
     };
 
     proto.set_parameter = function Engine_get_parameter (valtype, name, value) {
-	var rv = this.eqtb.set_parameter (valtype, name, value);
+	if (this.assign_flags & AF_GLOBAL)
+	    this.eqtb.toplevel.set_parameter (valtype, name, value);
+	else
+	    this.eqtb.set_parameter (valtype, name, value);
 	this.maybe_insert_after_assign_token ();
-	return rv;
+    };
+
+    proto.get_code = function Engine_get_code (valtype, ord) {
+	return this.eqtb.get_code (valtype, ord);
+    };
+
+    proto.set_code = function Engine_get_code (valtype, ord, value) {
+	if (this.assign_flags & AF_GLOBAL)
+	    this.eqtb.toplevel.set_code (valtype, ord, value);
+	else
+	    this.eqtb.set_code (valtype, ord, value);
+	this.maybe_insert_after_assign_token ();
     };
 
     // Infrastructure.

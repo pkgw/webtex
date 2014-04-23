@@ -77,7 +77,7 @@ var TokenizerInput = (function TokenizerInput_closure () {
 	    return EOF;
 
 	// XXX not so great re: encapsulation
-	var catcodes = this.engine.eqtb._catcodes;
+	var catcodes = this.engine.eqtb._qq_catcodes;
 	var o = this.ordsrc.next (catcodes);
 
 	if (o === NeedMoreData)

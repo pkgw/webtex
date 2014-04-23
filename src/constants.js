@@ -13,6 +13,19 @@ var vt_ok_for_parameter = [true, true, true, true, true, false, false];
 var vt_names = ['int', 'dimen', 'glue', 'muglue', 'toklist', 'boxlist', 'font'];
 
 
+// "Code types" -- not the best name for these things ...
+
+var CT_CATEGORY = 0,  // catcodes -- handled specially.
+    CT_LOWERCASE = 1, // lowercase
+    CT_UPPERCASE = 2, // uppercase
+    CT_SPACEFAC = 3,  // space factors
+    CT_MATH = 4,      // math category codes
+    CT_DELIM = 5;     // delimiter codes
+
+var ct_maxvals = [15, 255, 255, 0x7FFF, 0x8000, 0xFFFFFF];
+var ct_names = ['catcode', 'lccode', 'uccode', 'sfcode', 'mathcode', 'delcode'];
+
+
 var M_VERT = 0,  // standard vertical mode
     M_IVERT = 1, // internal vertical mode
     M_HORZ = 2,  // standard horizontal mode

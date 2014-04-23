@@ -4,10 +4,4 @@
 
 actives			ord	cmd
 cseqs			str	cmd
-catcodes		ord	catcode
-lccodes			ord	ord
-uccodes			ord	ord
-sfcodes			ord	spacefac
-mathcodes		ord	mathcode
-delcodes		ord	delcode
 fonts			str	font
