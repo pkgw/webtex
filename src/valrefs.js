@@ -1,7 +1,10 @@
 // References to values, as many commands are.
 
 var Valref = (function Valref_closure () {
-    function Valref () {}
+    function Valref (valtype) {
+	this.valtype = valtype;
+    }
+
     var proto = Valref.prototype;
 
     proto.get = function Valref_get (engine) {
@@ -25,10 +28,6 @@ var Valref = (function Valref_closure () {
 	throw new TexInternalError ('not implemented Valref.scan');
     };
 
-    proto.is_toks_value = false;
-    /* Somewhat hacky property to help with toklist scanning. Works how
-     * it sounds. */
-
     return Valref;
 }) ();
 
@@ -41,10 +40,8 @@ var RegisterValref = (function RegisterValref_closure () {
 	if (reg < 0 || reg > 255)
 	    throw new TexInternalError ('illegal register ' + reg);
 
-	Valref.call (this);
-	this.valtype = valtype;
+	Valref.call (this, valtype);
 	this.reg = reg;
-	this.is_toks_value = (valtype == T_TOKLIST); // XXX temporary
     }
 
     inherit (RegisterValref, Valref);
@@ -74,10 +71,8 @@ var ParamValref = (function ParamValref_closure () {
 	    throw new TexInternalError ('illegal valtype for parameter: ' +
 					vt_names[valtype]);
 
-	Valref.call (this);
-	this.valtype = valtype;
+	Valref.call (this, valtype);
 	this.name = name;
-	this.is_toks_value = (valtype == T_TOKLIST); // XXX temporary
     }
 
     inherit (ParamValref, Valref);
@@ -102,10 +97,8 @@ var ParamValref = (function ParamValref_closure () {
 
 var ConstantValref = (function ConstantValref_closure () {
     function ConstantValref (valtype, value) {
-	Valref.call (this);
-	this.valtype = valtype;
+	Valref.call (this, valtype);
 	this.value = Value.coerce (valtype, value);
-	this.is_toks_value = (valtype == T_TOKLIST); // XXX temporary
     }
 
     inherit (ConstantValref, Valref);

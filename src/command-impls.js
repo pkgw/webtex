@@ -555,7 +555,7 @@ function _cmd_def (engine, cname, expand_replacement) {
 	    if (tok.iscmd (engine, 'the')) {
 		var next = engine.next_tok_throw ();
 		var nv = next.tocmd (engine).asvalref (engine);
-		if (nv.is_toks_value === true) {
+		if (nv.valtype == T_TOKLIST) {
 		    repl_toks = repl_toks.concat (nv.get (engine).toks);
 		    continue
 		} else {
@@ -1180,7 +1180,7 @@ commands.the = function cmd_the (engine) {
 	throw new TexRuntimeError ('unable to get internal value (for ' +
 				   '\\the) from ' + tok);
 
-    if (val.is_toks_value) {
+    if (val.valtype == T_TOKLIST) {
 	var toks = val.get (engine);
 	engine.debug ('the (toks) ' + tok + ' -> ' + toks);
 	engine.push_toks (toks);
