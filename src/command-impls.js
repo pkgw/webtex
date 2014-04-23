@@ -110,7 +110,7 @@ commands.count = (function CountCommand_closure () {
 
     proto.asvalref = function CountCommand_asvalref (engine) {
 	var reg = engine.scan_char_code ();
-	return new QQRegisterValref (T_INT, reg);
+	return new RegisterValref (T_INT, reg);
     };
 
     return CountCommand;
@@ -130,7 +130,7 @@ commands.dimen = (function DimenCommand_closure () {
 
     proto.asvalref = function DimenCommand_asvalref (engine) {
 	var reg = engine.scan_char_code ();
-	return new DimenRegValref (reg);
+	return new RegisterValref (T_INT, reg);
     };
 
     return DimenCommand;
@@ -151,7 +151,7 @@ commands.skip = (function SkipCommand_closure () {
 
     proto.asvalref = function SkipCommand_asvalref (engine) {
 	var reg = engine.scan_char_code ();
-	return new GlueRegValref (reg);
+	return new RegisterValref (T_GLUE, reg);
     };
 
     return SkipCommand;
@@ -172,7 +172,7 @@ commands.muskip = (function MuskipCommand_closure () {
 
     proto.asvalref = function MuskipCommand_asvalref (engine) {
 	var reg = engine.scan_char_code ();
-	return new MuGlueRegValref (reg);
+	return new RegisterValref (T_MUGLUE, reg);
     };
 
     return MuskipCommand;
@@ -192,7 +192,7 @@ commands.toks = (function ToksCommand_closure () {
 
     proto.asvalref = function ToksCommand_asvalref (engine) {
 	var reg = engine.scan_char_code ();
-	return new ToksRegValref (reg);
+	return new RegisterValref (T_TOKLIST, reg);
     };
 
     return ToksCommand;
@@ -822,7 +822,7 @@ commands.wd = (function WdCommand_closure () {
 
     proto.asvalref = function WdCommand_asvalref (engine) {
 	var reg = engine.scan_char_code ();
-	var box = engine.boxreg (reg);
+	var box = engine.get_register (T_BOXLIST, reg);
 	return new ConstantDimenValref (box.width);
     };
 
@@ -842,7 +842,7 @@ commands.ht = (function HtCommand_closure () {
 
     proto.asvalref = function HtCommand_asvalref (engine) {
 	var reg = engine.scan_char_code ();
-	var box = engine.boxreg (reg);
+	var box = engine.get_register (T_BOXLIST, reg);
 	return new ConstantDimenValref (box.height);
     };
 
@@ -884,7 +884,7 @@ commands.vrule = function cmd_vrule (engine) {
 commands.unhbox = function cmd_unhbox (engine) {
     engine.ensure_horizontal ();
     var reg = engine.scan_char_code ();
-    var box = engine.boxreg (reg);
+    var box = engine.get_register (T_BOXLIST, reg);
 
     if (!box.tlist.length)
 	return

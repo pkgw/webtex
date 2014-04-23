@@ -57,9 +57,10 @@ var TopEquivTable = (function TopEquivTable_closure () {
 	    this._mathcodes[i] = i;
 	    this._sfcodes[i] = 1000;
 	    this._delcodes[i] = -1;
-	    this._glueregs[i] = new Glue ();
-	    this._tokregs[i] = [];
-	    this._boxregs[i] = new Box ();
+	    this._qq_registers[T_GLUE][i] = new Glue ();
+	    this._qq_registers[T_MUGLUE][i] = new Glue ();
+	    this._qq_registers[T_TOKLIST][i] = new Toklist ();
+	    this._qq_registers[T_BOXLIST][i] = new Box ();
 	}
 
 	for (var i = 0; i < 26; i++) {
@@ -163,7 +164,9 @@ var Engine = (function Engine_closure () {
     };
 
     proto.set_register = function Engine_get_register (valtype, reg, value) {
-	return this.eqtb.set_register (valtype, reg, value);
+	var rv = this.eqtb.set_register (valtype, reg, value);
+	this.maybe_insert_after_assign_token ();
+	return rv;
     };
 
     // Infrastructure.
@@ -782,6 +785,20 @@ var Engine = (function Engine_closure () {
 	return g;
     };
 
+    proto.scan_toks_value = function Engine_scan_toks_value () {
+	this.scan_one_optional_space ();
+
+	var tok = this.next_tok ();
+	if (tok === NeedMoreData || tok === EOF)
+	    throw tok;
+
+	// TODO: \tokpar=<toklist register or toklist param>
+	if (!tok.iscat (C_BGROUP))
+	    throw new TexSyntaxError ('expected { in toklist assignment; got ' + tok);
+
+	return this.scan_tok_group (false);
+    };
+
     proto.scan_valtype = function Engine_scan_valtype (valtype) {
 	if (valtype == T_INT)
 	    return this.scan_int ();
@@ -792,8 +809,9 @@ var Engine = (function Engine_closure () {
 	    return this.scan_glue (false);
 	if (valtype == T_MUGLUE)
 	    return this.scan_glue (true);
-	throw new TexInternalException ('can\'t generically scan value type ' +
-					valtype);
+	if (valtype == T_TOKLIST)
+	    return this.scan_toks_value ();
+	throw new TexInternalError ('can\'t generically scan value type ' + valtype);
     };
 
     proto.scan_r_token = function Engine_scan_r_token () {
@@ -1044,7 +1062,7 @@ var Engine = (function Engine_closure () {
 
         function set_the_box (engine, box) {
             this.debug ('... finish setbox: #' + reg + ' = ' + box);
-            engine.set_boxreg (reg, box)
+            engine.set_register (T_BOXLIST, reg, box)
 	}
 
         this.boxop_stack.push ([set_the_box, true]);

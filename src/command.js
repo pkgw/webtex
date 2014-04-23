@@ -625,7 +625,7 @@ var GivenCountCommand = (function GivenCountCommand_closure () {
     proto.desc = 'count';
 
     proto.asvalref = function GivenCountCommand_asvalref (engine) {
-	return new QQRegisterValref (T_INT, this.register);
+	return new RegisterValref (T_INT, this.register);
     };
 
     return GivenCountCommand;
@@ -640,7 +640,7 @@ var GivenDimenCommand = (function GivenDimenCommand_closure () {
     proto.desc = 'dimen';
 
     proto.asvalref = function GivenDimenCommand_asvalref (engine) {
-	return new DimenRegValref (this.register);
+	return new RegisterValref (T_DIMEN, this.register);
     };
 
     return GivenDimenCommand;
@@ -655,7 +655,7 @@ var GivenGlueCommand = (function GivenGlueCommand_closure () {
     proto.desc = 'glue';
 
     proto.asvalref = function GivenGlueCommand_asvalref (engine) {
-	return new GlueRegValref (this.register);
+	return new RegisterValref (T_GLUE, this.register);
     };
 
     return GivenGlueCommand;
@@ -670,7 +670,7 @@ var GivenMuglueCommand = (function GivenMuglueCommand_closure () {
     proto.desc = 'muglue';
 
     proto.asvalref = function GivenMuglueCommand_asvalref (engine) {
-	return new MuglueRegValref (this.register);
+	return new RegisterValref (T_MUGLUE, this.register);
     };
 
     return GivenMuglueCommand;
@@ -685,7 +685,7 @@ var GivenToksCommand = (function GivenToksCommand_closure () {
     proto.desc = 'toks';
 
     proto.asvalref = function GivenToksCommand_asvalref (engine) {
-	return new ToksRegValref (this.register);
+	return new RegisterValref (T_TOKLIST, this.register);
     };
 
     return GivenToksCommand;

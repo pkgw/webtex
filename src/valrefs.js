@@ -34,47 +34,34 @@ var Valref = (function Valref_closure () {
 
 
 var RegisterValref = (function RegisterValref_closure () {
-    function RegisterValref (reg) {
-	if (reg < 0 || reg > 255)
-	    throw new TexInternalError ('illegal register ' + reg);
-	Valref.call (this);
-	this.reg = reg;
-    }
-
-    inherit (RegisterValref, Valref);
-
-    return RegisterValref;
-}) ();
-
-
-var QQRegisterValref = (function QQRegisterValref_closure () {
-    function QQRegisterValref (valtype, reg) {
+    function RegisterValref (valtype, reg) {
 	/* All valtypes are OK: int dimen glue muglue toklist boxlist */
 	if (reg < 0 || reg > 255)
 	    throw new TexInternalError ('illegal register ' + reg);
 	Valref.call (this);
 	this.valtype = valtype;
 	this.reg = reg;
+	this.is_toks_value = (valtype == T_TOKLIST); // XXX temporary
     }
 
-    inherit (QQRegisterValref, Valref);
-    var proto = QQRegisterValref.prototype;
+    inherit (RegisterValref, Valref);
+    var proto = RegisterValref.prototype;
 
-    proto.scan = function QQRegisterValref_scan (engine) {
+    proto.scan = function RegisterValref_scan (engine) {
 	// XXX this function will probably no longer be needed once we switch
 	// over.
 	return engine.scan_valtype (this.valtype);
     };
 
-    proto.get = function QQRegisterValref_get (engine) {
+    proto.get = function RegisterValref_get (engine) {
 	return engine.get_register (this.valtype, this.reg);
     };
 
-    proto.set = function QQRegisterValref_set (engine, value) {
+    proto.set = function RegisterValref_set (engine, value) {
 	engine.set_register (this.valtype, this.reg, value);
     };
 
-    return QQRegisterValref;
+    return RegisterValref;
 }) ();
 
 
@@ -184,74 +171,6 @@ var ConstantFontValref = (function ConstantFontValref_closure () {
     function ConstantFontValref (value) { ConstantValref.call (this, value); }
     inherit (ConstantFontValref, ConstantValref);
     return _make_font_valref (ConstantFontValref);
-}) ();
-
-
-var DimenRegValref = (function DimenRegValref_closure () {
-    function DimenRegValref (reg) { RegisterValref.call (this, reg); }
-    inherit (DimenRegValref, RegisterValref);
-    var proto = DimenRegValref.prototype;
-
-    proto.get = function DimenRegValref_get (engine) {
-	return engine.dimenreg (this.reg);
-    };
-
-    proto.set = function DimenRegValref_set (engine, value) {
-	engine.set_dimenreg (this.reg, value);
-    };
-
-    return _make_dimen_valref (DimenRegValref);
-}) ();
-
-
-var GlueRegValref = (function GlueRegValref_closure () {
-    function GlueRegValref (reg) { RegisterValref.call (this, reg); }
-    inherit (GlueRegValref, RegisterValref);
-    var proto = GlueRegValref.prototype;
-
-    proto.get = function GlueRegValref_get (engine) {
-	return engine.gluereg (this.reg);
-    };
-
-    proto.set = function GlueRegValref_set (engine, value) {
-	engine.set_gluereg (this.reg, value);
-    };
-
-    return _make_glue_valref (GlueRegValref);
-}) ();
-
-
-var MuGlueRegValref = (function MuGlueRegValref_closure () {
-    function MuGlueRegValref (reg) { RegisterValref.call (this, reg); }
-    inherit (MuGlueRegValref, RegisterValref);
-    var proto = MuGlueRegValref.prototype;
-
-    proto.get = function MuGlueRegValref_get (engine) {
-	return engine.mugluereg (this.reg);
-    };
-
-    proto.set = function MuGlueRegValref_set (engine, value) {
-	engine.set_mugluereg (this.reg, value);
-    };
-
-    return _make_muglue_valref (MuGlueRegValref);
-}) ();
-
-
-var ToksRegValref = (function ToksRegValref_closure () {
-    function ToksRegValref (reg) { RegisterValref.call (this, reg); }
-    inherit (ToksRegValref, RegisterValref);
-    var proto = ToksRegValref.prototype;
-
-    proto.get = function ToksRegValref_get (engine) {
-	return engine.tokreg (this.reg);
-    };
-
-    proto.set = function ToksRegValref_set (engine, value) {
-	engine.set_tokreg (this.reg, value);
-    };
-
-    return _make_toks_valref (ToksRegValref);
 }) ();
 
 
