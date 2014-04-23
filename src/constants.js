@@ -1,5 +1,12 @@
 'use strict';
 
+var T_INT = 0,     // a simple integer
+    T_DIMEN = 1,   // a dimension
+    T_GLUE = 2,    // regular glue (AKA "skip")
+    T_MUGLUE = 3,  // math-mode glue (AKA "skip")
+    T_TOKLIST = 4, // a list of tokens
+    T_BOXLIST = 5; // a list (?) of boxes
+
 var M_VERT = 0,  // standard vertical mode
     M_IVERT = 1, // internal vertical mode
     M_HORZ = 2,  // standard horizontal mode

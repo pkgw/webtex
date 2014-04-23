@@ -2,10 +2,35 @@ var EquivTable = (function EquivTable_closure () {
     function EquivTable (parent) {
 	this.toplevel = parent.toplevel;
 	this.parent = parent;
+
+	this._qq_registers = {};
+	this._qq_registers[T_INT] = {};
+	this._qq_registers[T_DIMEN] = {};
+	this._qq_registers[T_GLUE] = {};
+	this._qq_registers[T_MUGLUE] = {};
+	this._qq_registers[T_TOKLIST] = {};
+	this._qq_registers[T_BOXLIST] = {};
+
 	init_generic_eqtb (this);
     }
 
-    fill_generic_eqtb_accessors (EquivTable.prototype);
+    var proto = EquivTable.prototype;
+    fill_generic_eqtb_accessors (proto);
+
+    proto.set_register = function EquivTable_set_register (valtype, reg, value) {
+	/* Any valtype is OK: int, dimen, glue, nuglue, toklist, boxlist. */
+	if (reg < 0 || reg > 255)
+	    throw new TexRuntimeError ('illegal register number ' + reg);
+	this._qq_registers[valtype][reg] = value;
+    };
+
+    proto.get_register = function EquivTable_get_register (valtype, reg) {
+	if (reg < 0 || reg > 255)
+	    throw new TexRuntimeError ('illegal register number ' + reg);
+	if (this._qq_registers[valtype].hasOwnProperty (reg))
+	    return this._qq_registers[valtype][reg];
+	return this.parent.get_register (valtype, reg);
+    };
 
     return EquivTable;
 })();
@@ -17,6 +42,15 @@ var TopEquivTable = (function TopEquivTable_closure () {
 	this.parent = null;
 
 	init_top_eqtb (this);
+
+	// XXX take advantage of generic EquivTable ctor
+	this._qq_registers = {};
+	this._qq_registers[T_INT] = {};
+	this._qq_registers[T_DIMEN] = {};
+	this._qq_registers[T_GLUE] = {};
+	this._qq_registers[T_MUGLUE] = {};
+	this._qq_registers[T_TOKLIST] = {};
+	this._qq_registers[T_BOXLIST] = {};
 
 	for (var i = 0; i < 256; i++) {
 	    this._catcodes[i] = C_OTHER;
@@ -54,8 +88,17 @@ var TopEquivTable = (function TopEquivTable_closure () {
     }
 
     inherit (TopEquivTable, EquivTable);
+    var proto = TopEquivTable.prototype;
 
-    fill_top_eqtb_accessors (TopEquivTable.prototype);
+    fill_top_eqtb_accessors (proto);
+
+    proto.get_register = function TopEquivTable_get_register (valtype, reg) {
+	if (reg < 0 || reg > 255)
+	    throw new TexRuntimeError ('illegal register number ' + reg);
+	if (this._qq_registers[valtype].hasOwnProperty (reg))
+	    return this._qq_registers[valtype][reg];
+	return null;
+    };
 
     return TopEquivTable;
 })();
@@ -114,6 +157,14 @@ var Engine = (function Engine_closure () {
 
     var proto = Engine.prototype;
     fill_engine_eqtb_wrappers (proto, AF_GLOBAL);
+
+    proto.get_register = function Engine_get_register (valtype, reg) {
+	return this.eqtb.get_register (valtype, reg);
+    };
+
+    proto.set_register = function Engine_get_register (valtype, reg, value) {
+	return this.eqtb.set_register (valtype, reg, value);
+    };
 
     // Infrastructure.
 
@@ -729,6 +780,20 @@ var Engine = (function Engine_closure () {
 	}
 
 	return g;
+    };
+
+    proto.scan_valtype = function Engine_scan_valtype (valtype) {
+	if (valtype == T_INT)
+	    return this.scan_int ();
+	if (valtype == T_DIMEN)
+	    // XXX we don't know what to put for infmode.
+	    return this.scan_dimen (false, false);
+	if (valtype == T_GLUE)
+	    return this.scan_glue (false);
+	if (valtype == T_MUGLUE)
+	    return this.scan_glue (true);
+	throw new TexInternalException ('can\'t generically scan value type ' +
+					valtype);
     };
 
     proto.scan_r_token = function Engine_scan_r_token () {

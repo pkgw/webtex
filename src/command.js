@@ -625,7 +625,7 @@ var GivenCountCommand = (function GivenCountCommand_closure () {
     proto.desc = 'count';
 
     proto.asvalref = function GivenCountCommand_asvalref (engine) {
-	return new IntRegValref (this.register);
+	return new QQRegisterValref (T_INT, this.register);
     };
 
     return GivenCountCommand;

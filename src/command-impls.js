@@ -110,7 +110,7 @@ commands.count = (function CountCommand_closure () {
 
     proto.asvalref = function CountCommand_asvalref (engine) {
 	var reg = engine.scan_char_code ();
-	return new IntRegValref (reg);
+	return new QQRegisterValref (T_INT, reg);
     };
 
     return CountCommand;

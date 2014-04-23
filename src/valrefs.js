@@ -47,6 +47,37 @@ var RegisterValref = (function RegisterValref_closure () {
 }) ();
 
 
+var QQRegisterValref = (function QQRegisterValref_closure () {
+    function QQRegisterValref (valtype, reg) {
+	/* All valtypes are OK: int dimen glue muglue toklist boxlist */
+	if (reg < 0 || reg > 255)
+	    throw new TexInternalError ('illegal register ' + reg);
+	Valref.call (this);
+	this.valtype = valtype;
+	this.reg = reg;
+    }
+
+    inherit (QQRegisterValref, Valref);
+    var proto = QQRegisterValref.prototype;
+
+    proto.scan = function QQRegisterValref_scan (engine) {
+	// XXX this function will probably no longer be needed once we switch
+	// over.
+	return engine.scan_valtype (this.valtype);
+    };
+
+    proto.get = function QQRegisterValref_get (engine) {
+	return engine.get_register (this.valtype, this.reg);
+    };
+
+    proto.set = function QQRegisterValref_set (engine, value) {
+	engine.set_register (this.valtype, this.reg, value);
+    };
+
+    return QQRegisterValref;
+}) ();
+
+
 var ParamValref = (function ParamValref_closure () {
     function ParamValref (name) {
 	Valref.call (this);
@@ -153,23 +184,6 @@ var ConstantFontValref = (function ConstantFontValref_closure () {
     function ConstantFontValref (value) { ConstantValref.call (this, value); }
     inherit (ConstantFontValref, ConstantValref);
     return _make_font_valref (ConstantFontValref);
-}) ();
-
-
-var IntRegValref = (function IntRegValref_closure () {
-    function IntRegValref (reg) { RegisterValref.call (this, reg); }
-    inherit (IntRegValref, RegisterValref);
-    var proto = IntRegValref.prototype;
-
-    proto.get = function IntRegValref_get (engine) {
-	return engine.countreg (this.reg);
-    };
-
-    proto.set = function IntRegValref_set (engine, value) {
-	engine.set_countreg (this.reg, value);
-    };
-
-    return _make_int_valref (IntRegValref);
 }) ();
 
 
