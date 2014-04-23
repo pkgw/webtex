@@ -149,15 +149,8 @@ def mac_command_info (emit, data, restargs):
 
 
 def mac_parameter_info (emit, data, restargs):
-    facmap = {'glue': 'NamedGlueCommand',
-              'muglue': 'NamedMuGlueCommand',
-              'toklist': 'NamedToksCommand',
-              'int': 'NamedIntCommand',
-              'dimen': 'NamedDimenCommand',
-    }
-
     for item in data.namedparams:
-        emit ('[%r, %s],', item.name, facmap[item.type])
+        emit ('[%r, T_%s],', item.name, item.type.upper ())
 
 
 def mac_init_parameters (emit, data, restargs):

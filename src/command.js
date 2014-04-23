@@ -614,8 +614,7 @@ var GivenRegisterCommand = (function GivenRegisterCommand_closure () {
 	var newval = engine.scan_valtype (this.valtype);
 	engine.debug (this.desc + ' #' + this.register + ' = ' + newval);
 
-	var v = this.asvalref (engine);
-	v.set (engine, newval);
+	this.asvalref (engine).set (engine, newval);
     };
 
     proto.texmeaning = function GivenRegisterCommand_texmeaning (engine) {
@@ -629,6 +628,10 @@ var GivenRegisterCommand = (function GivenRegisterCommand_closure () {
 
 var VariableRegisterCommand = (function VariableRegisterCommand_closure () {
     function VariableRegisterCommand (name, valtype) {
+	if (!vt_ok_for_register[valtype])
+	    throw new TexInternalError ('illegal valtype for register: ' +
+					vt_names[valtype]);
+
 	Command.call (this);
 	this.name = name;
 	this.valtype = valtype;
@@ -636,6 +639,14 @@ var VariableRegisterCommand = (function VariableRegisterCommand_closure () {
 
     inherit (VariableRegisterCommand, Command);
     var proto = VariableRegisterCommand.prototype;
+
+    proto.samecmd = function VariableRegisterCommand_samecmd (other) {
+	if (other == null)
+	    return false;
+	if (this.name != other.name)
+	    return false;
+	return this.valtype == other.valtype;
+    };
 
     proto.invoke = function VariableRegisterCommand_invoke (engine) {
 	var reg = engine.scan_char_code ();
@@ -691,98 +702,38 @@ var GivenFontCommand = (function GivenFontCommand_closure () {
 // Commands for named parameters
 
 var NamedParamCommand = (function NamedParamCommand_closure () {
-    function NamedParamCommand (name) {
+    function NamedParamCommand (name, valtype) {
+	if (!vt_ok_for_parameter[valtype])
+	    throw new TexInternalError ('illegal valtype for parameter: ' +
+					vt_names[valtype]);
+
 	Command.call (this);
 	this.name = name;
+	this.valtype = valtype;
     }
 
     inherit (NamedParamCommand, Command);
     var proto = NamedParamCommand.prototype;
-    proto.name = '<unnamed param>';
-    proto.desc = '<undescribed>';
 
-    proto.invoke = function NamedParamCommand_invoke (engine) {
-	var v = this.asvalref (engine);
-	engine.scan_optional_equals ();
-	var newval = engine.scan_valtype (v.valtype);
-	engine.debug ([this.desc, this.name, '=', newval].join (' '));
-	v.set (engine, newval);
+    proto.samecmd = function VariableRegisterCommand_samecmd (other) {
+	if (other == null)
+	    return false;
+	if (this.name != other.name)
+	    return false;
+	return this.valtype == other.valtype;
     };
 
     proto.asvalref = function NamedParamCommand_asvalref (engine) {
-	throw new TexInternalError ('not implemented');
+	return new ParamValref (this.valtype, this.name);
+    };
+
+    proto.invoke = function NamedParamCommand_invoke (engine) {
+	engine.scan_optional_equals ();
+	var newval = engine.scan_valtype (this.valtype);
+	engine.debug ([this.desc, this.name, '=', newval].join (' '));
+
+	this.asvalref (engine).set (engine, newval);
     };
 
     return NamedParamCommand;
-})();
-
-
-var NamedIntCommand = (function NamedIntCommand_closure () {
-    function NamedIntCommand (name) { NamedParamCommand.call (this, name); }
-    inherit (NamedIntCommand, NamedParamCommand);
-    var proto = NamedIntCommand.prototype;
-    proto.desc = 'intpar';
-
-    proto.asvalref = function NamedIntCommand_asvalref (engine) {
-	console.log ('zzzzz ' + this.name);
-	return new ParamValref (T_INT, this.name);
-    };
-
-    return NamedIntCommand;
-})();
-
-
-var NamedDimenCommand = (function NamedDimenCommand_closure () {
-    function NamedDimenCommand (name) { NamedParamCommand.call (this, name); }
-    inherit (NamedDimenCommand, NamedParamCommand);
-    var proto = NamedDimenCommand.prototype;
-    proto.desc = 'dimenpar';
-
-    proto.asvalref = function NamedDimenCommand_asvalref (engine) {
-	return new ParamValref (T_DIMEN, this.name);
-    };
-
-    return NamedDimenCommand;
-})();
-
-
-var NamedGlueCommand = (function NamedGlueCommand_closure () {
-    function NamedGlueCommand (name) { NamedParamCommand.call (this, name); }
-    inherit (NamedGlueCommand, NamedParamCommand);
-    var proto = NamedGlueCommand.prototype;
-    proto.desc = 'gluepar';
-
-    proto.asvalref = function NamedGlueCommand_asvalref (engine) {
-	return new ParamValref (T_GLUE, this.name);
-    };
-
-    return NamedGlueCommand;
-})();
-
-
-var NamedMuGlueCommand = (function NamedMuGlueCommand_closure () {
-    function NamedMuGlueCommand (name) { NamedParamCommand.call (this, name); }
-    inherit (NamedMuGlueCommand, NamedParamCommand);
-    var proto = NamedMuGlueCommand.prototype;
-    proto.desc = 'mugluepar';
-
-    proto.asvalref = function NamedMuGlueCommand_asvalref (engine) {
-	return new ParamValref (T_MUGLUE, this.name);
-    };
-
-    return NamedMuGlueCommand;
-})();
-
-
-var NamedToksCommand = (function NamedToksCommand_closure () {
-    function NamedToksCommand (name) { NamedParamCommand.call (this, name); }
-    inherit (NamedToksCommand, NamedParamCommand);
-    var proto = NamedToksCommand.prototype;
-    proto.desc = 'tokspar';
-
-    proto.asvalref = function NamedToksCommand_asvalref (engine) {
-	return new ParamValref (T_TOKLIST, this.name);
-    };
-
-    return NamedToksCommand;
 })();
