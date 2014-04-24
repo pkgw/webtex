@@ -12,7 +12,7 @@ sharedjs = \
   src/linebuffer.js \
   src/ordsource.js \
   src/inputstack.js \
-  src/command.js \
+  src/command-classes.js \
   src/command-impls.js \
   $(builddir)/engine-helpers.js \
   src/engine.js \

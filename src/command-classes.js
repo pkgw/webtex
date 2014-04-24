@@ -323,7 +323,6 @@ var CharacterCommand = (function CharacterCommand_closure () {
 var BeginGroupCommand = (function BeginGroupCommand_closure () {
     function BeginGroupCommand (ord) {
 	CharacterCommand.call (this, ord);
-
     }
 
     inherit (BeginGroupCommand, CharacterCommand);
@@ -343,7 +342,6 @@ var BeginGroupCommand = (function BeginGroupCommand_closure () {
 var EndGroupCommand = (function EndGroupCommand_closure () {
     function EndGroupCommand (ord) {
 	CharacterCommand.call (this, ord);
-
     }
 
     inherit (EndGroupCommand, CharacterCommand);
@@ -546,7 +544,7 @@ var GivenCharCommand = (function GivenCharCommand_closure () {
 var GivenMathcharCommand = (function GivenMathcharCommand_closure () {
     function GivenMathcharCommand (mathchar) {
 	Command.call (this);
-	if (mathchar < 0 || mathchar > 32767)
+	if (mathchar < 0 || mathchar > 0x8000)
 	    throw new TexInternalError ('illegal math character numder ' + mathchar);
 	this.mathchar = mathchar;
     }
