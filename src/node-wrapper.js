@@ -1,4 +1,4 @@
-exports.WEBTEX = WEBTEX = {};
+WEBTEX = exports;
 WEBTEX.Node = {};
 
 (function webtexWrapper () {
@@ -8,4 +8,4 @@ WEBTEX.Node = {};
 
 $insert_files
 
-}).call ((typeof window === 'undefined') ? this : window);
+}) ();

@@ -3,7 +3,7 @@ if (process.argv.length < 4) {
     process.exit (1);
 }
 
-var WEBTEX = require (process.argv[2]).WEBTEX;
+var WEBTEX = require (process.argv[2]);
 
 WEBTEX.Node.promise_engine (process.argv[3], process.argv[3], 'texbundles/default.zip')
     .then (function (engine) {
