@@ -11,11 +11,12 @@ var OrdSource = WEBTEX.OrdSource = (function OrdSource_closure () {
 	return o;
     }) ();
 
-    function OrdSource (linebuffer) {
+    function OrdSource (linebuffer, args) {
 	this.linebuffer = linebuffer;
 	this.pushed = [];
 	this.curords = null;
 	this.curindex = null;
+	this.debug_input_lines = args.debug_input_lines || false;
     }
 
     var proto = OrdSource.prototype = {};
@@ -32,7 +33,8 @@ var OrdSource = WEBTEX.OrdSource = (function OrdSource_closure () {
 	    return NeedMoreData;
 
 	if (l === EOF) {
-	    console.log ('<<! EOF');
+	    if (this.debug_input_lines)
+		console.log ('<<! EOF');
 	    this.linebuffer = null;
 	    return EOF;
 	}
@@ -42,7 +44,9 @@ var OrdSource = WEBTEX.OrdSource = (function OrdSource_closure () {
 	this.curords = map.call (l, function (x) { return x.charCodeAt (0); });
 	this.curords.push (O_RETURN);
 	this.curindex = 0;
-	console.log ('<< ' + l);
+
+	if (this.debug_input_lines)
+	    console.log ('<< ' + l);
 	return true;
     };
 

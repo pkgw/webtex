@@ -199,10 +199,18 @@ var Engine = (function Engine_closure () {
     var BO_SETBOX = 0;
 
     function Engine (args) {
+	/* Possible properties of args:
+	 *
+	 * bundle - the Bundle with TeX files (required)
+	 * debug_input_lines - print lines of input as they're read
+	 * initial_linebuf - LineBuffer of the initial input (required)
+	 * jobname - the TeX job name
+	 */
+
 	this.jobname = args.jobname || 'texput';
 	this.bundle = args.bundle;
 
-	this.inputstack = new InputStack (args.initial_linebuf, this);
+	this.inputstack = new InputStack (args.initial_linebuf, this, args);
 
 	this.eqtb = new EquivTable (null);
 	this.mode_stack = [M_VERT];

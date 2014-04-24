@@ -177,15 +177,16 @@ var TokenizerInput = (function TokenizerInput_closure () {
 
 
 var InputStack = (function InputStack_closure () {
-    function InputStack (initial_linebuf, engine) {
+    function InputStack (initial_linebuf, engine, args) {
 	this.engine = engine;
+	this.misc_args = args;
 
 	if (initial_linebuf == null) {
 	    this.next_toknums = [];
 	    this.inputs = [];
 	} else {
 	    this.next_toknums = [0];
-	    var ordsrc = new OrdSource (initial_linebuf);
+	    var ordsrc = new OrdSource (initial_linebuf, args);
 	    this.inputs = [new TokenizerInput (ordsrc, engine)];
 	}
     }
@@ -193,7 +194,7 @@ var InputStack = (function InputStack_closure () {
     var proto = InputStack.prototype;
 
     proto.clone = function InputStack_clone () {
-	var c = new InputStack (null, this.engine)
+	var c = new InputStack (null, this.engine, this.misc_args)
 	c.next_toknums = this.next_toknums.slice ();
 	c.inputs = this.inputs.slice ();
 	return c;
@@ -234,7 +235,7 @@ var InputStack = (function InputStack_closure () {
     };
 
     proto.push_linebuf = function InputStack_push_linebuf (lb) {
-	var ordsrc = new OrdSource (lb);
+	var ordsrc = new OrdSource (lb, this.misc_args);
 	this.inputs.push (new TokenizerInput (ordsrc, this.engine));
 	this.next_toknums.push (0);
     };
