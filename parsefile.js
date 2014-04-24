@@ -8,7 +8,9 @@ var WEBTEX = require (process.argv[2]);
 WEBTEX.Node.promise_engine ({
     jobname: process.argv[3],
     inputpath: process.argv[3],
-    bundlepath: 'texbundles/default.zip'
+    bundlepath: 'texbundles/default.zip',
+    debug_input_lines: true,
+    debug_trace: true,
 }).then (function (engine) {
     function iterate () {
 	var rv = engine.step ();

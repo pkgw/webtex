@@ -144,7 +144,7 @@ var MacroCommand = (function MacroCommand_closure () {
 
     proto.invoke = function MacroCommand_invoke (engine) {
 	if (!this.tmpl.length) {
-	    engine.debug ('*macro ' + this.origcs + ' -> ' +
+	    engine.trace ('*macro ' + this.origcs + ' -> ' +
 			  new Toklist (this.repl));
 	    engine.push_toks (this.repl);
 	    return;
@@ -270,11 +270,11 @@ var MacroCommand = (function MacroCommand_closure () {
 	    }
 	}
 
-	engine.debug ('*macro ' + this.origcs + ' ...');
+	engine.trace ('*macro ' + this.origcs + ' ...');
 	for (var i = 1; i < 9; i++)
 	    if (param_vals.hasOwnProperty (i))
-		engine.debug ('   #' + i + ' = ' + new Toklist (param_vals[i]));
-	engine.debug (' -> ' + new Toklist (fullrepl));
+		engine.trace ('   #' + i + ' = ' + new Toklist (param_vals[i]));
+	engine.trace (' -> ' + new Toklist (fullrepl));
 	engine.push_toks (fullrepl);
     };
 
@@ -447,9 +447,9 @@ var SpacerCommand = (function SpacerCommand_closure () {
 
     proto.invoke = function Spacer_invoke (engine) {
 	if (engine.mode == M_VERT || engine.mode == M_IVERT)
-	    engine.debug ('spacer: ignored, vertical model');
+	    engine.trace ('spacer: ignored, vertical model');
 	else
-	    engine.debug ('spacer ...');
+	    engine.trace ('spacer ...');
     };
 
     return SpacerCommand;
@@ -469,7 +469,7 @@ var InsertLetterCommand = (function InsertLetterCommand_closure () {
 
     proto.invoke = function InsertLetter_invoke (engine) {
 	engine.ensure_horizontal ();
-	engine.debug ('accum letter ' + escchr (this.ord));
+	engine.trace ('accum letter ' + escchr (this.ord));
 	engine.mode_accum (this.ord);
     };
 
@@ -490,7 +490,7 @@ var InsertOtherCommand = (function InsertOtherCommand_closure () {
 
     proto.invoke = function InsertOther_invoke (engine) {
 	engine.ensure_horizontal ();
-	engine.debug ('accum other ' + escchr (this.ord));
+	engine.trace ('accum other ' + escchr (this.ord));
 	engine.mode_accum (this.ord);
     };
 
@@ -610,7 +610,7 @@ var GivenRegisterCommand = (function GivenRegisterCommand_closure () {
     proto.invoke = function GivenRegisterCommand_invoke (engine) {
 	engine.scan_optional_equals ();
 	var newval = engine.scan_valtype (this.valtype);
-	engine.debug (this.desc + ' #' + this.register + ' = ' + newval);
+	engine.trace (this.desc + ' #' + this.register + ' = ' + newval);
 
 	this.asvalref (engine).set (engine, newval);
     };
@@ -681,7 +681,7 @@ var GivenFontCommand = (function GivenFontCommand_closure () {
     };
 
     proto.invoke = function GivenFontCommand_invoke (engine) {
-	engine.debug ('activate font ' + this.font);
+	engine.trace ('activate font ' + this.font);
 	engine.set_font ('<current>', this.font);
     };
 
@@ -728,7 +728,7 @@ var NamedParamCommand = (function NamedParamCommand_closure () {
     proto.invoke = function NamedParamCommand_invoke (engine) {
 	engine.scan_optional_equals ();
 	var newval = engine.scan_valtype (this.valtype);
-	engine.debug ([this.name, '=', newval].join (' '));
+	engine.trace ([this.name, '=', newval].join (' '));
 	this.asvalref (engine).set (engine, newval);
     };
 

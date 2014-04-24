@@ -3,14 +3,14 @@
 var commands = WEBTEX.commands = {};
 
 commands.par = function cmd_par (engine) {
-    engine.debug ('par');
+    engine.trace ('par');
 };
 
 
 // Language infrastructure
 
 commands.relax = function cmd_relax (engine) {
-    engine.debug ('relax');
+    engine.trace ('relax');
 };
 
 
@@ -21,7 +21,7 @@ commands.expandafter = function cmd_expandafter (engine) {
     var tok1 = engine.next_tok_throw ();
     var tok2 = engine.next_tok_throw ();
 
-    engine.debug ('*expandafter ' + tok1 + '|' + tok2 + ' ...');
+    engine.trace ('*expandafter ' + tok1 + '|' + tok2 + ' ...');
 
     var cmd2 = tok2.tocmd (engine);
     if (cmd2.expandable)
@@ -60,7 +60,7 @@ commands.csname = function cmd_csname (engine) {
     }
 
     var tok = Token.new_cseq (csname);
-    engine.debug ('* \\csname...\\endcsname -> ' + tok);
+    engine.trace ('* \\csname...\\endcsname -> ' + tok);
     engine.push (tok);
 
     if (engine.get_cseq (csname) == null)
@@ -69,18 +69,18 @@ commands.csname = function cmd_csname (engine) {
 
 
 commands.global = function cmd_global (engine) {
-    engine.debug ('global');
+    engine.trace ('global');
     engine.set_global_assign_mode ();
 };
 
 
 commands.outer = function cmd_outer (engine) {
-    engine.debug ('outer'); // I think it's OK to make this a noop.
+    engine.trace ('outer'); // I think it's OK to make this a noop.
 };
 
 
 commands._long = function cmd_long (engine) {
-    engine.debug ('long'); // I think it's OK to make this a noop.
+    engine.trace ('long'); // I think it's OK to make this a noop.
 };
 
 
@@ -104,7 +104,7 @@ commands._let = function cmd_let (engine) {
 	break;
     }
 
-    engine.debug ('let ' + cstok + ' = ' + equiv);
+    engine.trace ('let ' + cstok + ' = ' + equiv);
     cstok.assign_cmd (engine, equiv.tocmd (engine));
 };
 
@@ -113,7 +113,7 @@ commands.futurelet = function cmd_futurelet (engine) {
     var cstok = engine.scan_r_token ();
     var thenexpand = engine.next_tok_throw ();
     var equiv = engine.next_tok_throw ();
-    engine.debug ('futurelet ' + cstok + ' = ' + equiv + '; ' + thenexpand);
+    engine.trace ('futurelet ' + cstok + ' = ' + equiv + '; ' + thenexpand);
     cstok.assign_cmd (engine, equiv.tocmd (engine));
     engine.push_toks ([thenexpand, equiv]);
 };
@@ -121,7 +121,7 @@ commands.futurelet = function cmd_futurelet (engine) {
 
 commands.string = function cmd_string (engine) {
     var tok = engine.next_tok_throw ();
-    engine.debug ('* \\string ' + tok);
+    engine.trace ('* \\string ' + tok);
 
     if (tok.ischar ()) {
 	engine.push (tok); // keep catcode
@@ -141,7 +141,7 @@ commands.string = function cmd_string (engine) {
 
 commands.number = function cmd_number (engine) {
     var val = engine.scan_int ().value;
-    engine.debug ('* number ' + val);
+    engine.trace ('* number ' + val);
     engine.push_string ('' + val);
 };
 
@@ -149,7 +149,7 @@ commands.number = function cmd_number (engine) {
 commands.afterassignment = function cmd_afterassignment (engine) {
     var tok = engine.next_tok_throw ();
     engine.set_after_assign_token (tok);
-    engine.debug ('afterassignment <- ' + tok);
+    engine.trace ('afterassignment <- ' + tok);
 };
 
 
@@ -168,7 +168,7 @@ commands.advance = function cmd_advance (engine) {
     engine.scan_keyword ('by');
     var cur = val.get (engine);
     var delta = engine.scan_valtype (val.valtype);
-    engine.debug ('advance ' + cmd + ' = ' + cur + ' + ' + delta);
+    engine.trace ('advance ' + cmd + ' = ' + cur + ' + ' + delta);
     val.set (engine, cur.advance (delta));
 };
 
@@ -180,7 +180,7 @@ commands.divide = function cmd_divide (engine) {
     engine.scan_keyword ('by');
     var cur = val.get (engine);
     var denom = engine.scan_int ();
-    engine.debug ('divide ' + cmd + ' = ' + cur + ' / ' + denom);
+    engine.trace ('divide ' + cmd + ' = ' + cur + ' / ' + denom);
     val.set (engine, cur.intdivide (denom));
 };
 
@@ -192,7 +192,7 @@ commands.multiply = function cmd_multiply (engine) {
     engine.scan_keyword ('by');
     var cur = val.get (engine);
     var factor = engine.scan_int ();
-    engine.debug ('multiply ' + cmd + ' = ' + cur + ' * ' + factor);
+    engine.trace ('multiply ' + cmd + ' = ' + cur + ' * ' + factor);
     val.set (engine, cur.intproduct (factor));
 };
 
@@ -201,7 +201,7 @@ function define_register (name, valtype, engine) {
     var cstok = engine.scan_r_token ();
     engine.scan_optional_equals ();
     var reg = engine.scan_register_num ();
-    engine.debug (name + 'def ' + cstok + ' -> {\\' + name + ' ' + reg + '}');
+    engine.trace (name + 'def ' + cstok + ' -> {\\' + name + ' ' + reg + '}');
     cstok.assign_cmd (engine, new GivenRegisterCommand (valtype, name, reg));
 };
 
@@ -244,7 +244,7 @@ var CharCodeCommand = (function CharCodeCommand_closure () {
 	    throw new TexRuntimeException ('illegal value ' + code +
 					   ' for ' + ct_names[this.codetype]);
 
-	engine.debug (ct_names[this.codetype] + ' ' + escchr (ord) + '=' +
+	engine.trace (ct_names[this.codetype] + ' ' + escchr (ord) + '=' +
 		      ord + ' -> ' + code);
 	engine.set_code (this.codetype, ord, code);
     };
@@ -271,7 +271,7 @@ commands.chardef = function cmd_chardef (engine) {
     var cstok = engine.scan_r_token ();
     engine.scan_optional_equals ();
     var ord = engine.scan_char_code ();
-    engine.debug ('chardef ' + cstok + ' -> {inschar ' + escchr (ord) +
+    engine.trace ('chardef ' + cstok + ' -> {inschar ' + escchr (ord) +
 		  '=' + ord + '}');
     cstok.assign_cmd (engine, new GivenCharCommand (ord));
 };
@@ -284,7 +284,7 @@ commands.mathchardef = function cmd_mathchardef (engine) {
     if (val < 0 || val > 0x8000)
 	throw new TexRuntimeError ('need mathcode in [0,0x8000] but ' +
 				   'got ' + val);
-    engine.debug ('mathchardef ' + cstok + ' -> {insmathchar ' + val + '}');
+    engine.trace ('mathchardef ' + cstok + ' -> {insmathchar ' + val + '}');
     cstok.assign_cmd (engine, new GivenMathcharCommand (val));
 };
 
@@ -401,7 +401,7 @@ function _cmd_def (engine, cname, expand_replacement) {
     if (end_with_lbrace)
 	repl_toks.push (tmpl_toks[tmpl_toks.length - 1]);
 
-    engine.debug ([cname, cstok, '~', new Toklist (tmpl_toks),
+    engine.trace ([cname, cstok, '~', new Toklist (tmpl_toks),
 		   '->', new Toklist (repl_toks)].join (' '));
     cstok.assign_cmd (engine, new MacroCommand (cstok, tmpl_toks, repl_toks));
 }
@@ -457,7 +457,7 @@ commands._if = function cmd_if (engine) {
     }
 
     var result = (key (t1) == key (t2));
-    engine.debug ('if ' + t1 + ' ~ ' + t2 + ' => ' + result);
+    engine.trace ('if ' + t1 + ' ~ ' + t2 + ' => ' + result);
     engine.handle_if (result);
 };
 
@@ -474,7 +474,7 @@ commands.ifx = function cmd_ifx (engine) {
 	result = cmd1.samecmd (cmd2);
     }
 
-    engine.debug ('ifx ' + t1 + ' ~ ' + t2 + ' => ' + result);
+    engine.trace ('ifx ' + t1 + ' ~ ' + t2 + ' => ' + result);
     engine.handle_if (result);
 };
 
@@ -503,7 +503,7 @@ commands.ifnum = function cmd_ifnum (engine) {
     else
 	throw new TexSyntaxError ('expected <,=,> in \\ifnum but got ' + tok);
 
-    engine.debug (['ifnum', val1, tok, val2, '?'].join (' '));
+    engine.trace (['ifnum', val1, tok, val2, '?'].join (' '));
     engine.handle_if (result);
 };
 
@@ -511,7 +511,7 @@ commands.ifnum = function cmd_ifnum (engine) {
 commands.ifodd = function cmd_ifodd (engine) {
     var val = engine.scan_int ().value;
     var result = (val % 2 == 1);
-    engine.debug ('ifodd ' + val + '?');
+    engine.trace ('ifodd ' + val + '?');
     engine.handle_if (result);
 };
 
@@ -538,44 +538,44 @@ commands.ifdim = function cmd_ifdim (engine) {
     else
 	throw new TexSyntaxError ('expected <,=,> in \\ifdim but got ' + tok);
 
-    engine.debug (['ifdim', val1, tok, val2, '?'].join (' '));
+    engine.trace (['ifdim', val1, tok, val2, '?'].join (' '));
     engine.handle_if (result);
 };
 
 
 commands.iffalse = function cmd_iffalse (engine) {
-    engine.debug ('iffalse');
+    engine.trace ('iffalse');
     engine.handle_if (false);
 };
 
 
 commands.iftrue = function cmd_iftrue (engine) {
-    engine.debug ('iftrue');
+    engine.trace ('iftrue');
     engine.handle_if (true);
 };
 
 
 commands.ifcase = function cmd_ifcase (engine) {
     var val = engine.scan_int ().value;
-    engine.debug ('ifcase ' + val);
+    engine.trace ('ifcase ' + val);
     engine.handle_if_case (val);
 };
 
 
 commands._else = function cmd_else (engine) {
-    engine.debug ('else [non-eaten]');
+    engine.trace ('else [non-eaten]');
     engine.handle_else ();
 };
 
 
 commands.or = function cmd_or (engine) {
-    engine.debug ('or [non-eaten]');
+    engine.trace ('or [non-eaten]');
     engine.handle_or ();
 };
 
 
 commands.fi = function cmd_fi (engine) {
-    engine.debug ('fi [non-eaten]');
+    engine.trace ('fi [non-eaten]');
     engine.handle_fi ();
 };
 
@@ -640,7 +640,7 @@ commands.ht = (function HtCommand_closure () {
 commands.setbox = function cmd_setbox (engine) {
     var reg = engine.scan_char_code ();
     engine.scan_optional_equals ();
-    engine.debug ('setbox: queue #' + reg + ' = ...');
+    engine.trace ('setbox: queue #' + reg + ' = ...');
     engine.handle_setbox (reg);
 };
 
@@ -663,7 +663,7 @@ commands.vrule = function cmd_vrule (engine) {
 	    break;
     }
 
-    engine.debug ('vrule ' + rule);
+    engine.trace ('vrule ' + rule);
     return rule;
 };
 
@@ -735,7 +735,7 @@ commands.font = (function FontCommand_closure () {
 
 	var font = new Font (fn, s);
 	var cmd = new GivenFontCommand (font);
-	engine.debug ('font ' + cstok + ' = ' + font);
+	engine.trace ('font ' + cstok + ' = ' + font);
 	cstok.assign_cmd (engine, cmd);
     };
 
@@ -755,7 +755,7 @@ commands.nullfont = (function NullFontCommand_closure () {
     proto.name = 'nullfont';
 
     proto.invoke = function NullFontCommand_invoke (engine) {
-	engine.debug ('activate null font');
+	engine.trace ('activate null font');
 	engine.set_font ('<current>', engine.get_font ('<null>'));
     };
 
@@ -789,7 +789,7 @@ commands.fontdimen = (function FontDimenCommand_closure () {
 
 	engine.scan_optional_equals ();
 	var val = engine.scan_dimen ();
-	engine.debug (['fontdimen', font, num, '=', val].join (' '));
+	engine.trace (['fontdimen', font, num, '=', val].join (' '));
 	font.get (engine).dimens[num] = val;
     };
 
@@ -827,7 +827,7 @@ commands.skewchar = function cmd_skewchar (engine) {
 
     engine.scan_optional_equals ();
     var ord = engine.scan_char_code ();
-    engine.debug (['skewchar', val.get (engine), '=', escchr (ord)].join (' '));
+    engine.trace (['skewchar', val.get (engine), '=', escchr (ord)].join (' '));
     engine.maybe_insert_after_assign_token ();
 };
 
@@ -842,7 +842,7 @@ commands.hyphenchar = function cmd_hyphenchar (engine) {
 
     engine.scan_optional_equals ();
     var ord = engine.scan_char_code ();
-    engine.debug (['hyphenchar', val.get (engine), '=', escchr (ord), '[noop]'].join (' '));
+    engine.trace (['hyphenchar', val.get (engine), '=', escchr (ord), '[noop]'].join (' '));
     engine.maybe_insert_after_assign_token ();
 };
 
@@ -857,7 +857,7 @@ function _def_family (engine, fam) {
 	throw new TexRuntimeError ('expected \\' + fam + ' to assign a font; ' +
 				   'got ' +tok);
 
-    engine.debug (['fam', slot, '=', val.get (engine), '[noop]'].join (' '));
+    engine.trace (['fam', slot, '=', val.get (engine), '[noop]'].join (' '));
     engine.maybe_insert_after_assign_token ();
 };
 
@@ -885,7 +885,7 @@ commands.patterns = function cmd_patterns (engine) {
 	throw new TexSyntaxError ('expected { immediately after \\patterns');
 
     engine.scan_tok_group (false);
-    engine.debug ('patterns [noop/ignored]');
+    engine.trace ('patterns [noop/ignored]');
 };
 
 
@@ -897,7 +897,7 @@ commands.hyphenation = function cmd_hyphenation (engine) {
 	throw new TexSyntaxError ('expected { immediately after \\hyphenation');
 
     engine.scan_tok_group (false);
-    engine.debug ('hyphenation [noop/ignored]');
+    engine.trace ('hyphenation [noop/ignored]');
 };
 
 
@@ -929,7 +929,7 @@ function _change_case (engine, isupper) {
 	    newtoks.push (tok);
     }
 
-    engine.debug ([cmdname, '~' + new Toklist (oldtoks), '->',
+    engine.trace ([cmdname, '~' + new Toklist (oldtoks), '->',
 		   '~' + new Toklist (newtoks)].join (' '));
     engine.push_toks (newtoks);
 }
@@ -969,13 +969,13 @@ commands.the = function cmd_the (engine) {
 
     if (val.valtype == T_TOKLIST) {
 	var toks = val.get (engine);
-	engine.debug ('the (toks) ' + tok + ' -> ' + toks);
+	engine.trace ('the (toks) ' + tok + ' -> ' + toks);
 	engine.push_toks (toks);
 	return;
     }
 
     var expn = val.get (engine).to_texstr ();
-    engine.debug ('the ' + tok + ' -> ' + expn);
+    engine.trace ('the ' + tok + ' -> ' + expn);
     engine.push_string (expn);
 };
 
@@ -983,13 +983,13 @@ commands.the = function cmd_the (engine) {
 commands.meaning = function cmd_meaning (engine) {
     var tok = engine.next_tok_throw ();
     var expn = tok.tocmd (engine).texmeaning (engine);
-    engine.debug (['meaning', tok, '->', expn].join (' '));
+    engine.trace (['meaning', tok, '->', expn].join (' '));
     engine.push_string (expn);
 };
 
 
 commands.jobname = function cmd_jobname (engine) {
-    engine.debug ('jobname -> ' + engine.jobname);
+    engine.trace ('jobname -> ' + engine.jobname);
     engine.push_string (engine.jobname);
 };
 
@@ -1003,7 +1003,7 @@ commands.message = function cmd_message (engine) {
 	throw new TexSyntaxError ('expected { immediately after \\message');
 
     var toks = engine.scan_tok_group ();
-    engine.debug ('message ' + toks.uitext ());
+    engine.trace ('message ' + toks.uitext ());
 };
 
 
@@ -1014,7 +1014,7 @@ commands.errmessage = function cmd_errmessage (engine) {
 	throw new TexSyntaxError ('expected { immediately after \\errmessage');
 
     var toks = engine.scan_tok_group ();
-    engine.debug ('errmessage ~' + toks.uitext ());
+    engine.trace ('errmessage ~' + toks.uitext ());
     throw new TexRuntimeError ('TeX-triggered error: ' + toks.uitext ());
 };
 
@@ -1023,7 +1023,7 @@ commands.immediate = function cmd_immediate (engine) {
     /* This causes a following \openout, \write, or \closeout to take effect
      * immediately, rather than waiting until page shipout. I suspect that I'll
      * need to distinguish these eventually, but for now, this is a noop. */
-    engine.debug ('immediate');
+    engine.trace ('immediate');
 };
 
 
@@ -1033,19 +1033,19 @@ commands.write = function cmd_write (engine) {
 	throw new TexSyntaxError ('expected { immediately after \\write');
 
     var toks = engine.scan_tok_group (false);
-    engine.debug ('write:' + streamnum + ' ' + toks.uitext ());
+    engine.trace ('write:' + streamnum + ' ' + toks.uitext ());
 };
 
 
 commands.input = function cmd_input (engine) {
     var fn = engine.scan_file_name ();
-    engine.debug ('input ' + fn);
+    engine.trace ('input ' + fn);
     engine.handle_input (fn);
 };
 
 
 commands.endinput = function cmd_endinput (engine) {
-    engine.debug ('endinput');
+    engine.trace ('endinput');
     engine.handle_endinput ();
 };
 
@@ -1054,13 +1054,13 @@ commands.openout = function cmd_openout (engine) {
     var snum = engine.scan_streamnum ();
     engine.scan_optional_equals ();
     var fn = engine.scan_file_name ();
-    engine.debug ('openout ' + snum + ' = ' + fn + ' [noop]');
+    engine.trace ('openout ' + snum + ' = ' + fn + ' [noop]');
 };
 
 
 commands.closeout = function cmd_closeout (engine) {
     var snum = engine.scan_streamnum ();
-    engine.debug ('closeout ' + snum + ' [noop]');
+    engine.trace ('closeout ' + snum + ' [noop]');
 };
 
 
@@ -1074,7 +1074,7 @@ commands.openin = function cmd_openin (engine) {
 
     engine.set_infile (snum, null);
 
-    engine.debug ('openin ' + snum + ' = ' + fn);
+    engine.trace ('openin ' + snum + ' = ' + fn);
     var lb = engine.bundle.try_open_linebuffer (fn);
     if (lb == null)
 	// File existence is tested by \openin..\ifeof, so this should
@@ -1103,7 +1103,7 @@ commands.ifeof = function cmd_ifeof (engine) {
     else
 	result = (engine.infile (snum) == null);
 
-    engine.debug ('ifeof ' + snum + ' -> ' + result);
+    engine.trace ('ifeof ' + snum + ' -> ' + result);
     engine.handle_if (result);
 };
 
@@ -1111,21 +1111,21 @@ commands.ifeof = function cmd_ifeof (engine) {
 // High-level miscellany
 
 commands.dump = function cmd_dump (engine) {
-    engine.debug ('dump');
+    engine.trace ('dump');
 };
 
 commands.batchmode = function cmd_batchmode (engine) {
-    engine.debug ('batchmode');
+    engine.trace ('batchmode');
 };
 
 commands.errorstopmode = function cmd_errorstopmode (engine) {
-    engine.debug ('errorstopmode');
+    engine.trace ('errorstopmode');
 };
 
 commands.nonstopmode = function cmd_nonstopmode (engine) {
-    engine.debug ('nonstopmode');
+    engine.trace ('nonstopmode');
 };
 
 commands.scrollmode = function cmd_scrollmode (engine) {
-    engine.debug ('scrollmode');
+    engine.trace ('scrollmode');
 };

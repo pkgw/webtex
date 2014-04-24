@@ -203,6 +203,7 @@ var Engine = (function Engine_closure () {
 	 *
 	 * bundle - the Bundle with TeX files (required)
 	 * debug_input_lines - print lines of input as they're read
+	 * debug_trace - print commands as they're executed
 	 * initial_linebuf - LineBuffer of the initial input (required)
 	 * jobname - the TeX job name
 	 */
@@ -250,6 +251,11 @@ var Engine = (function Engine_closure () {
 	var nf = new Font ('nullfont', -1000);
 	this.set_font ('<null>', nf);
 	this.set_font ('<current>', nf);
+
+	if (args.debug_trace)
+	    this.trace = function (t) { global_log ('{' + t + '}'); };
+	else
+	    this.trace = function (t) {};
     }
 
     var proto = Engine.prototype;
@@ -330,10 +336,6 @@ var Engine = (function Engine_closure () {
 
     // Infrastructure.
 
-    proto.debug = function Engine_debug (text) {
-	global_log ('{' + text + '}');
-    };
-
     proto.warn = function Engine_warn (text) {
 	global_log ('!! ' + text);
     };
@@ -397,7 +399,7 @@ var Engine = (function Engine_closure () {
     };
 
     proto.enter_mode = function Engine_enter_mode (mode) {
-	this.debug ('<enter ' + mode_abbrev[mode] + ' mode>');
+	this.trace ('<enter ' + mode_abbrev[mode] + ' mode>');
 	this.mode_stack.push (mode);
 	this.build_stack.push ([]);
     };
@@ -405,7 +407,7 @@ var Engine = (function Engine_closure () {
     proto.leave_mode = function Engine_leave_mode () {
 	var oldmode = this.mode_stack.pop ();
 	var tlist = this.build_stack.pop ();
-	this.debug ('<leave ' + mode_abbrev[oldmode] + ' mode: ' +
+	this.trace ('<leave ' + mode_abbrev[oldmode] + ' mode: ' +
 		    tlist.length + ' items>');
 	return tlist;
     };
@@ -422,7 +424,7 @@ var Engine = (function Engine_closure () {
     };
 
     proto.handle_bgroup = function Engine_handle_bgroup () {
-	this.debug ('< --> simple>');
+	this.trace ('< --> simple>');
 	this.nest_eqtb ();
 	this.group_exit_stack.push (this.unnest_eqtb.bind (this));
     };
@@ -434,7 +436,7 @@ var Engine = (function Engine_closure () {
     };
 
     proto.handle_begingroup = function Engine_handle_begingroup () {
-	this.debug ('< --> semi-simple>');
+	this.trace ('< --> semi-simple>');
 	this.nest_eqtb ();
 
 	function end_semisimple (eng) {
@@ -455,7 +457,7 @@ var Engine = (function Engine_closure () {
 	    throw new TexRuntimeError ('got \\endgroup when should have ' +
 					   'gotten other group-ender');
 
-	this.debug ('< <-- semi-simple>');
+	this.trace ('< <-- semi-simple>');
 	this.unnest_eqtb ();
     };
 
@@ -527,7 +529,7 @@ var Engine = (function Engine_closure () {
 
 	    if (cmd.samecmd (this.commands['noexpand'])) {
 		tok = this.next_tok ();
-		this.debug ('noexpand: ' + tok);
+		this.trace ('noexpand: ' + tok);
 		return tok;
 	    }
 
@@ -1126,21 +1128,21 @@ var Engine = (function Engine_closure () {
 		if (depth == 0) {
 		    if (mode == CS_FI)
 			throw new TexSyntaxError ('unexpected \\else');
-		    this.debug ('... skipped conditional ... ' + tok);
+		    this.trace ('... skipped conditional ... ' + tok);
 		    return 'else';
 		}
 	    } else if (tok.iscmd (this, 'fi')) {
 		if (depth > 0)
 		    depth -= 1;
 		else {
-		    this.debug ('... skipped conditional ... ' + tok);
+		    this.trace ('... skipped conditional ... ' + tok);
 		    return 'fi';
 		}
 	    } else if (tok.iscmd (this, 'or')) {
 		if (depth == 0) {
 		    if (mode != CS_OR_ELSE_FI)
 			throw new TexSyntaxError ('unexpected \\or');
-		    this.debug ('... skipped conditional ... ' + tok);
+		    this.trace ('... skipped conditional ... ' + tok);
 		    return 'or';
 		}
 	    } else if (tok.isconditional (this)) {
@@ -1220,7 +1222,7 @@ var Engine = (function Engine_closure () {
         // setbox operation.
 
         function set_the_box (engine, box) {
-            this.debug ('... finish setbox: #' + reg + ' = ' + box);
+            this.trace ('... finish setbox: #' + reg + ' = ' + box);
             engine.set_register (T_BOXLIST, reg, box)
 	}
 
@@ -1246,7 +1248,7 @@ var Engine = (function Engine_closure () {
 	    if (!this.boxop_stack.length)
 		throw new TexRuntimeError ('what to do with bare box?');
 
-	    this.debug ('<--- hbox');
+	    this.trace ('<--- hbox');
 	    this.unnest_eqtb ();
 	    var box = new Box ();
 	    box.tlist = this.leave_mode ();
@@ -1260,7 +1262,7 @@ var Engine = (function Engine_closure () {
 	    // This is an assignment expression.
 	    this.maybe_insert_after_assign_token ();
 
-	this.debug ('--> hbox');
+	this.trace ('--> hbox');
 	this.enter_mode (M_RHORZ);
 	this.nest_eqtb ();
 	this.group_exit_stack.push (finish_box.bind (this));
