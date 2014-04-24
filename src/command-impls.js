@@ -68,6 +68,57 @@ commands.csname = function cmd_csname (engine) {
 };
 
 
+commands.global = function cmd_global (engine) {
+    engine.debug ('global');
+    engine.set_global_assign_mode ();
+};
+
+
+commands.outer = function cmd_outer (engine) {
+    engine.debug ('outer'); // I think it's OK to make this a noop.
+};
+
+
+commands._long = function cmd_long (engine) {
+    engine.debug ('long'); // I think it's OK to make this a noop.
+};
+
+
+commands._let = function cmd_let (engine) {
+    var cstok = engine.scan_r_token ();
+
+    // Note that we don't use scan_optional_equals here since it
+    // expands things.
+
+    while (true) {
+	var tok = engine.next_tok_throw ();
+	if (tok.iscat (C_SPACE))
+	    continue
+	if (tok.isotherchar (O_EQUALS)) {
+	    var equiv = engine.next_tok_throw ();
+	    if (equiv.iscat (C_SPACE))
+		equiv = engine.next_tok_throw ();
+	    break;
+	}
+	var equiv = tok;
+	break;
+    }
+
+    engine.debug ('let ' + cstok + ' = ' + equiv);
+    cstok.assign_cmd (engine, equiv.tocmd (engine));
+};
+
+
+commands.futurelet = function cmd_futurelet (engine) {
+    var cstok = engine.scan_r_token ();
+    var thenexpand = engine.next_tok_throw ();
+    var equiv = engine.next_tok_throw ();
+    engine.debug ('futurelet ' + cstok + ' = ' + equiv + '; ' + thenexpand);
+    cstok.assign_cmd (engine, equiv.tocmd (engine));
+    engine.push_toks ([thenexpand, equiv]);
+};
+
+
 commands.string = function cmd_string (engine) {
     var tok = engine.next_tok_throw ();
     engine.debug ('* \\string ' + tok);
@@ -92,6 +143,13 @@ commands.number = function cmd_number (engine) {
     var val = engine.scan_int ().value;
     engine.debug ('* number ' + val);
     engine.push_string ('' + val);
+};
+
+
+commands.afterassignment = function cmd_afterassignment (engine) {
+    var tok = engine.next_tok_throw ();
+    engine.set_after_assign_token (tok);
+    engine.debug ('afterassignment <- ' + tok);
 };
 
 
@@ -231,57 +289,7 @@ commands.mathchardef = function cmd_mathchardef (engine) {
 };
 
 
-// Non-specific definition infrastructure
-
-commands.global = function cmd_global (engine) {
-    engine.debug ('global');
-    engine.set_global_assign_mode ();
-};
-
-commands.outer = function cmd_outer (engine) {
-    // I think it's OK to make this a noop.
-    engine.debug ('outer');
-};
-
-commands._long = function cmd_long (engine) {
-    // I think it's OK to make this a noop.
-    engine.debug ('long');
-};
-
-commands._let = function cmd_let (engine) {
-    var cstok = engine.scan_r_token ();
-
-    // Note that we don't use scan_optional_equals here since it
-    // expands things.
-
-    while (true) {
-	var tok = engine.next_tok_throw ();
-	if (tok.iscat (C_SPACE))
-	    continue
-	if (tok.isotherchar (O_EQUALS)) {
-	    var equiv = engine.next_tok_throw ();
-	    if (equiv.iscat (C_SPACE))
-		equiv = engine.next_tok_throw ();
-	    break;
-	}
-	var equiv = tok;
-	break;
-    }
-
-    engine.debug ('let ' + cstok + ' = ' + equiv);
-    cstok.assign_cmd (engine, equiv.tocmd (engine));
-};
-
-
-commands.futurelet = function cmd_futurelet (engine) {
-    var cstok = engine.scan_r_token ();
-    var thenexpand = engine.next_tok_throw ();
-    var equiv = engine.next_tok_throw ();
-    engine.debug ('futurelet ' + cstok + ' = ' + equiv + '; ' + thenexpand);
-    cstok.assign_cmd (engine, equiv.tocmd (engine));
-    engine.push_toks ([thenexpand, equiv]);
-};
-
+// Macros.
 
 function _cmd_def (engine, cname, expand_replacement) {
     var cstok = engine.scan_r_token ();
@@ -415,12 +423,6 @@ commands.edef = function cmd_edef (engine) {
 commands.xdef = function cmd_xdef (engine) {
     engine.set_global_assign_mode ();
     return _cmd_def (engine, 'xdef', true);
-};
-
-commands.afterassignment = function cmd_afterassignment (engine) {
-    var tok = engine.next_tok_throw ();
-    engine.set_after_assign_token (tok);
-    engine.debug ('afterassignment <- ' + tok);
 };
 
 
@@ -707,7 +709,7 @@ commands.inputlineno = (function InputlinenoCommand_closure () {
 })();
 
 
-// Font
+// Font stuff
 
 commands.font = (function FontCommand_closure () {
     function FontCommand () { Command.call (this); }
