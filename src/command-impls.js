@@ -139,6 +139,32 @@ commands.multiply = function cmd_multiply (engine) {
 };
 
 
+function define_register (name, valtype, engine) {
+    var cstok = engine.scan_r_token ();
+    engine.scan_optional_equals ();
+    var reg = engine.scan_register_num ();
+    engine.debug (name + 'def ' + cstok + ' -> {\\' + name + ' ' + reg + '}');
+    cstok.assign_cmd (engine, new GivenRegisterCommand (valtype, name, reg));
+};
+
+
+commands.countdef = function cmd_countdef (engine) {
+    define_register ('count', T_INT, engine);
+};
+
+commands.dimendef = function cmd_dimendef (engine) {
+    define_register ('dimen', T_DIMEN, engine);
+};
+
+commands.skipdef = function cmd_skipdef (engine) {
+    define_register ('skip', T_GLUE, engine);
+};
+
+commands.toksdef = function cmd_toksdef (engine) {
+    define_register ('toks', T_TOKLIST, engine);
+};
+
+
 // Setting categories: \catcode, \mathcode, etc.
 
 var CharCodeCommand = (function CharCodeCommand_closure () {
@@ -197,47 +223,11 @@ commands.mathchardef = function cmd_mathchardef (engine) {
     var cstok = engine.scan_r_token ();
     engine.scan_optional_equals ();
     var val = engine.scan_int ().value;
-    if (val < 0 || val > 32768)
+    if (val < 0 || val > 0x8000)
 	throw new TexRuntimeError ('need mathcode in [0,0x8000] but ' +
 				   'got ' + val);
     engine.debug ('mathchardef ' + cstok + ' -> {insmathchar ' + val + '}');
     cstok.assign_cmd (engine, new GivenMathcharCommand (val));
-};
-
-
-commands.countdef = function cmd_countdef (engine) {
-    var cstok = engine.scan_r_token ();
-    engine.scan_optional_equals ();
-    var reg = engine.scan_register_num ();
-    engine.debug ('countdef ' + cstok + ' -> {\\count' + reg + '}');
-    cstok.assign_cmd (engine, new GivenRegisterCommand (T_INT, 'count', reg));
-};
-
-
-commands.dimendef = function cmd_dimendef (engine) {
-    var cstok = engine.scan_r_token ();
-    engine.scan_optional_equals ();
-    var reg = engine.scan_register_num ();
-    engine.debug ('dimendef ' + cstok + ' -> {\\dimen' + reg + '}');
-    cstok.assign_cmd (engine, new GivenRegisterCommand (T_DIMEN, 'dimen', reg));
-};
-
-
-commands.skipdef = function cmd_skipdef (engine) {
-    var cstok = engine.scan_r_token ();
-    engine.scan_optional_equals ();
-    var reg = engine.scan_register_num ();
-    engine.debug ('skipdef ' + cstok + ' -> {\\skip' + reg + '}');
-    cstok.assign_cmd (engine, new GivenRegisterCommand (T_GLUE, 'skip', reg));
-};
-
-
-commands.toksdef = function cmd_toksdef (engine) {
-    var cstok = engine.scan_r_token ();
-    engine.scan_optional_equals ();
-    var reg = engine.scan_register_num ();
-    engine.debug ('toksdef ' + cstok + ' -> {\\toks' + reg + '}');
-    cstok.assign_cmd (engine, new GivenRegisterCommand (T_TOKLIST, 'toks', reg));
 };
 
 
