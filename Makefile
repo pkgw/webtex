@@ -21,7 +21,6 @@ sharedjs = \
 
 
 browserjs = \
-  src/browser-api.js \
   src/browser-io.js
 
 browserprejs = \
@@ -39,8 +38,7 @@ standard: \
 
 minified: \
   $(builddir)/browser-webtex.min.js \
-  $(builddir)/node-webtex.min.js \
-  $(builddir)/browser-autoload.min.js
+  $(builddir)/node-webtex.min.js
 
 $(builddir)/browser-webtex.js: \
 generate.py src/browser-wrapper.js $(browserprejs) $(sharedjs) $(browserjs) \
@@ -56,9 +54,6 @@ $(builddir)/%-helpers.js: \
 generate.py src/%-helpers-tmpl.js \
 | $(builddir)
 	$(python) $^ $@
-
-$(builddir)/browser-autoload.min.js: src/browser-autoload.js | $(builddir)
-	$(minify) $< >$@.new && mv -f $@.new $@
 
 %.min.js: %.js
 	$(minify) $< >$@.new && mv -f $@.new $@
