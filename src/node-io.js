@@ -92,13 +92,16 @@ WEBTEX.IOBackend.makeInflater = function (datacb) {
 }
 
 
-function promise_engine (jobname, inputpath, bundlepath) {
-    var f = new RandomAccessFile (bundlepath);
+function promise_engine (args) {
+    var f = new RandomAccessFile (args.bundlepath);
     var z = new ZipReader (f.read_range.bind (f), f.size ());
-    var bundle = new Bundle (z);
+    args.bundle = new Bundle (z);
+    delete args.bundlepath;
 
-    var lb = make_fs_linebuffer (inputpath);
-    return Promise.resolve (new Engine (jobname, lb, bundle));
+    args.initial_linebuf = make_fs_linebuffer (args.inputpath);
+    delete args.inputpath;
+
+    return Promise.resolve (new Engine (args));
 };
 
 

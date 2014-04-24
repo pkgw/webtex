@@ -198,11 +198,11 @@ var Engine = (function Engine_closure () {
     var CS_FI = 0, CS_ELSE_FI = 1, CS_OR_ELSE_FI = 2;
     var BO_SETBOX = 0;
 
-    function Engine (jobname, initial_linebuf, bundle) {
-	this.jobname = jobname;
-	this.bundle = bundle;
+    function Engine (args) {
+	this.jobname = args.jobname || 'texput';
+	this.bundle = args.bundle;
 
-	this.inputstack = new InputStack (initial_linebuf, this);
+	this.inputstack = new InputStack (args.initial_linebuf, this);
 
 	this.eqtb = new EquivTable (null);
 	this.mode_stack = [M_VERT];

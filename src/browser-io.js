@@ -101,14 +101,18 @@ function make_random_access_url (url) {
 WEBTEX.Web.make_random_access_url = make_random_access_url;
 
 
-function promise_engine (jobname, inputurl, bundleurl) {
-    return make_random_access_url (bundleurl)
+function promise_engine (args) {
+    return make_random_access_url (args.bundleurl)
 	.then (function (rau) {
 	    var z = new ZipReader (rau.read_range.bind (rau), rau.size ());
-	    var bundle = new Bundle (z);
-	    var lb = new LineBuffer ();
-	    stream_url_to_linebuffer (inputurl, lb);
-	    return new Engine (jobname, lb, bundle);
+	    args.bundle = new Bundle (z);
+	    delete args.bundleurl;
+
+	    args.initial_linebuf = new LineBuffer ();
+	    stream_url_to_linebuffer (inputurl, args.initial_linebuf);
+	    delete args.inputurl;
+
+	    return new Engine (args);
 	});
 };
 

@@ -5,17 +5,20 @@ if (process.argv.length < 4) {
 
 var WEBTEX = require (process.argv[2]);
 
-WEBTEX.Node.promise_engine (process.argv[3], process.argv[3], 'texbundles/default.zip')
-    .then (function (engine) {
-	function iterate () {
-	    var rv = engine.step ();
+WEBTEX.Node.promise_engine ({
+    jobname: process.argv[3],
+    inputpath: process.argv[3],
+    bundlepath: 'texbundles/default.zip'
+}).then (function (engine) {
+    function iterate () {
+	var rv = engine.step ();
 
-	    if (rv === true)
-		setImmediate (iterate);
-	    else if (rv === WEBTEX.NeedMoreData)
-		setTimeout (iterate, 10);
-	    // otherwise, EOF and we're done.
-	}
+	if (rv === true)
+	    setImmediate (iterate);
+	else if (rv === WEBTEX.NeedMoreData)
+	    setTimeout (iterate, 10);
+	// otherwise, EOF and we're done.
+    }
 
-	iterate ();
-    });
+    iterate ();
+});
