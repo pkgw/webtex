@@ -4,33 +4,33 @@ var EquivTable = (function EquivTable_closure () {
 
 	if (parent == null) {
 	    this.toplevel = this;
-	    this._qq_catcodes = new Array (256);
+	    this._catcodes = new Array (256);
 	} else {
 	    this.toplevel = parent.toplevel;
-	    this._qq_catcodes = parent._qq_catcodes.slice ();
+	    this._catcodes = parent._catcodes.slice ();
 	}
 
-	this._qq_registers = {};
-	this._qq_registers[T_INT] = {};
-	this._qq_registers[T_DIMEN] = {};
-	this._qq_registers[T_GLUE] = {};
-	this._qq_registers[T_MUGLUE] = {};
-	this._qq_registers[T_TOKLIST] = {};
-	this._qq_registers[T_BOXLIST] = {};
+	this._registers = {};
+	this._registers[T_INT] = {};
+	this._registers[T_DIMEN] = {};
+	this._registers[T_GLUE] = {};
+	this._registers[T_MUGLUE] = {};
+	this._registers[T_TOKLIST] = {};
+	this._registers[T_BOXLIST] = {};
 
-	this._qq_parameters = {};
-	this._qq_parameters[T_INT] = {};
-	this._qq_parameters[T_DIMEN] = {};
-	this._qq_parameters[T_GLUE] = {};
-	this._qq_parameters[T_MUGLUE] = {};
-	this._qq_parameters[T_TOKLIST] = {};
+	this._parameters = {};
+	this._parameters[T_INT] = {};
+	this._parameters[T_DIMEN] = {};
+	this._parameters[T_GLUE] = {};
+	this._parameters[T_MUGLUE] = {};
+	this._parameters[T_TOKLIST] = {};
 
-	this._qq_codes = {};
-	this._qq_codes[CT_LOWERCASE] = {};
-	this._qq_codes[CT_UPPERCASE] = {};
-	this._qq_codes[CT_SPACEFAC] = {};
-	this._qq_codes[CT_MATH] = {};
-	this._qq_codes[CT_DELIM] = {};
+	this._codes = {};
+	this._codes[CT_LOWERCASE] = {};
+	this._codes[CT_UPPERCASE] = {};
+	this._codes[CT_SPACEFAC] = {};
+	this._codes[CT_MATH] = {};
+	this._codes[CT_DELIM] = {};
 
 	this._actives = {};
 	this._cseqs = {};
@@ -49,7 +49,7 @@ var EquivTable = (function EquivTable_closure () {
 	if (reg < 0 || reg > 255)
 	    throw new TexRuntimeError ('illegal register number ' + reg);
 
-	this._qq_registers[valtype][reg] = Value.coerce (valtype, value);
+	this._registers[valtype][reg] = Value.coerce (valtype, value);
     };
 
     proto.get_register = function EquivTable_get_register (valtype, reg) {
@@ -59,8 +59,8 @@ var EquivTable = (function EquivTable_closure () {
 	if (reg < 0 || reg > 255)
 	    throw new TexRuntimeError ('illegal register number ' + reg);
 
-	if (this._qq_registers[valtype].hasOwnProperty (reg))
-	    return this._qq_registers[valtype][reg];
+	if (this._registers[valtype].hasOwnProperty (reg))
+	    return this._registers[valtype][reg];
 	return this.parent.get_register (valtype, reg);
     };
 
@@ -69,7 +69,7 @@ var EquivTable = (function EquivTable_closure () {
 	    throw new TexRuntimeError ('illegal value type for parameter: ' +
 				       vt_names[valtype]);
 
-	this._qq_parameters[valtype][name] = Value.coerce (valtype, value);
+	this._parameters[valtype][name] = Value.coerce (valtype, value);
     };
 
     proto.get_parameter = function EquivTable_get_parameter (valtype, name) {
@@ -77,8 +77,8 @@ var EquivTable = (function EquivTable_closure () {
 	    throw new TexRuntimeError ('illegal value type for parameter: ' +
 				       vt_names[valtype]);
 
-	if (this._qq_parameters[valtype].hasOwnProperty (name))
-	    return this._qq_parameters[valtype][name];
+	if (this._parameters[valtype].hasOwnProperty (name))
+	    return this._parameters[valtype][name];
 	if (this.parent == null)
 	    throw new TexRuntimeError ('undefined named parameter ' + name);
 	return this.parent.get_parameter (valtype, name);
@@ -92,9 +92,9 @@ var EquivTable = (function EquivTable_closure () {
 				       ' value ' + value);
 
 	if (codetype == CT_CATEGORY)
-	    this._qq_catcodes[ord] = value;
+	    this._catcodes[ord] = value;
 	else
-	    this._qq_codes[codetype][ord] = value;
+	    this._codes[codetype][ord] = value;
     };
 
     proto.get_code = function EquivTable_get_code (codetype, ord) {
@@ -102,10 +102,10 @@ var EquivTable = (function EquivTable_closure () {
 	    throw new TexRuntimeError ('illegal ordinal number ' + ord);
 
 	if (codetype == CT_CATEGORY)
-	    return this._qq_catcodes[ord];
+	    return this._catcodes[ord];
 
-	if (this._qq_codes[codetype].hasOwnProperty (ord))
-	    return this._qq_codes[codetype][ord];
+	if (this._codes[codetype].hasOwnProperty (ord))
+	    return this._codes[codetype][ord];
 	return this.parent.get_code (codetype, ord);
     };
 
@@ -153,40 +153,40 @@ var EquivTable = (function EquivTable_closure () {
 
     proto._toplevel_init = function EquivTable__toplevel_init () {
 	for (var i = 0; i < 256; i++) {
-	    this._qq_catcodes[i] = C_OTHER;
-	    this._qq_codes[CT_MATH][i] = i;
-	    this._qq_codes[CT_SPACEFAC][i] = 1000;
-	    this._qq_codes[CT_DELIM][i] = -1;
-	    this._qq_codes[CT_LOWERCASE][i] = 0;
-	    this._qq_codes[CT_UPPERCASE][i] = 0;
-	    this._qq_registers[T_GLUE][i] = new Glue ();
-	    this._qq_registers[T_MUGLUE][i] = new Glue ();
-	    this._qq_registers[T_TOKLIST][i] = new Toklist ();
-	    this._qq_registers[T_BOXLIST][i] = new Box ();
+	    this._catcodes[i] = C_OTHER;
+	    this._codes[CT_MATH][i] = i;
+	    this._codes[CT_SPACEFAC][i] = 1000;
+	    this._codes[CT_DELIM][i] = -1;
+	    this._codes[CT_LOWERCASE][i] = 0;
+	    this._codes[CT_UPPERCASE][i] = 0;
+	    this._registers[T_GLUE][i] = new Glue ();
+	    this._registers[T_MUGLUE][i] = new Glue ();
+	    this._registers[T_TOKLIST][i] = new Toklist ();
+	    this._registers[T_BOXLIST][i] = new Box ();
 	}
 
 	for (var i = 0; i < 26; i++) {
-	    this._qq_catcodes[O_LC_A + i] = C_LETTER;
-	    this._qq_catcodes[O_UC_A + i] = C_LETTER;
-	    this._qq_codes[CT_MATH][O_LC_A + i] = O_LC_A + i + 0x7100;
-	    this._qq_codes[CT_MATH][O_UC_A + i] = O_UC_A + i + 0x7100;
-	    this._qq_codes[CT_UPPERCASE][O_UC_A + i] = O_UC_A + i;
-	    this._qq_codes[CT_UPPERCASE][O_LC_A + i] = O_UC_A + i;
-	    this._qq_codes[CT_LOWERCASE][O_UC_A + i] = O_LC_A + i;
-	    this._qq_codes[CT_LOWERCASE][O_LC_A + i] = O_LC_A + i;
-	    this._qq_codes[CT_SPACEFAC][O_UC_A + i] = 999;
+	    this._catcodes[O_LC_A + i] = C_LETTER;
+	    this._catcodes[O_UC_A + i] = C_LETTER;
+	    this._codes[CT_MATH][O_LC_A + i] = O_LC_A + i + 0x7100;
+	    this._codes[CT_MATH][O_UC_A + i] = O_UC_A + i + 0x7100;
+	    this._codes[CT_UPPERCASE][O_UC_A + i] = O_UC_A + i;
+	    this._codes[CT_UPPERCASE][O_LC_A + i] = O_UC_A + i;
+	    this._codes[CT_LOWERCASE][O_UC_A + i] = O_LC_A + i;
+	    this._codes[CT_LOWERCASE][O_LC_A + i] = O_LC_A + i;
+	    this._codes[CT_SPACEFAC][O_UC_A + i] = 999;
 	}
 
 	for (var i = 0; i < 10; i++)
-	    this._qq_codes[CT_MATH][O_ZERO + i] = O_ZERO + i + 0x7000;
+	    this._codes[CT_MATH][O_ZERO + i] = O_ZERO + i + 0x7000;
 
-	this._qq_catcodes[O_NULL] = C_IGNORE;
-	this._qq_catcodes[O_BACKSPACE] = C_INVALID;
-	this._qq_catcodes[O_RETURN] = C_EOL;
-	this._qq_catcodes[O_SPACE] = C_SPACE;
-	this._qq_catcodes[O_PERCENT] = C_COMMENT;
-	this._qq_catcodes[O_BACKSLASH] = C_ESCAPE;
-	this._qq_codes[CT_DELIM][O_PERIOD] = 0;
+	this._catcodes[O_NULL] = C_IGNORE;
+	this._catcodes[O_BACKSPACE] = C_INVALID;
+	this._catcodes[O_RETURN] = C_EOL;
+	this._catcodes[O_SPACE] = C_SPACE;
+	this._catcodes[O_PERCENT] = C_COMMENT;
+	this._catcodes[O_BACKSLASH] = C_ESCAPE;
+	this._codes[CT_DELIM][O_PERIOD] = 0;
     };
 
     return EquivTable;
