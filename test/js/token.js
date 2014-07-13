@@ -1,5 +1,6 @@
 var assert = require ('assert');
-var wt = require (process.argv[2]).WEBTEX;
+var console = require ('console');
+var webtex = require (process.argv[2]);
 
-t = wt.Token.new_cseq ('foo');
+t = webtex.Token.new_cseq ('foo');
 assert.equal (t.is_frozen_cs (), false, 'frozen 1');
