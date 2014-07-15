@@ -20,4 +20,6 @@ WEBTEX.Web.promise_engine ({
     }
 
     iterate ();
+}).catch (function (err) {
+    console.log (err.stack);
 });
