@@ -3,9 +3,9 @@ if (process.argv.length < 4) {
     process.exit (1);
 }
 
-var WEBTEX = require (process.argv[2]);
+var webtex = require (process.argv[2]);
 
-WEBTEX.Node.promise_engine ({
+webtex.Node.promise_engine ({
     jobname: process.argv[3],
     inputpath: process.argv[3],
     bundlepath: 'texbundles/default.zip',
@@ -17,10 +17,12 @@ WEBTEX.Node.promise_engine ({
 
 	if (rv === true)
 	    setImmediate (iterate);
-	else if (rv === WEBTEX.NeedMoreData)
+	else if (rv === webtex.NeedMoreData)
 	    setTimeout (iterate, 10);
 	// otherwise, EOF and we're done.
     }
 
     iterate ();
+}).catch (function (err) {
+    console.log (err.stack);
 });
