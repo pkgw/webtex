@@ -194,35 +194,117 @@ var EquivTable = (function EquivTable_closure () {
     proto.serialize = function Eqtb_serialize () {
 	var state = {};
 	var i = 0;
+	var name = null;
 
 	state.catcodes = this._catcodes;
 	state.registers = {ints: {}, dimens: {}, glues: {}, muglues: {},
 			   toklists: {}, boxlists: {}};
+	state.parameters = {ints: {}, dimens: {}, glues: {}, muglues: {},
+			    toklists: {}};
 
 	for (i = 0; i < 256; i++) {
 	    var r = this._registers[T_INT][i];
-	    if (r !== undefined && r.is_nonzero ())
+	    if (r != null && r.is_nonzero ())
 		state.registers.ints[i] = r.as_serializable ();
 
 	    r = this._registers[T_DIMEN][i];
-	    if (r !== undefined && r.is_nonzero ())
+	    if (r != null && r.is_nonzero ())
 		state.registers.dimens[i] = r.as_serializable ();
 
 	    r = this._registers[T_GLUE][i];
-	    if (r !== undefined && r.is_nonzero ())
+	    if (r != null && r.is_nonzero ())
 		state.registers.glues[i] = r.as_serializable ();
 
 	    r = this._registers[T_MUGLUE][i];
-	    if (r !== undefined && r.is_nonzero ())
+	    if (r != null && r.is_nonzero ())
 		state.registers.muglues[i] = r.as_serializable ();
 
 	    r = this._registers[T_TOKLIST][i];
-	    if (r !== undefined && r.is_nonzero ())
+	    if (r != null && r.is_nonzero ())
 		state.registers.toklists[i] = r.as_serializable ();
 
 	    r = this._registers[T_BOXLIST][i];
-	    if (r !== undefined && r.is_nonzero ())
+	    if (r != null && r.is_nonzero ())
 		state.registers.boxlists[i] = r.as_serializable ();
+	}
+
+	// Parameters
+
+	for (name in this._parameters[T_INT]) {
+	    if (!this._parameters[T_INT].hasOwnProperty (name))
+		continue;
+	    state.parameters.ints[name] = this._parameters[T_INT][name].as_serializable ();
+	}
+
+	for (name in this._parameters[T_DIMEN]) {
+	    if (!this._parameters[T_DIMEN].hasOwnProperty (name))
+		continue;
+	    state.parameters.dimens[name] = this._parameters[T_DIMEN][name].as_serializable ();
+	}
+
+	for (name in this._parameters[T_GLUE]) {
+	    if (!this._parameters[T_GLUE].hasOwnProperty (name))
+		continue;
+	    state.parameters.glues[name] = this._parameters[T_GLUE][name].as_serializable ();
+	}
+
+	for (name in this._parameters[T_MUGLUE]) {
+	    if (!this._parameters[T_MUGLUE].hasOwnProperty (name))
+		continue;
+	    state.parameters.muglues[name] = this._parameters[T_MUGLUE][name].as_serializable ();
+	}
+
+	for (name in this._parameters[T_TOKLIST]) {
+	    if (!this._parameters[T_TOKLIST].hasOwnProperty (name))
+		continue;
+	    state.parameters.toklists[name] = this._parameters[T_TOKLIST][name].as_serializable ();
+	}
+
+	// Category codes.
+
+	// Commands -- need to process these before we can handle actives and
+	// cseqs since we need to set up _serialize_names.
+
+	state.commands = {};
+	var commands = {};
+	var ucounter = 0;
+
+	for (name in this._cseqs) {
+	    if (!this._cseqs.hasOwnProperty (name))
+		continue;
+
+	    var cmd = this._cseqs[name];
+
+	    if (cmd._serialize_name != null)
+		continue;
+
+	    if (!cmd.multi_instanced) {
+		// Builtin unique command, no need to serialize anything.
+		// Just need to remember that it exists.
+		if (commands.hasOwnProperty (cmd.name))
+		    throw new TexRuntimeError ('multiple commands with name ' + cmd.name);
+		commands[cmd.name] = cmd;
+		cmd._serialize_name = cmd.name;
+		continue;
+	    }
+
+	    // Command is not unique. We need to give this particular instance
+	    // a special name.
+	    cmd._serialize_name = cmd.name + '/' + ucounter;
+	    commands[cmd._serialize_name] = cmd;
+	    state.commands[cmd._serialize_name] = cmd.as_serializable ();
+	    ucounter += 1;
+	}
+
+	// Control seqs.
+
+	state.cseqs = {};
+
+	for (name in this._cseqs) {
+	    if (!this._cseqs.hasOwnProperty (name))
+		continue;
+
+	    state.cseqs[name] = this._cseqs[name]._serialize_name;
 	}
 
 	return state;

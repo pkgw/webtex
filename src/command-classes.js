@@ -7,6 +7,7 @@ var Command = WEBTEX.Command = (function Command_closure () {
     proto.expandable = false;
     proto.conditional = false;
     proto.boxlike = false;
+    proto.multi_instanced = false; // can multiple Command instances with the same name exist?
     proto.assign_flag_mode = AFM_INVALID;
     proto.name = '<unset command name>';
 
@@ -55,6 +56,10 @@ var Command = WEBTEX.Command = (function Command_closure () {
 	if (v == null)
 	    return null;
 	return v.get (engine).as_glue ();
+    };
+
+    proto.as_serializable = function Command_as_serializable () {
+	throw new TexRuntimeError ('as_serializable not implemented for command');
     };
 
     proto.texmeaning = function Command_texmeaning (engine) {
@@ -120,6 +125,13 @@ var MacroCommand = (function MacroCommand_closure () {
     var proto = MacroCommand.prototype;
     proto.name = '<macro>';
     proto.expandable = true;
+    proto.multi_instanced = true;
+
+    proto.as_serializable = function MacroCommand_as_serializable () {
+	return [this.origcs.to_serialize_str (),
+		(new Toklist (this.tmpl)).as_serializable (),
+		(new Toklist (this.repl)).as_serializable ()];
+    };
 
     proto.samecmd = function MacroCommand_samecmd (other) {
 	if (other == null)
@@ -519,6 +531,11 @@ var GivenCharCommand = (function GivenCharCommand_closure () {
     inherit (GivenCharCommand, Command);
     var proto = GivenCharCommand.prototype;
     proto.name = '<given-char>';
+    proto.multi_instanced = true;
+
+    proto.as_serializable = function GivenCharCommand_as_serializable () {
+	return this.ord;
+    };
 
     proto.samecmd = function GivenCharCommand_samecmd (other) {
 	if (other == null)
@@ -552,6 +569,11 @@ var GivenMathcharCommand = (function GivenMathcharCommand_closure () {
     inherit (GivenMathcharCommand, Command);
     var proto = GivenMathcharCommand.prototype;
     proto.name = '<given-mathchar>';
+    proto.multi_instanced = true;
+
+    proto.as_serializable = function GivenMathcharCommand_as_serializable () {
+	return this.mathchar;
+    };
 
     proto.samecmd = function GivenMathcharCommand_samecmd (other) {
 	if (other == null)
@@ -591,7 +613,12 @@ var GivenRegisterCommand = (function GivenRegisterCommand_closure () {
 
     inherit (GivenRegisterCommand, Command);
     var proto = GivenRegisterCommand.prototype;
+    proto.multi_instanced = true;
     proto.assign_flag_mode = AFM_CONSUME;
+
+    proto.as_serializable = function GivenRegisterCommand_as_serializable () {
+	return this.register;
+    };
 
     proto.samecmd = function GivenRegisterCommand_samecmd (other) {
 	if (other == null)
@@ -670,7 +697,12 @@ var GivenFontCommand = (function GivenFontCommand_closure () {
     inherit (GivenFontCommand, Command);
     var proto = GivenFontCommand.prototype;
     proto.name = '<given-font>';
+    proto.multi_instanced = true;
     proto.assign_flags_mode = AFM_CONSUME;
+
+    proto.as_serializable = function GivenFontCommand_as_serializable () {
+	return ['XXX FONT SERIALIZATION'];
+    };
 
     proto.samecmd = function GivenFontCommand_samecmd (other) {
 	if (other == null)
