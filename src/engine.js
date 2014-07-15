@@ -189,6 +189,45 @@ var EquivTable = (function EquivTable_closure () {
 	this._codes[CT_DELIM][O_PERIOD] = 0;
     };
 
+    // Serialization. Our equivalent of the \dump primitive.
+
+    proto.serialize = function Eqtb_serialize () {
+	var state = {};
+	var i = 0;
+
+	state.catcodes = this._catcodes;
+	state.registers = {ints: {}, dimens: {}, glues: {}, muglues: {},
+			   toklists: {}, boxlists: {}};
+
+	for (i = 0; i < 256; i++) {
+	    var r = this._registers[T_INT][i];
+	    if (r !== undefined && r.is_nonzero ())
+		state.registers.ints[i] = r.as_serializable ();
+
+	    r = this._registers[T_DIMEN][i];
+	    if (r !== undefined && r.is_nonzero ())
+		state.registers.dimens[i] = r.as_serializable ();
+
+	    r = this._registers[T_GLUE][i];
+	    if (r !== undefined && r.is_nonzero ())
+		state.registers.glues[i] = r.as_serializable ();
+
+	    r = this._registers[T_MUGLUE][i];
+	    if (r !== undefined && r.is_nonzero ())
+		state.registers.muglues[i] = r.as_serializable ();
+
+	    r = this._registers[T_TOKLIST][i];
+	    if (r !== undefined && r.is_nonzero ())
+		state.registers.toklists[i] = r.as_serializable ();
+
+	    r = this._registers[T_BOXLIST][i];
+	    if (r !== undefined && r.is_nonzero ())
+		state.registers.boxlists[i] = r.as_serializable ();
+	}
+
+	return state;
+    };
+
     return EquivTable;
 })();
 
@@ -487,6 +526,43 @@ var Engine = (function Engine_closure () {
 	this.infiles[num] = value;
     };
 
+
+    // Serialization. Our equivalent of the \dump primitive.
+
+    proto.serialize = function Engine_serialize () {
+	// We only allow serialization in a clean global state:
+
+	if (this.inputstack.inputs.length > 1) {
+	    console.log (this.inputstack.inputs[1]);
+	    throw new TexRuntimeError ('can only serialize Engine at topmost input');
+}
+	if (this.eqtb.parent !== null)
+	    throw new TexRuntimeError ('can only serialize Engine in topmost eqtb');
+	if (this.mode_stack.length > 1)
+	    throw new TexRuntimeError ('can only serialize Engine in topmost mode');
+	if (this.build_stack.length > 1 || this.build_stack[0].length > 0)
+	    throw new TexRuntimeError ('cannot serialize Engine with queued build items');
+	if (this.group_exit_stack.length > 0)
+	    throw new TexRuntimeError ('can only serialize Engine without open groups');
+	if (this.boxop_stack.length > 0)
+	    throw new TexRuntimeError ('can only serialize Engine without open boxops');
+	if (this.assign_flags != 0)
+	    throw new TexRuntimeError ('cannot serialize Engine with active assignment flags');
+	if (this.after_assign_token != null)
+	    throw new TexRuntimeError ('cannot serialize Engine with active ' +
+				       'after_assign_token');
+	if (this.conditional_stack.length > 0)
+	    throw new TexRuntimeError ('can only serialize Engine without open conditionals');
+	for (var i = 0; i < 16; i++)
+	    if (this.infiles[i] != null)
+		throw new TexRuntimeError ('cannot serialize Engine with open input files');
+
+	// OK, we're clear.
+
+	var state = this.eqtb.serialize ();
+
+	return state;
+    };
 
     // Tokenization. I'd like to separate this out into its own class,
     // but there are just too many interactions between this subsystem and

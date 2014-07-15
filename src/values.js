@@ -30,6 +30,12 @@ var Value = (function Value_closure () {
 	throw new TexInternalError ('not implemented Value.equals');
     };
 
+    proto.is_nonzero = function Value_is_nonzero () {
+	/* Returns whether this object is different than the default value for
+	 * its class. */
+	throw new TexInternalError ('not implemented Value.is_nonzero');
+    };
+
     proto.as_int = function Value_as_int () {
 	/* Returns a TexInt that this value is equivalent to, or null if such
 	 * a conversion is not allowed. */
@@ -54,6 +60,11 @@ var Value = (function Value_closure () {
 	/* Returns a Glue that this value is equivalent to, or null if such a
 	 * conversion is not allowed. This is used in Engine.scan_glue. */
 	throw new TexInternalError ('not implemented Value.as_glue');
+    };
+
+    proto.as_serializable = function Value_as_serializable () {
+	/* Returns a unique JSON-compatible representation. */
+	throw new TexInternalError ('not implemented Value.as_serializable');
     };
 
     proto.advance = function Value_advance (other) {
@@ -177,6 +188,10 @@ var TexInt = WEBTEX.TexInt = (function TexInt_closure () {
 	return new TexInt (this.value);
     };
 
+    proto.is_nonzero = function TexInt_is_nonzero () {
+	return (this.value != 0);
+    };
+
     proto.as_int = function TexInt_as_int () {
 	return this; // NOTE: ok since TexInts are immutable
     };
@@ -191,6 +206,10 @@ var TexInt = WEBTEX.TexInt = (function TexInt_closure () {
 
     proto.as_glue = function TexInt_as_glue () {
 	return null;
+    };
+
+    proto.as_serializable = function TexInt_as_serializable () {
+	return this.value;
     };
 
     proto.advance = function TexInt_advance (other) {
@@ -391,6 +410,10 @@ var Scaled = WEBTEX.Scaled = (function Scaled_closure () {
 	return new Scaled (this.value);
     };
 
+    proto.is_nonzero = function Scaled_is_nonzero () {
+	return (this.value != 0);
+    };
+
     proto.as_int = function Scaled_as_int () {
 	return new TexInt (this.value);
     };
@@ -405,6 +428,10 @@ var Scaled = WEBTEX.Scaled = (function Scaled_closure () {
 
     proto.as_glue = function Scaled_as_glue () {
 	return null;
+    };
+
+    proto.as_serializable = function Scaled_as_serializable () {
+	return this.value;
     };
 
     proto.advance = function Scaled_advance (other) {
@@ -468,6 +495,10 @@ var Dimen = (function Dimen_closure () {
 	return d;
     };
 
+    proto.is_nonzero = function Dimen_is_nonzero () {
+	return this.sp.is_nonzero ();
+    };
+
     proto.as_int = function Dimen_as_int () {
 	return this.sp.as_int ();
     };
@@ -482,6 +513,10 @@ var Dimen = (function Dimen_closure () {
 
     proto.as_glue = function Dimen_as_glue () {
 	return null;
+    };
+
+    proto.as_serializable = function Dimen_as_serializable () {
+	return this.sp.as_serializable ();
     };
 
     proto.advance = function Dimen_advance (other) {
@@ -536,6 +571,14 @@ var Glue = (function Glue_closure () {
 	return g;
     };
 
+    proto.is_nonzero = function Glue_is_nonzero () {
+	return (this.width.is_nonzero () ||
+		this.stretch.is_nonzero () ||
+		this.stretch_order != 0 ||
+		this.shrink.is_nonzero () ||
+		this.shrink_order != 0);
+    };
+
     proto.as_int = function Glue_as_int () {
 	return this.width.as_int ();
     };
@@ -550,6 +593,14 @@ var Glue = (function Glue_closure () {
 
     proto.as_glue = function Glue_as_glue () {
 	return this.clone ();
+    };
+
+    proto.as_serializable = function Glue_as_serializable () {
+	return [this.width.as_serializable (),
+		this.stretch.as_serializable (),
+		this.stretch_order,
+		this.shrink.as_serializable (),
+		this.shrink_order];
     };
 
     proto.advance = function Glue_advance (other) {
@@ -598,6 +649,20 @@ var Box = (function Box_closure () {
 	    ' d=' + this.depth + ' #toks=' + this.tlist.length + '>';
     };
 
+    proto.is_nonzero = function Box_is_nonzero () {
+	return (this.width.is_nonzero () ||
+		this.height.is_nonzero () ||
+		this.depth.is_nonzero () ||
+		this.tlist.length > 0);
+    };
+
+    proto.as_serializable = function Box_as_serializable () {
+	return [this.width.as_serializable (),
+		this.height.as_serializable (),
+		this.depth.as_serializable (),
+		this.tlist.as_serializable ()];
+    };
+
     return Box;
 }) ();
 
@@ -630,7 +695,7 @@ var Toklist = WEBTEX.Toklist = (function Toklist_closure () {
     var proto = Toklist.prototype;
 
     proto.toString = function Toklist_toString () {
-	return this.to_serialize_str ();
+	return this.as_serializable ();
     };
 
     proto.uitext = function Toklist_uitext () {
@@ -650,7 +715,11 @@ var Toklist = WEBTEX.Toklist = (function Toklist_closure () {
 	return n;
     };
 
-    proto.to_serialize_str = function Toklist_to_serialize_str () {
+    proto.is_nonzero = function Toklist_is_nonzero () {
+	return this.toks.length > 0;
+    };
+
+    proto.as_serializable = function Toklist_as_serializable () {
 	return this.toks.map (function (t) {
 	    return t.to_serialize_str ();
 	}).join ('');
