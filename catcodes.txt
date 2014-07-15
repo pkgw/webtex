@@ -1,17 +1,17 @@
-#long_name	code	short_name	charlike
-escape		0	esc		n
-bgroup		1	bgr		y
-egroup		2	egr		y
-mshift		3	mth		y
-aligntab	4	tab		y
-eol		5	eol		n
-param		6	par		y
-super		7	sup		y
-sub		8	sub		y
-ignore		9	ign		n
-space		10	spc		n
-letter		11	let		y
-other		12	oth		y
-active		13	act		y
-comment		14	cmt		n
-invalid		15	inv		n
+#long_name	code	short_name	charlike	single_char
+escape		0	esc		n		e
+bgroup		1	bgr		y		g
+egroup		2	egr		y		G
+mshift		3	mth		y		m
+aligntab	4	tab		y		t
+eol		5	eol		n		E
+param		6	par		y		p
+super		7	sup		y		s
+sub		8	sub		y		S
+ignore		9	ign		n		i
+space		10	spc		n		_
+letter		11	let		y		l
+other		12	oth		y		o
+active		13	act		y		a
+comment		14	cmt		n		c
+invalid		15	inv		n		X

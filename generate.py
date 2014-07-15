@@ -48,7 +48,7 @@ def parsebool (text):
 
 
 all_tables = [
-    ('catcodes', 'long_name code short_name charlike'),
+    ('catcodes', 'long_name code short_name charlike single_char'),
     ('commands', 'escname expand cond afm'),
     ('eqtbitems', 'name index valuetype'),
     ('namedparams', 'name type'),

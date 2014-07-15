@@ -69,6 +69,14 @@ var cc_ischar = [
     1, 1, 0, 0,
 ];
 
+var cc_idchar = 'egGmtEpsSi_loacX';
+
+var cc_idchar_unmap = {
+    'e': 0, 'g': 1, 'G':  2, 'm':  3, 't':  4, 'E':  5, 'p':  6, 's':  7,
+    'S': 8, 'i': 9, '_': 10, 'l': 11, 'o': 12, 'a': 13, 'c': 14, 'X': 15
+};
+
+
 var O_NULL = 0, // '\0'
     O_ALARM = 7, // '\a'
     O_BACKSPACE = 8, // '\b'
