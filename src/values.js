@@ -613,7 +613,7 @@ var Rule = (function Rule_closure () {
 }) ();
 
 
-var Toklist = (function Toklist_closure () {
+var Toklist = WEBTEX.Toklist = (function Toklist_closure () {
     function Toklist (toks) {
 	if (toks == null)
 	    this.toks = [];
@@ -654,6 +654,90 @@ var Toklist = (function Toklist_closure () {
 	return this.toks.map (function (t) {
 	    return t.to_serialize_str ();
 	}).join ('');
+    };
+
+    Toklist.new_from_serialized = function Toklist_new_from_serialized (text) {
+	var list = [];
+	var n = text.length;
+
+	for (var i = 0; i < n; i++) {
+	    var o = ord (text[i]);
+
+	    if (o != O_BACKSLASH) {
+		// Standard character.
+		list.push (Token.new_char (ord_standard_catcodes[o], o));
+		continue;
+	    }
+
+	    i++;
+	    if (i >= n)
+		throw new TexRuntimeError ('malformed serialized toklist: ' + text);
+
+	    o = ord (text[i]);
+
+	    if (o == O_HASH) {
+		// Macro parameter token.
+		i++;
+		if (i >= n)
+		    throw new TexRuntimeError ('malformed serialized toklist: ' + text);
+
+		o = ord (text[i]);
+		list.push (Token.new_param (o - O_ZERO));
+		continue;
+	    }
+
+	    if ((o >= O_ZERO && o < O_ZERO + 10) ||
+		(o >= O_LC_A && o < O_LC_A + 6) ||
+		(o >= O_UC_A && o < O_UC_A + 6)) {
+		// Escaped character.
+		if (i + 2 >= n)
+		    throw new TexRuntimeError ('malformed serialized toklist: ' + text);
+		o = parseInt (text.substr (i, 2), 16);
+		var cc = cc_idchar_unmap[text[i+2]];
+		list.push (Token.new_char (cc, o));
+		i += 2;
+		continue; // catcode id char will be eaten by the for loop increment.
+	    }
+
+	    if (o != O_LEFT_BRACKET)
+		throw new TexRuntimeError ('malformed serialized toklist: ' + text);
+
+	    // We must be a cseq.
+	    i++;
+	    if (i >= n)
+		throw new TexRuntimeError ('malformed serialized toklist: ' + text);
+
+	    var name = '';
+
+	    while (i < n) {
+		o = ord (text[i]);
+
+		if (o == O_RIGHT_BRACKET)
+		    break;
+
+		if (o != O_BACKSLASH) {
+		    name += text[i];
+		    i++;
+		    continue;
+		}
+
+		// We must be an escaped character. No catcodes here.
+		if (i + 2 >= n) // recall that we need at least the close bracket.
+		    throw new TexRuntimeError ('malformed serialized toklist: ' + text);
+		o = parseInt (text.substr (i + 1, 2), 16);
+		name += String.fromCharCode (o);
+		i += 3;
+	    }
+
+	    if (i >= n)
+		// We ran off the end of the string!
+		throw new TexRuntimeError ('malformed serialized toklist: ' + text);
+
+	    // Finished the cseq successfully. For loop will eat the ].
+	    list.push (Token.new_cseq (name));
+	}
+
+	return new Toklist (list);
     };
 
     return Toklist;
