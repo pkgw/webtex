@@ -205,29 +205,33 @@ var Token = WEBTEX.Token = (function Token_closure () {
     };
 
     /* The roundtrippable string format for serializing Engines.
-       \[...] -> cseq
-       \#0 -> macro param
-       \XXc -> non-standard ord and/or non-printable char, or \ ord;
+       %[...] -> cseq
+       %#0 -> macro param
+       %XXc -> non-standard ord, or non-printable char, or % ord;
                XX is hex, C is catcode ident char.
+
+       We don't use backslash as an escape character since this stuff gets
+       exported to JSON, so all the backslashes need an extra escape, which
+       gets annoying.
      */
 
     proto.to_serialize_str = function Token_to_serialize_str () {
 	if (this.kind == TK_CHAR) {
 	    if (ord_standard_catcodes[this.ord] == this.catcode &&
-		this.ord >= 0x20 && this.ord <= 0x7e && this.ord != O_BACKSLASH)
+		this.ord >= 0x20 && this.ord <= 0x7e && this.ord != O_PERCENT)
 		return String.fromCharCode (this.ord);
 	    var s = ('00' + this.ord.toString (16)).substr (-2);
-	    return '\\' + s + cc_idchar[this.catcode];
+	    return '%' + s + cc_idchar[this.catcode];
 	}
 
 	if (this.kind == TK_PARAM)
-	    return '\\#' + this.pnum.toString ();
+	    return '%#' + this.pnum.toString ();
 
 	// We must be a control sequence.
-	return '\\[' + [].map.call (this.name, function (c) {
+	return '%[' + [].map.call (this.name, function (c) {
 	    var o = ord (c);
-	    if (o < 0x20 || o > 0x7e || o == O_BACKSLASH || o == O_RIGHT_BRACKET)
-		return '\\' + ('00' + o.toString (16)).substr (-2);
+	    if (o < 0x20 || o > 0x7e || o == O_PERCENT || o == O_RIGHT_BRACKET)
+		return '%' + ('00' + o.toString (16)).substr (-2);
 	    return c;
 	}).join ('') + ']';
     };

@@ -732,7 +732,7 @@ var Toklist = WEBTEX.Toklist = (function Toklist_closure () {
 	for (var i = 0; i < n; i++) {
 	    var o = ord (text[i]);
 
-	    if (o != O_BACKSLASH) {
+	    if (o != O_PERCENT) {
 		// Standard character.
 		list.push (Token.new_char (ord_standard_catcodes[o], o));
 		continue;
@@ -784,7 +784,7 @@ var Toklist = WEBTEX.Toklist = (function Toklist_closure () {
 		if (o == O_RIGHT_BRACKET)
 		    break;
 
-		if (o != O_BACKSLASH) {
+		if (o != O_PERCENT) {
 		    name += text[i];
 		    i++;
 		    continue;
