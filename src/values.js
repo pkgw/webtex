@@ -630,8 +630,7 @@ var Toklist = (function Toklist_closure () {
     var proto = Toklist.prototype;
 
     proto.toString = function Toklist_toString () {
-	// XXX could/should be better
-	return '|' + this.toks.join ('|') + '|';
+	return this.to_serialize_str ();
     };
 
     proto.uitext = function Toklist_uitext () {
@@ -649,6 +648,12 @@ var Toklist = (function Toklist_closure () {
 	var n = new Toklist ();
 	n.toks = this.toks.slice ();
 	return n;
+    };
+
+    proto.to_serialize_str = function Toklist_to_serialize_str () {
+	return this.toks.map (function (t) {
+	    return t.to_serialize_str ();
+	}).join ('');
     };
 
     return Toklist;
