@@ -11,11 +11,13 @@ var Token = WEBTEX.Token = (function Token_closure () {
 
     function Token () {};
 
-    Token.prototype._csesc = function Token__csesc (escape) {
+    var proto = Token.prototype;
+
+    proto._csesc = function Token__csesc (escape) {
 	return [].map.call (this.name, ord).map (escape).join ('');
     };
 
-    Token.prototype.toString = function Token_toString () {
+    proto.toString = function Token_toString () {
 	if (this.kind == TK_CHAR)
 	    return escchr (this.ord) + ':' + cc_abbrev[this.catcode];
 	if (this.kind == TK_CSEQ)
@@ -25,7 +27,7 @@ var Token = WEBTEX.Token = (function Token_closure () {
 	throw new TexInternalError ('not reached');
     };
 
-    Token.prototype.uitext = function Token_uitext () {
+    proto.uitext = function Token_uitext () {
 	if (this.kind == TK_CHAR)
 	    return escchr (this.ord);
 	if (this.kind == TK_CSEQ)
@@ -35,7 +37,7 @@ var Token = WEBTEX.Token = (function Token_closure () {
 	throw new TexInternalError ('not reached');
     };
 
-    Token.prototype.textext = function Token_textext (engine, ismacro) {
+    proto.textext = function Token_textext (engine, ismacro) {
 	if (this.kind == TK_CHAR) {
 	    if (ismacro && this.ord == O_HASH)
 		return '##';
@@ -52,7 +54,7 @@ var Token = WEBTEX.Token = (function Token_closure () {
 	throw new TexInternalError ('not reached');
     };
 
-    Token.prototype.equals = function Token_equals (other) {
+    proto.equals = function Token_equals (other) {
 	if (other === null)
 	    return false;
 	if (!(other instanceof Token))
@@ -70,7 +72,7 @@ var Token = WEBTEX.Token = (function Token_closure () {
 	throw new TexInternalError ('not reached');
     };
 
-    Token.prototype.tocmd = function Token_tocmd (engine) {
+    proto.tocmd = function Token_tocmd (engine) {
 	var cmd = null, name = '<unexpected token command>';
 
 	if (this.kind == TK_CHAR) {
@@ -96,27 +98,27 @@ var Token = WEBTEX.Token = (function Token_closure () {
 	return cmd;
     };
 
-    Token.prototype.ischar = function Token_ischar () {
+    proto.ischar = function Token_ischar () {
 	return this.kind == TK_CHAR;
     };
 
-    Token.prototype.isparam = function Token_isparam () {
+    proto.isparam = function Token_isparam () {
 	return this.kind == TK_PARAM;
     };
 
-    Token.prototype.iscat = function Token_iscat (catcode) {
+    proto.iscat = function Token_iscat (catcode) {
 	if (this.kind != TK_CHAR)
 	    return false;
 	return this.catcode == catcode;
     };
 
-    Token.prototype.isotherchar = function Token_isotherchar (ord) {
+    proto.isotherchar = function Token_isotherchar (ord) {
 	if (this.kind != TK_CHAR || this.catcode != C_OTHER)
 	    return false;
 	return this.ord == ord;
     };
 
-    Token.prototype.iscslike = function Token_iscslike () {
+    proto.iscslike = function Token_iscslike () {
 	if (this.kind == TK_CSEQ)
 	    return true;
 	if (this.kind == TK_CHAR)
@@ -124,13 +126,13 @@ var Token = WEBTEX.Token = (function Token_closure () {
 	return false;
     };
 
-    Token.prototype.is_frozen_cs = function Token_is_frozen_cs () {
+    proto.is_frozen_cs = function Token_is_frozen_cs () {
 	if (this.kind != TK_CSEQ)
 	    return false;
 	return frozen_cs_names.hasOwnProperty (this.name);
     };
 
-    Token.prototype.maybe_octal_value = function Token_maybe_octal_value () {
+    proto.maybe_octal_value = function Token_maybe_octal_value () {
 	if (this.kind != TK_CHAR)
 	    return -1;
 	if (this.catcode != C_OTHER)
@@ -141,7 +143,7 @@ var Token = WEBTEX.Token = (function Token_closure () {
 	return v;
     };
 
-    Token.prototype.maybe_decimal_value = function Token_maybe_decimal_value () {
+    proto.maybe_decimal_value = function Token_maybe_decimal_value () {
 	if (this.kind != TK_CHAR)
 	    return -1;
 	if (this.catcode != C_OTHER)
@@ -152,7 +154,7 @@ var Token = WEBTEX.Token = (function Token_closure () {
 	return v;
     };
 
-    Token.prototype.maybe_hex_value = function Token_maybe_hex_value () {
+    proto.maybe_hex_value = function Token_maybe_hex_value () {
 	if (this.kind != TK_CHAR)
 	    return -1;
 
@@ -176,11 +178,11 @@ var Token = WEBTEX.Token = (function Token_closure () {
 	return v;
     };
 
-    Token.prototype.iscmd = function Token_iscmd (engine, cmdname) {
+    proto.iscmd = function Token_iscmd (engine, cmdname) {
 	return this.tocmd (engine).samecmd (engine.commands[cmdname]);
     };
 
-    Token.prototype.assign_cmd = function Token_assign_cmd (engine, cmd) {
+    proto.assign_cmd = function Token_assign_cmd (engine, cmd) {
 	if (this.kind == TK_CSEQ) {
 	    engine.set_cseq (this.name, cmd);
 	    return;
@@ -194,11 +196,11 @@ var Token = WEBTEX.Token = (function Token_closure () {
 	throw new TexInternalError ('cannot assign command for token ' + this);
     };
 
-    Token.prototype.isexpandable = function Token_isexpandable (engine) {
+    proto.isexpandable = function Token_isexpandable (engine) {
 	return this.tocmd (engine).expandable;
     };
 
-    Token.prototype.isconditional = function Token_isconditional (engine) {
+    proto.isconditional = function Token_isconditional (engine) {
 	return this.tocmd (engine).conditional;
     };
 
@@ -209,7 +211,7 @@ var Token = WEBTEX.Token = (function Token_closure () {
                XX is hex, C is catcode ident char.
      */
 
-    Token.prototype.to_serialize_str = function Token_to_serialize_str () {
+    proto.to_serialize_str = function Token_to_serialize_str () {
 	if (this.kind == TK_CHAR) {
 	    if (ord_standard_catcodes[this.ord] == this.catcode &&
 		this.ord >= 0x20 && this.ord <= 0x7e && this.ord != O_BACKSLASH)
