@@ -203,6 +203,7 @@ var EquivTable = (function EquivTable_closure () {
 	state.parameters = {ints: {}, dimens: {}, glues: {}, muglues: {},
 			    toklists: {}};
 	state.commands = {};
+	state.actives = {};
 
 	for (i = 0; i < 256; i++) {
 	    var r = this._registers[T_INT][i];
@@ -228,6 +229,9 @@ var EquivTable = (function EquivTable_closure () {
 	    r = this._registers[T_BOXLIST][i];
 	    if (r != null && r.is_nonzero ())
 		state.registers.boxlists[i] = r.as_serializable ();
+
+	    if (this._actives.hasOwnProperty (i))
+		state.actives[i] = this._actives[i].get_serialize_ident (state, housekeeping);
 	}
 
 	// Parameters
