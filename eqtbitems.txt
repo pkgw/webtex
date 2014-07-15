@@ -1,3 +1,0 @@
-# Categories of things that are managed by the equivalents table
-#
-#name			index	valuetype
