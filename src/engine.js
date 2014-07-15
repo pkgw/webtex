@@ -193,6 +193,7 @@ var EquivTable = (function EquivTable_closure () {
 
     proto.serialize = function Eqtb_serialize () {
 	var state = {};
+	var housekeeping = {commands: {}};
 	var i = 0;
 	var name = null;
 
@@ -201,6 +202,7 @@ var EquivTable = (function EquivTable_closure () {
 			   toklists: {}, boxlists: {}};
 	state.parameters = {ints: {}, dimens: {}, glues: {}, muglues: {},
 			    toklists: {}};
+	state.commands = {};
 
 	for (i = 0; i < 256; i++) {
 	    var r = this._registers[T_INT][i];
@@ -262,38 +264,16 @@ var EquivTable = (function EquivTable_closure () {
 
 	// Category codes.
 
-	// Commands -- need to process these before we can handle actives and
-	// cseqs since we need to set up _serialize_names.
+	// Fonts -- need to set these up since given-font commands can delegate here.
 
-	state.commands = {};
-	var commands = {};
-	var ucounter = 0;
+	state.fonts = [];
 
-	for (name in this._cseqs) {
-	    if (!this._cseqs.hasOwnProperty (name))
+	for (name in this._fonts) {
+	    if (!this._fonts.hasOwnProperty (name))
 		continue;
 
-	    var cmd = this._cseqs[name];
-
-	    if (cmd._serialize_name != null)
-		continue;
-
-	    if (!cmd.multi_instanced) {
-		// Builtin unique command, no need to serialize anything.
-		// Just need to remember that it exists.
-		if (commands.hasOwnProperty (cmd.name))
-		    throw new TexRuntimeError ('multiple commands with name ' + cmd.name);
-		commands[cmd.name] = cmd;
-		cmd._serialize_name = cmd.name;
-		continue;
-	    }
-
-	    // Command is not unique. We need to give this particular instance
-	    // a special name.
-	    cmd._serialize_name = cmd.name + '/' + ucounter;
-	    commands[cmd._serialize_name] = cmd;
-	    state.commands[cmd._serialize_name] = cmd.as_serializable ();
-	    ucounter += 1;
+	    // Don't need to use the return value here.
+	    this._fonts[name].get_serialize_ident (state, housekeeping);
 	}
 
 	// Control seqs.
@@ -304,7 +284,7 @@ var EquivTable = (function EquivTable_closure () {
 	    if (!this._cseqs.hasOwnProperty (name))
 		continue;
 
-	    state.cseqs[name] = this._cseqs[name]._serialize_name;
+	    state.cseqs[name] = this._cseqs[name].get_serialize_ident (state, housekeeping);
 	}
 
 	return state;

@@ -58,12 +58,44 @@ var Command = WEBTEX.Command = (function Command_closure () {
 	return v.get (engine).as_glue ();
     };
 
-    proto.as_serializable = function Command_as_serializable () {
-	throw new TexRuntimeError ('as_serializable not implemented for command');
-    };
-
     proto.texmeaning = function Command_texmeaning (engine) {
 	return texchr (engine.escapechar ()) + this.name;
+    };
+
+    // Serialization.
+
+    proto.get_serialize_ident = function Command_get_serialize_ident (state, housekeeping) {
+	if (this._serialize_ident == null) {
+	    if (!this.multi_instanced) {
+		// Builtin unique command, no need to serialize anything. Just
+		// need to remember that it exists.
+		if (housekeeping.commands.hasOwnProperty (this.name))
+		    throw new TexRuntimeError ('multiple commands with name ' + this.name);
+		housekeeping.commands[this.name] = true;
+		this._serialize_ident = this.name;
+	    } else {
+		// Command is not unique. We need to give this particular
+		// instance a special name and save its unique, special
+		// parameters.
+
+		var data = this._serialize_data (state, housekeeping);
+		var cmdlist = null;
+
+		if (!state.commands.hasOwnProperty (this.name))
+		    cmdlist = state.commands[this.name] = [];
+		else
+		    cmdlist = state.commands[this.name];
+
+		this._serialize_ident = this.name + '/' + cmdlist.length;
+		cmdlist.push (data);
+	    }
+	}
+
+	return this._serialize_ident;
+    };
+
+    proto._serialize_data = function Command__serialize_data (state, housekeeping) {
+	throw new TexRuntimeError ('_serialize_data not implemented for command');
     };
 
     return Command;
@@ -93,14 +125,20 @@ var CommandUnimplPrimitive = (function CommandUnimplPrimitive_closure () {
 var UndefinedCommand = (function UndefinedCommand_closure () {
     function UndefinedCommand (name) {
 	Command.call (this);
-	this.name = name;
+	this.csname = name;
     }
 
     inherit (UndefinedCommand, Command);
     var proto = UndefinedCommand.prototype;
+    proto.name = '<undefined>';
+    proto.multi_instanced = true; // simplest way forward.
+
+    proto._serialize_data = function UndefinedCommand__serialize_data (state, housekeeping) {
+	return this.csname;
+    };
 
     proto.invoke = function UndefinedCommand_invoke (engine) {
-	throw new TexRuntimeError ('trying to invoke undefined command \\' + this.name);
+	throw new TexRuntimeError ('trying to invoke undefined command \\' + this.csname);
     };
 
     proto.samecmd = function UndefinedCommand_samecmd (other) {
@@ -127,7 +165,7 @@ var MacroCommand = (function MacroCommand_closure () {
     proto.expandable = true;
     proto.multi_instanced = true;
 
-    proto.as_serializable = function MacroCommand_as_serializable () {
+    proto._serialize_data = function MacroCommand__serialize_data (state, housekeeping) {
 	return [this.origcs.to_serialize_str (),
 		(new Toklist (this.tmpl)).as_serializable (),
 		(new Toklist (this.repl)).as_serializable ()];
@@ -313,8 +351,13 @@ var CharacterCommand = (function CharacterCommand_closure () {
 
     inherit (CharacterCommand, Command);
     var proto = CharacterCommand.prototype;
+    proto.multi_instanced = true; // simplest way forward.
 
     proto.desc = 'undescribed command';
+
+    proto._serialize_data = function CharacterCommand__serialize_data (state, housekeeping) {
+	return this.ord;
+    };
 
     proto.samecmd = function CharacterCommand_samecmd (other) {
 	if (other == null)
@@ -533,7 +576,7 @@ var GivenCharCommand = (function GivenCharCommand_closure () {
     proto.name = '<given-char>';
     proto.multi_instanced = true;
 
-    proto.as_serializable = function GivenCharCommand_as_serializable () {
+    proto._serialize_data = function GivenCharCommand__serialize_data (state, housekeeping) {
 	return this.ord;
     };
 
@@ -571,7 +614,7 @@ var GivenMathcharCommand = (function GivenMathcharCommand_closure () {
     proto.name = '<given-mathchar>';
     proto.multi_instanced = true;
 
-    proto.as_serializable = function GivenMathcharCommand_as_serializable () {
+    proto._serialize_data = function GivenMathcharCommand__serialize_data (state, housekeeping) {
 	return this.mathchar;
     };
 
@@ -616,7 +659,7 @@ var GivenRegisterCommand = (function GivenRegisterCommand_closure () {
     proto.multi_instanced = true;
     proto.assign_flag_mode = AFM_CONSUME;
 
-    proto.as_serializable = function GivenRegisterCommand_as_serializable () {
+    proto._serialize_data = function GivenRegisterCommand__serialize_data (state, housekeeping) {
 	return this.register;
     };
 
@@ -700,8 +743,8 @@ var GivenFontCommand = (function GivenFontCommand_closure () {
     proto.multi_instanced = true;
     proto.assign_flags_mode = AFM_CONSUME;
 
-    proto.as_serializable = function GivenFontCommand_as_serializable () {
-	return ['XXX FONT SERIALIZATION'];
+    proto._serialize_data = function GivenFontCommand__serialize_data (state, housekeeping) {
+	return this.font.get_serialize_ident (state, housekeeping);
     };
 
     proto.samecmd = function GivenFontCommand_samecmd (other) {

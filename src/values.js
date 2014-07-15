@@ -837,5 +837,18 @@ var Font = (function Font_closure () {
 	return (this.ident == other.ident) && (this.scale == other.scale);
     };
 
+    proto.get_serialize_ident = function Font_get_serialize_ident (state, housekeeping) {
+	if (this._serialize_ident == null) {
+	    this._serialize_ident = state.fonts.length;
+	    state.fonts.push ([this.ident,
+			       this.scale,
+			       this.dimens,
+			       this.hyphenchar,
+			       this.skewchar]);
+	}
+
+	return this._serialize_ident;
+    };
+
     return Font;
 }) ();
