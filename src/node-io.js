@@ -101,7 +101,18 @@ function promise_engine (args) {
     args.initial_linebuf = make_fs_linebuffer (args.inputpath);
     delete args.inputpath;
 
-    return Promise.resolve (new Engine (args));
+    return new Promise (function (resolve, reject) {
+	// Make sure that the bundle's zip reader is ready to go before
+	// handing off control.
+	function iterate () {
+	    if (args.bundle.zipreader.dirinfo == null)
+		setTimeout (iterate, 10);
+	    else
+		resolve (new Engine (args));
+	}
+
+	iterate ();
+    });
 };
 
 
