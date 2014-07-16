@@ -42,6 +42,27 @@ var Bundle = (function Bundle_closure () {
 	return null;
     };
 
+    proto.promise_json = function Bundle_promise_json (path) {
+	return new Promise (function (resolve, reject) {
+	    var jp = new JSONStreamParser ();
+	    jp.onError = reject;
+	    jp.onValue = function (value) {
+		jp._last_value = value;
+	    };
+
+	    this.zipreader.stream_entry (path, function (err, buf) {
+		if (err != null) {
+		    reject (err);
+		} else if (buf == null) {
+		    resolve (jp._last_value);
+		} else {
+		    var arr = new Uint8Array (buf);
+		    jp.write (String.fromCharCode.apply (null, arr));
+		}
+	    });
+	}.bind (this));
+    };
+
     return Bundle;
 }) ();
 
