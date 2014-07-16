@@ -608,13 +608,12 @@ var Engine = (function Engine_closure () {
 
     // Serialization. Our equivalent of the \dump primitive.
 
-    proto.serialize = function Engine_serialize () {
-	// We only allow serialization in a clean global state:
+    proto._check_clean = function Engine__check_clean () {
+	// For now (?), we're very restrictive about what state we can be in
+	// when (de)serializing engine state.
 
-	if (this.inputstack.inputs.length > 1) {
-	    console.log (this.inputstack.inputs[1]);
+	if (this.inputstack.inputs.length > 1)
 	    throw new TexRuntimeError ('can only serialize Engine at topmost input');
-}
 	if (this.eqtb.parent !== null)
 	    throw new TexRuntimeError ('can only serialize Engine in topmost eqtb');
 	if (this.mode_stack.length > 1)
@@ -635,12 +634,18 @@ var Engine = (function Engine_closure () {
 	for (var i = 0; i < 16; i++)
 	    if (this.infiles[i] != null)
 		throw new TexRuntimeError ('cannot serialize Engine with open input files');
+    };
 
-	// OK, we're clear.
+    proto.serialize = function Engine_serialize () {
+	this._check_clean ();
 
-	var state = this.eqtb.serialize ();
+	// We don't actually need to add anything here beyond what's taken
+	// care of in the eqtb.
+	return this.eqtb.serialize ();
+    };
 
-	return state;
+    proto.restore_serialized_state = function Engine_restore_serialized_state (json) {
+	this._check_clean ();
     };
 
     // Tokenization. I'd like to separate this out into its own class,
