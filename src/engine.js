@@ -266,7 +266,17 @@ var EquivTable = (function EquivTable_closure () {
 	    state.parameters.toklists[name] = this._parameters[T_TOKLIST][name].as_serializable ();
 	}
 
-	// Category codes.
+	// Various other "codes".
+
+	state.codes = {lower: [], upper: [], spacefac: [], math: [], delim: []};
+
+	for (i = 0; i < 256; i++) {
+	    state.codes.lower.push (this._codes[CT_LOWERCASE][i]);
+	    state.codes.upper.push (this._codes[CT_UPPERCASE][i]);
+	    state.codes.spacefac.push (this._codes[CT_SPACEFAC][i]);
+	    state.codes.math.push (this._codes[CT_MATH][i]);
+	    state.codes.delim.push (this._codes[CT_DELIM][i]);
+	}
 
 	// Fonts -- need to set these up since given-font commands can delegate here.
 
