@@ -13,9 +13,10 @@ skip_roots = frozenset (('makeindex', 'tlpkg'))
 
 
 class Bundler (object):
-    def __init__ (self, specfile, cachedir):
+    def __init__ (self, specfile, cachedir, otherfiles):
         self.specfile = specfile
         self.cachedir = cachedir
+        self.otherfiles = otherfiles
         self.elemshas = {}
 
 
@@ -30,6 +31,9 @@ class Bundler (object):
 
         try:
             with zipfile.ZipFile (temp.name, 'w', zipfile.ZIP_DEFLATED, True) as zip:
+                for path in self.otherfiles:
+                    self.load_miscfile (zip, path)
+
                 for line in io.open (self.specfile, 'rt'):
                     pkgname = line.split ('#', 1)[0].strip ()
                     if not len (pkgname):
@@ -51,6 +55,19 @@ class Bundler (object):
         zpath = s.hexdigest () + '.zip'
         os.rename (temp.name, zpath)
         print ('Created', zpath)
+
+
+    def load_miscfile (self, zip, path):
+        base = os.path.basename (path)
+
+        with io.open (path, 'rb') as f:
+            # zipfile has no way to stream data into the archive
+            # (lame), so we read the whole file into memory.
+            contents = f.read ()
+            zip.writestr (base, contents)
+            s = hashlib.sha1 ()
+            s.update (contents)
+            self.elemshas[base] = s.digest ()
 
 
     def load_package (self, zip, pkgname):
@@ -105,12 +122,12 @@ class Bundler (object):
 
 
 def commandline (argv):
-    if len (sys.argv) != 3:
-        print ('usage: make-tex-bundle.py <specfile-path> <cachedir>',
+    if len (sys.argv) < 3:
+        print ('usage: make-tex-bundle.py <specfile-path> <cachedir> [otherfiles...]',
                file=sys.stderr)
         sys.exit (1)
 
-    b = Bundler (sys.argv[1], sys.argv[2])
+    b = Bundler (sys.argv[1], sys.argv[2], sys.argv[3:])
     b.go ()
 
 
