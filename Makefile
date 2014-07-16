@@ -3,6 +3,7 @@ python = python
 minify = java -jar yuicompressor-2.4.8.jar
 
 sharedjs = \
+  src/jsonparse.js \
   src/preamble.js \
   src/constants.js \
   src/values.js \
