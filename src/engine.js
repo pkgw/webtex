@@ -239,6 +239,9 @@ var EquivTable = (function EquivTable_closure () {
 	for (name in this._parameters[T_INT]) {
 	    if (!this._parameters[T_INT].hasOwnProperty (name))
 		continue;
+	    if (name == 'year' || name == 'month' || name == 'day' ||
+		name == 'time')
+		continue;
 	    state.parameters.ints[name] = this._parameters[T_INT][name].as_serializable ();
 	}
 
