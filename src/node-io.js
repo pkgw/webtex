@@ -115,5 +115,30 @@ function promise_engine (args) {
     });
 };
 
-
 WEBTEX.Node.promise_engine = promise_engine;
+
+
+function promise_fs_json (path) {
+    var fs = require ('fs');
+    var rs = fs.createReadStream (path, {encoding: 'utf-8'});
+    var jp = new JSONStreamParser ();
+
+    return new Promise (function (resolve, reject) {
+	jp.onError = reject;
+	jp.onValue = function (value) {
+	    jp._last_value = value;
+	};
+
+	rs.on ('data', function (chunk) {
+	    jp.write (chunk);
+	});
+
+	rs.on ('end', function () {
+	    resolve (jp._last_value);
+	});
+
+	rs.on ('error', reject);
+    });
+};
+
+WEBTEX.Node.promise_fs_json = promise_fs_json;
