@@ -19,8 +19,7 @@ webtex.Promise.all ([pjson, pengine]).then (function (stuff) {
     var json = stuff[0];
     var engine = stuff[1];
 
-    //console.log ('xx: ' + json.commands['<macro>'][1]);
-    //console.log (JSON.stringify (json, null, 2));
+    engine.restore_serialized_state (json);
 
     function iterate () {
         var rv = engine.step ();
