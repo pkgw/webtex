@@ -1,3 +1,4 @@
+emulateapj
 hyphen-base
 latex
 plain

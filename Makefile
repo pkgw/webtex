@@ -71,4 +71,7 @@ test: $(builddir)/node-webtex.min.js
 fattest: $(builddir)/node-webtex.js # actually debuggable
 	@cd test && ./run-all-tests.sh ../$<
 
-.PHONY: all clean test
+update-bundle:
+	./make-tex-bundle.py packages.txt texcache latex.dump.json
+
+.PHONY: all clean fattest standard minified test update-bundle
