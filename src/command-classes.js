@@ -137,6 +137,10 @@ var UndefinedCommand = (function UndefinedCommand_closure () {
 	return this.csname;
     };
 
+    UndefinedCommand.deserialize = function UndefinedCommand_deserialize (data, hk) {
+	return new UndefinedCommand (data);
+    };
+
     proto.invoke = function UndefinedCommand_invoke (engine) {
 	throw new TexRuntimeError ('trying to invoke undefined command \\' + this.csname);
     };
@@ -169,6 +173,13 @@ var MacroCommand = (function MacroCommand_closure () {
 	return [this.origcs.to_serialize_str (),
 		(new Toklist (this.tmpl)).as_serializable (),
 		(new Toklist (this.repl)).as_serializable ()];
+    };
+
+    MacroCommand.deserialize = function MacroCommand_deserialize (data, housekeeping) {
+	var origcs = Toklist.deserialize (data[0]).toks[0];
+	var tmpl = Toklist.deserialize (data[1]).toks;
+	var repl = Toklist.deserialize (data[2]).toks;
+	return new MacroCommand (origcs, tmpl, repl);
     };
 
     proto.samecmd = function MacroCommand_samecmd (other) {
@@ -390,6 +401,10 @@ var BeginGroupCommand = (function BeginGroupCommand_closure () {
 	return engine.handle_bgroup ();
     };
 
+    BeginGroupCommand.deserialize = function BeginGroupCommand_deserialize (data, hk) {
+	return new BeginGroupCommand (parseInt (data, 10));
+    };
+
     return BeginGroupCommand;
 })();
 
@@ -407,6 +422,10 @@ var EndGroupCommand = (function EndGroupCommand_closure () {
 
     proto.invoke = function EndGroupCommand_invoke (engine) {
 	return engine.handle_egroup ();
+    };
+
+    EndGroupCommand.deserialize = function EndGroupCommand_deserialize (data, hk) {
+	return new EndGroupCommand (parseInt (data, 10));
     };
 
     return EndGroupCommand;
@@ -469,6 +488,10 @@ var SuperCommand = (function SuperCommand_closure () {
     proto.name = '<superscript>';
     proto.desc = 'superscript character';
 
+    SuperCommand.deserialize = function SuperCommand_deserialize (data, hk) {
+	return new SuperCommand (parseInt (data, 10));
+    };
+
     return SuperCommand;
 })();
 
@@ -483,6 +506,10 @@ var SubCommand = (function SubCommand_closure () {
 
     proto.name = '<subscript>';
     proto.desc = 'subscript character';
+
+    SubCommand.deserialize = function SubCommand_deserialize (data, hk) {
+	return new SubCommand (parseInt (data, 10));
+    };
 
     return SubCommand;
 })();
@@ -505,6 +532,10 @@ var SpacerCommand = (function SpacerCommand_closure () {
 	    engine.trace ('spacer: ignored, vertical model');
 	else
 	    engine.trace ('spacer ...');
+    };
+
+    SpacerCommand.deserialize = function SpacerCommand_deserialize (data, hk) {
+	return new SpacerCommand (parseInt (ord, 10));
     };
 
     return SpacerCommand;
@@ -580,6 +611,10 @@ var GivenCharCommand = (function GivenCharCommand_closure () {
 	return this.ord;
     };
 
+    GivenCharCommand.deserialize = function GivenCharCommand_deserialize (data, hk) {
+	return new GivenCharCommand (parseInt (data, 10));
+    };
+
     proto.samecmd = function GivenCharCommand_samecmd (other) {
 	if (other == null)
 	    return false;
@@ -616,6 +651,10 @@ var GivenMathcharCommand = (function GivenMathcharCommand_closure () {
 
     proto._serialize_data = function GivenMathcharCommand__serialize_data (state, housekeeping) {
 	return this.mathchar;
+    };
+
+    GivenMathcharCommand.deserialize = function GivenMathcharCommand_deserialize (data, hk) {
+	return new GivenMathcharCommand (parseInt (data, 10));
     };
 
     proto.samecmd = function GivenMathcharCommand_samecmd (other) {

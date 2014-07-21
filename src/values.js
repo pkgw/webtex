@@ -212,6 +212,10 @@ var TexInt = WEBTEX.TexInt = (function TexInt_closure () {
 	return this.value;
     };
 
+    TexInt.deserialize = function TexInt_deserialize (data) {
+	return new TexInt (parseInt (data, 10));
+    };
+
     proto.advance = function TexInt_advance (other) {
 	return new TexInt (this.value + other.value);
     };
@@ -434,6 +438,10 @@ var Scaled = WEBTEX.Scaled = (function Scaled_closure () {
 	return this.value;
     };
 
+    Scaled.deserialize = function Scaled_deserialize (data) {
+	return new Scaled (parseInt (data, 10));
+    };
+
     proto.advance = function Scaled_advance (other) {
 	return new Scaled (this.value + other.value);
     };
@@ -517,6 +525,12 @@ var Dimen = (function Dimen_closure () {
 
     proto.as_serializable = function Dimen_as_serializable () {
 	return this.sp.as_serializable ();
+    };
+
+    Dimen.deserialize = function Dimen_deserialize (data) {
+	var d = new Dimen ();
+	d.sp = Scaled.deserialize (data);
+	return d;
     };
 
     proto.advance = function Dimen_advance (other) {
@@ -603,6 +617,16 @@ var Glue = (function Glue_closure () {
 		this.shrink_order];
     };
 
+    Glue.deserialize = function Glue_deserialize (data) {
+	var g = new Glue ();
+	g.width = Dimen.deserialize (data[0]);
+	g.stretch = Dimen.deserialize (data[1]);
+	g.stretch_order = parseInt (data[2], 10);
+	g.shrink = Dimen.deserialize (data[3]);
+	g.shrink_order = parseInt (data[4], 10);
+	return g;
+    };
+
     proto.advance = function Glue_advance (other) {
 	var g = this.clone ();
 	g.width = this.width.advance (other.width);
@@ -661,6 +685,15 @@ var Box = (function Box_closure () {
 		this.height.as_serializable (),
 		this.depth.as_serializable (),
 		this.tlist.as_serializable ()];
+    };
+
+    Box.deserialize = function Box_deserialize (data) {
+	var b = new Box ();
+	b.width = Dimen.deserialize (data[0]);
+	b.height = Dimen.deserialize (data[1]);
+	b.depth = Dimen.deserialize (data[2]);
+	b.tlist = Toklist.deserialize (data[3]);
+	return b;
     };
 
     return Box;
@@ -725,7 +758,7 @@ var Toklist = WEBTEX.Toklist = (function Toklist_closure () {
 	}).join ('');
     };
 
-    Toklist.new_from_serialized = function Toklist_new_from_serialized (text) {
+    Toklist.deserialize = function Toklist_deserialize (text) {
 	var list = [];
 	var n = text.length;
 
@@ -853,6 +886,14 @@ var Font = (function Font_closure () {
 	}
 
 	return this._serialize_ident;
+    };
+
+    Font.deserialize = function Font_deserialize (data) {
+	var font = new Font (data[0], data[1]);
+	font.dimens = data[2];
+	font.hyphenchar = data[3];
+	font.skewchar = data[4];
+	return font;
     };
 
     return Font;

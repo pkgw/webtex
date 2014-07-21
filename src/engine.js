@@ -87,7 +87,7 @@ var EquivTable = (function EquivTable_closure () {
     proto.set_code = function EquivTable_set_code (codetype, ord, value) {
 	if (ord < 0 || ord > 255)
 	    throw new TexRuntimeError ('illegal ordinal number ' + ord);
-	if (value < 0 || value > ct_maxvals[codetype])
+	if ((value < 0 && codetype != CT_DELIM) || value > ct_maxvals[codetype])
 	    throw new TexRuntimeError ('illegal ' + ct_names[codetype] +
 				       ' value ' + value);
 
@@ -644,8 +644,129 @@ var Engine = (function Engine_closure () {
 	return this.eqtb.serialize ();
     };
 
+    var command_ctors = {
+	'<begin-group>': BeginGroupCommand.deserialize,
+	'<end-group>': EndGroupCommand.deserialize,
+	'<given-char>': GivenCharCommand.deserialize,
+	'<given-count>': function deserialize_count (data, hk) {
+	    return new GivenRegisterCommand (T_INT, 'count', parseInt (data, 10));
+	},
+	'<given-dimen>': function deserialize_dimen (data, hk) {
+	    return new GivenRegisterCommand (T_DIMEN, 'dimen', parseInt (data, 10));
+	},
+	'<given-font>': function deserialize_font (data, hk) {
+	    return new GivenFontCommand (hk.fonts[data]);
+	},
+	'<given-skip>': function deserialize_skip (data, hk) {
+	    return new GivenRegisterCommand (T_GLUE, 'skip', parseInt (data, 10));
+	},
+	'<given-toks>': function deserialize_skip (data, hk) {
+	    return new GivenRegisterCommand (T_TOKLIST, 'toks', parseInt (data, 10));
+	},
+	'<given-mathchar>': GivenMathcharCommand.deserialize,
+	'<macro>': MacroCommand.deserialize,
+	'<space>': SpacerCommand.deserialize,
+	'<subscript>': SubCommand.deserialize,
+	'<superscript>': SuperCommand.deserialize,
+	'<undefined>': UndefinedCommand.deserialize,
+    };
+
     proto.restore_serialized_state = function Engine_restore_serialized_state (json) {
 	this._check_clean ();
+
+	var housekeeping = {};
+	var i = 0;
+
+	// First step is to rebuild saved fonts.
+
+	var fontids = housekeeping.fonts = {};
+
+	for (i = 0; i < json.fonts.length; i++)
+	    fontids[i] = Font.deserialize (json.fonts[i]);
+
+	// Next step is to rebuild all of the saved commands.
+
+	var cmdids = housekeeping.commands = {};
+
+	for (var kind in json.commands) {
+	    var list = json.commands[kind];
+	    var n = list.length;
+	    var cmd = null;
+	    var ctor = command_ctors[kind];
+
+	    if (ctor == null)
+		throw new TexRuntimeError ('unhandled stored command kind ' + kind);
+
+	    for (i = 0; i < n; i++)
+		cmdids[kind + '/' + i] = ctor (list[i], housekeeping);
+	}
+
+	var getcmd = function _getcmd (s) {
+	    var c = this.commands[s];
+	    if (c == null)
+		c = cmdids[s];
+	    if (c == null)
+		throw new TexRuntimeError ('unresolvable command name ' + s);
+	    return c;
+	}.bind (this);
+
+	// The rest we can do in about any order. We try to mirror Eqtb.serialize
+	// -- it's a little bit sketchy that this function is so far from that,
+	// but it seems good to take advantage of our wrapper setter functions.
+
+	for (i = 0; i < 255; i++) {
+	    this.set_code (CT_CATEGORY, i, json.catcodes[i]);
+	    this.set_code (CT_LOWERCASE, i, json.codes.lower[i]);
+	    this.set_code (CT_UPPERCASE, i, json.codes.upper[i]);
+	    this.set_code (CT_SPACEFAC, i, json.codes.spacefac[i]);
+	    this.set_code (CT_MATH, i, json.codes.math[i]);
+	    this.set_code (CT_DELIM, i, json.codes.delim[i]);
+	}
+
+	for (var reg in json.registers.ints)
+	    this.set_register (T_INT, parseInt (reg, 10),
+			       TexInt.deserialize (json.registers.ints[reg]));
+
+	for (var reg in json.registers.dimens)
+	    this.set_register (T_DIMEN, parseInt (reg, 10),
+			       Dimen.deserialize (json.registers.dimens[reg]));
+
+	for (var reg in json.registers.glues)
+	    this.set_register (T_GLUE, parseInt (reg, 10),
+			       Glue.deserialize (json.registers.glues[reg]));
+
+	for (var reg in json.registers.muglues)
+	    this.set_register (T_MUGLUE, parseInt (reg, 10),
+			       Glue.deserialize (json.registers.muglues[reg]));
+
+	for (var reg in json.registers.toklists)
+	    this.set_register (T_TOKLIST, parseInt (reg, 10),
+			       Toklist.deserialize (json.registers.toklists[reg]));
+
+	for (var reg in json.registers.boxlists)
+	    this.set_register (T_BOXLIST, parseInt (reg, 10),
+			       Box.deserialize (json.registers.boxlists[reg]));
+
+	for (var ord in json.actives)
+	    this.set_active (parseInt (ord, 10), getcmd (json.actives[ord]));
+
+	for (var name in json.parameters.ints)
+	    this.set_parameter (T_INT, name, parseInt (json.parameters.ints[name], 10));
+
+	for (var name in json.parameters.dimens)
+	    this.set_parameter (T_DIMEN, name, Dimen.deserialize (json.parameters.dimens[name]));
+
+	for (var name in json.parameters.glues)
+	    this.set_parameter (T_GLUE, name, Glue.deserialize (json.parameters.glues[name]));
+
+	for (var name in json.parameters.muglues)
+	    this.set_parameter (T_MUGLUE, name, Glue.deserialize (json.parameters.muglues[name]));
+
+	for (var name in json.parameters.toklists)
+	    this.set_parameter (T_TOKLIST, name, Toklist.deserialize (json.parameters.toklists[name]));
+
+	for (var cseq in json.cseqs)
+	    this.set_cseq (cseq, getcmd (json.cseqs[cseq]));
     };
 
     // Tokenization. I'd like to separate this out into its own class,
