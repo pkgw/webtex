@@ -26,6 +26,16 @@ var Command = WEBTEX.Command = (function Command_closure () {
 	return this.name == other.name;
     };
 
+    proto.get_valtype = function Command_get_valtype () {
+	// Return the type of the value that this command yields, or null if
+	// not applicable. Needed so that \the can peek and see whether it's
+	// about to get a token list so that xdef can do the right thing.
+	// Otherwise, some kinds of as_valref() calls will eat tokens that
+	// don't get put back into the parser when \the decides to do nothing
+	// unusual.
+	return null;
+    };
+
     proto.as_valref = function Command_as_valref (engine) {
 	return null;
     };
@@ -635,6 +645,10 @@ var GivenCharCommand = (function GivenCharCommand_closure () {
 	return this.ord == other.ord;
     };
 
+    proto.get_valtype = function GivenCharCommand_get_valtype () {
+	return T_INT;
+    };
+
     proto.as_valref = function GivenCharCommand_as_valref (engine) {
 	return new ConstantValref (T_INT, this.ord);
     };
@@ -675,6 +689,10 @@ var GivenMathcharCommand = (function GivenMathcharCommand_closure () {
 	if (this.name != other.name)
 	    return false;
 	return this.mathchar == other.mathchar;
+    };
+
+    proto.get_valtype = function GivenMathcharCommand_get_valtype () {
+	return T_INT;
     };
 
     proto.as_valref = function GivenMathcharCommand_as_valref (engine) {
@@ -722,6 +740,10 @@ var GivenRegisterCommand = (function GivenRegisterCommand_closure () {
 	if (this.valtype != other.valtype)
 	    return false;
 	return this.register == other.register;
+    };
+
+    proto.get_valtype = function GivenRegisterCommand_get_valtype () {
+	return this.valtype;
     };
 
     proto.as_valref = function GivenRegisterCommand_as_valref (engine) {
@@ -773,6 +795,10 @@ var VariableRegisterCommand = (function VariableRegisterCommand_closure () {
 	return grc.invoke (engine);
     };
 
+    proto.get_valtype = function VariableRegisterCommand_get_valtype () {
+	return this.valtype;
+    };
+
     proto.as_valref = function VariableRegisterCommand_as_valref (engine) {
 	var reg = engine.scan_char_code ();
 	return new RegisterValref (this.valtype, reg);
@@ -811,6 +837,10 @@ var GivenFontCommand = (function GivenFontCommand_closure () {
 	engine.set_font ('<current>', this.font);
     };
 
+    proto.get_valtype = function GivenFontCommand_get_valtype () {
+	return T_FONT;
+    };
+
     proto.as_valref = function GivenFontCommand_as_valref (engine) {
 	return new ConstantValref (T_FONT, this.font);
     };
@@ -845,6 +875,10 @@ var NamedParamCommand = (function NamedParamCommand_closure () {
 	if (this.name != other.name)
 	    return false;
 	return this.valtype == other.valtype;
+    };
+
+    proto.get_valtype = function NamedParamCommand_get_valtype () {
+	return this.valtype;
     };
 
     proto.as_valref = function NamedParamCommand_as_valref (engine) {

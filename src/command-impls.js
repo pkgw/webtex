@@ -249,6 +249,10 @@ var CharCodeCommand = (function CharCodeCommand_closure () {
 	engine.set_code (this.codetype, ord, code);
     };
 
+    proto.get_valtype = function CharCodeCommand_get_valtype () {
+	return T_INT;
+    };
+
     proto.as_valref = function CharCodeCommand_as_valref (engine) {
 	var ord = engine.scan_char_code ();
 	return new ConstantValref (T_INT, engine.get_code (this.codetype, ord));
@@ -347,10 +351,12 @@ function _cmd_def (engine, cname, expand_replacement) {
 	    // not supposed to be sub-expanded (TeXBook p. 216). Yargh.
 	    if (tok.iscmd (engine, 'the')) {
 		var next = engine.next_tok_throw ();
-		var nv = next.tocmd (engine).as_valref (engine);
-		if (nv.valtype == T_TOKLIST) {
+		var ncmd = next.tocmd (engine);
+
+		if (ncmd.get_valtype () == T_TOKLIST) {
+		    var nv = ncmd.as_valref (engine);
 		    repl_toks = repl_toks.concat (nv.get (engine).toks);
-		    continue
+		    continue;
 		} else {
 		    engine.push (next);
 		}
@@ -607,6 +613,10 @@ commands.wd = (function WdCommand_closure () {
 	throw new TexInternalError ('not implemented bare \\wd');
     };
 
+    proto.get_valtype = function WdCommand_get_valtype () {
+	return T_DIMEN;
+    };
+
     proto.as_valref = function WdCommand_as_valref (engine) {
 	var reg = engine.scan_char_code ();
 	var box = engine.get_register (T_BOXLIST, reg);
@@ -625,6 +635,10 @@ commands.ht = (function HtCommand_closure () {
 
     proto.invoke = function HtCommand_invoke (engine) {
 	throw new TexInternalError ('not implemented bare \\ht');
+    };
+
+    proto.get_valtype = function HtCommand_get_valtype () {
+	return T_DIMEN;
     };
 
     proto.as_valref = function HtCommand_as_valref (engine) {
@@ -700,6 +714,10 @@ commands.inputlineno = (function InputlinenoCommand_closure () {
 	throw new TexRuntimeError ('not implemented');
     };
 
+    proto.get_valtype = function InputlinenoCommand_get_valtype () {
+	return T_INT;
+    };
+
     proto.as_valref = function InputlinenoCommand_as_valref (engine) {
 	// LaTeX considers this "undefined"
 	return new ConstantValref (T_INT, -1);
@@ -739,6 +757,10 @@ commands.font = (function FontCommand_closure () {
 	cstok.assign_cmd (engine, cmd);
     };
 
+    proto.get_valtype = function FontCommand_get_valtype () {
+	return T_FONT;
+    };
+
     proto.as_valref = function FontCommand_as_valref (engine) {
 	return new ConstantValref (T_FONT, engine.get_font ('<current>'));
     };
@@ -757,6 +779,10 @@ commands.nullfont = (function NullFontCommand_closure () {
     proto.invoke = function NullFontCommand_invoke (engine) {
 	engine.trace ('activate null font');
 	engine.set_font ('<current>', engine.get_font ('<null>'));
+    };
+
+    proto.get_valtype = function NullFontCommand_get_valtype () {
+	return T_FONT;
     };
 
     proto.as_valref = function NullFontCommand_as_valref (engine) {
@@ -791,6 +817,10 @@ commands.fontdimen = (function FontDimenCommand_closure () {
 	var val = engine.scan_dimen ();
 	engine.trace (['fontdimen', font, num, '=', val].join (' '));
 	font.get (engine).dimens[num] = val;
+    };
+
+    proto.get_valtype = function FontDimenCommand_get_valtype () {
+	return T_DIMEN;
     };
 
     proto.as_valref = function FontDimenCommand_as_valref (engine) {
