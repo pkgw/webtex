@@ -276,15 +276,27 @@ var MacroCommand = (function MacroCommand_closure () {
 		    continue;
 		}
 
-		// We're not matching the template. Accumulate into the expansion.
-		for (var i = 0; i < cur_match_idx; i++)
-		    // If we were making progress on a match, those tokens
-		    // weren't getting recorded into the expansion. Rectify
-		    // that.
-		    expansion.push (this.tmpl[match_start + i]);
+		// We're not matching the template. We need to accumulate
+		// something into the expansion.
 
-		cur_match_idx = 0;
-		expansion.push (tok);
+		if (cur_match_idx == 0) {
+		    // We weren't matching at all; straightforward.
+		    expansion.push (tok);
+		} else {
+		    // More complicated situation. If a macro's template is
+		    // #1xxy and the pattern fed into it is abcxxxy, #1 should
+		    // map to abcx. For this to work, we need to start
+		    // rescanning for a pattern match at the second x, which
+		    // will have already been thrown away (but can be
+		    // recovered since it is precisely a token in this.tmpl).
+		    // We also need to add the first x to the expansion since
+		    // we now know that it isn't matching the template.
+		    expansion.push (this.tmpl[match_start]);
+		    engine.push (tok);
+		    engine.push_toks (this.tmpl.slice (match_start + 1,
+						       match_start + cur_match_idx));
+		    cur_match_idx = 0;
+		}
 	    }
 
 	    if (expansion.length > 1 && expansion[0].iscat (C_BGROUP) &&
