@@ -2,3 +2,4 @@ emulateapj
 hyphen-base
 latex
 plain
+revtex4
