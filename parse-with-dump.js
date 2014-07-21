@@ -13,7 +13,8 @@ var pengine = webtex.Node.promise_engine ({
     jobname: process.argv[4],
     inputpath: process.argv[4],
     bundlepath: 'texbundles/default.zip',
-    //debug_trace: true,
+    debug_input_lines: true,
+    debug_trace: true,
 });
 
 webtex.Promise.all ([pjson, pengine]).then (function (stuff) {
