@@ -61,6 +61,9 @@ var EquivTable = (function EquivTable_closure () {
 
 	if (this._registers[valtype].hasOwnProperty (reg))
 	    return this._registers[valtype][reg];
+	if (this.parent == null)
+	    throw new TexRuntimeError ('unset register; type=' + valtype +
+				       ', number=' + reg);
 	return this.parent.get_register (valtype, reg);
     };
 
