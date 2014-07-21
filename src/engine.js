@@ -1055,7 +1055,7 @@ var Engine = (function Engine_closure () {
 	var negfactor = t[0], tok = t[1], inf_order = 0, val = null,
 	    frac = 0, nonfrac = null;
 
-	var v = tok.tocmd (this).asvalref (this);
+	var v = tok.tocmd (this).as_valref (this);
 	if (v != null) {
 	    v = v.get (this);
 

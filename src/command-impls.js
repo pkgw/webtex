@@ -164,7 +164,7 @@ commands.toks = new VariableRegisterCommand ('toks', T_TOKLIST);
 commands.advance = function cmd_advance (engine) {
     var tok = engine.next_x_tok ();
     var cmd = tok.tocmd (engine);
-    var val = cmd.asvalref (engine); // might eat tokens
+    var val = cmd.as_valref (engine); // might eat tokens
     engine.scan_keyword ('by');
     var cur = val.get (engine);
     var delta = engine.scan_valtype (val.valtype);
@@ -176,7 +176,7 @@ commands.advance = function cmd_advance (engine) {
 commands.divide = function cmd_divide (engine) {
     var tok = engine.next_x_tok ();
     var cmd = tok.tocmd (engine);
-    var val = cmd.asvalref (engine); // might eat tokens
+    var val = cmd.as_valref (engine); // might eat tokens
     engine.scan_keyword ('by');
     var cur = val.get (engine);
     var denom = engine.scan_int ();
@@ -188,7 +188,7 @@ commands.divide = function cmd_divide (engine) {
 commands.multiply = function cmd_multiply (engine) {
     var tok = engine.next_x_tok ();
     var cmd = tok.tocmd (engine);
-    var val = cmd.asvalref (engine); // might eat tokens
+    var val = cmd.as_valref (engine); // might eat tokens
     engine.scan_keyword ('by');
     var cur = val.get (engine);
     var factor = engine.scan_int ();
@@ -249,7 +249,7 @@ var CharCodeCommand = (function CharCodeCommand_closure () {
 	engine.set_code (this.codetype, ord, code);
     };
 
-    proto.asvalref = function CharCodeCommand_asvalref (engine) {
+    proto.as_valref = function CharCodeCommand_as_valref (engine) {
 	var ord = engine.scan_char_code ();
 	return new ConstantValref (T_INT, engine.get_code (this.codetype, ord));
     };
@@ -347,7 +347,7 @@ function _cmd_def (engine, cname, expand_replacement) {
 	    // not supposed to be sub-expanded (TeXBook p. 216). Yargh.
 	    if (tok.iscmd (engine, 'the')) {
 		var next = engine.next_tok_throw ();
-		var nv = next.tocmd (engine).asvalref (engine);
+		var nv = next.tocmd (engine).as_valref (engine);
 		if (nv.valtype == T_TOKLIST) {
 		    repl_toks = repl_toks.concat (nv.get (engine).toks);
 		    continue
@@ -607,7 +607,7 @@ commands.wd = (function WdCommand_closure () {
 	throw new TexInternalError ('not implemented bare \\wd');
     };
 
-    proto.asvalref = function WdCommand_asvalref (engine) {
+    proto.as_valref = function WdCommand_as_valref (engine) {
 	var reg = engine.scan_char_code ();
 	var box = engine.get_register (T_BOXLIST, reg);
 	return new ConstantValref (T_DIMEN, box.width);
@@ -627,7 +627,7 @@ commands.ht = (function HtCommand_closure () {
 	throw new TexInternalError ('not implemented bare \\ht');
     };
 
-    proto.asvalref = function HtCommand_asvalref (engine) {
+    proto.as_valref = function HtCommand_as_valref (engine) {
 	var reg = engine.scan_char_code ();
 	var box = engine.get_register (T_BOXLIST, reg);
 	return new ConstantValref (T_DIMEN, box.height);
@@ -700,7 +700,7 @@ commands.inputlineno = (function InputlinenoCommand_closure () {
 	throw new TexRuntimeError ('not implemented');
     };
 
-    proto.asvalref = function InputlinenoCommand_asvalref (engine) {
+    proto.as_valref = function InputlinenoCommand_as_valref (engine) {
 	// LaTeX considers this "undefined"
 	return new ConstantValref (T_INT, -1);
     };
@@ -739,7 +739,7 @@ commands.font = (function FontCommand_closure () {
 	cstok.assign_cmd (engine, cmd);
     };
 
-    proto.asvalref = function FontCommand_asvalref (engine) {
+    proto.as_valref = function FontCommand_as_valref (engine) {
 	return new ConstantValref (T_FONT, engine.get_font ('<current>'));
     };
 
@@ -759,7 +759,7 @@ commands.nullfont = (function NullFontCommand_closure () {
 	engine.set_font ('<current>', engine.get_font ('<null>'));
     };
 
-    proto.asvalref = function NullFontCommand_asvalref (engine) {
+    proto.as_valref = function NullFontCommand_as_valref (engine) {
 	return new ConstantValref (T_FONT, engine.get_font ('<null>'));
     };
 
@@ -781,7 +781,7 @@ commands.fontdimen = (function FontDimenCommand_closure () {
     proto.invoke = function FontDimenCommand_invoke (engine) {
 	var num = engine.scan_int ();
 	var tok = engine.next_tok_throw ();
-	var font = tok.tocmd (engine).asvalref (engine);
+	var font = tok.tocmd (engine).as_valref (engine);
 
 	if (font.valtype != T_FONT)
 	    throw new TexRuntimeError ('expected \\fontdimen to be followed ' +
@@ -793,10 +793,10 @@ commands.fontdimen = (function FontDimenCommand_closure () {
 	font.get (engine).dimens[num] = val;
     };
 
-    proto.asvalref = function FontDimenCommand_asvalref (engine) {
+    proto.as_valref = function FontDimenCommand_as_valref (engine) {
 	var num = engine.scan_int ();
 	var tok = engine.next_tok_throw ();
-	var font = tok.tocmd (engine).asvalref (engine);
+	var font = tok.tocmd (engine).as_valref (engine);
 
 	if (font.valtype != T_FONT)
 	    throw new TexRuntimeError ('expected \\fontdimen to be followed ' +
@@ -819,7 +819,7 @@ commands.fontdimen = (function FontDimenCommand_closure () {
 
 commands.skewchar = function cmd_skewchar (engine) {
     var tok = engine.next_tok_throw ();
-    var val = tok.tocmd (engine).asvalref (engine);
+    var val = tok.tocmd (engine).as_valref (engine);
 
     if (val.valtype != T_FONT)
 	throw new TexRuntimeError ('expected \\skewchar to be followed by a font; ' +
@@ -834,7 +834,7 @@ commands.skewchar = function cmd_skewchar (engine) {
 
 commands.hyphenchar = function cmd_hyphenchar (engine) {
     var tok = engine.next_tok_throw ();
-    var val = tok.tocmd (engine).asvalref (engine);
+    var val = tok.tocmd (engine).as_valref (engine);
 
     if (val.valtype != T_FONT)
 	throw new TexRuntimeError ('expected \\hyphenchar to be followed by a font; ' +
@@ -851,7 +851,7 @@ function _def_family (engine, fam) {
     var slot = engine.scan_int_4bit ();
     engine.scan_optional_equals ();
     var tok = engine.next_tok_throw ();
-    var val = tok.tocmd (engine).asvalref (engine);
+    var val = tok.tocmd (engine).as_valref (engine);
 
     if (val.valtype != T_FONT)
 	throw new TexRuntimeError ('expected \\' + fam + ' to assign a font; ' +
@@ -962,7 +962,7 @@ commands.the = function cmd_the (engine) {
      */
 
     var tok = engine.next_tok_throw ();
-    var val = tok.tocmd (engine).asvalref (engine);
+    var val = tok.tocmd (engine).as_valref (engine);
     if (val == null)
 	throw new TexRuntimeError ('unable to get internal value (for ' +
 				   '\\the) from ' + tok);

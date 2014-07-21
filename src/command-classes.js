@@ -26,33 +26,33 @@ var Command = WEBTEX.Command = (function Command_closure () {
 	return this.name == other.name;
     };
 
-    proto.asvalref = function Command_asvalref (engine) {
+    proto.as_valref = function Command_as_valref (engine) {
 	return null;
     };
 
     proto.as_int = function Command_as_int (engine) {
-	var v = this.asvalref (engine);
+	var v = this.as_valref (engine);
 	if (v == null)
 	    return null;
 	return v.get (engine).as_int ();
     };
 
     proto.as_scaled = function Command_as_scaled (engine) {
-	var v = this.asvalref (engine);
+	var v = this.as_valref (engine);
 	if (v == null)
 	    return null;
 	return v.get (engine).as_scaled ();
     };
 
     proto.as_dimen = function Command_as_dimen (engine) {
-	var v = this.asvalref (engine);
+	var v = this.as_valref (engine);
 	if (v == null)
 	    return null;
 	return v.get (engine).as_dimen ();
     };
 
     proto.as_glue = function Command_as_glue (engine) {
-	var v = this.asvalref (engine);
+	var v = this.as_valref (engine);
 	if (v == null)
 	    return null;
 	return v.get (engine).as_glue ();
@@ -635,7 +635,7 @@ var GivenCharCommand = (function GivenCharCommand_closure () {
 	return this.ord == other.ord;
     };
 
-    proto.asvalref = function GivenCharCommand_asvalref (engine) {
+    proto.as_valref = function GivenCharCommand_as_valref (engine) {
 	return new ConstantValref (T_INT, this.ord);
     };
 
@@ -677,7 +677,7 @@ var GivenMathcharCommand = (function GivenMathcharCommand_closure () {
 	return this.mathchar == other.mathchar;
     };
 
-    proto.asvalref = function GivenMathcharCommand_asvalref (engine) {
+    proto.as_valref = function GivenMathcharCommand_as_valref (engine) {
 	return new ConstantValref (T_INT, this.mathchar);
     };
 
@@ -724,7 +724,7 @@ var GivenRegisterCommand = (function GivenRegisterCommand_closure () {
 	return this.register == other.register;
     };
 
-    proto.asvalref = function GivenRegisterCommand_asvalref (engine) {
+    proto.as_valref = function GivenRegisterCommand_as_valref (engine) {
 	return new RegisterValref (this.valtype, this.register);
     };
 
@@ -733,7 +733,7 @@ var GivenRegisterCommand = (function GivenRegisterCommand_closure () {
 	var newval = engine.scan_valtype (this.valtype);
 	engine.trace (this.desc + ' #' + this.register + ' = ' + newval);
 
-	this.asvalref (engine).set (engine, newval);
+	this.as_valref (engine).set (engine, newval);
     };
 
     proto.texmeaning = function GivenRegisterCommand_texmeaning (engine) {
@@ -773,7 +773,7 @@ var VariableRegisterCommand = (function VariableRegisterCommand_closure () {
 	return grc.invoke (engine);
     };
 
-    proto.asvalref = function VariableRegisterCommand_asvalref (engine) {
+    proto.as_valref = function VariableRegisterCommand_as_valref (engine) {
 	var reg = engine.scan_char_code ();
 	return new RegisterValref (this.valtype, reg);
     };
@@ -811,7 +811,7 @@ var GivenFontCommand = (function GivenFontCommand_closure () {
 	engine.set_font ('<current>', this.font);
     };
 
-    proto.asvalref = function GivenFontCommand_asvalref (engine) {
+    proto.as_valref = function GivenFontCommand_as_valref (engine) {
 	return new ConstantValref (T_FONT, this.font);
     };
 
@@ -847,7 +847,7 @@ var NamedParamCommand = (function NamedParamCommand_closure () {
 	return this.valtype == other.valtype;
     };
 
-    proto.asvalref = function NamedParamCommand_asvalref (engine) {
+    proto.as_valref = function NamedParamCommand_as_valref (engine) {
 	return new ParamValref (this.valtype, this.name);
     };
 
@@ -855,7 +855,7 @@ var NamedParamCommand = (function NamedParamCommand_closure () {
 	engine.scan_optional_equals ();
 	var newval = engine.scan_valtype (this.valtype);
 	engine.trace ([this.name, '=', newval].join (' '));
-	this.asvalref (engine).set (engine, newval);
+	this.as_valref (engine).set (engine, newval);
     };
 
     return NamedParamCommand;
