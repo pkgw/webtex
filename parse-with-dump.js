@@ -1,10 +1,11 @@
+var console = require ('console');
+var util = require ('util');
+
 if (process.argv.length < 5) {
     console.log ('usage: node ' + process.argv[1] + ' <webtex.js> <dumpfile> <filename>');
     process.exit (1);
 }
 
-var console = require ('console');
-var util = require ('util');
 var webtex = require (process.argv[2]);
 
 var pjson = webtex.Node.promise_fs_json (process.argv[3]);
