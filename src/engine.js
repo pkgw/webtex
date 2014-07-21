@@ -361,7 +361,7 @@ var Engine = (function Engine_closure () {
 	this.set_parameter (T_INT, 'endlinechar', O_RETURN);
 
 	var d = new Date ();
-	this.set_parameter (T_INT, 'year', d.getYear ());
+	this.set_parameter (T_INT, 'year', d.getFullYear ());
 	this.set_parameter (T_INT, 'month', d.getMonth ());
 	this.set_parameter (T_INT, 'day', d.getDay ());
 	this.set_parameter (T_INT, 'time', d.getHours () * 60 + d.getMinutes ());
