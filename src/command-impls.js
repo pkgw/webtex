@@ -349,21 +349,23 @@ function _cmd_def (engine, cname, expand_replacement) {
 	if (expand_replacement) {
 	    // We can't just use next_x_tok because \the{toklist} is
 	    // not supposed to be sub-expanded (TeXBook p. 216). Yargh.
-	    if (tok.iscmd (engine, 'the')) {
-		var next = engine.next_tok_throw ();
-		var ncmd = next.tocmd (engine);
-
-		if (ncmd.get_valtype () == T_TOKLIST) {
-		    var nv = ncmd.as_valref (engine);
-		    repl_toks = repl_toks.concat (nv.get (engine).toks);
-		    continue;
-		} else {
-		    engine.push (next);
-		}
-	    } else if (tok.iscmd (engine, 'noexpand')) {
+	    if (tok.iscmd (engine, 'noexpand')) {
 		repl_toks.push (engine.next_tok_throw ());
 		continue;
 	    } else if (tok.isexpandable (engine)) {
+		if (tok.iscmd (engine, 'the')) {
+		    var next = engine.next_tok_throw ();
+		    var ncmd = next.tocmd (engine);
+
+		    if (ncmd.get_valtype () == T_TOKLIST) {
+			var nv = ncmd.as_valref (engine);
+			repl_toks = repl_toks.concat (nv.get (engine).toks);
+			continue;
+		    } else {
+			engine.push (next);
+		    }
+		}
+
 		tok.tocmd (engine).invoke (engine);
 		continue;
 	    }
