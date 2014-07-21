@@ -71,7 +71,12 @@ test: $(builddir)/node-webtex.min.js
 fattest: $(builddir)/node-webtex.js # actually debuggable
 	@cd test && ./run-all-tests.sh ../$<
 
-update-bundle:
-	./make-tex-bundle.py packages.txt texcache latex.dump.json
+# We can't use $^ in the following rule because it converts "./build/..." to
+# "build/...", which breaks Node.js's explicit-module-path system.
+$(builddir)/latex.dump.json: dump-format.js $(builddir)/node-webtex.min.js test/tex/latex.ltx
+	node dump-format.js ./$(builddir)/node-webtex.min.js test/tex/latex.ltx >$@.new && mv -f $@.new $@
+
+update-bundle: $(builddir)/latex.dump.json
+	./make-tex-bundle.py packages.txt texcache $^
 
 .PHONY: all clean fattest standard minified test update-bundle
