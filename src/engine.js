@@ -460,7 +460,7 @@ var Engine = (function Engine_closure () {
     // Infrastructure.
 
     proto.warn = function Engine_warn (text) {
-	global_log ('!! ' + text);
+	global_warn ('!! ' + text);
     };
 
     // Driving everything

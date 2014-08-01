@@ -12,6 +12,15 @@ var global_log = (function () {
 }) ();
 
 
+var global_warn = (function () {
+    if ('console' in globalScope && 'warn' in globalScope['console']) {
+	return globalScope['console']['warn'].bind (globalScope['console']);
+    } else {
+	return global_log;
+    }
+}) ();
+
+
 function inherit (ctor, superCtor) {
     /* Copying node.js */
     ctor.super_ = superCtor;
