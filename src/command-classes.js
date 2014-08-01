@@ -701,7 +701,7 @@ var GivenMathcharCommand = (function GivenMathcharCommand_closure () {
 
     proto.texmeaning = function GivenMathcharCommand_texmeaning (engine) {
 	return texchr (engine.escapechar ()) + 'mathchar' +
-	    this.ord.toString (16).toUpperCase ();
+	    this.mathchar.toString (16).toUpperCase ();
     };
 
     return GivenMathcharCommand;
