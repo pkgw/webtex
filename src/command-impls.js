@@ -605,6 +605,21 @@ commands.hbox = (function HboxCommand_closure () {
 })();
 
 
+commands.vbox = (function VboxCommand_closure () {
+    function VboxCommand () { Command.call (this); }
+    inherit (VboxCommand, Command);
+    var proto = VboxCommand.prototype;
+    proto.name = 'vbox';
+    proto.boxlike = true;
+
+    proto.invoke = function VboxCommand_invoke (engine) {
+	engine.handle_vbox ();
+    };
+
+    return VboxCommand;
+})();
+
+
 commands.wd = (function WdCommand_closure () {
     function WdCommand () { Command.call (this); }
     inherit (WdCommand, Command);
@@ -665,7 +680,7 @@ commands.vrule = function cmd_vrule (engine) {
     if (engine.mode() != M_HORZ && engine.mode() != M_RHORZ)
 	throw new TexRuntimeError ('can only create \\vrule in horizontal mode');
 
-    var rule = new Rule ();
+    var rule = new Box (BT_RULE);
     rule.width.sp.value = 26214; // default rule = 0.4pt; T:TP sec 463
 
     while (true) {

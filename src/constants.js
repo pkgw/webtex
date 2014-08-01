@@ -1,5 +1,7 @@
 'use strict';
 
+// Value types
+
 var T_INT = 0,     // a simple integer
     T_DIMEN = 1,   // a dimension
     T_GLUE = 2,    // regular glue (AKA "skip")
@@ -11,6 +13,16 @@ var T_INT = 0,     // a simple integer
 var vt_ok_for_register = [true, true, true, true, true, true, false];
 var vt_ok_for_parameter = [true, true, true, true, true, false, false];
 var vt_names = ['int', 'dimen', 'glue', 'muglue', 'toklist', 'boxlist', 'font'];
+
+
+// Box types
+
+var BT_VOID = 0,
+    BT_HBOX = 1,
+    BT_VBOX = 2,
+    BT_RULE = 3;
+
+var bt_names = ['void', 'hbox', 'vbox', 'rule'];
 
 
 // "Code types" -- not the best name for these things ...

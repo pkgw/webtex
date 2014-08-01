@@ -167,7 +167,7 @@ var EquivTable = (function EquivTable_closure () {
 	    this._registers[T_GLUE][i] = new Glue ();
 	    this._registers[T_MUGLUE][i] = new Glue ();
 	    this._registers[T_TOKLIST][i] = new Toklist ();
-	    this._registers[T_BOXLIST][i] = new Box ();
+	    this._registers[T_BOXLIST][i] = new Box (BT_VOID);
 	}
 
 	for (var i = 0; i < 26; i++) {
@@ -1516,7 +1516,7 @@ var Engine = (function Engine_closure () {
         this.scan_box (); // check that we're being followed by a box.
     };
 
-    proto.handle_hbox = function Engine_handle_hbox () {
+    proto._handle_box = function Engine__handle_box (boxtype, newmode) {
 	var is_exact, spec;
 
 	if (this.scan_keyword ('to')) {
@@ -1534,9 +1534,9 @@ var Engine = (function Engine_closure () {
 	    if (!this.boxop_stack.length)
 		throw new TexRuntimeError ('what to do with bare box?');
 
-	    this.trace ('<--- hbox');
+	    this.trace ('<--- ' + bt_names[boxtype]);
 	    this.unnest_eqtb ();
-	    var box = new Box ();
+	    var box = new Box (boxtype);
 	    box.tlist = this.leave_mode ();
 	    var t = this.boxop_stack.pop ();
 	    var boxop = t[0], isassignment = t[1];
@@ -1545,13 +1545,23 @@ var Engine = (function Engine_closure () {
 	this.scan_left_brace ();
 
 	if (this.boxop_stack && this.boxop_stack.length)
-	    // This is an assignment expression.
+	    // This is an assignment expression. TODO: afterassign token
+	    // in boxes gets inserted at beginning of box token list,
+	    // before every[hv]box token lists (TeXbook p. 279)
 	    this.maybe_insert_after_assign_token ();
 
-	this.trace ('--> hbox');
-	this.enter_mode (M_RHORZ);
+	this.trace ('--> ' + bt_names[boxtype]);
+	this.enter_mode (newmode);
 	this.nest_eqtb ();
 	this.group_exit_stack.push (finish_box.bind (this));
+    };
+
+    proto.handle_hbox = function Engine_handle_hbox () {
+	this._handle_box (BT_HBOX, M_RHORZ);
+    };
+
+    proto.handle_vbox = function Engine_handle_vbox () {
+	this._handle_box (BT_VBOX, M_IVERT);
     };
 
 

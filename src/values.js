@@ -658,7 +658,8 @@ var Glue = (function Glue_closure () {
 
 
 var Box = (function Box_closure () {
-    function Box () {
+    function Box (type) {
+	this.type = type;
 	this.width = new Dimen ();
 	this.height = new Dimen ();
 	this.depth = new Dimen ();
@@ -669,45 +670,36 @@ var Box = (function Box_closure () {
     var proto = Box.prototype;
 
     proto.toString = function Box_toString () {
-	return '<Box w=' + this.width + ' h=' + this.height +
-	    ' d=' + this.depth + ' #toks=' + this.tlist.length + '>';
+	return '<Box ' + bt_names[this.type] + ' w=' + this.width +
+	    ' h=' + this.height + ' d=' + this.depth + ' #toks=' +
+	    this.tlist.length + '>';
     };
 
     proto.is_nonzero = function Box_is_nonzero () {
-	return (this.width.is_nonzero () ||
-		this.height.is_nonzero () ||
-		this.depth.is_nonzero () ||
-		this.tlist.length > 0);
+	// The way TeX handles things, an all-zero non-void box is best
+	// considered nonzero.
+	return this.type != BT_VOID;
     };
 
     proto.as_serializable = function Box_as_serializable () {
-	return [this.width.as_serializable (),
+	return [this.type,
+		this.width.as_serializable (),
 		this.height.as_serializable (),
 		this.depth.as_serializable (),
 		this.tlist.as_serializable ()];
     };
 
     Box.deserialize = function Box_deserialize (data) {
-	var b = new Box ();
-	b.width = Dimen.deserialize (data[0]);
-	b.height = Dimen.deserialize (data[1]);
-	b.depth = Dimen.deserialize (data[2]);
-	b.tlist = Toklist.deserialize (data[3]);
+	var b = new Box (BT_VOID);
+	b.type = parseInt (data[0], 10);
+	b.width = Dimen.deserialize (data[1]);
+	b.height = Dimen.deserialize (data[2]);
+	b.depth = Dimen.deserialize (data[3]);
+	b.tlist = Toklist.deserialize (data[4]);
 	return b;
     };
 
     return Box;
-}) ();
-
-
-var Rule = (function Rule_closure () {
-    function Rule () {
-	Box.call (this);
-    }
-
-    inherit (Rule, Box);
-
-    return Rule;
 }) ();
 
 
