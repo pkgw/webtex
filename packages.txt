@@ -1,5 +1,7 @@
 emulateapj
 hyphen-base
 latex
+natbib
 plain
 revtex4
+url
