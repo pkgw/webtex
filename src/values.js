@@ -494,7 +494,16 @@ var Dimen = (function Dimen_closure () {
     };
 
     proto.to_texstr = function Dimen_to_texstr () {
-	return this.sp.asfloat ().toFixed (3) + 'pt';
+	// Tex always shows at least 1 decimal place, and more if needed.
+	var text = this.sp.asfloat ().toFixed (7);
+
+	while (text[text.length - 1] == '0') {
+	    if (text[text.length - 2] == '.')
+		break;
+	    text = text.slice (0, -1);
+	}
+
+	return text + 'pt';
     };
 
     proto.clone = function Dimen_clone () {
@@ -573,6 +582,38 @@ var Glue = (function Glue_closure () {
 	return '<Glue ' + this.width + ' st=' + this.stretch + '|' +
 	    this.stretch_order + ' sh=' + this.shrink + '|' +
 	    this.shrink_order + '>';
+    };
+
+    proto.to_texstr = function Glue_to_texstr () {
+	var t = this.width.to_texstr ();
+
+	if (this.stretch.is_nonzero ()) {
+	    t += ' plus ';
+	    t += this.stretch.to_texstr ();
+	    if (this.stretch_order > 0) {
+		t = t.slice (0, -2); // strip trailing 'pt'
+		t += 'fil';
+		if (this.stretch_order > 1)
+		    t += 'l';
+		if (this.stretch_order > 2)
+		    t += 'l';
+	    }
+	}
+
+	if (this.shrink.is_nonzero ()) {
+	    t += ' minus ';
+	    t += this.shrink.to_texstr ();
+	    if (this.shrink_order > 0) {
+		t = t.slice (0, -2); // strip trailing 'pt'
+		t += 'fil';
+		if (this.shrink_order > 1)
+		    t += 'l';
+		if (this.shrink_order > 2)
+		    t += 'l';
+	    }
+	}
+
+	return t;
     };
 
     proto.clone = function Glue_clone () {
