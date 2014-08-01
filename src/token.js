@@ -257,7 +257,7 @@ var Token = WEBTEX.Token = (function Token_closure () {
     };
 
     Token.new_param = function Token_new_param (pnum) {
-	if (pnum < 1 || pnum > 8)
+	if (pnum < 1 || pnum > 9)
 	    throw new TexInternalError ('illegal param num ' + pnum);
 
 	var tok = new Token ();

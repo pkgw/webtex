@@ -317,8 +317,8 @@ function _cmd_def (engine, cname, expand_replacement) {
 	    }
 
 	    if (tok.isotherchar (O_ZERO + next_pnum)) {
-		if (next_pnum > 8)
-		    throw new TexRuntimeError ('macros may only have 8 parameters');
+		if (next_pnum > 9)
+		    throw new TexRuntimeError ('macros may only have 9 parameters');
 
 		tmpl_toks.push (Token.new_param (next_pnum));
 		next_pnum += 1;
