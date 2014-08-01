@@ -63,7 +63,8 @@ commands.csname = function cmd_csname (engine) {
     engine.trace ('* \\csname...\\endcsname -> ' + tok);
     engine.push (tok);
 
-    if (engine.get_cseq (csname) == null)
+    var cmd = engine.get_cseq (csname);
+    if (cmd == null || cmd.name == 'undefined')
 	tok.assign_cmd (engine, engine.commands['relax']);
 };
 

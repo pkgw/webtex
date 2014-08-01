@@ -678,7 +678,7 @@ var Engine = (function Engine_closure () {
 	'<space>': SpacerCommand.deserialize,
 	'<subscript>': SubCommand.deserialize,
 	'<superscript>': SuperCommand.deserialize,
-	'<undefined>': UndefinedCommand.deserialize,
+	'undefined': UndefinedCommand.deserialize,
     };
 
     proto.restore_serialized_state = function Engine_restore_serialized_state (json) {

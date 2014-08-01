@@ -140,7 +140,7 @@ var UndefinedCommand = (function UndefinedCommand_closure () {
 
     inherit (UndefinedCommand, Command);
     var proto = UndefinedCommand.prototype;
-    proto.name = '<undefined>';
+    proto.name = 'undefined';
     proto.multi_instanced = true; // simplest way forward.
 
     proto._serialize_data = function UndefinedCommand__serialize_data (state, housekeeping) {
