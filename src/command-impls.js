@@ -711,6 +711,88 @@ commands.unhbox = function cmd_unhbox (engine) {
 };
 
 
+commands.hfil = function cmd_hfil (engine) {
+    engine.ensure_horizontal ();
+    var g = new Glue ();
+    g.stretch.sp = Scaled.new_from_parts (1, 0);
+    g.stretch_order = 1;
+    return g;
+};
+
+commands.hfill = function cmd_hfill (engine) {
+    engine.ensure_horizontal ();
+    var g = new Glue ();
+    g.stretch.sp = Scaled.new_from_parts (1, 0);
+    g.stretch_order = 2;
+    return g;
+};
+
+commands.hss = function cmd_hss (engine) {
+    engine.ensure_horizontal ();
+    var g = new Glue ();
+    g.stretch.sp = Scaled.new_from_parts (1, 0);
+    g.stretch_order = 1;
+    g.shrink.sp = Scaled.new_from_parts (1, 0);
+    g.shrink_order = 1;
+    return g;
+};
+
+commands.hfilneg = function cmd_hfilneg (engine) {
+    engine.ensure_horizontal ();
+    var g = new Glue ();
+    g.stretch.sp = Scaled.new_from_parts (-1, 0);
+    g.stretch_order = 1;
+    return g;
+};
+
+commands.hskip = function cmd_hskip (engine) {
+    engine.ensure_horizontal ();
+    return engine.scan_glue (false);
+};
+
+
+commands.vfil = function cmd_vfil (engine) {
+    engine.ensure_vertical ();
+    var g = new Glue ();
+    g.stretch.sp = Scaled.new_from_parts (1, 0);
+    g.stretch_order = 1;
+    return g;
+};
+
+
+commands.vfill = function cmd_vfill (engine) {
+    engine.ensure_vertical ();
+    var g = new Glue ();
+    g.stretch.sp = Scaled.new_from_parts (1, 0);
+    g.stretch_order = 2;
+    return g;
+};
+
+
+commands.vss = function cmd_vss (engine) {
+    engine.ensure_vertical ();
+    var g = new Glue ();
+    g.stretch.sp = Scaled.new_from_parts (1, 0);
+    g.stretch_order = 1;
+    g.shrink.sp = Scaled.new_from_parts (1, 0);
+    g.shrink_order = 1;
+    return g;
+};
+
+commands.vfilneg = function cmd_vfilneg (engine) {
+    engine.ensure_vertical ();
+    var g = new Glue ();
+    g.stretch.sp = Scaled.new_from_parts (-1, 0);
+    g.stretch_order = 1;
+    return g;
+};
+
+commands.vskip = function cmd_vskip (engine) {
+    engine.ensure_vertical ();
+    return engine.scan_glue (false);
+};
+
+
 // "Special registers"
 //
 // ints: \prevgraf, \deadcycles, \insertpenalties, \inputlineno, \badness,

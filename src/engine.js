@@ -542,6 +542,11 @@ var Engine = (function Engine_closure () {
 	    this.enter_mode (M_RHORZ);
     };
 
+    proto.ensure_vertical = function Engine_ensure_vertical () {
+	if (this.mode () != M_VERT && this.mode () != M_IVERT)
+	    this.enter_mode (M_IVERT);
+    };
+
     proto.mode_accum = function Engine_mode_accum (item) {
 	this.build_stack[this.build_stack.length - 1].push (item);
     };
