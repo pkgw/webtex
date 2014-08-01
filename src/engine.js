@@ -318,7 +318,7 @@ var EquivTable = (function EquivTable_closure () {
 
 var Engine = (function Engine_closure () {
     var AF_GLOBAL = 1 << 0;
-    var CS_FI = 0, CS_ELSE_FI = 1, CS_OR_ELSE_FI = 2;
+    var CS_FI = 0, CS_ELSE_FI = 1, CS_OR_ELSE_FI = 2, CS_INCONDITION = 3;
     var BO_SETBOX = 0;
 
     function Engine (args) {
@@ -1354,6 +1354,19 @@ var Engine = (function Engine_closure () {
 
     // Conditionals
 
+    proto.start_parsing_if_condition = function Engine_start_parsing_if_condition () {
+	this.conditional_stack.push (CS_INCONDITION);
+    };
+
+    proto.done_parsing_if_condition = function Engine_done_parsing_if_condition () {
+	if (!this.conditional_stack.length)
+	    throw new TexInternalError ('imbalanced if-condition parsing calls? (1)');
+
+	var mode = this.conditional_stack.pop ();
+	if (mode != CS_INCONDITION)
+	    throw new TexInternalError ('imbalanced if-condition parsing calls? (2)');
+    };
+
     proto.handle_if = function Engine_handle_if (result) {
 	/* Assumes that an \if has just been read in and the result of the
          * test is `result`. We now prepare to handle the outcome. We'll have
@@ -1453,6 +1466,17 @@ var Engine = (function Engine_closure () {
 	    throw new TexSyntaxError ('stray \\or');
 
 	var mode = this.conditional_stack.pop (), skipmode = CS_OR_ELSE_FI;
+	if (mode == CS_INCONDITION) {
+	    // We were parsing the condition of the \ifcase and it involved
+	    // some kind of open-ended expanding parsing that made it out to
+	    // this \or. TeX inserts a \relax in this case to stop the
+	    // expansion.
+	    this.push_toks ([Token.new_cseq ('relax'),
+			     Token.new_cseq ('or')]); // XXX: bad if \let\or=...?
+	    this.conditional_stack.push (mode);
+	    return;
+	}
+
 	if (mode != CS_OR_ELSE_FI)
 	    throw new TexSyntaxError ('unexpected \\or');
 
@@ -1471,6 +1495,14 @@ var Engine = (function Engine_closure () {
 	    throw new TexSyntaxError ('stray \\else');
 
 	var mode = this.conditional_stack.pop ();
+	if (mode == CS_INCONDITION) {
+	    // See comment in handle_or.
+	    this.push_toks ([Token.new_cseq ('relax'),
+			     Token.new_cseq ('else')]);
+	    this.conditional_stack.push (mode);
+	    return;
+	}
+
 	if (mode == CS_FI)
 	    throw new TexSyntaxError ('unexpected (duplicate?) \\else');
 
@@ -1481,8 +1513,16 @@ var Engine = (function Engine_closure () {
 	if (!this.conditional_stack.length)
 	    throw new TexSyntaxError ('stray \\fi');
 
-	// Don't care about mode, and nothing more to do.
-	this.conditional_stack.pop ();
+	var mode = this.conditional_stack.pop ();
+	if (mode == CS_INCONDITION) {
+	    // See comment in handle_or.
+	    this.push_toks ([Token.new_cseq ('relax'),
+			     Token.new_cseq ('fi')]);
+	    this.conditional_stack.push (mode);
+	    return;
+	}
+
+	// Otherwise, we don't care and there's nothing more to do.
     };
 
 

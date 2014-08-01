@@ -453,7 +453,9 @@ commands.endgroup = function cmd_endgroup (engine) {
 // Conditionals
 
 commands._if = function cmd_if (engine) {
+    engine.start_parsing_if_condition ();
     var t1 = engine.next_x_tok (), t2 = engine.next_x_tok ();
+    engine.done_parsing_if_condition ();
 
     // The comparison rules here are a bit funky.
 
@@ -493,6 +495,7 @@ commands.ifx = function cmd_ifx (engine) {
 
 
 commands.ifnum = function cmd_ifnum (engine) {
+    engine.start_parsing_if_condition ();
     var val1 = engine.scan_int ().value;
 
     while (true) {
@@ -506,6 +509,7 @@ commands.ifnum = function cmd_ifnum (engine) {
     // It's a little futzy to not check the validity of tok before
     // reading val2.
     var val2 = engine.scan_int ().value, result;
+    engine.done_parsing_if_condition ();
 
     if (tok.isotherchar (O_LESS))
 	result = (val1 < val2);
@@ -522,7 +526,9 @@ commands.ifnum = function cmd_ifnum (engine) {
 
 
 commands.ifodd = function cmd_ifodd (engine) {
+    engine.start_parsing_if_condition ();
     var val = engine.scan_int ().value;
+    engine.done_parsing_if_condition ();
     var result = (val % 2 == 1);
     engine.trace ('ifodd ' + val + '?');
     engine.handle_if (result);
@@ -530,6 +536,7 @@ commands.ifodd = function cmd_ifodd (engine) {
 
 
 commands.ifdim = function cmd_ifdim (engine) {
+    engine.start_parsing_if_condition ();
     var val1 = engine.scan_dimen ();
 
     while (1) {
@@ -541,6 +548,7 @@ commands.ifdim = function cmd_ifdim (engine) {
     }
 
     var val2 = engine.scan_dimen (), result;
+    engine.done_parsing_if_condition ();
 
     if (tok.isotherchar (O_LESS))
 	result = (val1.sp.value < val2.sp.value);
@@ -569,7 +577,9 @@ commands.iftrue = function cmd_iftrue (engine) {
 
 
 commands.ifcase = function cmd_ifcase (engine) {
+    engine.start_parsing_if_condition ();
     var val = engine.scan_int ().value;
+    engine.done_parsing_if_condition ();
     engine.trace ('ifcase ' + val);
     engine.handle_if_case (val);
 };
