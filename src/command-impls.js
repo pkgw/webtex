@@ -593,6 +593,24 @@ commands.fi = function cmd_fi (engine) {
 };
 
 
+commands.ifhmode = function cmd_ifhmode (engine) {
+    engine.trace ('ifhmode');
+    engine.handle_if (engine.mode () == M_HORZ || engine.mode () == M_RHORZ);
+};
+
+
+commands.ifvmode = function cmd_ifvmode (engine) {
+    engine.trace ('ifvmode');
+    engine.handle_if (engine.mode () == M_VERT || engine.mode () == M_IVERT);
+};
+
+
+commands.ifmmode = function cmd_ifmmode (engine) {
+    engine.trace ('ifmmode');
+    engine.handle_if (engine.mode () == M_MATH || engine.mode () == M_DMATH);
+};
+
+
 // Boxes
 
 commands.hbox = (function HboxCommand_closure () {
