@@ -218,6 +218,10 @@ commands.skipdef = function cmd_skipdef (engine) {
     define_register ('skip', T_GLUE, engine);
 };
 
+commands.muskipdef = function cmd_muskipdef (engine) {
+    define_register ('muskip', T_MUGLUE, engine);
+};
+
 commands.toksdef = function cmd_toksdef (engine) {
     define_register ('toks', T_TOKLIST, engine);
 };
