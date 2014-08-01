@@ -1,7 +1,12 @@
+amsfonts
 emulateapj
+epsf
+graphics
 hyphen-base
 latex
+latexconfig
 natbib
 plain
 revtex4
+tools
 url
