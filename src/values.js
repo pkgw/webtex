@@ -453,7 +453,7 @@ var Scaled = WEBTEX.Scaled = (function Scaled_closure () {
 
     proto.intdivide = function Scaled_intdivide (k) {
 	k = TexInt.xcheck (k);
-	return this.clone ().over_n (k);
+	return this.clone ().over_n (k)[0];
     };
 
     proto.asfloat = function Scaled_asfloat () {
