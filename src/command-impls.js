@@ -877,6 +877,31 @@ commands.mark = function cmd_mark (engine) {
 };
 
 
+function _cmd_box_shift (engine, desc, negate) {
+    var amount = engine.scan_dimen ();
+    engine.trace (desc + ' next box by ' + amount + ' ...');
+
+    function shift_the_box (engine, box) {
+	engine.trace ('... finish ' + desc);
+	if (negate)
+	    amount = amount.intproduct (-1);
+	box.shift_amount = box.shift_amount.advance (amount);
+	return box;
+    }
+
+    engine.boxop_stack.push ([shift_the_box, false]);
+    engine.scan_box ();
+};
+
+commands.lower = function cmd_lower (engine) {
+    _cmd_box_shift (engine, 'lower', false);
+};
+
+commands.raise = function cmd_raise (engine) {
+    _cmd_box_shift (engine, 'raise', true);
+};
+
+
 // "Special registers"
 //
 // ints: \prevgraf, \deadcycles, \insertpenalties, \inputlineno, \badness,

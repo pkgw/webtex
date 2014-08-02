@@ -24,6 +24,8 @@ var Boxlike = (function Boxlike_closure () {
 	this.width = new Dimen ();
 	this.height = new Dimen ();
 	this.depth = new Dimen ();
+	this.shift_amount = new Dimen ();
+	// TODO: glue_order, glue_sign, glue_set: see T:TP 135.
     }
 
     inherit (Boxlike, Listable);
