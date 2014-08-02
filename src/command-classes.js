@@ -229,7 +229,7 @@ var MacroCommand = (function MacroCommand_closure () {
 	    if (!ttok.isparam ()) {
 		// span of nonparameter tokens in template -- eat and make
 		// sure that the actual token stream matches.
-		var atok = engine.next_x_tok_throw ();
+		var atok = engine.next_tok_throw ();
 		if (!atok.equals (ttok))
 		    throw new TexRuntimeError ('macro invocation doesn\'t match ' +
 					       'template: expected ' + ttok + ', ' +
