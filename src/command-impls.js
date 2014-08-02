@@ -894,6 +894,15 @@ commands.mark = function cmd_mark (engine) {
 };
 
 
+commands.special = function cmd_special (engine) {
+    engine.scan_left_brace ();
+    var tlist = engine.scan_tok_group (true);
+    var special = new Special (tlist.toks);
+    engine.trace ('special ' + tlist.uitext ());
+    return special;
+};
+
+
 function _cmd_box_shift (engine, desc, negate) {
     var amount = engine.scan_dimen ();
     engine.trace (desc + ' next box by ' + amount + ' ...');

@@ -152,3 +152,20 @@ var Kern = (function Kern_closure () {
 
     return Kern;
 }) ();
+
+
+var Special = (function Special_closure () {
+    function Special (toks) {
+	this.ltype = LT_SPECIAL;
+	this.toks = toks;
+    }
+
+    inherit (Special, Listable);
+    var proto = Special.prototype;
+
+    proto.toString = function Special_toString () {
+	return '<Special ' + (new Toklist (this.toks).as_serializable ()) + '>';
+    };
+
+    return Special;
+}) ();
