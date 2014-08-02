@@ -1621,9 +1621,6 @@ var Engine = (function Engine_closure () {
 	};
 
 	this.scan_left_brace ();
-
-	if (this.boxop_stack && this.boxop_stack.length)
-
 	this.trace ('--> ' + bt_names[boxtype]);
 	this.enter_mode (newmode);
 	this.nest_eqtb ();
