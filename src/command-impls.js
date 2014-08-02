@@ -584,6 +584,29 @@ commands.ifcase = function cmd_ifcase (engine) {
 };
 
 
+function _cmd_if_boxtype (engine, wanttype) {
+    engine.start_parsing_if_condition ();
+    var reg = engine.scan_char_code ();
+    engine.done_parsing_if_condition ();
+    var btype = engine.get_register (T_BOX, reg).type;
+    var result = (btype == wanttype);
+    engine.trace ('if' + bt_names[wanttype] + ' ' + bt_names[btype] + ' ? ' + result);
+    engine.handle_if (result);
+};
+
+commands.ifvoid = function cmd_ifvoid (engine) {
+    _cmd_if_boxtype (engine, BT_VOID);
+};
+
+commands.ifhbox = function cmd_ifhbox (engine) {
+    _cmd_if_boxtype (engine, BT_HBOX);
+};
+
+commands.ifvbox = function cmd_ifvbox (engine) {
+    _cmd_if_boxtype (engine, BT_VBOX);
+};
+
+
 commands._else = function cmd_else (engine) {
     engine.trace ('else [non-eaten]');
     engine.handle_else ();
@@ -736,10 +759,30 @@ commands.unhbox = function cmd_unhbox (engine) {
     var reg = engine.scan_char_code ();
     var box = engine.get_register (T_BOX, reg);
 
-    if (!box.list.length)
-	return
+    if (box.type == BT_VOID)
+	return;
 
-    throw new TexInternalError ('see TeXbook pg. 285');
+    if (box.type != BT_HBOX)
+	throw new TexRuntimeError ('trying to unhbox a non-hbox');
+
+    engine.set_register (T_BOX, ref, new Box ('void'));
+    return box.list;
+};
+
+
+commands.unvbox = function cmd_unvbox (engine) {
+    engine.ensure_vertical ();
+    var reg = engine.scan_char_code ();
+    var box = engine.get_register (T_BOX, reg);
+
+    if (box.type == BT_VOID)
+	return;
+
+    if (box.type != BT_VBOX)
+	throw new TexRuntimeError ('trying to unvbox a non-vbox');
+
+    engine.set_register (T_BOX, ref, new Box ('void'));
+    return box.list;
 };
 
 
