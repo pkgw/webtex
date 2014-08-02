@@ -125,7 +125,7 @@ commands.string = function cmd_string (engine) {
     engine.trace ('* \\string ' + tok);
 
     if (tok.ischar ()) {
-	engine.push (tok); // keep catcode
+	engine.push_string (String.fromCharCode (tok.ord));
 	return;
     }
 
