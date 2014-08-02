@@ -698,53 +698,6 @@ var Glue = (function Glue_closure () {
 }) ();
 
 
-var Box = (function Box_closure () {
-    function Box (type) {
-	this.type = type;
-	this.width = new Dimen ();
-	this.height = new Dimen ();
-	this.depth = new Dimen ();
-	this.list = [];
-    }
-
-    inherit (Box, Value);
-    var proto = Box.prototype;
-
-    proto.toString = function Box_toString () {
-	return '<Box ' + bt_names[this.type] + ' w=' + this.width +
-	    ' h=' + this.height + ' d=' + this.depth + ' #toks=' +
-	    this.list.length + '>';
-    };
-
-    proto.is_nonzero = function Box_is_nonzero () {
-	// The way TeX handles things, an all-zero non-void box is best
-	// considered nonzero.
-	return this.type != BT_VOID;
-    };
-
-    proto.as_serializable = function Box_as_serializable () {
-	if (this.list.length)
-	    throw new TexInternalException ('can\'t serialize box lists yet');
-	return [this.type,
-		this.width.as_serializable (),
-		this.height.as_serializable (),
-		this.depth.as_serializable ()];
-    };
-
-    Box.deserialize = function Box_deserialize (data) {
-	var b = new Box (BT_VOID);
-	b.type = parseInt (data[0], 10);
-	b.width = Dimen.deserialize (data[1]);
-	b.height = Dimen.deserialize (data[2]);
-	b.depth = Dimen.deserialize (data[3]);
-	b.list = []; // XXX temp?
-	return b;
-    };
-
-    return Box;
-}) ();
-
-
 var Toklist = WEBTEX.Toklist = (function Toklist_closure () {
     function Toklist (toks) {
 	if (toks == null)

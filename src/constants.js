@@ -15,14 +15,30 @@ var vt_ok_for_parameter = [true, true, true, true, true, false, false];
 var vt_names = ['int', 'dimen', 'glue', 'muglue', 'toklist', 'box', 'font'];
 
 
+// "listable" types -- things that can go in horizontal, vertical, or math lists.
+// Rather than generic "whatsits", we implement them more specifically.
+
+var LT_BOX = 0,
+    LT_RULE = 1,
+    LT_CHARACTER = 2,
+    LT_GLUE = 3,
+    LT_KERN = 4,
+    LT_MARK = 5,
+    LT_PENALTY = 6,
+    LT_LEADER = 7,
+    LT_SPECIAL = 8; // a \special{}
+
+var lt_names = ['box', 'rule', 'character', 'glue', 'kern', 'mark', 'penalty',
+		'leader', 'special'];
+
+
 // Box types
 
 var BT_VOID = 0,
     BT_HBOX = 1,
-    BT_VBOX = 2,
-    BT_RULE = 3;
+    BT_VBOX = 2;
 
-var bt_names = ['void', 'hbox', 'vbox', 'rule'];
+var bt_names = ['void', 'hbox', 'vbox'];
 
 
 // "Code types" -- not the best name for these things ...

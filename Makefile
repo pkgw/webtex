@@ -7,6 +7,7 @@ sharedjs = \
   src/preamble.js \
   src/constants.js \
   src/values.js \
+  src/boxes.js \
   src/valrefs.js \
   src/util.js \
   src/token.js \

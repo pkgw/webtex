@@ -588,7 +588,7 @@ function _cmd_if_boxtype (engine, wanttype) {
     engine.start_parsing_if_condition ();
     var reg = engine.scan_char_code ();
     engine.done_parsing_if_condition ();
-    var btype = engine.get_register (T_BOX, reg).type;
+    var btype = engine.get_register (T_BOX, reg).btype;
     var result = (btype == wanttype);
     engine.trace ('if' + bt_names[wanttype] + ' ' + bt_names[btype] + ' ? ' + result);
     engine.handle_if (result);
@@ -735,7 +735,7 @@ commands.vrule = function cmd_vrule (engine) {
     if (engine.mode() != M_HORZ && engine.mode() != M_RHORZ)
 	throw new TexRuntimeError ('can only create \\vrule in horizontal mode');
 
-    var rule = new Box (BT_RULE);
+    var rule = new Rule ();
     rule.width.sp.value = 26214; // default rule = 0.4pt; T:TP sec 463
 
     while (true) {
@@ -759,10 +759,10 @@ commands.unhbox = function cmd_unhbox (engine) {
     var reg = engine.scan_char_code ();
     var box = engine.get_register (T_BOX, reg);
 
-    if (box.type == BT_VOID)
+    if (box.btype == BT_VOID)
 	return;
 
-    if (box.type != BT_HBOX)
+    if (box.btype != BT_HBOX)
 	throw new TexRuntimeError ('trying to unhbox a non-hbox');
 
     engine.set_register (T_BOX, ref, new Box ('void'));
@@ -775,10 +775,10 @@ commands.unvbox = function cmd_unvbox (engine) {
     var reg = engine.scan_char_code ();
     var box = engine.get_register (T_BOX, reg);
 
-    if (box.type == BT_VOID)
+    if (box.btype == BT_VOID)
 	return;
 
-    if (box.type != BT_VBOX)
+    if (box.btype != BT_VBOX)
 	throw new TexRuntimeError ('trying to unvbox a non-vbox');
 
     engine.set_register (T_BOX, ref, new Box ('void'));
