@@ -16,7 +16,7 @@ var EquivTable = (function EquivTable_closure () {
 	this._registers[T_GLUE] = {};
 	this._registers[T_MUGLUE] = {};
 	this._registers[T_TOKLIST] = {};
-	this._registers[T_BOXLIST] = {};
+	this._registers[T_BOX] = {};
 
 	this._parameters = {};
 	this._parameters[T_INT] = {};
@@ -167,7 +167,7 @@ var EquivTable = (function EquivTable_closure () {
 	    this._registers[T_GLUE][i] = new Glue ();
 	    this._registers[T_MUGLUE][i] = new Glue ();
 	    this._registers[T_TOKLIST][i] = new Toklist ();
-	    this._registers[T_BOXLIST][i] = new Box (BT_VOID);
+	    this._registers[T_BOX][i] = new Box (BT_VOID);
 	}
 
 	for (var i = 0; i < 26; i++) {
@@ -204,7 +204,7 @@ var EquivTable = (function EquivTable_closure () {
 
 	state.catcodes = this._catcodes;
 	state.registers = {ints: {}, dimens: {}, glues: {}, muglues: {},
-			   toklists: {}, boxlists: {}};
+			   toklists: {}, boxes: {}};
 	state.parameters = {ints: {}, dimens: {}, glues: {}, muglues: {},
 			    toklists: {}};
 	state.commands = {};
@@ -231,9 +231,9 @@ var EquivTable = (function EquivTable_closure () {
 	    if (r != null && r.is_nonzero ())
 		state.registers.toklists[i] = r.as_serializable ();
 
-	    r = this._registers[T_BOXLIST][i];
+	    r = this._registers[T_BOX][i];
 	    if (r != null && r.is_nonzero ())
-		state.registers.boxlists[i] = r.as_serializable ();
+		state.registers.boxes[i] = r.as_serializable ();
 
 	    if (this._actives.hasOwnProperty (i))
 		state.actives[i] = this._actives[i].get_serialize_ident (state, housekeeping);
@@ -529,10 +529,10 @@ var Engine = (function Engine_closure () {
 
     proto.leave_mode = function Engine_leave_mode () {
 	var oldmode = this.mode_stack.pop ();
-	var tlist = this.build_stack.pop ();
+	var list = this.build_stack.pop ();
 	this.trace ('<leave ' + mode_abbrev[oldmode] + ' mode: ' +
-		    tlist.length + ' items>');
-	return tlist;
+		    list.length + ' items>');
+	return list;
     };
 
     proto.ensure_horizontal = function Engine_ensure_horizontal () {
@@ -548,7 +548,11 @@ var Engine = (function Engine_closure () {
     };
 
     proto.mode_accum = function Engine_mode_accum (item) {
-	this.build_stack[this.build_stack.length - 1].push (item);
+	if (item instanceof Array)
+	    Array.prototype.push.apply (this.build_stack[this.build_stack.length - 1],
+					item);
+	else
+	    this.build_stack[this.build_stack.length - 1].push (item);
     };
 
     proto.handle_bgroup = function Engine_handle_bgroup () {
@@ -753,9 +757,9 @@ var Engine = (function Engine_closure () {
 	    this.set_register (T_TOKLIST, parseInt (reg, 10),
 			       Toklist.deserialize (json.registers.toklists[reg]));
 
-	for (var reg in json.registers.boxlists)
-	    this.set_register (T_BOXLIST, parseInt (reg, 10),
-			       Box.deserialize (json.registers.boxlists[reg]));
+	for (var reg in json.registers.boxes)
+	    this.set_register (T_BOX, parseInt (reg, 10),
+			       Box.deserialize (json.registers.boxes[reg]));
 
 	for (var ord in json.actives)
 	    this.set_active (parseInt (ord, 10), getcmd (json.actives[ord]));
@@ -1573,11 +1577,11 @@ var Engine = (function Engine_closure () {
         // setbox operation.
 
         function set_the_box (engine, box) {
-            this.trace ('... finish setbox: #' + reg + ' = ' + box);
-            engine.set_register (T_BOXLIST, reg, box)
+            engine.trace ('... finish setbox: #' + reg + ' = ' + box);
+            engine.set_register (T_BOX, reg, box)
 	}
 
-        this.boxop_stack.push ([set_the_box, true]);
+        this.boxop_stack.push ([set_the_box.bind (this), true]);
         this.scan_box (); // check that we're being followed by a box.
     };
 
@@ -1602,18 +1606,23 @@ var Engine = (function Engine_closure () {
 	    this.trace ('<--- ' + bt_names[boxtype]);
 	    this.unnest_eqtb ();
 	    var box = new Box (boxtype);
-	    box.tlist = this.leave_mode ();
+	    box.list = this.leave_mode ();
 	    var t = this.boxop_stack.pop ();
 	    var boxop = t[0], isassignment = t[1];
+
+	    if (isassignment && this.after_assign_token != null) {
+		// This is an assignment expression. TODO: afterassign token
+		// in boxes gets inserted at beginning of box token list,
+		// before every[hv]box token lists (TeXbook p. 279)
+		throw new TexRuntimeError ('afterassignment for boxes');
+	    }
+
+	    return boxop (this, box);
 	};
 
 	this.scan_left_brace ();
 
 	if (this.boxop_stack && this.boxop_stack.length)
-	    // This is an assignment expression. TODO: afterassign token
-	    // in boxes gets inserted at beginning of box token list,
-	    // before every[hv]box token lists (TeXbook p. 279)
-	    this.maybe_insert_after_assign_token ();
 
 	this.trace ('--> ' + bt_names[boxtype]);
 	this.enter_mode (newmode);

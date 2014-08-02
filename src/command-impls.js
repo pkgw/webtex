@@ -668,7 +668,7 @@ commands.wd = (function WdCommand_closure () {
 
     proto.as_valref = function WdCommand_as_valref (engine) {
 	var reg = engine.scan_char_code ();
-	var box = engine.get_register (T_BOXLIST, reg);
+	var box = engine.get_register (T_BOX, reg);
 	return new ConstantValref (T_DIMEN, box.width);
     };
 
@@ -692,7 +692,7 @@ commands.ht = (function HtCommand_closure () {
 
     proto.as_valref = function HtCommand_as_valref (engine) {
 	var reg = engine.scan_char_code ();
-	var box = engine.get_register (T_BOXLIST, reg);
+	var box = engine.get_register (T_BOX, reg);
 	return new ConstantValref (T_DIMEN, box.height);
     };
 
@@ -734,9 +734,9 @@ commands.vrule = function cmd_vrule (engine) {
 commands.unhbox = function cmd_unhbox (engine) {
     engine.ensure_horizontal ();
     var reg = engine.scan_char_code ();
-    var box = engine.get_register (T_BOXLIST, reg);
+    var box = engine.get_register (T_BOX, reg);
 
-    if (!box.tlist.length)
+    if (!box.list.length)
 	return
 
     throw new TexInternalError ('see TeXbook pg. 285');

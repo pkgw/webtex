@@ -111,9 +111,9 @@ var Value = (function Value_closure () {
 	    return value;
 	}
 
-	if (valtype == T_BOXLIST) {
-	    if (!(value instanceof Boxlist))
-		throw new TexInternalError ('cannot coerce to boxlist: ' + value);
+	if (valtype == T_BOX) {
+	    if (!(value instanceof Box))
+		throw new TexInternalError ('cannot coerce to box: ' + value);
 	    return value;
 	}
 
@@ -704,7 +704,7 @@ var Box = (function Box_closure () {
 	this.width = new Dimen ();
 	this.height = new Dimen ();
 	this.depth = new Dimen ();
-	this.tlist = [];
+	this.list = [];
     }
 
     inherit (Box, Value);
@@ -713,7 +713,7 @@ var Box = (function Box_closure () {
     proto.toString = function Box_toString () {
 	return '<Box ' + bt_names[this.type] + ' w=' + this.width +
 	    ' h=' + this.height + ' d=' + this.depth + ' #toks=' +
-	    this.tlist.length + '>';
+	    this.list.length + '>';
     };
 
     proto.is_nonzero = function Box_is_nonzero () {
@@ -723,11 +723,12 @@ var Box = (function Box_closure () {
     };
 
     proto.as_serializable = function Box_as_serializable () {
+	if (this.list.length)
+	    throw new TexInternalException ('can\'t serialize box lists yet');
 	return [this.type,
 		this.width.as_serializable (),
 		this.height.as_serializable (),
-		this.depth.as_serializable (),
-		this.tlist.as_serializable ()];
+		this.depth.as_serializable ()];
     };
 
     Box.deserialize = function Box_deserialize (data) {
@@ -736,7 +737,7 @@ var Box = (function Box_closure () {
 	b.width = Dimen.deserialize (data[1]);
 	b.height = Dimen.deserialize (data[2]);
 	b.depth = Dimen.deserialize (data[3]);
-	b.tlist = Toklist.deserialize (data[4]);
+	b.list = []; // XXX temp?
 	return b;
     };
 
