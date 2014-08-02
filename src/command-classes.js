@@ -354,7 +354,7 @@ var MacroCommand = (function MacroCommand_closure () {
 	}
 
 	engine.trace ('*macro ' + this.origcs + ' ...');
-	for (var i = 1; i < 9; i++)
+	for (var i = 1; i < 10; i++)
 	    if (param_vals.hasOwnProperty (i))
 		engine.trace ('   #' + i + ' = ' + new Toklist (param_vals[i]));
 	engine.trace (' -> ' + new Toklist (fullrepl));
