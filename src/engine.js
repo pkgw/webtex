@@ -1471,8 +1471,8 @@ var Engine = (function Engine_closure () {
 	    // some kind of open-ended expanding parsing that made it out to
 	    // this \or. TeX inserts a \relax in this case to stop the
 	    // expansion.
-	    this.push_toks ([Token.new_cseq ('relax'),
-			     Token.new_cseq ('or')]); // XXX: bad if \let\or=...?
+	    this.push_toks ([Token.new_cmd (this.commands['relax']),
+			     Token.new_cmd (this.commands['or'])]);
 	    this.conditional_stack.push (mode);
 	    return;
 	}
@@ -1497,8 +1497,8 @@ var Engine = (function Engine_closure () {
 	var mode = this.conditional_stack.pop ();
 	if (mode == CS_INCONDITION) {
 	    // See comment in handle_or.
-	    this.push_toks ([Token.new_cseq ('relax'),
-			     Token.new_cseq ('else')]);
+	    this.push_toks ([Token.new_cmd (this.commands['relax']),
+			     Token.new_cmd (this.commands['else'])]);
 	    this.conditional_stack.push (mode);
 	    return;
 	}
@@ -1516,8 +1516,8 @@ var Engine = (function Engine_closure () {
 	var mode = this.conditional_stack.pop ();
 	if (mode == CS_INCONDITION) {
 	    // See comment in handle_or.
-	    this.push_toks ([Token.new_cseq ('relax'),
-			     Token.new_cseq ('fi')]);
+	    this.push_toks ([Token.new_cmd (this.commands['relax']),
+			     Token.new_cmd (this.commands['fi'])]);
 	    this.conditional_stack.push (mode);
 	    return;
 	}

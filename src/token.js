@@ -5,7 +5,7 @@
  * subclasses, but maybe that's wrong. */
 
 var Token = WEBTEX.Token = (function Token_closure () {
-    var TK_CHAR = 0, TK_CSEQ = 1, TK_PARAM = 2;
+    var TK_CHAR = 0, TK_CSEQ = 1, TK_PARAM = 2, TK_PURECMD = 3;
     var frozen_cs_names = {cr: 1, endgroup: 1, right: 1, fi: 1, endtemplate: 1,
                            relax: 1, endwrite: 1, 'notexpanded:': 1, nullfont: 1};
 
@@ -24,6 +24,8 @@ var Token = WEBTEX.Token = (function Token_closure () {
 	    return '<' + this._csesc (escchr) + '>';
 	if (this.kind == TK_PARAM)
 	    return '#' + this.pnum;
+	if (this.kind == TK_PURECMD)
+	    return '!' + this.cmd;
 	throw new TexInternalError ('not reached');
     };
 
@@ -34,6 +36,8 @@ var Token = WEBTEX.Token = (function Token_closure () {
 	    return '\\' + this._csesc (escchr) + ' ';
 	if (this.kind == TK_PARAM)
 	    return '#' + this.pnum;
+	if (this.kind == TK_PURECMD)
+	    return '!' + this.cmd;
 	throw new TexInternalError ('not reached');
     };
 
@@ -50,6 +54,9 @@ var Token = WEBTEX.Token = (function Token_closure () {
 
 	if (this.kind == TK_PARAM)
 	    return '#' + this.pnum
+
+	if (this.kind == TK_PURECMD)
+	    throw new TexInternalError ('sholdn\'t TeXify a pure-command token');
 
 	throw new TexInternalError ('not reached');
     };
@@ -69,6 +76,9 @@ var Token = WEBTEX.Token = (function Token_closure () {
 	    return this.name == other.name;
 	if (this.kind == TK_PARAM)
 	    return this.pnum == other.pnum;
+	if (this.kind == TK_PURECMD)
+	    throw new TexInternalError ('cannot test equality of pure-command tokens');
+
 	throw new TexInternalError ('not reached');
     };
 
@@ -89,6 +99,8 @@ var Token = WEBTEX.Token = (function Token_closure () {
 	} else if (this.kind == TK_CSEQ) {
 	    cmd = engine.get_cseq (this.name);
 	    name = this.name;
+	} else if (this.kind == TK_PURECMD) {
+	    return this.cmd;
 	} else {
 	    throw new TexInternalError ('cannot commandify token ' + this);
 	}
@@ -263,6 +275,16 @@ var Token = WEBTEX.Token = (function Token_closure () {
 	var tok = new Token ();
 	tok.kind = TK_PARAM;
 	tok.pnum = pnum;
+	return tok;
+    };
+
+    Token.new_cmd = function Token_new_cmd (cmd) {
+	if (cmd == null)
+	    throw new TexInternalError ('illegal null command');
+
+	var tok = new Token ();
+	tok.kind = TK_PURECMD;
+	tok.cmd = cmd;
 	return tok;
     };
 
