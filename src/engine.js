@@ -1359,12 +1359,30 @@ var Engine = (function Engine_closure () {
     };
 
     proto.done_parsing_if_condition = function Engine_done_parsing_if_condition () {
-	if (!this.conditional_stack.length)
-	    throw new TexInternalError ('imbalanced if-condition parsing calls? (1)');
+	while (this.conditional_stack.length) {
+	    var mode = this.conditional_stack.pop ();
+	    if (mode == CS_INCONDITION)
+		return;
 
-	var mode = this.conditional_stack.pop ();
-	if (mode != CS_INCONDITION)
-	    throw new TexInternalError ('imbalanced if-condition parsing calls? (2)');
+	    // This can legally happen if there was an \if inside the
+	    // condition that is almost done parsing but hasn't quite wrapped
+	    // up, e.g.:
+	    //    \ifcase \iftrue1 \fi \else ... \fi
+	    // parse_int will stop before the \fi, so that a CS_ELSE_FI will
+	    // still be on conditional_stack. Everything will be all right if we just
+	    // eat the \fi.
+	    //
+	    // This solution feels pretty hacky but we'll see whether it
+	    // spirals out of control on us or not.
+
+	    var tok = this.next_tok_throw ();
+	    if (tok.iscmd (this, 'else') || tok.iscmd (this, 'fi') || tok.iscmd (this, 'or')) {
+		this.conditional_stack.push (mode);
+		tok.tocmd (this).invoke (this);
+	    } else {
+		throw new TexInternalError ('mis-nested condition guards?');
+	    }
+	}
     };
 
     proto.handle_if = function Engine_handle_if (result) {
