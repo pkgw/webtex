@@ -903,6 +903,14 @@ commands.special = function cmd_special (engine) {
 };
 
 
+commands.penalty = function cmd_penalty (engine) {
+    var amount = engine.scan_int ();
+    var penalty = new Penalty (amount);
+    engine.trace ('penalty ' + amount);
+    return penalty;
+};
+
+
 function _cmd_box_shift (engine, desc, negate) {
     var amount = engine.scan_dimen ();
     engine.trace (desc + ' next box by ' + amount + ' ...');

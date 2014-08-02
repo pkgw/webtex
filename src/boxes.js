@@ -169,3 +169,20 @@ var Special = (function Special_closure () {
 
     return Special;
 }) ();
+
+
+var Penalty = (function Penalty_closure () {
+    function Penalty (amount) {
+	this.ltype = LT_PENALTY;
+	this.amount = amount;
+    }
+
+    inherit (Penalty, Listable);
+    var proto = Penalty.prototype;
+
+    proto.toString = function Penalty_toString () {
+	return '<Penalty ' + amount + '>';
+    };
+
+    return Penalty;
+}) ();
