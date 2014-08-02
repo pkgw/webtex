@@ -1039,24 +1039,14 @@ commands.scriptscriptfont = function cmd_scriptscriptfont (engine) {
 // Hyphenation
 
 commands.patterns = function cmd_patterns (engine) {
-    var tok = engine.next_tok_throw ();
-    if (tok == null)
-	throw new TexSyntaxError ('EOF in middle of \\patterns');
-    if (!tok.iscat (C_BGROUP))
-	throw new TexSyntaxError ('expected { immediately after \\patterns');
-
+    engine.scan_left_brace ();
     engine.scan_tok_group (false);
     engine.trace ('patterns [noop/ignored]');
 };
 
 
 commands.hyphenation = function cmd_hyphenation (engine) {
-    var tok = engine.next_tok_throw ();
-    if (tok == null)
-	throw new TexSyntaxError ('EOF in middle of \\hyphenation');
-    if (!tok.iscat (C_BGROUP))
-	throw new TexSyntaxError ('expected { immediately after \\hyphenation');
-
+    engine.scan_left_brace ();
     engine.scan_tok_group (false);
     engine.trace ('hyphenation [noop/ignored]');
 };
@@ -1070,12 +1060,7 @@ function _change_case (engine, isupper) {
     else
 	var cmdname = 'lowercase', codetype = CT_LOWERCASE;
 
-    var tok = engine.next_tok_throw ();
-    if (tok == null)
-	throw new TexSyntaxError ('EOF in middle of \\' + cmdname);
-    if (!tok.iscat (C_BGROUP))
-	throw new TexSyntaxError ('expected { immediately after \\' + cmdname);
-
+    engine.scan_left_brace ();
     var oldtoks = engine.scan_tok_group (false).toks, newtoks = [];
 
     for (var i = 0; i < oldtoks.length; i++) {
@@ -1164,22 +1149,14 @@ commands.jobname = function cmd_jobname (engine) {
 // User interaction, I/O
 
 commands.message = function cmd_message (engine) {
-    var tok = engine.next_tok_throw ();
-
-    if (!tok.iscat (C_BGROUP))
-	throw new TexSyntaxError ('expected { immediately after \\message');
-
+    engine.scan_left_brace ();
     var toks = engine.scan_tok_group ();
     engine.trace ('message ' + toks.uitext ());
 };
 
 
 commands.errmessage = function cmd_errmessage (engine) {
-    var tok = engine.next_tok_throw ();
-
-    if (!tok.iscat (C_BGROUP))
-	throw new TexSyntaxError ('expected { immediately after \\errmessage');
-
+    engine.scan_left_brace ();
     var toks = engine.scan_tok_group ();
     engine.trace ('errmessage ~' + toks.uitext ());
     throw new TexRuntimeError ('TeX-triggered error: ' + toks.uitext ());
@@ -1195,10 +1172,8 @@ commands.immediate = function cmd_immediate (engine) {
 
 
 commands.write = function cmd_write (engine) {
-    var streamnum = engine.scan_streamnum (), tok = engine.next_tok_throw ();
-    if (!tok.iscat (C_BGROUP))
-	throw new TexSyntaxError ('expected { immediately after \\write');
-
+    var streamnum = engine.scan_streamnum ();
+    engine.scan_left_brace ();
     var toks = engine.scan_tok_group (false);
     engine.trace ('write:' + streamnum + ' ' + toks.uitext ());
 };

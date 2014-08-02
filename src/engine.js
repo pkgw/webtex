@@ -872,6 +872,8 @@ var Engine = (function Engine_closure () {
 	while (1) {
 	    var tok = this.next_x_tok_throw ();
 
+	    if (tok == null)
+		throw new TexSyntaxError ('EOF when expected left brace');
 	    if (tok.iscat (C_SPACE))
 		continue;
 	    if (tok.iscmd (this, 'relax'))
