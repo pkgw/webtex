@@ -1136,6 +1136,12 @@ commands.the = function cmd_the (engine) {
 	return;
     }
 
+    if (val.valtype == T_FONT) {
+	var val = val.get (engine);
+	engine.push (Token.new_cmd (new GivenFontCommand (val)));
+	return;
+    }
+
     var expn = val.get (engine).to_texstr ();
     engine.trace ('the ' + tok + ' -> ' + expn);
     engine.push_string (expn);
