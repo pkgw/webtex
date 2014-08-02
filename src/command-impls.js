@@ -520,7 +520,7 @@ commands.ifnum = function cmd_ifnum (engine) {
     else
 	throw new TexSyntaxError ('expected <,=,> in \\ifnum but got ' + tok);
 
-    engine.trace (['ifnum', val1, tok, val2, '?'].join (' '));
+    engine.trace (['ifnum', val1, tok, val2, '?', result].join (' '));
     engine.handle_if (result);
 };
 
