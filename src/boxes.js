@@ -97,3 +97,20 @@ var Rule = (function Rule_closure () {
 
     return Rule;
 }) ();
+
+
+var Mark = (function Mark_closure () {
+    function Mark (toks) {
+	this.ltype = LT_MARK;
+	this.toks = toks;
+    }
+
+    inherit (Mark, Listable);
+    var proto = Mark.prototype;
+
+    proto.toString = function Mark_toString () {
+	return '<Mark ' + (new Toklist (this.toks).as_serializable ()) + '>';
+    };
+
+    return Mark;
+}) ();

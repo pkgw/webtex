@@ -868,6 +868,15 @@ commands.vskip = function cmd_vskip (engine) {
 };
 
 
+commands.mark = function cmd_mark (engine) {
+    engine.scan_left_brace ();
+    var tlist = engine.scan_tok_group (true);
+    var mark = new Mark (tlist.toks);
+    engine.trace ('mark ' + tlist.uitext ());
+    return mark;
+};
+
+
 // "Special registers"
 //
 // ints: \prevgraf, \deadcycles, \insertpenalties, \inputlineno, \badness,
