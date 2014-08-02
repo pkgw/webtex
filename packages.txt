@@ -1,11 +1,15 @@
 amsfonts
+amsmath
 emulateapj
 epsf
 graphics
+hyperref
 hyphen-base
 latex
 latexconfig
+microtype
 natbib
+oberdiek
 plain
 revtex4
 tools
