@@ -675,6 +675,23 @@ commands.vbox = (function VboxCommand_closure () {
 })();
 
 
+commands.copy = (function CopyCommand_closure () {
+    function CopyCommand () { Command.call (this); }
+    inherit (CopyCommand, Command);
+    var proto = CopyCommand.prototype;
+    proto.name = 'copy';
+    proto.boxlike = true;
+
+    proto.invoke = function CopyCommand_invoke (engine) {
+	var reg = engine.scan_char_code ();
+	var box = engine.get_register (T_BOX, reg);
+	return box.clone ();
+    };
+
+    return CopyCommand;
+})();
+
+
 commands.wd = (function WdCommand_closure () {
     function WdCommand () { Command.call (this); }
     inherit (WdCommand, Command);

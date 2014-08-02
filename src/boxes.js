@@ -31,6 +31,13 @@ var Boxlike = (function Boxlike_closure () {
     inherit (Boxlike, Listable);
     var proto = Boxlike.prototype;
 
+    proto._copyto = function Boxlike__copyto (other) {
+	other.width = this.width.clone ();
+	other.height = this.height.clone ();
+	other.depth = this.depth.clone ();
+	other.shift_amount = this.shift_amount.clone ();
+    };
+
     return Boxlike;
 }) ();
 
@@ -50,6 +57,18 @@ var Box = (function Box_closure () {
 	return '<Box ' + bt_names[this.btype] + ' w=' + this.width +
 	    ' h=' + this.height + ' d=' + this.depth + ' #toks=' +
 	    this.list.length + '>';
+    };
+
+    proto._copyto = function Box__copyto (other) {
+	Boxlike.prototype._copyto.call (this, other);
+	other.btype = this.btype;
+	other.list = this.list.slice ();
+    };
+
+    proto.clone = function Box_clone () {
+	var b = new Box (this.btype);
+	this._copyto (b);
+	return b;
     };
 
     // Some compatible API with Value for convenience.
