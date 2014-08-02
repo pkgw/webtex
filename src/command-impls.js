@@ -968,6 +968,33 @@ commands.inputlineno = (function InputlinenoCommand_closure () {
 })();
 
 
+commands.lastskip = (function LastskipCommand_closure () {
+    // This is needed for LaTeX's version detection.
+    function LastskipCommand () { Command.call (this); }
+    inherit (LastskipCommand, Command);
+    var proto = LastskipCommand.prototype;
+    proto.name = 'lastskip';
+
+    proto._get = function LastskipCommand__get (engine) {
+	var item = engine.get_last_listable ();
+	if (item.ltype != LT_GLUE)
+	    return new Glue ();
+	return item.amount;
+    };
+
+    proto.invoke = function LastskipCommand_invoke (engine) {
+	engine.trace ('lastskip [uneaten]');
+	return this._get (engine);
+    };
+
+    proto.as_valref = function LastskipCommand_as_valref (engine) {
+	return new ConstantValref (T_GLUE, this._get (engine));
+    };
+
+    return LastskipCommand;
+})();
+
+
 // Font stuff
 
 commands.font = (function FontCommand_closure () {

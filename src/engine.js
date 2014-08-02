@@ -1636,6 +1636,18 @@ var Engine = (function Engine_closure () {
     };
 
 
+    proto.get_last_listable = function Engine_get_last_listable () {
+	var l = this.build_stack.length;
+	if (l == 0)
+	    return null;
+	var c = this.build_stack[l - 1];
+	l = c.length;
+	if (c == 0)
+	    return null;
+	return c[l - 1];
+    };
+
+
     // Miscellaneous
 
     proto.set_global_assign_mode = function Engine_set_global_assign_mode () {
