@@ -116,3 +116,20 @@ var Mark = (function Mark_closure () {
 
     return Mark;
 }) ();
+
+
+var Kern = (function Kern_closure () {
+    function Kern (amount) {
+	this.ltype = LT_KERN;
+	this.amount = amount;
+    }
+
+    inherit (Kern, Listable);
+    var proto = Kern.prototype;
+
+    proto.toString = function Kern_toString () {
+	return '<Kern ' + amount + '>';
+    };
+
+    return Kern;
+}) ();

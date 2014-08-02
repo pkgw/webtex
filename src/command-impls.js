@@ -902,6 +902,13 @@ commands.raise = function cmd_raise (engine) {
 };
 
 
+commands.kern = function cmd_kern (engine) {
+    var amount = engine.scan_dimen ();
+    engine.trace ('kern ' + amount);
+    return new Kern (amount);
+};
+
+
 // "Special registers"
 //
 // ints: \prevgraf, \deadcycles, \insertpenalties, \inputlineno, \badness,
