@@ -5,6 +5,7 @@ epsf
 graphics
 hyperref
 hyphen-base
+ifxetex
 latex
 latexconfig
 microtype
