@@ -180,6 +180,8 @@ var InputStack = (function InputStack_closure () {
     function InputStack (initial_linebuf, engine, args) {
 	this.engine = engine;
 	this.misc_args = args;
+	this.recent_toks = new Array (64);
+	this.next_recent_tok = 0;
 
 	if (initial_linebuf == null) {
 	    this.next_toknums = [];
@@ -195,6 +197,8 @@ var InputStack = (function InputStack_closure () {
 
     proto.clone = function InputStack_clone () {
 	var c = new InputStack (null, this.engine, this.misc_args)
+	c.recent_toks = this.recent_toks.slice ();
+	c.next_recent_tok = this.next_recent_tok;
 	c.next_toknums = this.next_toknums.slice ();
 	c.inputs = this.inputs.slice ();
 	return c;
@@ -218,6 +222,8 @@ var InputStack = (function InputStack_closure () {
 
 	if (tok !== EOF) {
 	    this.next_toknums[i]++;
+	    this.recent_toks[this.next_recent_tok] = tok;
+	    this.next_recent_tok = (this.next_recent_tok + 1) % this.recent_toks.length;
 	    return tok;
 	}
 
@@ -257,6 +263,46 @@ var InputStack = (function InputStack_closure () {
 
 	this.inputs = this.inputs.slice (0, i);
 	this.next_toknums = this.next_toknums.slice (0, i);
+    };
+
+    proto.describe_recent = function InputStack_describe_recent () {
+	var list = [];
+
+	for (var i = 0; i < this.recent_toks.length; i++) {
+	    var t = this.recent_toks[(this.next_recent_tok + i) % this.recent_toks.length];
+	    if (t != null)
+		list.push (t);
+	}
+
+	return 'Recent tokens (including expansions): '
+	    + (new Toklist (list).as_serializable ());
+    };
+
+    proto.describe_upcoming = function InputStack_describe_upcoming () {
+	// This function eats the upcoming tokens. It is assumed that it will
+	// only be called in error conditions where we're giving up.
+	// describe_recent() should be called before this function since the
+	// tokens we fetch will get logged as recent ones!
+
+	var list = [];
+	var t = null;
+
+	while (list.length < 64) {
+	    t = this.next_tok ();
+	    if (t === EOF || t === NeedMoreData)
+		break;
+	    list.push (t);
+	}
+
+	var s = 'Upcoming tokens (ignoring expansions): '
+	    + (new Toklist (list).as_serializable ());
+
+	if (t === EOF)
+	    s += ' <EOF>';
+	else
+	    s += ' ...';
+
+	return s;
     };
 
     return InputStack;

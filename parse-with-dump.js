@@ -24,7 +24,19 @@ webtex.Promise.all ([pjson, pengine]).then (function (stuff) {
     engine.restore_serialized_state (json);
 
     function iterate () {
-        var rv = engine.step ();
+	try {
+            var rv = engine.step ();
+	} catch (e) {
+	    console.warn ('--- error encountered ---');
+	    // The temporary variables make it so any input line logging that
+	    // happens when we peek at the upcoming tokens is separated nicely
+	    // from the recent/upcoming report instead of interleaved.
+	    var recent = engine.inputstack.describe_recent ();
+	    var upcoming = engine.inputstack.describe_upcoming ();
+	    console.warn (recent);
+	    console.warn (upcoming);
+	    throw e;
+	}
 
         if (rv === true)
             setImmediate (iterate);
