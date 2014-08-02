@@ -355,8 +355,7 @@ function _cmd_def (engine, cname, expand_replacement) {
 	    // We can't just use next_x_tok because \the{toklist} is
 	    // not supposed to be sub-expanded (TeXBook p. 216). Yargh.
 	    if (tok.iscmd (engine, 'noexpand')) {
-		repl_toks.push (engine.next_tok_throw ());
-		continue;
+		tok = engine.next_tok_throw ();
 	    } else if (tok.isexpandable (engine)) {
 		if (tok.iscmd (engine, 'the')) {
 		    var next = engine.next_tok_throw ();
