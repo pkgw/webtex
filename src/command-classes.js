@@ -244,8 +244,9 @@ var MacroCommand = (function MacroCommand_closure () {
 
 		if (tok.iscat (C_BGROUP))
 		    param_vals[ttok.pnum] = engine.scan_tok_group (false).toks;
-		else if (tok.iscmd (engine, '<space>'))
-		    // TexBook pg 201: spaces are not used as undelimited args
+		else if (tok.iscat (C_SPACE))
+		    // TexBook pg 201: spaces are not used as undelimited args;
+		    // here we intentionally do not use isspace() (T:TP 393).
 		    continue;
 		else
 		    param_vals[ttok.pnum] = [tok];

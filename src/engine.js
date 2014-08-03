@@ -853,7 +853,7 @@ var Engine = (function Engine_closure () {
 	var tok = this.next_tok ();
 	if (tok === NeedMoreData)
 	    throw tok;
-	if (tok == EOF || tok.iscat (C_SPACE))
+	if (tok == EOF || tok.isspace (this))
 	    return;
 	this.push (tok);
     };
@@ -864,7 +864,7 @@ var Engine = (function Engine_closure () {
 	    var tok = this.next_x_tok ();
 	    if (tok === NeedMoreData)
 		throw tok;
-	    if (!tok.iscmd (this, '<space>'))
+	    if (!tok.isspace (this))
 		return tok;
 	}
     };
@@ -875,11 +875,15 @@ var Engine = (function Engine_closure () {
 
 	    if (tok == null)
 		throw new TexSyntaxError ('EOF when expected left brace');
-	    if (tok.iscat (C_SPACE))
+	    if (tok.isspace (this))
 		continue;
 	    if (tok.iscmd (this, 'relax'))
 		continue;
-	    if (tok.iscat (C_BGROUP))
+	    if (tok.tocmd (this) instanceof BeginGroupCommand)
+		// We can't use iscmd() here because it calls samecmd(), which
+		// cares about the ordinal associated with the command,
+		// whereas here we don't. samecmd() needs to care about the
+		// ordinal for \ifx to work as desired.
 		return;
 
 	    throw new TexSyntaxError ('expected left brace but found ' + tok);
@@ -890,7 +894,7 @@ var Engine = (function Engine_closure () {
 	while (1) {
 	    var tok = this.next_x_tok_throw ();
 
-	    if (tok.iscat (C_SPACE))
+	    if (tok.isspace (this))
 		continue;
 	    if (tok.isotherchar (O_EQUALS))
 		return true;
@@ -914,7 +918,7 @@ var Engine = (function Engine_closure () {
 
 	    scanned.push (tok);
 
-	    if (i == 0 && tok.iscat (C_SPACE))
+	    if (i == 0 && tok.isspace (this))
 		continue; // my best interpretation of scan_keyword ...
 	    else if (!tok.ischar ())
 		break;
@@ -939,7 +943,7 @@ var Engine = (function Engine_closure () {
 	while (1) {
 	    var tok = this.next_x_tok_throw ();
 
-	    if (tok.iscat (C_SPACE)) {
+	    if (tok.isspace (this)) {
 	    } else if (tok.isotherchar (O_PLUS)) {
 	    } else if (tok.isotherchar (O_MINUS)) {
 		negfactor = -negfactor;
@@ -1116,7 +1120,7 @@ var Engine = (function Engine_closure () {
 
 		    var v = tok.maybe_decimal_value ();
 		    if (v < 0) {
-			if (!tok.iscat (C_SPACE))
+			if (!tok.isspace (this))
 			    this.push (tok);
 			break;
 		    }
@@ -1277,6 +1281,7 @@ var Engine = (function Engine_closure () {
 	    if (tok == null)
 		throw new TexRuntimeError ('EOF when expected cseq name');
 	    if (!tok.iscat (C_SPACE))
+		// note: here we do NOT want tok.isspace()
 		break;
 	}
 
@@ -1336,7 +1341,7 @@ var Engine = (function Engine_closure () {
 		break;
 	    }
 
-	    if (tok.iscat (C_SPACE))
+	    if (tok.isspace (this))
 		break;
 
 	    name += String.fromCharCode (tok.ord);
@@ -1554,7 +1559,7 @@ var Engine = (function Engine_closure () {
 
 	while (true) {
 	    tok = this.next_x_tok_throw ();
-	    if (!tok.iscat (C_SPACE) && !tok.iscmd (this, 'relax'))
+	    if (!tok.isspace (this) && !tok.iscmd (this, 'relax'))
 		break;
 	}
 

@@ -144,6 +144,27 @@ var Token = WEBTEX.Token = (function Token_closure () {
 	return frozen_cs_names.hasOwnProperty (this.name);
     };
 
+    proto.isspace = function Token_isspace (engine) {
+	var cmd = null;
+
+	if (this.kind == TK_CHAR) {
+	    if (this.catcode == C_SPACE)
+		return true;
+	    if (this.catcode == C_ACTIVE)
+		cmd = engine.get_active (this.ord);
+	    else
+		return false;
+	} else if (this.kind == TK_CSEQ) {
+	    cmd = engine.get_cseq (this.name);
+	} else if (this.kind == TK_PURECMD) {
+	    cmd = this.cmd;
+	} else {
+	    return false;
+	}
+
+	return (cmd instanceof SpacerCommand);
+    };
+
     proto.maybe_octal_value = function Token_maybe_octal_value () {
 	if (this.kind != TK_CHAR)
 	    return -1;
