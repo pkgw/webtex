@@ -579,7 +579,7 @@ var InsertLetterCommand = (function InsertLetterCommand_closure () {
     proto.invoke = function InsertLetter_invoke (engine) {
 	engine.ensure_horizontal ();
 	engine.trace ('accum letter ' + escchr (this.ord));
-	engine.mode_accum (this.ord);
+	return new Character (engine.get_font ('<current>'), this.ord);
     };
 
     return InsertLetterCommand;
@@ -600,7 +600,7 @@ var InsertOtherCommand = (function InsertOtherCommand_closure () {
     proto.invoke = function InsertOther_invoke (engine) {
 	engine.ensure_horizontal ();
 	engine.trace ('accum other ' + escchr (this.ord));
-	engine.mode_accum (this.ord);
+	return new Character (engine.get_font ('<current>'), this.ord);
     };
 
     return InsertOtherCommand;
@@ -636,6 +636,12 @@ var GivenCharCommand = (function GivenCharCommand_closure () {
 
     GivenCharCommand.deserialize = function GivenCharCommand_deserialize (data, hk) {
 	return new GivenCharCommand (parseInt (data, 10));
+    };
+
+    proto.invoke = function GivenCharCommand_invoke (engine) {
+	engine.ensure_horizontal ();
+	engine.trace ('accum given-char ' + escchr (this.ord));
+	return new Character (engine.get_font ('<current>'), this.ord);
     };
 
     proto.samecmd = function GivenCharCommand_samecmd (other) {

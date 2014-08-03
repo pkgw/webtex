@@ -120,6 +120,27 @@ var Rule = (function Rule_closure () {
 }) ();
 
 
+var Character = (function Character_closure () {
+    function Character (font, ord) {
+	Boxlike.call (this);
+	this.ltype = LT_CHARACTER;
+	this.font = font;
+	this.ord = ord;
+    }
+
+    inherit (Character, Boxlike);
+    var proto = Character.prototype;
+
+    proto.toString = function Character_toString () {
+	return '<Character  w=' + this.width + ' h=' + this.height +
+	    ' d=' + this.depth + ' ord=' + escchr (this.ord) +
+	    ' font=' + this.font + '>';
+    };
+
+    return Character;
+}) ();
+
+
 var Mark = (function Mark_closure () {
     function Mark (toks) {
 	this.ltype = LT_MARK;
