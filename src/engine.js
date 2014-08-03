@@ -204,7 +204,7 @@ var EquivTable = (function EquivTable_closure () {
 
 	state.catcodes = this._catcodes;
 	state.registers = {ints: {}, dimens: {}, glues: {}, muglues: {},
-			   toklists: {}, boxes: {}};
+			   toklists: {}};
 	state.parameters = {ints: {}, dimens: {}, glues: {}, muglues: {},
 			    toklists: {}};
 	state.commands = {};
@@ -231,9 +231,10 @@ var EquivTable = (function EquivTable_closure () {
 	    if (r != null && r.is_nonzero ())
 		state.registers.toklists[i] = r.as_serializable ();
 
-	    r = this._registers[T_BOX][i];
-	    if (r != null && r.is_nonzero ())
-		state.registers.boxes[i] = r.as_serializable ();
+	    //Box contents don't get serialized. I think.
+	    //r = this._registers[T_BOX][i];
+	    //if (r != null && r.is_nonzero ())
+	    //	state.registers.boxes[i] = r.as_serializable ();
 
 	    if (this._actives.hasOwnProperty (i))
 		state.actives[i] = this._actives[i].get_serialize_ident (state, housekeeping);
@@ -756,10 +757,6 @@ var Engine = (function Engine_closure () {
 	for (var reg in json.registers.toklists)
 	    this.set_register (T_TOKLIST, parseInt (reg, 10),
 			       Toklist.deserialize (json.registers.toklists[reg]));
-
-	for (var reg in json.registers.boxes)
-	    this.set_register (T_BOX, parseInt (reg, 10),
-			       Box.deserialize (json.registers.boxes[reg]));
 
 	for (var ord in json.actives)
 	    this.set_active (parseInt (ord, 10), getcmd (json.actives[ord]));
