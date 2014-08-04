@@ -770,6 +770,30 @@ commands.setbox = function cmd_setbox (engine) {
 };
 
 
+commands.hrule = function cmd_hrule (engine) {
+    if (engine.mode() != M_VERT && engine.mode() != M_IVERT)
+	throw new TexRuntimeError ('can only create \\hrule in vertical mode');
+
+    var rule = new Rule ();
+    rule.height.sp.value = 26214; // default rule = 0.4pt; T:TP sec 463
+    rule.depth.sp.value = 0;
+
+    while (true) {
+	if (engine.scan_keyword ('width'))
+	    rule.width = engine.scan_dimen ();
+	else if (engine.scan_keyword ('height'))
+	    rule.height = engine.scan_dimen ();
+	else if (engine.scan_keyword ('depth'))
+	    rule.depth = engine.scan_dimen ();
+	else
+	    break;
+    }
+
+    engine.trace ('hrule ' + rule);
+    return rule;
+};
+
+
 commands.vrule = function cmd_vrule (engine) {
     if (engine.mode() != M_HORZ && engine.mode() != M_RHORZ)
 	throw new TexRuntimeError ('can only create \\vrule in horizontal mode');
