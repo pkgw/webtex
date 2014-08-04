@@ -338,6 +338,25 @@ var Engine = (function Engine_closure () {
 	this.inputstack = new InputStack (args.initial_linebuf, this, args);
 
 	this.eqtb = new EquivTable (null);
+
+	// See TeXBook p. 271. These are global.
+	this.special_values = {};
+	this.special_values[T_INT] = {};
+	this.special_values[T_DIMEN] = {};
+	this.set_special_value (T_INT, 'spacefactor', 1000);
+	this.set_special_value (T_INT, 'prevgraf', 0);
+	this.set_special_value (T_INT, 'deadcycles', 0);
+	this.set_special_value (T_INT, 'insertpenalties', 0);
+	this.set_special_value (T_DIMEN, 'prevdepth', new Dimen ());
+	this.set_special_value (T_DIMEN, 'pagegoal', new Dimen ());
+	this.set_special_value (T_DIMEN, 'pagetotal', new Dimen ());
+	this.set_special_value (T_DIMEN, 'pagestretch', new Dimen ());
+	this.set_special_value (T_DIMEN, 'pagefilstretch', new Dimen ());
+	this.set_special_value (T_DIMEN, 'pagefillstretch', new Dimen ());
+	this.set_special_value (T_DIMEN, 'pagefilllstretch', new Dimen ());
+	this.set_special_value (T_DIMEN, 'pageshrink', new Dimen ());
+	this.set_special_value (T_DIMEN, 'pagedepth', new Dimen ());
+
 	this.mode_stack = [M_VERT];
 	this.build_stack = [[]];
 	this.group_exit_stack = [];
@@ -456,6 +475,14 @@ var Engine = (function Engine_closure () {
 	else
 	    this.eqtb.set_font (name, value);
 	this.maybe_insert_after_assign_token ();
+    };
+
+    proto.get_special_value = function Engine_get_special_value (valtype, name) {
+	return this.special_values[valtype][name];
+    };
+
+    proto.set_special_value = function Engine_set_special_value (valtype, name, value) {
+	this.special_values[valtype][name] = Value.coerce (valtype, value);
     };
 
     // Infrastructure.

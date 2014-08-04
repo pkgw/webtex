@@ -876,7 +876,7 @@ var NamedParamCommand = (function NamedParamCommand_closure () {
     inherit (NamedParamCommand, Command);
     var proto = NamedParamCommand.prototype;
 
-    proto.samecmd = function VariableRegisterCommand_samecmd (other) {
+    proto.samecmd = function NamedParamCommand_samecmd (other) {
 	if (other == null)
 	    return false;
 	if (this.name != other.name)
@@ -900,4 +900,33 @@ var NamedParamCommand = (function NamedParamCommand_closure () {
     };
 
     return NamedParamCommand;
+})();
+
+
+var SpecialValueCommand = (function SpecialValueCommand_closure () {
+    function SpecialValueCommand (valtype, name) {
+	Command.call (this);
+	this.valtype = valtype;
+	this.name = name;
+    }
+
+    inherit (SpecialValueCommand, Command);
+    var proto = SpecialValueCommand.prototype;
+
+    proto.get_valtype = function SpecialValueCommand_get_valtype () {
+	return this.valtype;
+    };
+
+    proto.as_valref = function SpecialValueCommand_as_valref (engine) {
+	return new SpecialValref (this.valtype, this.name);
+    };
+
+    proto.invoke = function SpecialValueCommand_invoke (engine) {
+	engine.scan_optional_equals ();
+	var newval = engine.scan_valtype (this.valtype);
+	engine.trace ([this.name, '=', newval].join (' '));
+	this.as_valref (engine).set (engine, newval);
+    };
+
+    return SpecialValueCommand;
 })();

@@ -995,14 +995,33 @@ commands.kern = function cmd_kern (engine) {
 };
 
 
-// "Special registers"
+// "Special registers" with single global values:
 //
-// ints: \prevgraf, \deadcycles, \insertpenalties, \inputlineno, \badness,
-// \parshape. In horizontal mode, also \spacefactor.
+// ints: \prevgraf, \deadcycles, \insertpenalties, \spacefactor.
 //
 // dimens: \pagetotal, \pagegoal, \pagestretch, \pagefilstretch,
-// \pagefillstretch, \pagefilllstretch, \pageshrink, \pagedepth. In vertical
-// mode, also \prevdepth.
+// \pagefillstretch, \pagefilllstretch, \pageshrink, \pagedepth, \prevdepth.
+//
+// Other internal values; listed as a superset of the specials in TeXBook.
+// distinction unclear:
+//
+// ints: \parshape \inputlineno \badness \lastpenalty
+// dimens: \lastkern
+
+commands.prevgraf = new SpecialValueCommand (T_INT, 'prevgraf');
+commands.deadcycles = new SpecialValueCommand (T_INT, 'deadcycles');
+commands.insertpenalties = new SpecialValueCommand (T_INT, 'insertpenalties');
+commands.spacefactor = new SpecialValueCommand (T_INT, 'spacefactor');
+commands.prevdepth = new SpecialValueCommand (T_DIMEN, 'prevdepth'); // XXX: only valid in vertical mode
+commands.pagegoal = new SpecialValueCommand (T_DIMEN, 'pagegoal');
+commands.pagetotal = new SpecialValueCommand (T_DIMEN, 'pagetotal');
+commands.pagestretch = new SpecialValueCommand (T_DIMEN, 'pagestretch');
+commands.pagefilstretch = new SpecialValueCommand (T_DIMEN, 'pagefilstretch');
+commands.pagefillstretch = new SpecialValueCommand (T_DIMEN, 'pagefillstretch');
+commands.pagefilllstretch = new SpecialValueCommand (T_DIMEN, 'pagefilllstretch');
+commands.pageshrink = new SpecialValueCommand (T_DIMEN, 'pageshrink');
+commands.pagedepth = new SpecialValueCommand (T_DIMEN, 'pagedepth');
+
 
 commands.inputlineno = (function InputlinenoCommand_closure () {
     // This is needed for LaTeX's version detection.

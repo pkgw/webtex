@@ -76,6 +76,27 @@ var ParamValref = (function ParamValref_closure () {
 }) ();
 
 
+var SpecialValref = (function SpecialValref_closure () {
+    function SpecialValref (valtype, name) {
+	Valref.call (this, valtype);
+	this.name = name;
+    }
+
+    inherit (SpecialValref, Valref);
+    var proto = SpecialValref.prototype;
+
+    proto.get = function SpecialValref_get (engine) {
+	return engine.get_special_value (this.valtype, this.name);
+    };
+
+    proto.set = function SpecialValref_set (engine, value) {
+	engine.set_special_value (this.valtype, this.name, value);
+    };
+
+    return SpecialValref;
+}) ();
+
+
 var ConstantValref = (function ConstantValref_closure () {
     function ConstantValref (valtype, value) {
 	Valref.call (this, valtype);
