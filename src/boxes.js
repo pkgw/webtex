@@ -207,3 +207,20 @@ var Penalty = (function Penalty_closure () {
 
     return Penalty;
 }) ();
+
+
+var BoxGlue = (function BoxGlue_closure () {
+    function BoxGlue (amount) {
+	this.ltype = LT_GLUE;
+	this.amount = amount;
+    }
+
+    inherit (BoxGlue, Listable);
+    var proto = BoxGlue.prototype;
+
+    proto.toString = function BoxGlue_toString () {
+	return '<BoxGlue ' + amount + '>';
+    };
+
+    return BoxGlue;
+}) ();

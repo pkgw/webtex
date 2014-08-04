@@ -2,8 +2,27 @@
 
 var commands = WEBTEX.commands = {};
 
+
+// Text layout.
+
 commands.par = function cmd_par (engine) {
     engine.trace ('par');
+};
+
+
+commands._space_ = function cmd__space_ (engine) {
+    // A control-space command appends glue to the current list, using the
+    // same amount that a <space token> inserts when the space factor is 1000.
+    engine.trace ('" " (explicit space) fake dimen');
+
+    var ss = engine.get_parameter (T_GLUE, 'spaceskip');
+    if (ss.is_nonzero ())
+	return new BoxGlue (ss);
+
+    // TODO: real font glue dimenions. T:TP 1042.
+    var g = new Glue ();
+    g.width.sp = Scaled.new_from_parts (12, 0);
+    return new BoxGlue (g);
 };
 
 
