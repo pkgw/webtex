@@ -696,6 +696,24 @@ commands.copy = (function CopyCommand_closure () {
 })();
 
 
+commands.box = (function BoxCommand_closure () {
+    function BoxCommand () { Command.call (this); }
+    inherit (BoxCommand, Command);
+    var proto = BoxCommand.prototype;
+    proto.name = 'box';
+    proto.boxlike = true;
+
+    proto.invoke = function BoxCommand_invoke (engine) {
+	var reg = engine.scan_char_code ();
+	var box = engine.get_register (T_BOX, reg);
+	engine.set_register (T_BOX, reg, new Box (BT_VOID));
+	return box;
+    };
+
+    return BoxCommand;
+})();
+
+
 commands.wd = (function WdCommand_closure () {
     function WdCommand () { Command.call (this); }
     inherit (WdCommand, Command);
@@ -786,7 +804,7 @@ commands.unhbox = function cmd_unhbox (engine) {
     if (box.btype != BT_HBOX)
 	throw new TexRuntimeError ('trying to unhbox a non-hbox');
 
-    engine.set_register (T_BOX, ref, new Box ('void'));
+    engine.set_register (T_BOX, reg, new Box (BT_VOID));
     return box.list;
 };
 
@@ -802,8 +820,38 @@ commands.unvbox = function cmd_unvbox (engine) {
     if (box.btype != BT_VBOX)
 	throw new TexRuntimeError ('trying to unvbox a non-vbox');
 
-    engine.set_register (T_BOX, ref, new Box ('void'));
+    engine.set_register (T_BOX, reg, new Box (BT_VOID));
     return box.list;
+};
+
+
+commands.unhcopy = function cmd_unhcopy (engine) {
+    engine.ensure_horizontal ();
+    var reg = engine.scan_char_code ();
+    var box = engine.get_register (T_BOX, reg);
+
+    if (box.btype == BT_VOID)
+	return;
+
+    if (box.btype != BT_HBOX)
+	throw new TexRuntimeError ('trying to unhcopy a non-hbox');
+
+    return box.list.slice ();
+};
+
+
+commands.unvcopy = function cmd_unvcopy (engine) {
+    engine.ensure_vertical ();
+    var reg = engine.scan_char_code ();
+    var box = engine.get_register (T_BOX, reg);
+
+    if (box.btype == BT_VOID)
+	return;
+
+    if (box.btype != BT_VBOX)
+	throw new TexRuntimeError ('trying to unvcopy a non-vbox');
+
+    return box.list.slice ();
 };
 
 
@@ -981,7 +1029,6 @@ commands.inputlineno = (function InputlinenoCommand_closure () {
 
 
 commands.lastskip = (function LastskipCommand_closure () {
-    // This is needed for LaTeX's version detection.
     function LastskipCommand () { Command.call (this); }
     inherit (LastskipCommand, Command);
     var proto = LastskipCommand.prototype;
