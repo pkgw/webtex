@@ -1644,7 +1644,7 @@ var Engine = (function Engine_closure () {
 	    return null;
 	var c = this.build_stack[l - 1];
 	l = c.length;
-	if (c == 0)
+	if (l == 0)
 	    return null;
 	return c[l - 1];
     };
