@@ -1629,13 +1629,14 @@ var Engine = (function Engine_closure () {
 	}
 
 	function finish_box (engine) {
-	    if (!this.boxop_stack.length)
-		throw new TexRuntimeError ('what to do with bare box?');
-
 	    this.trace ('<--- ' + bt_names[boxtype]);
 	    this.unnest_eqtb ();
 	    var box = new Box (boxtype);
 	    box.list = this.leave_mode ();
+
+	    if (!this.boxop_stack.length)
+		return box;
+
 	    var t = this.boxop_stack.pop ();
 	    var boxop = t[0], isassignment = t[1];
 
