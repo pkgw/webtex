@@ -1534,6 +1534,14 @@ commands.ifeof = function cmd_ifeof (engine) {
 
 // High-level miscellany
 
+commands.end = function cmd_end (engine) {
+    // See the TeXBook end of Ch. 23 (p. 264). Terminate if main vertical list
+    // is empty and \deadcycles=0. Otherwise insert '\line{} \vfill
+    // \penalty=`10000000000' into the main vertical list and reread the \end.
+    engine.trace ('end [fake impl]');
+    engine.handle_end ();
+};
+
 commands.dump = function cmd_dump (engine) {
     engine.trace ('dump');
 };

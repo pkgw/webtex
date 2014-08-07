@@ -336,6 +336,7 @@ var Engine = (function Engine_closure () {
 	this.iostack = args.iostack;
 
 	this.inputstack = new InputStack (args.initial_linebuf, this, args);
+	this._force_end = false;
 
 	this.eqtb = new EquivTable (null);
 
@@ -638,6 +639,10 @@ var Engine = (function Engine_closure () {
 	this.inputstack.pop_current_linebuf ();
     };
 
+    proto.handle_end = function Engine_handle_end () {
+	this._force_end = true;
+    };
+
     proto.infile = function Engine_infile (num) {
 	if (num < 0 || num > 15)
 	    throw new TexRuntimeError ('illegal input file number ' + num);
@@ -848,6 +853,8 @@ var Engine = (function Engine_closure () {
     };
 
     proto.next_tok = function Engine_next_tok () {
+	if (this._force_end)
+	    return EOF;
 	return this.inputstack.next_tok ();
     };
 
