@@ -1408,14 +1408,14 @@ commands.jobname = function cmd_jobname (engine) {
 
 commands.message = function cmd_message (engine) {
     engine.scan_left_brace ();
-    var toks = engine.scan_tok_group ();
+    var toks = engine.scan_tok_group (true);
     engine.trace ('message ' + toks.uitext ());
 };
 
 
 commands.errmessage = function cmd_errmessage (engine) {
     engine.scan_left_brace ();
-    var toks = engine.scan_tok_group ();
+    var toks = engine.scan_tok_group (true);
     engine.trace ('errmessage ~' + toks.uitext ());
     throw new TexRuntimeError ('TeX-triggered error: ' + toks.uitext ());
 };
@@ -1432,7 +1432,7 @@ commands.immediate = function cmd_immediate (engine) {
 commands.write = function cmd_write (engine) {
     var streamnum = engine.scan_streamnum ();
     engine.scan_left_brace ();
-    var toks = engine.scan_tok_group (false);
+    var toks = engine.scan_tok_group (true);
     var tt = toks.textext (engine, false);
 
     if (streamnum == 16) {
