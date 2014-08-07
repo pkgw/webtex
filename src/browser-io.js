@@ -105,8 +105,10 @@ function promise_engine (args) {
     return make_random_access_url (args.bundleurl)
 	.then (function (rau) {
 	    var z = new ZipReader (rau.read_range.bind (rau), rau.size ());
-	    args.bundle = new Bundle (z);
+	    var bundle = new Bundle (z);
 	    delete args.bundleurl;
+	    args.iostack = new IOStack ();
+	    args.iostack.push (bundle);
 
 	    args.initial_linebuf = new LineBuffer ();
 	    stream_url_to_linebuffer (inputurl, args.initial_linebuf);

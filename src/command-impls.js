@@ -1475,7 +1475,7 @@ commands.openin = function cmd_openin (engine) {
     engine.set_infile (snum, null);
 
     engine.trace ('openin ' + snum + ' = ' + fn);
-    var lb = engine.bundle.try_open_linebuffer (fn);
+    var lb = engine.iostack.try_open_linebuffer (fn);
     if (lb == null)
 	// File existence is tested by \openin..\ifeof, so this should
 	// be a warning only.

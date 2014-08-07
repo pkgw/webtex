@@ -325,7 +325,7 @@ var Engine = (function Engine_closure () {
     function Engine (args) {
 	/* Possible properties of args:
 	 *
-	 * bundle - the Bundle with TeX files (required)
+	 * iostack - an IOStack with TeX files (required)
 	 * debug_input_lines - print lines of input as they're read
 	 * debug_trace - print commands as they're executed
 	 * initial_linebuf - LineBuffer of the initial input (required)
@@ -333,7 +333,7 @@ var Engine = (function Engine_closure () {
 	 */
 
 	this.jobname = args.jobname || 'texput';
-	this.bundle = args.bundle;
+	this.iostack = args.iostack;
 
 	this.inputstack = new InputStack (args.initial_linebuf, this, args);
 
@@ -624,7 +624,7 @@ var Engine = (function Engine_closure () {
     // Input nesting and other I/O
 
     proto.handle_input = function Engine_handle_input (texfn) {
-	var lb = this.bundle.try_open_linebuffer (texfn);
+	var lb = this.iostack.try_open_linebuffer (texfn);
 	if (lb == null)
 	    throw new TexRuntimeError ('can\'t find any matching files for "' +
 				       texfn + '"');

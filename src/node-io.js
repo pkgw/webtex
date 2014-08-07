@@ -95,8 +95,10 @@ WEBTEX.IOBackend.makeInflater = function (datacb) {
 function promise_engine (args) {
     var f = new RandomAccessFile (args.bundlepath);
     var z = new ZipReader (f.read_range.bind (f), f.size ());
-    args.bundle = new Bundle (z);
+    var bundle = new Bundle (z);
     delete args.bundlepath;
+    args.iostack = new IOStack ();
+    args.iostack.push (bundle);
 
     args.initial_linebuf = make_fs_linebuffer (args.inputpath);
     delete args.inputpath;
@@ -105,7 +107,7 @@ function promise_engine (args) {
 	// Make sure that the bundle's zip reader is ready to go before
 	// handing off control.
 	function iterate () {
-	    if (args.bundle.zipreader.dirinfo == null)
+	    if (bundle.zipreader.dirinfo == null)
 		setTimeout (iterate, 10);
 	    else
 		resolve (new Engine (args));
