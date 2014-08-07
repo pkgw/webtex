@@ -368,8 +368,11 @@ var Engine = (function Engine_closure () {
 	this.conditional_stack = [];
 
 	this.infiles = [];
-	for (var i = 0; i < 16; i++)
+	this.outfiles = [];
+	for (var i = 0; i < 16; i++) {
 	    this.infiles[i] = null;
+	    this.outfiles[i] = null;
+	}
 
 	this.commands = {};
 	fill_cseq_commands (this);
@@ -645,6 +648,18 @@ var Engine = (function Engine_closure () {
 	if (num < 0 || num > 15)
 	    throw new TexRuntimeError ('illegal input file number ' + num);
 	this.infiles[num] = value;
+    };
+
+    proto.outfile = function Engine_outfile (num) {
+	if (num < 0 || num > 15)
+	    throw new TexRuntimeError ('illegal output file number ' + num);
+	return this.outfiles[num];
+    };
+
+    proto.set_outfile = function Engine_set_outfile (num, value) {
+	if (num < 0 || num > 15)
+	    throw new TexRuntimeError ('illegal output file number ' + num);
+	this.outfiles[num] = value;
     };
 
 

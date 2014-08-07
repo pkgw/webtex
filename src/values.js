@@ -725,6 +725,13 @@ var Toklist = WEBTEX.Toklist = (function Toklist_closure () {
 	}).join ('');
     };
 
+    proto.textext = function Toklist_textext (engine, ismacro) {
+	/* TeX representation of a toklist for \message, \write, etc. */
+	return this.toks.map (function (t) {
+	    return t.textext (engine, ismacro);
+	}).join ('');
+    };
+
     proto.to_texstr = function Toklist_to_texstr () {
 	throw new TexInternalError ('\\the of toklist should be handled specially');
     };

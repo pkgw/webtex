@@ -1433,7 +1433,22 @@ commands.write = function cmd_write (engine) {
     var streamnum = engine.scan_streamnum ();
     engine.scan_left_brace ();
     var toks = engine.scan_tok_group (false);
-    engine.trace ('write:' + streamnum + ' ' + toks.uitext ());
+    var tt = toks.textext (engine, false);
+
+    if (streamnum == 16) {
+	// 16 -> the log
+	engine.trace ('write:' + streamnum + '(->log) ' + tt);
+	return;
+    }
+
+    // If the specified file hasn't been opened, TeX writes to the console.
+    var outf = engine.outfile (streamnum);
+    if (outf == null)
+	engine.trace ('write:' + streamnum + '(->console) ' + tt);
+    else {
+	engine.trace ('write:' + streamnum + ' ' + tt);
+	outf.write_string (tt + '\n');
+    }
 };
 
 
@@ -1454,13 +1469,22 @@ commands.openout = function cmd_openout (engine) {
     var snum = engine.scan_streamnum ();
     engine.scan_optional_equals ();
     var fn = engine.scan_file_name ();
-    engine.trace ('openout ' + snum + ' = ' + fn + ' [noop]');
+
+    engine.trace ('openout ' + snum + ' = ' + fn);
+    var outf = engine.iostack.open_for_write (fn);
+    if (outf == null)
+	throw new TexRuntimeError ('failed to \\openout ' + fn);
+    if (outf == NeedMoreData)
+	throw outf;
+
+    engine.set_outfile (snum, outf);
 };
 
 
 commands.closeout = function cmd_closeout (engine) {
     var snum = engine.scan_streamnum ();
     engine.trace ('closeout ' + snum + ' [noop]');
+    engine.set_outfile (snum, null);
 };
 
 
