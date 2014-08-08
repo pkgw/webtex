@@ -805,6 +805,30 @@ commands.ht = (function HtCommand_closure () {
 })();
 
 
+commands.dp = (function DpCommand_closure () {
+    function DpCommand () { Command.call (this); }
+    inherit (DpCommand, Command);
+    var proto = DpCommand.prototype;
+    proto.name = 'dp';
+
+    proto.invoke = function DpCommand_invoke (engine) {
+	throw new TexInternalError ('not implemented bare \\dp');
+    };
+
+    proto.get_valtype = function DpCommand_get_valtype () {
+	return T_DIMEN;
+    };
+
+    proto.as_valref = function DpCommand_as_valref (engine) {
+	var reg = engine.scan_char_code ();
+	var box = engine.get_register (T_BOX, reg);
+	return new ConstantValref (T_DIMEN, box.depth);
+    };
+
+    return DpCommand;
+})();
+
+
 commands.setbox = function cmd_setbox (engine) {
     var reg = engine.scan_char_code ();
     engine.scan_optional_equals ();
