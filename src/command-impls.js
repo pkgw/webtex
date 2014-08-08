@@ -819,7 +819,17 @@ commands.dp = (function DpCommand_closure () {
     proto.name = 'dp';
 
     proto.invoke = function DpCommand_invoke (engine) {
-	throw new TexInternalError ('not implemented bare \\dp');
+	var reg = engine.scan_char_code ();
+	engine.scan_optional_equals ();
+	var depth = engine.scan_dimen ();
+	var box = engine.get_register (T_BOX, reg);
+
+	if (box.btype == BT_VOID) {
+	    engine.trace ('\\dp' + reg + ' = ' + depth + ' -- noop on void box');
+	} else {
+	    engine.trace ('\\dp' + reg + ' = ' + depth);
+	    box.depth = depth;
+	}
     };
 
     proto.get_valtype = function DpCommand_get_valtype () {
