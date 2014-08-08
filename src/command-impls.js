@@ -25,7 +25,7 @@ commands.par = function cmd_par (engine) {
 	hbox.list = engine.leave_mode ();
 	// skip: interline glue and penalties
 	engine.accum (hbox);
-	// TODO: page builder.
+	engine.run_page_builder ();
     } else {
 	throw new TexRuntimeError ('illegal use of \\par in math mode');
     }
@@ -1097,6 +1097,18 @@ commands.unskip = function cmd_unskip (engine) {
     engine.handle_un_listify (LT_GLUE);
 };
 
+
+commands.shipout = function cmd_shipout (engine) {
+    function ship_it_good (engine, box) {
+	if (box.btype != BT_VBOX)
+	    throw new TexRuntimeError ('\\shipout expected a vbox');
+
+	engine.set_register (T_BOX, 255, new Box (BT_VOID));
+	engine.ship_it (box);
+    };
+
+    engine.scan_box (ship_it_good, false);
+};
 
 
 // "Special registers" with single global values:

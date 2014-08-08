@@ -628,6 +628,42 @@ var Engine = (function Engine_closure () {
 	    this.build_stack[this.build_stack.length - 1].push (item);
     };
 
+    proto.run_page_builder = function Engine_run_page_builder () {
+	// Real TeX pays attention to the height of the page-in-progress and
+	// decides to break with a bunch of complex logic. We don't need any
+	// of that because the whole point is that computer monitors don't
+	// need pagination! So in Webtex the page builder has to be explicitly
+	// called.
+	if (this.mode () != M_VERT)
+	    throw new TexInternalError ('tried to build page outside of vertical mode');
+	if (this.build_stack.length != 1)
+	    throw new TexInternalError ('vertical mode is not deepest?')
+
+	// See TeXBook p. 125.
+
+	var vbox = new Box (BT_VBOX);
+	vbox.list = this.build_stack[0];
+	this.set_register (T_BOX, 255, vbox);
+	this.build_stack[0] = [];
+
+	function finish_output (eng) {
+	    this.trace ('< <-- output routine>');
+	    this.unnest_eqtb ();
+	    // TODO: deal with held-over insertions, etc.
+	};
+
+	var outtl = this.get_parameter (T_TOKLIST, 'output');
+	this.trace ('< --> output routine>');
+	this.trace ('*output -> ' + outtl.as_serializable ());
+	this.nest_eqtb ();
+	this.group_exit_stack.push (finish_output.bind (this));
+	this.push_toks (outtl.toks);
+    };
+
+    proto.ship_it = function Engine_ship_it (vbox) {
+	this.trace ('=== shipping [TODO: box stringification] ===');
+    };
+
     proto.handle_un_listify = function Engine_handle_unskip (targtype) {
 	// TODO?: TeXBook p. 280: not allowed in vmode if main vertical list
 	// has been entirely contributed to current page.
@@ -1652,7 +1688,7 @@ var Engine = (function Engine_closure () {
 
         function set_the_box (engine, box) {
             engine.trace ('... finish setbox: #' + reg + ' = ' + box);
-            engine.set_register (T_BOX, reg, box)
+            engine.set_register (T_BOX, reg, box);
 	}
 
         this.scan_box (set_the_box.bind (this), true);
