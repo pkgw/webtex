@@ -512,9 +512,7 @@ var Engine = (function Engine_closure () {
 
 	try {
 	    var cmd = tok.tocmd (this);
-	    var result = cmd.invoke (this);
-	    if (result != null)
-		this.mode_accum (result);
+	    cmd.invoke (this);
 	} catch (e) {
 	    if (e === NeedMoreData) {
 		this.inputstack = initial_is;
@@ -579,14 +577,6 @@ var Engine = (function Engine_closure () {
 	    this.enter_mode (M_IVERT);
     };
 
-    proto.mode_accum = function Engine_mode_accum (item) {
-	if (item instanceof Array)
-	    Array.prototype.push.apply (this.build_stack[this.build_stack.length - 1],
-					item);
-	else
-	    this.build_stack[this.build_stack.length - 1].push (item);
-    };
-
     proto.handle_bgroup = function Engine_handle_bgroup () {
 	this.trace ('< --> simple>');
 	this.nest_eqtb ();
@@ -596,7 +586,10 @@ var Engine = (function Engine_closure () {
     proto.handle_egroup = function Engine_handle_egroup () {
 	if (!this.group_exit_stack.length)
 	    throw new TexRuntimeError ('ending a group that wasn\'t started');
-	return (this.group_exit_stack.pop ()) (this);
+
+	var result = (this.group_exit_stack.pop ()) (this);
+	if (result != null)
+	    this.accum (result);
     };
 
     proto.handle_begingroup = function Engine_handle_begingroup () {
@@ -623,6 +616,16 @@ var Engine = (function Engine_closure () {
 
 	this.trace ('< <-- semi-simple>');
 	this.unnest_eqtb ();
+    };
+
+    // List-building.
+
+    proto.accum = function Engine_accum (item) {
+	if (item instanceof Array)
+	    Array.prototype.push.apply (this.build_stack[this.build_stack.length - 1],
+					item);
+	else
+	    this.build_stack[this.build_stack.length - 1].push (item);
     };
 
     // Input nesting and other I/O

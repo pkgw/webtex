@@ -421,7 +421,7 @@ var BeginGroupCommand = (function BeginGroupCommand_closure () {
     proto.desc = 'begin-group character';
 
     proto.invoke = function BeginGroupCommand_invoke (engine) {
-	return engine.handle_bgroup ();
+	engine.handle_bgroup ();
     };
 
     BeginGroupCommand.deserialize = function BeginGroupCommand_deserialize (data, hk) {
@@ -444,7 +444,7 @@ var EndGroupCommand = (function EndGroupCommand_closure () {
     proto.desc = 'end-group character';
 
     proto.invoke = function EndGroupCommand_invoke (engine) {
-	return engine.handle_egroup ();
+	engine.handle_egroup ();
     };
 
     EndGroupCommand.deserialize = function EndGroupCommand_deserialize (data, hk) {
@@ -579,7 +579,7 @@ var InsertLetterCommand = (function InsertLetterCommand_closure () {
     proto.invoke = function InsertLetter_invoke (engine) {
 	engine.ensure_horizontal ();
 	engine.trace ('accum letter ' + escchr (this.ord));
-	return new Character (engine.get_font ('<current>'), this.ord);
+	engine.accum (new Character (engine.get_font ('<current>'), this.ord));
     };
 
     return InsertLetterCommand;
@@ -600,7 +600,7 @@ var InsertOtherCommand = (function InsertOtherCommand_closure () {
     proto.invoke = function InsertOther_invoke (engine) {
 	engine.ensure_horizontal ();
 	engine.trace ('accum other ' + escchr (this.ord));
-	return new Character (engine.get_font ('<current>'), this.ord);
+	engine.accum (new Character (engine.get_font ('<current>'), this.ord));
     };
 
     return InsertOtherCommand;
@@ -641,7 +641,7 @@ var GivenCharCommand = (function GivenCharCommand_closure () {
     proto.invoke = function GivenCharCommand_invoke (engine) {
 	engine.ensure_horizontal ();
 	engine.trace ('accum given-char ' + escchr (this.ord));
-	return new Character (engine.get_font ('<current>'), this.ord);
+	engine.accum (new Character (engine.get_font ('<current>'), this.ord));
     };
 
     proto.samecmd = function GivenCharCommand_samecmd (other) {
@@ -799,7 +799,7 @@ var VariableRegisterCommand = (function VariableRegisterCommand_closure () {
     proto.invoke = function VariableRegisterCommand_invoke (engine) {
 	var reg = engine.scan_char_code ();
 	var grc = new GivenRegisterCommand (this.valtype, this.name, reg);
-	return grc.invoke (engine);
+	grc.invoke (engine);
     };
 
     proto.get_valtype = function VariableRegisterCommand_get_valtype () {
