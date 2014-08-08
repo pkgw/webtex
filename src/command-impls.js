@@ -201,6 +201,13 @@ commands.afterassignment = function cmd_afterassignment (engine) {
 };
 
 
+commands.aftergroup = function cmd_aftergroup (engine) {
+    var tok = engine.next_tok_throw ();
+    engine.trace ('aftergroup <- ' + tok);
+    engine.handle_aftergroup (tok);
+};
+
+
 // Register access and manipulation: \count, \advance, etc.
 
 commands.count = new VariableRegisterCommand ('count', T_INT);

@@ -362,11 +362,10 @@ var Engine = (function Engine_closure () {
 	this.build_stack = [[]];
 	this.group_exit_stack = [];
 	this.boxop_stack = [];
+	this.conditional_stack = [];
 
 	this.assign_flags = 0;
 	this.after_assign_token = null;
-
-	this.conditional_stack = [];
 
 	this.infiles = [];
 	this.outfiles = [];
@@ -580,16 +579,20 @@ var Engine = (function Engine_closure () {
     proto.handle_bgroup = function Engine_handle_bgroup () {
 	this.trace ('< --> simple>');
 	this.nest_eqtb ();
-	this.group_exit_stack.push (this.unnest_eqtb.bind (this));
+	this.group_exit_stack.push ([this.unnest_eqtb.bind (this), []]);
     };
 
     proto.handle_egroup = function Engine_handle_egroup () {
 	if (!this.group_exit_stack.length)
 	    throw new TexRuntimeError ('ending a group that wasn\'t started');
 
-	var result = (this.group_exit_stack.pop ()) (this);
+	var info = this.group_exit_stack.pop (); // [callback, aftergroup-toklist]
+
+	var result = info[0] (this);
 	if (result != null)
 	    this.accum (result);
+
+	this.push_toks (info[1]);
     };
 
     proto.handle_begingroup = function Engine_handle_begingroup () {
@@ -602,21 +605,31 @@ var Engine = (function Engine_closure () {
 	}
 	end_semisimple.is_semisimple = true;
 
-	this.group_exit_stack.push (end_semisimple);
+	this.group_exit_stack.push ([end_semisimple, []]);
     };
 
     proto.handle_endgroup = function Engine_handle_endgroup () {
 	if (!this.group_exit_stack.length)
 	    throw new TexRuntimeError ('stray \\endgroup');
 
-	var ender = this.group_exit_stack.pop ();
-	if (ender.is_semisimple !== true)
+	var info = this.group_exit_stack.pop ();
+	if (info[0].is_semisimple !== true)
 	    throw new TexRuntimeError ('got \\endgroup when should have ' +
-					   'gotten other group-ender');
+				       'gotten other group-ender');
 
 	this.trace ('< <-- semi-simple>');
 	this.unnest_eqtb ();
+	this.push_toks (info[1]);
     };
+
+    proto.handle_aftergroup = function Engine_handle_aftergroup (tok) {
+	var l = this.group_exit_stack.length;
+	if (l == 0)
+	    throw new TexRuntimeError ('cannot call \\aftergroup outside of a group');
+
+	this.group_exit_stack[l - 1][1].push (tok);
+    };
+
 
     // List-building.
 
@@ -656,7 +669,7 @@ var Engine = (function Engine_closure () {
 	this.trace ('< --> output routine>');
 	this.trace ('*output -> ' + outtl.as_serializable ());
 	this.nest_eqtb ();
-	this.group_exit_stack.push (finish_output.bind (this));
+	this.group_exit_stack.push ([finish_output.bind (this), []]);
 	this.push_toks (outtl.toks);
     };
 
@@ -1734,7 +1747,7 @@ var Engine = (function Engine_closure () {
 	this.trace ('--> ' + bt_names[boxtype]);
 	this.enter_mode (newmode);
 	this.nest_eqtb ();
-	this.group_exit_stack.push (finish_box.bind (this));
+	this.group_exit_stack.push ([finish_box.bind (this), []]);
     };
 
     proto.handle_hbox = function Engine_handle_hbox () {
