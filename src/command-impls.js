@@ -1127,9 +1127,7 @@ commands.unskip = function cmd_unskip (engine) {
 
 commands.shipout = function cmd_shipout (engine) {
     function ship_it_good (engine, box) {
-	if (box.btype != BT_VBOX)
-	    throw new TexRuntimeError ('\\shipout expected a vbox');
-
+	// Note: any box type (void, hbox, vbox) is OK to ship out.
 	engine.set_register (T_BOX, 255, new Box (BT_VOID));
 	engine.ship_it (box);
     };
