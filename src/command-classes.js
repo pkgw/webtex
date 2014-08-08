@@ -825,7 +825,7 @@ var GivenFontCommand = (function GivenFontCommand_closure () {
     var proto = GivenFontCommand.prototype;
     proto.name = '<given-font>';
     proto.multi_instanced = true;
-    proto.assign_flags_mode = AFM_CONSUME;
+    proto.assign_flag_mode = AFM_CONSUME;
 
     proto._serialize_data = function GivenFontCommand__serialize_data (state, housekeeping) {
 	return this.font.get_serialize_ident (state, housekeeping);
@@ -875,6 +875,7 @@ var NamedParamCommand = (function NamedParamCommand_closure () {
 
     inherit (NamedParamCommand, Command);
     var proto = NamedParamCommand.prototype;
+    proto.assign_flag_mode = AFM_CONSUME;
 
     proto.samecmd = function NamedParamCommand_samecmd (other) {
 	if (other == null)
