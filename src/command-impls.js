@@ -6,7 +6,29 @@ var commands = WEBTEX.commands = {};
 // Text layout.
 
 commands.par = function cmd_par (engine) {
-    engine.trace ('par');
+    var m = engine.mode ();
+
+    if (m == M_VERT || m == M_IVERT) {
+	// Should exercise page builder and reset paragraph shape params
+	// (TeXBook p. 283).
+	engine.trace ('par: vertical -> [bad noop]');
+    } else if (m == M_RHORZ) {
+	engine.trace ('par: rhorz -> noop');
+    } else if (m == M_HORZ) {
+	// TeXBook p. 286:
+	engine.trace ('par: horz -> endgraf');
+	engine.handle_un_listify (LT_GLUE);
+	engine.accum (new Penalty (new TexInt (10000)));
+	engine.accum (new BoxGlue (engine.get_parameter (T_GLUE, 'parfillskip')));
+	// skip: linebreaking
+	var hbox = new Box (BT_HBOX);
+	hbox.list = engine.leave_mode ();
+	// skip: interline glue and penalties
+	engine.accum (hbox);
+	// TODO: page builder.
+    } else {
+	throw new TexRuntimeError ('illegal use of \\par in math mode');
+    }
 };
 
 
