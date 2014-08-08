@@ -628,6 +628,24 @@ var Engine = (function Engine_closure () {
 	    this.build_stack[this.build_stack.length - 1].push (item);
     };
 
+    proto.handle_un_listify = function Engine_handle_unskip (targtype) {
+	// TODO?: TeXBook p. 280: not allowed in vmode if main vertical list
+	// has been entirely contributed to current page.
+
+	var l = this.build_stack.length;
+	if (l == 0)
+	    return;
+
+	var list = this.build_stack[l - 1];
+	l = list.length;
+	if (l == 0)
+	    return;
+
+	if (list[l - 1].ltype == targtype)
+	    list.pop ();
+    };
+
+
     // Input nesting and other I/O
 
     proto.handle_input = function Engine_handle_input (texfn) {

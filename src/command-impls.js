@@ -1040,6 +1040,20 @@ commands.kern = function cmd_kern (engine) {
 };
 
 
+commands.unpenalty = function cmd_unpenalty (engine) {
+    engine.handle_un_listify (LT_PENALTY);
+};
+
+commands.unkern = function cmd_unkern (engine) {
+    engine.handle_un_listify (LT_KERN);
+};
+
+commands.unskip = function cmd_unskip (engine) {
+    engine.handle_un_listify (LT_GLUE);
+};
+
+
+
 // "Special registers" with single global values:
 //
 // ints: \prevgraf, \deadcycles, \insertpenalties, \spacefactor.
