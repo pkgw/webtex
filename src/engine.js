@@ -1624,7 +1624,7 @@ var Engine = (function Engine_closure () {
 
     // Box construction
 
-    proto.scan_box = function Engine_scan_box () {
+    proto.scan_box = function Engine_scan_box (callback, is_assignment) {
 	var tok = null;
 
 	while (true) {
@@ -1638,6 +1638,8 @@ var Engine = (function Engine_closure () {
 
 	if (!tok.tocmd (this).boxlike)
 	    throw new TexRuntimeError ('expected boxlike command but got ' + tok);
+
+        this.boxop_stack.push ([callback, is_assignment]);
 	this.push (tok);
     };
 
@@ -1653,8 +1655,7 @@ var Engine = (function Engine_closure () {
             engine.set_register (T_BOX, reg, box)
 	}
 
-        this.boxop_stack.push ([set_the_box.bind (this), true]);
-        this.scan_box (); // check that we're being followed by a box.
+        this.scan_box (set_the_box.bind (this), true);
     };
 
     proto._handle_box = function Engine__handle_box (boxtype, newmode) {

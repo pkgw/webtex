@@ -1066,8 +1066,7 @@ function _cmd_box_shift (engine, desc, negate) {
 	return box;
     }
 
-    engine.boxop_stack.push ([shift_the_box, false]);
-    engine.scan_box ();
+    engine.scan_box (shift_the_box, false);
 };
 
 commands.lower = function cmd_lower (engine) {
