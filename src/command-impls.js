@@ -1077,12 +1077,22 @@ function _cmd_box_shift (engine, desc, negate) {
 };
 
 commands.lower = function cmd_lower (engine) {
+    // Sign conventions: T:TP 185.
     _cmd_box_shift (engine, 'lower', false);
 };
 
 commands.raise = function cmd_raise (engine) {
     _cmd_box_shift (engine, 'raise', true);
 };
+
+commands.moveright = function cmd_moveright (engine) {
+    _cmd_box_shift (engine, 'moveright', false);
+};
+
+commands.moveleft = function cmd_moveleft (engine) {
+    _cmd_box_shift (engine, 'moveleft', false);
+};
+
 
 
 commands.kern = function cmd_kern (engine) {
