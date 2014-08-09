@@ -968,7 +968,7 @@ commands.hfil = function cmd_hfil (engine) {
     var g = new Glue ();
     g.stretch.sp = Scaled.new_from_parts (1, 0);
     g.stretch_order = 1;
-    engine.accum (g);
+    engine.accum (new BoxGlue (g));
 };
 
 commands.hfill = function cmd_hfill (engine) {
@@ -976,7 +976,7 @@ commands.hfill = function cmd_hfill (engine) {
     var g = new Glue ();
     g.stretch.sp = Scaled.new_from_parts (1, 0);
     g.stretch_order = 2;
-    engine.accum (g);
+    engine.accum (new BoxGlue (g));
 };
 
 commands.hss = function cmd_hss (engine) {
@@ -986,7 +986,7 @@ commands.hss = function cmd_hss (engine) {
     g.stretch_order = 1;
     g.shrink.sp = Scaled.new_from_parts (1, 0);
     g.shrink_order = 1;
-    engine.accum (g);
+    engine.accum (new BoxGlue (g));
 };
 
 commands.hfilneg = function cmd_hfilneg (engine) {
@@ -994,7 +994,7 @@ commands.hfilneg = function cmd_hfilneg (engine) {
     var g = new Glue ();
     g.stretch.sp = Scaled.new_from_parts (-1, 0);
     g.stretch_order = 1;
-    engine.accum (g);
+    engine.accum (new BoxGlue (g));
 };
 
 commands.hskip = function cmd_hskip (engine) {
@@ -1008,7 +1008,7 @@ commands.vfil = function cmd_vfil (engine) {
     var g = new Glue ();
     g.stretch.sp = Scaled.new_from_parts (1, 0);
     g.stretch_order = 1;
-    engine.accum (g);
+    engine.accum (new BoxGlue (g));
 };
 
 
@@ -1017,7 +1017,7 @@ commands.vfill = function cmd_vfill (engine) {
     var g = new Glue ();
     g.stretch.sp = Scaled.new_from_parts (1, 0);
     g.stretch_order = 2;
-    engine.accum (g);
+    engine.accum (new BoxGlue (g));
 };
 
 
@@ -1028,7 +1028,7 @@ commands.vss = function cmd_vss (engine) {
     g.stretch_order = 1;
     g.shrink.sp = Scaled.new_from_parts (1, 0);
     g.shrink_order = 1;
-    engine.accum (g);
+    engine.accum (new BoxGlue (g));
 };
 
 commands.vfilneg = function cmd_vfilneg (engine) {
@@ -1036,7 +1036,7 @@ commands.vfilneg = function cmd_vfilneg (engine) {
     var g = new Glue ();
     g.stretch.sp = Scaled.new_from_parts (-1, 0);
     g.stretch_order = 1;
-    engine.accum (g);
+    engine.accum (new BoxGlue (g));
 };
 
 commands.vskip = function cmd_vskip (engine) {
