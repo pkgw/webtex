@@ -260,6 +260,13 @@ var Token = WEBTEX.Token = (function Token_closure () {
 	if (this.kind == TK_PARAM)
 	    return '%#' + this.pnum.toString ();
 
+	if (this.kind == TK_PURECMD) {
+	    // We need to handle this case since we use this function for
+	    // debugging, and in those instances it may be valid to have a
+	    // purecmd token in the list.
+	    return '%!' + this.cmd;
+	}
+
 	// We must be a control sequence.
 	return '%[' + [].map.call (this.name, function (c) {
 	    var o = ord (c);
