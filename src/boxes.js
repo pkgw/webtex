@@ -55,7 +55,7 @@ var Box = (function Box_closure () {
 
     proto.toString = function Box_toString () {
 	return '<Box ' + bt_names[this.btype] + ' w=' + this.width +
-	    ' h=' + this.height + ' d=' + this.depth + ' #toks=' +
+	    ' h=' + this.height + ' d=' + this.depth + ' #items=' +
 	    this.list.length + '>';
     };
 
