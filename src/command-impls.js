@@ -739,7 +739,8 @@ commands.copy = (function CopyCommand_closure () {
     proto.invoke = function CopyCommand_invoke (engine) {
 	var reg = engine.scan_char_code ();
 	var box = engine.get_register (T_BOX, reg);
-	engine.accum (box.clone ());
+	engine.trace ('copy box ' + reg);
+	engine.handle_finished_box (box.clone ());
     };
 
     return CopyCommand;
@@ -756,8 +757,9 @@ commands.box = (function BoxCommand_closure () {
     proto.invoke = function BoxCommand_invoke (engine) {
 	var reg = engine.scan_char_code ();
 	var box = engine.get_register (T_BOX, reg);
+	engine.trace ('fetch box ' + reg);
 	engine.set_register (T_BOX, reg, new Box (BT_VOID));
-	engine.accum (box);
+	engine.handle_finished_box (box);
     };
 
     return BoxCommand;

@@ -587,11 +587,7 @@ var Engine = (function Engine_closure () {
 	    throw new TexRuntimeError ('ending a group that wasn\'t started');
 
 	var info = this.group_exit_stack.pop (); // [callback, aftergroup-toklist]
-
-	var result = info[0] (this);
-	if (result != null)
-	    this.accum (result);
-
+	info[0] (this);
 	this.push_toks (info[1]);
     };
 
@@ -1748,6 +1744,24 @@ var Engine = (function Engine_closure () {
         this.scan_box (set_the_box.bind (this), true);
     };
 
+    proto.handle_finished_box = function Engine_handle_finished_box (box) {
+	if (!this.boxop_stack.length)
+	    this.accum (box)
+	else {
+	    var t = this.boxop_stack.pop ();
+	    var boxop = t[0], isassignment = t[1];
+
+	    if (isassignment && this.after_assign_token != null) {
+		// This is an assignment expression. TODO: afterassign token
+		// in boxes gets inserted at beginning of box token list,
+		// before every[hv]box token lists (TeXbook p. 279)
+		throw new TexRuntimeError ('afterassignment for boxes');
+	    }
+
+	    boxop (this, box);
+	}
+    };
+
     proto._handle_box = function Engine__handle_box (boxtype, newmode) {
 	var is_exact, spec;
 
@@ -1767,22 +1781,8 @@ var Engine = (function Engine_closure () {
 	    this.unnest_eqtb ();
 	    var box = new Box (boxtype);
 	    box.list = this.leave_mode ();
-
-	    if (!this.boxop_stack.length)
-		return box;
-
-	    var t = this.boxop_stack.pop ();
-	    var boxop = t[0], isassignment = t[1];
-
-	    if (isassignment && this.after_assign_token != null) {
-		// This is an assignment expression. TODO: afterassign token
-		// in boxes gets inserted at beginning of box token list,
-		// before every[hv]box token lists (TeXbook p. 279)
-		throw new TexRuntimeError ('afterassignment for boxes');
-	    }
-
-	    return boxop (this, box);
-	};
+	    engine.handle_finished_box (box);
+	}
 
 	this.scan_left_brace ();
 	this.trace ('< ---> ' + bt_names[boxtype] + '>');
