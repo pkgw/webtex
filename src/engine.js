@@ -577,7 +577,7 @@ var Engine = (function Engine_closure () {
     };
 
     proto.handle_bgroup = function Engine_handle_bgroup () {
-	this.trace ('< --> simple>');
+	this.trace ('< ---> simple>');
 	this.nest_eqtb ();
 	this.group_exit_stack.push ([this.unnest_eqtb.bind (this), []]);
     };
@@ -596,7 +596,7 @@ var Engine = (function Engine_closure () {
     };
 
     proto.handle_begingroup = function Engine_handle_begingroup () {
-	this.trace ('< --> semi-simple>');
+	this.trace ('< ---> semi-simple>');
 	this.nest_eqtb ();
 
 	function end_semisimple (eng) {
@@ -617,7 +617,7 @@ var Engine = (function Engine_closure () {
 	    throw new TexRuntimeError ('got \\endgroup when should have ' +
 				       'gotten other group-ender');
 
-	this.trace ('< <-- semi-simple>');
+	this.trace ('< <--- semi-simple>');
 	this.unnest_eqtb ();
 	this.push_toks (info[1]);
     };
@@ -660,13 +660,13 @@ var Engine = (function Engine_closure () {
 	this.build_stack[0] = [];
 
 	function finish_output (eng) {
-	    this.trace ('< <-- output routine>');
+	    this.trace ('< <--- output routine>');
 	    this.unnest_eqtb ();
 	    // TODO: deal with held-over insertions, etc.
 	};
 
 	var outtl = this.get_parameter (T_TOKLIST, 'output');
-	this.trace ('< --> output routine>');
+	this.trace ('< ---> output routine>');
 	this.trace ('*output -> ' + outtl.as_serializable ());
 	this.nest_eqtb ();
 	this.group_exit_stack.push ([finish_output.bind (this), []]);
@@ -1722,7 +1722,7 @@ var Engine = (function Engine_closure () {
 	}
 
 	function finish_box (engine) {
-	    this.trace ('<--- ' + bt_names[boxtype]);
+	    this.trace ('< <--- ' + bt_names[boxtype] + '>');
 	    this.unnest_eqtb ();
 	    var box = new Box (boxtype);
 	    box.list = this.leave_mode ();
@@ -1744,7 +1744,7 @@ var Engine = (function Engine_closure () {
 	};
 
 	this.scan_left_brace ();
-	this.trace ('--> ' + bt_names[boxtype]);
+	this.trace ('< ---> ' + bt_names[boxtype] + '>');
 	this.enter_mode (newmode);
 	this.nest_eqtb ();
 	this.group_exit_stack.push ([finish_box.bind (this), []]);
