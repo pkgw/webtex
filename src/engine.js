@@ -652,10 +652,24 @@ var Engine = (function Engine_closure () {
 	if (this.build_stack.length != 1)
 	    throw new TexInternalError ('vertical mode is not deepest?')
 
+	// Hacky version of \outputpenalty setting -- TeXBook p. 125. We should
+	// preserve the penalty for the next batch of output, but since (I think)
+	// we don't need it for anything, we just pop it off the list.
+
+	var list = this.build_stack[0];
+	var l = list.length;
+
+	if (l > 0 && list[l-1].ltype == LT_PENALTY) {
+	    this.set_parameter (T_INT, 'outputpenalty', list[l-1].amount);
+	    list.pop ();
+	} else {
+	    this.set_parameter (T_INT, 'outputpenalty', 10000);
+	}
+
 	// See TeXBook p. 125.
 
 	var vbox = new Box (BT_VBOX);
-	vbox.list = this.build_stack[0];
+	vbox.list = list;
 	this.set_register (T_BOX, 255, vbox);
 	this.build_stack[0] = [];
 
@@ -710,7 +724,32 @@ var Engine = (function Engine_closure () {
     };
 
     proto.handle_end = function Engine_handle_end () {
-	this._force_end = true;
+	// See the TeXBook end of Ch. 23 (p. 264). Terminate if main vertical
+	// list is empty and \deadcycles=0. Otherwise insert '\line{} \vfill
+	// \penalty-'10000000000' into the main vertical list and reread the
+	// \end. \line{} is \hbox to\hsize{}.
+
+	if (this.build_stack[0].length == 0 &&
+	    this.get_special_value (T_INT, 'deadcycles').value == 0) {
+	    this.trace ('... completely done');
+	    this._force_end = true;
+	} else {
+	    this.trace ('... forcing page build');
+
+	    var hb = new Box (BT_HBOX);
+	    hb.width = this.get_parameter (T_DIMEN, 'hsize');
+	    this.accum (hb);
+
+	    var g = new Glue ();
+	    g.stretch.sp = Scaled.new_from_parts (1, 0);
+	    g.stretch_order = 2;
+	    this.accum (new BoxGlue (g));
+
+	    this.accum (new Penalty (-1073741824));
+
+	    this.push (Token.new_cmd (this.commands['end']));
+	    this.run_page_builder ();
+	}
     };
 
     proto.infile = function Engine_infile (num) {
