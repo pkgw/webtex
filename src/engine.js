@@ -682,13 +682,15 @@ var Engine = (function Engine_closure () {
 	var outtl = this.get_parameter (T_TOKLIST, 'output');
 	this.trace ('< ---> output routine>');
 	this.trace ('*output -> ' + outtl.as_serializable ());
+	this.trace ('*box255 = ' + vbox.uitext ());
 	this.nest_eqtb ();
 	this.group_exit_stack.push ([finish_output.bind (this), []]);
 	this.push_toks (outtl.toks);
     };
 
-    proto.ship_it = function Engine_ship_it (vbox) {
-	this.trace ('=== shipping [TODO: box stringification] ===');
+    proto.ship_it = function Engine_ship_it (box) {
+	this.trace ('=== shipping ===');
+	this.trace (box.uitext ());
     };
 
     proto.handle_un_listify = function Engine_handle_unskip (targtype) {

@@ -999,7 +999,7 @@ commands.hfilneg = function cmd_hfilneg (engine) {
 
 commands.hskip = function cmd_hskip (engine) {
     engine.ensure_horizontal ();
-    engine.accum (engine.scan_glue (false));
+    engine.accum (new BoxGlue (engine.scan_glue (false)));
 };
 
 
@@ -1041,7 +1041,7 @@ commands.vfilneg = function cmd_vfilneg (engine) {
 
 commands.vskip = function cmd_vskip (engine) {
     engine.ensure_vertical ();
-    engine.accum (engine.scan_glue (false));
+    engine.accum (new BoxGlue (engine.scan_glue (false)));
 };
 
 
