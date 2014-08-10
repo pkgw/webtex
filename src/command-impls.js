@@ -722,6 +722,7 @@ commands.vbox = (function VboxCommand_closure () {
     proto.boxlike = true;
 
     proto.invoke = function VboxCommand_invoke (engine) {
+	engine.trace ('vbox ...');
 	engine.handle_vbox ();
     };
 
@@ -908,12 +909,15 @@ commands.unhbox = function cmd_unhbox (engine) {
     var reg = engine.scan_char_code ();
     var box = engine.get_register (T_BOX, reg);
 
-    if (box.btype == BT_VOID)
+    if (box.btype == BT_VOID) {
+	engine.trace ('unhbox ' + reg + ' (but void)');
 	return;
+    }
 
     if (box.btype != BT_HBOX)
 	throw new TexRuntimeError ('trying to unhbox a non-hbox');
 
+    engine.trace ('unhbox ' + reg + ' (non-void)');
     engine.set_register (T_BOX, reg, new Box (BT_VOID));
     engine.accum (box.list);
 };
@@ -924,12 +928,15 @@ commands.unvbox = function cmd_unvbox (engine) {
     var reg = engine.scan_char_code ();
     var box = engine.get_register (T_BOX, reg);
 
-    if (box.btype == BT_VOID)
+    if (box.btype == BT_VOID) {
+	engine.trace ('unvbox ' + reg + ' (but void)');
 	return;
+    }
 
     if (box.btype != BT_VBOX)
 	throw new TexRuntimeError ('trying to unvbox a non-vbox');
 
+    engine.trace ('unvbox ' + reg + ' (non-void)');
     engine.set_register (T_BOX, reg, new Box (BT_VOID));
     engine.accum (box.list);
 };
@@ -946,6 +953,7 @@ commands.unhcopy = function cmd_unhcopy (engine) {
     if (box.btype != BT_HBOX)
 	throw new TexRuntimeError ('trying to unhcopy a non-hbox');
 
+    engine.trace ('unhcopy ' + reg);
     engine.accum (box.list.slice ());
 };
 
@@ -961,6 +969,7 @@ commands.unvcopy = function cmd_unvcopy (engine) {
     if (box.btype != BT_VBOX)
 	throw new TexRuntimeError ('trying to unvcopy a non-vbox');
 
+    engine.trace ('unvcopy ' + reg);
     engine.accum (box.list.slice ());
 };
 
@@ -970,6 +979,7 @@ commands.hfil = function cmd_hfil (engine) {
     var g = new Glue ();
     g.stretch.sp = Scaled.new_from_parts (1, 0);
     g.stretch_order = 1;
+    engine.trace ('hfil');
     engine.accum (new BoxGlue (g));
 };
 
@@ -978,6 +988,7 @@ commands.hfill = function cmd_hfill (engine) {
     var g = new Glue ();
     g.stretch.sp = Scaled.new_from_parts (1, 0);
     g.stretch_order = 2;
+    engine.trace ('hfill');
     engine.accum (new BoxGlue (g));
 };
 
@@ -988,6 +999,7 @@ commands.hss = function cmd_hss (engine) {
     g.stretch_order = 1;
     g.shrink.sp = Scaled.new_from_parts (1, 0);
     g.shrink_order = 1;
+    engine.trace ('hss');
     engine.accum (new BoxGlue (g));
 };
 
@@ -996,12 +1008,15 @@ commands.hfilneg = function cmd_hfilneg (engine) {
     var g = new Glue ();
     g.stretch.sp = Scaled.new_from_parts (-1, 0);
     g.stretch_order = 1;
+    engine.trace ('hfilneg');
     engine.accum (new BoxGlue (g));
 };
 
 commands.hskip = function cmd_hskip (engine) {
     engine.ensure_horizontal ();
-    engine.accum (new BoxGlue (engine.scan_glue (false)));
+    var g = engine.scan_glue (false);
+    engine.trace ('hskip of ' + g);
+    engine.accum (new BoxGlue (g));
 };
 
 
@@ -1010,6 +1025,7 @@ commands.vfil = function cmd_vfil (engine) {
     var g = new Glue ();
     g.stretch.sp = Scaled.new_from_parts (1, 0);
     g.stretch_order = 1;
+    engine.trace ('vfil');
     engine.accum (new BoxGlue (g));
 };
 
@@ -1019,6 +1035,7 @@ commands.vfill = function cmd_vfill (engine) {
     var g = new Glue ();
     g.stretch.sp = Scaled.new_from_parts (1, 0);
     g.stretch_order = 2;
+    engine.trace ('vfill');
     engine.accum (new BoxGlue (g));
 };
 
@@ -1030,6 +1047,7 @@ commands.vss = function cmd_vss (engine) {
     g.stretch_order = 1;
     g.shrink.sp = Scaled.new_from_parts (1, 0);
     g.shrink_order = 1;
+    engine.trace ('vss');
     engine.accum (new BoxGlue (g));
 };
 
@@ -1038,12 +1056,15 @@ commands.vfilneg = function cmd_vfilneg (engine) {
     var g = new Glue ();
     g.stretch.sp = Scaled.new_from_parts (-1, 0);
     g.stretch_order = 1;
+    engine.trace ('vfilneg');
     engine.accum (new BoxGlue (g));
 };
 
 commands.vskip = function cmd_vskip (engine) {
     engine.ensure_vertical ();
-    engine.accum (new BoxGlue (engine.scan_glue (false)));
+    var g = engine.scan_glue (false);
+    engine.trace ('vskip of ' + g);
+    engine.accum (new BoxGlue (g));
 };
 
 
@@ -1115,14 +1136,17 @@ commands.kern = function cmd_kern (engine) {
 
 
 commands.unpenalty = function cmd_unpenalty (engine) {
+    engine.trace ('unpenalty');
     engine.handle_un_listify (LT_PENALTY);
 };
 
 commands.unkern = function cmd_unkern (engine) {
+    engine.trace ('unkern');
     engine.handle_un_listify (LT_KERN);
 };
 
 commands.unskip = function cmd_unskip (engine) {
+    engine.trace ('unskip');
     engine.handle_un_listify (LT_GLUE);
 };
 
@@ -1134,6 +1158,7 @@ commands.shipout = function cmd_shipout (engine) {
 	engine.ship_it (box);
     };
 
+    engine.trace ('shipout');
     engine.scan_box (ship_it_good, false);
 };
 
