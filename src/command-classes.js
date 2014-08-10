@@ -551,10 +551,40 @@ var SpacerCommand = (function SpacerCommand_closure () {
     proto.desc = 'blank space';
 
     proto.invoke = function Spacer_invoke (engine) {
-	if (engine.mode == M_VERT || engine.mode == M_IVERT)
+	// T:TP 1041-1044.
+	if (engine.mode () == M_VERT || engine.mode () == M_IVERT) {
 	    engine.trace ('spacer: ignored, vertical model');
-	else
-	    engine.trace ('spacer ...');
+	    return;
+	}
+
+	if (engine.mode () == M_HORZ || engine.mode () == M_RHORZ) {
+	    engine.trace ('spacer: h mode, accumed.');
+	    var sf = engine.get_special_value (T_INT, 'spacefactor');
+	    var xs = engine.get_parameter (T_GLUE, 'xspaceskip');
+	    var ss = engine.get_parameter (T_GLUE, 'spaceskip');
+	    var g = null;
+
+	    if (sf >= 2000 && xs.is_nonzero ())
+		g = xs;
+	    else if (ss.is_nonzero ())
+		g = ss;
+	    else {
+		// TODO: real font glue dimensions, with scaling by
+		// spacefactor. Not a priority since I don't think these will
+		// matter in normal operation.
+		var g = new Glue ();
+		g.width.sp = Scaled.new_from_parts (12, 0);
+
+		if (sf >= 2000)
+		    g.width.sp = Scaled.new_from_parts (16, 0);
+	    }
+	} else {
+	    engine.trace ('spacer: math mode, TODO.');
+	    // throw since we need to set 'g' somehow.
+	    throw new TexRuntimeError ('math space unimpl');
+	}
+
+	engine.accum (new BoxGlue (g));
     };
 
     SpacerCommand.deserialize = function SpacerCommand_deserialize (data, hk) {
