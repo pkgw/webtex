@@ -114,9 +114,45 @@ function promise_engine (args) {
 	    stream_url_to_linebuffer (inputurl, args.initial_linebuf);
 	    delete args.inputurl;
 
-	    return new Engine (args);
+	    return new Promise (function (resolve, reject) {
+		// Make sure that the bundle's zip reader is ready to go before
+		// handing off control. TODO: fix bundle init to be Promise-y.
+		function iterate () {
+		    if (bundle.zipreader.dirinfo == null)
+			setTimeout (iterate, 10);
+		    else
+			resolve (bundle);
+		}
+
+		iterate ();
+	    });
+	}).then (function (bundle) {
+	    var prom = bundle.promise_json (args.dump_bpath);
+	    delete args.dump_bpath;
+	    return prom;
+	}).then (function (dumpjson) {
+	    var eng = new Engine (args);
+	    eng.restore_serialized_state (dumpjson);
+	    return eng;
 	});
 };
 
 
 WEBTEX.Web.promise_engine = promise_engine;
+
+
+var DOMTarget = (function DOMTarget_closure () {
+    function DOMTarget (top_element) {
+	this.top_element = top_element;
+    }
+
+    var proto = DOMTarget.prototype;
+
+    proto.process = function DOMTarget_process (box) {
+	this.top_element.textContent = box.uitext ();
+    };
+
+    return DOMTarget;
+}) ();
+
+WEBTEX.Web.DOMTarget = DOMTarget;

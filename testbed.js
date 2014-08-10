@@ -1,12 +1,17 @@
 'use strict';
 
+var targdiv = document.getElementById ('webtex');
+
 var bundleurl = 'texbundles/default.zip';
-var inputurl = 'test/tex/plain.tex';
+var inputurl = 'test/tex/latex-minimal.tex';
+var dump_bpath = 'latex.dump.json';
 
 WEBTEX.Web.promise_engine ({
     jobname: 'plain',
     inputurl: inputurl,
     bundleurl: bundleurl,
+    dump_bpath: dump_bpath,
+    shiptarget: new WEBTEX.Web.DOMTarget (targdiv),
 }).then (function (engine) {
     function iterate () {
 	var rv = engine.step ();
@@ -21,5 +26,5 @@ WEBTEX.Web.promise_engine ({
 
     iterate ();
 }).catch (function (err) {
-    console.log (err.stack);
+    console.log (err);
 });

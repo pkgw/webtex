@@ -3,7 +3,8 @@
  * information reproduced below.
  *
  * This version wraps things slightly to expose the API using the same method
- * as the rest of Webtex.
+ * as the rest of Webtex. I also needed to change Buffer to ArrayBuffer for
+ * compat with browser JS environments.
  *
  * While I was at it I also removed trailing whitespace.
  */
@@ -94,6 +95,20 @@ function toknam(code) {
 }
 
 
+// This code from StackExchange user lovasoa:
+// http://stackoverflow.com/a/23329386/3760486
+function utf8ByteLength(str) {
+  // returns the byte length of an utf8 string
+  var s = str.length;
+  for (var i=str.length-1; i>=0; i--) {
+    var code = str.charCodeAt(i);
+    if (code > 0x7f && code <= 0x7ff) s++;
+    else if (code > 0x7ff && code <= 0xffff) s+=2;
+    if (code >= 0xDC00 && code <= 0xDFFF) i--; //trail surrogate
+  }
+  return s;
+}
+
 function Parser() {
   this.tState = START;
   this.value = undefined;
@@ -115,7 +130,7 @@ function Parser() {
   this.state = VALUE;
   this.bytes_remaining = 0; // number of bytes remaining in multi byte utf8 char to read after split boundary
   this.bytes_in_sequence = 0; // bytes in multi byte utf8 char to read
-  this.temp_buffs = { "2": new Buffer(2), "3": new Buffer(3), "4": new Buffer(4) }; // for rebuilding chars split before boundary is reached
+  this.temp_buffs = { "2": new Uint8Array(2), "3": new Uint8Array(3), "4": new Uint8Array(4) }; // for rebuilding chars split before boundary is reached
 
   // Stream offset
   this.offset = -1;
@@ -126,7 +141,16 @@ proto.charError = function (buffer, i) {
 };
 proto.onError = function (err) { throw err; };
 proto.write = function (buffer) {
-  if (typeof buffer === "string") buffer = new Buffer(buffer);
+  if (typeof buffer === "string") {
+      // This code derived from StackExchange user mangini,
+      // http://stackoverflow.com/a/11058858/3760486
+      var newbuf = new ArrayBuffer (buffer.length * 2);
+      var view = new Uint16Array (newbuf);
+      for (var i = 0, len = buffer.length; i < len; i++) {
+	  view[i] = buffer.charCodeAt (i);
+      }
+      buffer = view;
+  }
   //process.stdout.write("Input: ");
   //console.dir(buffer.toString());
   var n;
@@ -178,7 +202,7 @@ proto.write = function (buffer) {
           this.string += buffer.slice(i, (i + this.bytes_in_sequence)).toString();
           i = i + this.bytes_in_sequence - 1;
         }
-      } else if (n === 0x22) { this.tState = START; this.onToken(STRING, this.string); this.offset += Buffer.byteLength(this.string, 'utf8') + 1; this.string = undefined; }
+      } else if (n === 0x22) { this.tState = START; this.onToken(STRING, this.string); this.offset += utf8ByteLength(this.string) + 1; this.string = undefined; }
       else if (n === 0x5c) { this.tState = STRING2; }
       else if (n >= 0x20) { this.string += String.fromCharCode(n); }
       else { this.charError(buffer, i); }
