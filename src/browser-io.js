@@ -105,27 +105,16 @@ function promise_engine (args) {
     return make_random_access_url (args.bundleurl)
 	.then (function (rau) {
 	    var z = new ZipReader (rau.read_range.bind (rau), rau.size ());
+	    return z.promise_ready ();
+	}).then (function (z) {
 	    var bundle = new Bundle (z);
 	    delete args.bundleurl;
 	    args.iostack = new IOStack ();
 	    args.iostack.push (bundle);
-
 	    args.initial_linebuf = new LineBuffer ();
 	    stream_url_to_linebuffer (inputurl, args.initial_linebuf);
 	    delete args.inputurl;
-
-	    return new Promise (function (resolve, reject) {
-		// Make sure that the bundle's zip reader is ready to go before
-		// handing off control. TODO: fix bundle init to be Promise-y.
-		function iterate () {
-		    if (bundle.zipreader.dirinfo == null)
-			setTimeout (iterate, 10);
-		    else
-			resolve (bundle);
-		}
-
-		iterate ();
-	    });
+	    return bundle;
 	}).then (function (bundle) {
 	    var prom = bundle.promise_json (args.dump_bpath);
 	    delete args.dump_bpath;
@@ -136,7 +125,6 @@ function promise_engine (args) {
 	    return eng;
 	});
 };
-
 
 WEBTEX.Web.promise_engine = promise_engine;
 
