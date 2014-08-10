@@ -133,7 +133,7 @@ var Character = (function Character_closure () {
     var proto = Character.prototype;
 
     proto._uisummary = function Character__uisummary () {
-	return 'Character  w=' + this.width + ' h=' + this.height +
+	return 'Character w=' + this.width + ' h=' + this.height +
 	    ' d=' + this.depth + ' ord=' + escchr (this.ord) +
 	    ' font=' + this.font;
     };
