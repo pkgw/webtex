@@ -707,6 +707,11 @@ commands.hbox = (function HboxCommand_closure () {
     proto.boxlike = true;
 
     proto.invoke = function HboxCommand_invoke (engine) {
+	engine.trace ('hbox (for accumulation)');
+	engine.scan_box_for_accum (this);
+    };
+
+    proto.start_box = function HboxCommand_start_box (engine) {
 	engine.handle_hbox ();
     };
 
@@ -722,7 +727,11 @@ commands.vbox = (function VboxCommand_closure () {
     proto.boxlike = true;
 
     proto.invoke = function VboxCommand_invoke (engine) {
-	engine.trace ('vbox ...');
+	engine.trace ('vbox (for accumulation)');
+	engine.scan_box_for_accum (this);
+    };
+
+    proto.start_box = function VboxCommand_start_box (engine) {
 	engine.handle_vbox ();
     };
 
@@ -738,6 +747,10 @@ commands.copy = (function CopyCommand_closure () {
     proto.boxlike = true;
 
     proto.invoke = function CopyCommand_invoke (engine) {
+	engine.scan_box_for_accum (this);
+    };
+
+    proto.start_box = function CopyCommand_start_box (engine) {
 	var reg = engine.scan_char_code ();
 	var box = engine.get_register (T_BOX, reg);
 	engine.trace ('copy box ' + reg);
@@ -756,6 +769,10 @@ commands.box = (function BoxCommand_closure () {
     proto.boxlike = true;
 
     proto.invoke = function BoxCommand_invoke (engine) {
+	engine.scan_box_for_accum (this);
+    };
+
+    proto.start_box = function BoxCommand_start_box (engine) {
 	var reg = engine.scan_char_code ();
 	var box = engine.get_register (T_BOX, reg);
 	engine.trace ('fetch box ' + reg);
@@ -1103,7 +1120,7 @@ function _cmd_box_shift (engine, desc, negate) {
 	if (negate)
 	    amount = amount.intproduct (-1);
 	box.shift_amount = box.shift_amount.advance (amount);
-	return box;
+	engine.accum (box);
     }
 
     engine.scan_box (shift_the_box, false);

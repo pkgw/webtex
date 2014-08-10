@@ -1722,13 +1722,23 @@ var Engine = (function Engine_closure () {
 	// TODO: deal with leader_flag and hrule stuff; should accept:
 	// \box, \copy, \lastbox, \vsplit, \hbox, \vbox, \vtop
 
-	if (!tok.tocmd (this).boxlike)
+	var cmd = tok.tocmd (this);
+	if (!cmd.boxlike)
 	    throw new TexRuntimeError ('expected boxlike command but got ' + tok);
 
         this.boxop_stack.push ([callback, is_assignment]);
-	this.push (tok);
+	cmd.start_box (this);
     };
 
+    proto.scan_box_for_accum = function Engine_scan_box_for_accum (cmd) {
+	function accum_box (engine, box) {
+	    engine.trace ('... accumulate the finished box');
+	    engine.accum (box);
+	}
+
+	this.boxop_stack.push ([accum_box, false]);
+	cmd.start_box (this);
+    };
 
     proto.handle_setbox = function Engine_handle_setbox (reg) {
         // We just scanned "\setbox NN =". We'll now expect a box-construction
@@ -1745,21 +1755,18 @@ var Engine = (function Engine_closure () {
     };
 
     proto.handle_finished_box = function Engine_handle_finished_box (box) {
-	if (!this.boxop_stack.length)
-	    this.accum (box)
-	else {
-	    var t = this.boxop_stack.pop ();
-	    var boxop = t[0], isassignment = t[1];
+	var t = this.boxop_stack.pop ();
+	var boxop = t[0], isassignment = t[1];
 
-	    if (isassignment && this.after_assign_token != null) {
-		// This is an assignment expression. TODO: afterassign token
-		// in boxes gets inserted at beginning of box token list,
-		// before every[hv]box token lists (TeXbook p. 279)
-		throw new TexRuntimeError ('afterassignment for boxes');
-	    }
-
-	    boxop (this, box);
+	if (isassignment && this.after_assign_token != null) {
+	    // This is an assignment expression. TODO: afterassign token
+	    // in boxes gets inserted at beginning of box token list,
+	    // before every[hv]box token lists (TeXbook p. 279)
+	    throw new TexRuntimeError ('afterassignment for boxes');
 	}
+
+	this.trace ('finished: ' + box.uitext ());
+	boxop (this, box);
     };
 
     proto._handle_box = function Engine__handle_box (boxtype, newmode) {
