@@ -632,11 +632,38 @@ var Engine = (function Engine_closure () {
     // List-building.
 
     proto.accum = function Engine_accum (item) {
-	if (item instanceof Array)
-	    Array.prototype.push.apply (this.build_stack[this.build_stack.length - 1],
-					item);
-	else
-	    this.build_stack[this.build_stack.length - 1].push (item);
+	this.build_stack[this.build_stack.length - 1].push (item);
+
+	// spacefactor management. TeXBook p. 76.
+
+	if (item.ltype == LT_CHARACTER) {
+	    var prevsf = this.get_special_value (T_INT, 'spacefactor');
+	    var thissf = this.get_code (CT_SPACEFAC, item.ord);
+	    var newsf = null;
+
+	    if (thissf == 1000) {
+		newsf = 1000;
+	    } else if (thissf < 1000) {
+		if (thissf > 0)
+		    newsf = thissf;
+	    } else if (prevsf < 1000) {
+		newsf = 1000;
+	    } else {
+		newsf = thissf;
+	    }
+
+	    if (newsf != null)
+		this.set_special_value (T_INT, 'spacefactor', newsf);
+	} else if (item instanceof Boxlike) {
+	    this.set_special_value (T_INT, 'spacefactor', 1000);
+	}
+    };
+
+    proto.accum_list = function Engine_accum_list (list) {
+	// unhbox and friends do not cause \prevdepth etc. to be computed, so we don't
+	// process individual items.
+	Array.prototype.push.apply (this.build_stack[this.build_stack.length - 1],
+				    list);
     };
 
     proto.run_page_builder = function Engine_run_page_builder () {

@@ -936,7 +936,7 @@ commands.unhbox = function cmd_unhbox (engine) {
 
     engine.trace ('unhbox ' + reg + ' (non-void)');
     engine.set_register (T_BOX, reg, new Box (BT_VOID));
-    engine.accum (box.list);
+    engine.accum_list (box.list);
 };
 
 
@@ -955,7 +955,7 @@ commands.unvbox = function cmd_unvbox (engine) {
 
     engine.trace ('unvbox ' + reg + ' (non-void)');
     engine.set_register (T_BOX, reg, new Box (BT_VOID));
-    engine.accum (box.list);
+    engine.accum_list (box.list);
 };
 
 
@@ -971,7 +971,7 @@ commands.unhcopy = function cmd_unhcopy (engine) {
 	throw new TexRuntimeError ('trying to unhcopy a non-hbox');
 
     engine.trace ('unhcopy ' + reg);
-    engine.accum (box.list.slice ());
+    engine.accum_list (box.list.slice ());
 };
 
 
@@ -987,7 +987,7 @@ commands.unvcopy = function cmd_unvcopy (engine) {
 	throw new TexRuntimeError ('trying to unvcopy a non-vbox');
 
     engine.trace ('unvcopy ' + reg);
-    engine.accum (box.list.slice ());
+    engine.accum_list (box.list.slice ());
 };
 
 
