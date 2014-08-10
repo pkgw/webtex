@@ -144,3 +144,21 @@ function promise_fs_json (path) {
 };
 
 WEBTEX.Node.promise_fs_json = promise_fs_json;
+
+
+var ConsoleDumpTarget = (function ConsoleDumpTarget_closure () {
+    var console = require ('console');
+
+    function ConsoleDumpTarget () {}
+
+    var proto = ConsoleDumpTarget.prototype;
+
+    proto.process = function ConsoleDumpTarget_process (box) {
+	console.log ('=== shipped out: ===');
+	console.log (box.uitext ());
+    };
+
+    return ConsoleDumpTarget;
+}) ();
+
+WEBTEX.Node.ConsoleDumpTarget = ConsoleDumpTarget;

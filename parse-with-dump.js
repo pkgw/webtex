@@ -12,6 +12,7 @@ var pjson = webtex.Node.promise_fs_json (process.argv[3]);
 var pengine = webtex.Node.promise_engine ({
     jobname: process.argv[4],
     inputpath: process.argv[4],
+    shiptarget: new webtex.Node.ConsoleDumpTarget (),
     bundlepath: 'texbundles/default.zip',
     debug_input_lines: true,
     debug_trace: true,

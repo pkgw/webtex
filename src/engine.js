@@ -330,10 +330,12 @@ var Engine = (function Engine_closure () {
 	 * debug_trace - print commands as they're executed
 	 * initial_linebuf - LineBuffer of the initial input (required)
 	 * jobname - the TeX job name
+	 * shiptarget - target that will receive \shipout{} data.
 	 */
 
 	this.jobname = args.jobname || 'texput';
 	this.iostack = args.iostack;
+	this.shiptarget = args.shiptarget;
 
 	this.inputstack = new InputStack (args.initial_linebuf, this, args);
 	this._force_end = false;
@@ -685,8 +687,8 @@ var Engine = (function Engine_closure () {
     };
 
     proto.ship_it = function Engine_ship_it (box) {
-	this.trace ('=== shipping ===');
-	this.trace (box.uitext ());
+	this.trace ('shipping out');
+	this.shiptarget.process (box);
     };
 
     proto.handle_un_listify = function Engine_handle_unskip (targtype) {
