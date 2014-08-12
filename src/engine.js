@@ -381,6 +381,7 @@ var Engine = (function Engine_closure () {
 	engine_init_parameters (this);
 	engine_init_param_cseqs (this);
 	this.commands['<space>'] = new Command.catcode_commands[C_SPACE] (O_SPACE);
+	this.commands['<end-group>'] = new Command.catcode_commands[C_EGROUP] (O_LEFT_BRACE);
 
 	// T:TP sec 240; has to go after $init_parameters
 	this.set_parameter (T_INT, 'mag', 1000);
@@ -731,6 +732,9 @@ var Engine = (function Engine_closure () {
 	if (this.build_stack.length != 1)
 	    throw new TexInternalError ('vertical mode is not deepest?')
 
+	if (this._running_output)
+	    return; // T:TP 994.
+
 	// Hacky version of \outputpenalty setting -- TeXBook p. 125. We should
 	// preserve the penalty for the next batch of output, but since (I think)
 	// we don't need it for anything, we just pop it off the list.
@@ -767,12 +771,13 @@ var Engine = (function Engine_closure () {
 	this.trace ('*box255 = ' + vbox.uitext ());
 	this.nest_eqtb ();
 	this.group_exit_stack.push ([finish_output.bind (this), []]);
+	this.push (Token.new_cmd (this.commands['<end-group>']));
 	this.push_toks (outtl.toks);
 
 	// Not happy about this recursion but other functions really want the
 	// page builder to operate atomically.
 
-	while (this._running_output && !this._force_end)
+	while (this._running_output)
 	    this.step ();
     };
 

@@ -131,7 +131,8 @@ var O_NULL = 0, // '\0'
     O_BACKSLASH = 92, // '\\'
     O_RIGHT_BRACKET = 93, // ']'
     O_BACKTICK = 96, // '`'
-    O_LC_A = 97; // 'a'
+    O_LC_A = 97, // 'a'
+    O_LEFT_BRACE = 123; // '{'
 
 var ord_standard_catcodes = [
 // 0   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15
