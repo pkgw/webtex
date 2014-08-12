@@ -568,7 +568,7 @@ var Engine = (function Engine_closure () {
 
     proto.ensure_horizontal = function Engine_ensure_horizontal () {
 	if (this.mode () == M_VERT)
-	    this.enter_mode (M_HORZ);
+	    this.begin_graf (true);
 	else if (this.mode () == M_IVERT)
 	    this.enter_mode (M_RHORZ);
     };
@@ -628,6 +628,60 @@ var Engine = (function Engine_closure () {
 	this.group_exit_stack[l - 1][1].push (tok);
     };
 
+    proto.begin_graf = function Engine_begin_graf (indent) {
+	// T:TP 1091. Due to our different page-builder approach,
+	// we run it unconditionally at the top of the function,
+	// before doing the stuff to start the next paragraph.
+	this.trace ('@ new paragraph - run page builder');
+	this.run_page_builder ();
+
+	this.set_special_value (T_INT, 'prevgraf', 0);
+
+	if (this.mode () == M_VERT || this.build_stack[this.build_stack.length-1].length)
+	    this.accum (new BoxGlue (this.get_parameter (T_GLUE, 'parskip')));
+
+	this.enter_mode (M_HORZ);
+	this.set_special_value (T_INT, 'spacefactor', 1000);
+
+	if (indent) {
+	    var b = new Box (BT_HBOX);
+	    b.width = this.get_parameter (T_DIMEN, 'parindent');
+	    this.accum (b);
+	}
+
+	var tl = this.get_parameter (T_TOKLIST, 'everypar');
+	if (!tl.toks.length)
+	    this.trace ('@ everypar: empty');
+	else {
+	    this.trace ('@ everypar: ' + tl.as_serializable ());
+	    this.push_toks (tl.toks);
+	}
+    };
+
+    proto.end_graf = function Engine_end_graf () {
+	// T:TP 1070.
+	if (this.mode () != M_HORZ)
+	    return;
+
+	var list = this.leave_mode ();
+	if (!list.length)
+	    return;
+
+	this.handle_un_listify (LT_GLUE);
+	this.accum (new Penalty (new TexInt (10000)));
+	this.accum (new BoxGlue (this.get_parameter (T_GLUE, 'parfillskip')));
+	// skip: linebreaking
+	var hbox = new Box (BT_HBOX);
+	hbox.list = list;
+	// skip: interline glue and penalties
+	this.accum (hbox);
+	this.run_page_builder ();
+
+	this.set_parameter (T_INT, 'looseness', 0);
+	this.set_parameter (T_DIMEN, 'hangindent', new Dimen ());
+	this.set_parameter (T_INT, 'hangafter', 1);
+	// TODO: clear \parshape info, which nests in the EqTb.
+    };
 
     // List-building.
 
@@ -697,11 +751,14 @@ var Engine = (function Engine_closure () {
 	vbox.list = list;
 	this.set_register (T_BOX, 255, vbox);
 	this.build_stack[0] = [];
+	this._running_output = true;
 
 	function finish_output (eng) {
 	    this.trace ('< <--- output routine>');
+	    this.end_graf ();
 	    this.unnest_eqtb ();
-	    // TODO: deal with held-over insertions, etc.
+	    this._running_output = false;
+	    // TODO: deal with held-over insertions, etc. T:TP 1026.
 	};
 
 	var outtl = this.get_parameter (T_TOKLIST, 'output');
@@ -711,6 +768,12 @@ var Engine = (function Engine_closure () {
 	this.nest_eqtb ();
 	this.group_exit_stack.push ([finish_output.bind (this), []]);
 	this.push_toks (outtl.toks);
+
+	// Not happy about this recursion but other functions really want the
+	// page builder to operate atomically.
+
+	while (this._running_output && !this._force_end)
+	    this.step ();
     };
 
     proto.ship_it = function Engine_ship_it (box) {
@@ -1795,6 +1858,9 @@ var Engine = (function Engine_closure () {
 	}
 
 	this.trace ('finished: ' + box.uitext ());
+
+	if (box.btype == BT_VBOX)
+	    this.end_graf (); // in case we were in the middle of one. Noop if not.
 	boxop (this, box);
     };
 

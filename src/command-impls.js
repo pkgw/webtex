@@ -17,18 +17,19 @@ commands.par = function cmd_par (engine) {
     } else if (m == M_HORZ) {
 	// TeXBook p. 286:
 	engine.trace ('par: horz -> endgraf');
-	engine.handle_un_listify (LT_GLUE);
-	engine.accum (new Penalty (new TexInt (10000)));
-	engine.accum (new BoxGlue (engine.get_parameter (T_GLUE, 'parfillskip')));
-	// skip: linebreaking
-	var hbox = new Box (BT_HBOX);
-	hbox.list = engine.leave_mode ();
-	// skip: interline glue and penalties
-	engine.accum (hbox);
-	engine.run_page_builder ();
+	engine.end_graf ();
     } else {
 	throw new TexRuntimeError ('illegal use of \\par in math mode');
     }
+};
+
+
+commands.indent = function cmd_indent (engine) {
+    engine.begin_graf (true);
+};
+
+commands.noindent = function cmd_noindent (engine) {
+    engine.begin_graf (false);
 };
 
 
