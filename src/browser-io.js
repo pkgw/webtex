@@ -137,7 +137,59 @@ var DOMTarget = (function DOMTarget_closure () {
     var proto = DOMTarget.prototype;
 
     proto.process = function DOMTarget_process (box) {
-	this.top_element.textContent = box.uitext ();
+	var doc = this.top_element.ownerDocument;
+	var dom_stack = [this.top_element];
+	var idom = 0;
+	var queued_text = '';
+
+	var box_stack = [box];
+	var j_stack = [0];
+	var ibox = 0;
+
+	while (box_stack.length) {
+	    if (j_stack[ibox] >= box_stack[ibox].list.length) {
+		box_stack.pop ();
+		j_stack.pop ();
+		ibox--;
+		continue;
+	    }
+
+	    var item = box_stack[ibox].list[j_stack[ibox]];
+	    j_stack[ibox]++; // This item is dealt with.
+
+	    if (item instanceof Box) {
+		box_stack.push (item);
+		j_stack.push (0);
+		ibox++;
+	    } else if (item instanceof StartTag) {
+		if (queued_text.length) {
+		    dom_stack[idom].appendChild (doc.createTextNode (queued_text));
+		    queued_text = '';
+		}
+
+		var e = doc.createElement (item.name);
+		// XXX: no attributes
+		dom_stack.push (e);
+		idom++;
+	    } else if (item instanceof EndTag) {
+		if (queued_text.length) {
+		    dom_stack[idom].appendChild (doc.createTextNode (queued_text));
+		    queued_text = '';
+		}
+
+		// XXX: check start and end tags agree.
+		var e = dom_stack.pop ();
+		idom--;
+		dom_stack[idom].appendChild (e);
+	    } else if (item instanceof Character) {
+		queued_text += String.fromCharCode (item.ord);
+	    } else if (item instanceof BoxGlue) {
+		queued_text += ' ';
+	    }
+	}
+
+	if (queued_text.length)
+	    this.top_element.appendChild (doc.createTextNode (queued_text));
     };
 
     return DOMTarget;
