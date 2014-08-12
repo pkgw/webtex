@@ -26,10 +26,12 @@ var LT_BOX = 0,
     LT_MARK = 5,
     LT_PENALTY = 6,
     LT_LEADER = 7,
-    LT_SPECIAL = 8; // a \special{}
+    LT_SPECIAL = 8, // a \special{}
+    LT_STARTTAG = 9, // an HTML start tag
+    LT_ENDTAG = 10; // an HTML end tag
 
 var lt_names = ['box', 'rule', 'character', 'glue', 'kern', 'mark', 'penalty',
-		'leader', 'special'];
+		'leader', 'special', 'starttag', 'endtag'];
 
 
 // Box types

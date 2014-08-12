@@ -225,3 +225,38 @@ var BoxGlue = (function BoxGlue_closure () {
 
     return BoxGlue;
 }) ();
+
+
+var StartTag = (function StartTag_closure () {
+    function StartTag (name, attrs) {
+	this.ltype = LT_STARTTAG;
+	this.name = name;
+	this.attrs = attrs;
+    }
+
+    inherit (StartTag, Listable);
+    var proto = StartTag.prototype;
+
+    proto._uisummary = function StartTag__uisummary () {
+	return 'StartTag ' + this.name + ' ' + this.attrs;
+    };
+
+    return StartTag;
+}) ();
+
+
+var EndTag = (function EndTag_closure () {
+    function EndTag (name) {
+	this.ltype = LT_ENDTAG;
+	this.name = name;
+    }
+
+    inherit (EndTag, Listable);
+    var proto = EndTag.prototype;
+
+    proto._uisummary = function EndTag__uisummary () {
+	return 'EndTag ' + this.name;
+    };
+
+    return EndTag;
+}) ();

@@ -644,6 +644,8 @@ var Engine = (function Engine_closure () {
 	this.enter_mode (M_HORZ);
 	this.set_special_value (T_INT, 'spacefactor', 1000);
 
+	this.accum (new StartTag ('p', {})); // webtex special!
+
 	if (indent) {
 	    var b = new Box (BT_HBOX);
 	    b.width = this.get_parameter (T_DIMEN, 'parindent');
@@ -664,13 +666,14 @@ var Engine = (function Engine_closure () {
 	if (this.mode () != M_HORZ)
 	    return;
 
+	this.handle_un_listify (LT_GLUE);
 	var list = this.leave_mode ();
 	if (!list.length)
 	    return;
 
-	this.handle_un_listify (LT_GLUE);
-	this.accum (new Penalty (new TexInt (10000)));
-	this.accum (new BoxGlue (this.get_parameter (T_GLUE, 'parfillskip')));
+	list.push (new Penalty (new TexInt (10000)));
+	list.push (new BoxGlue (this.get_parameter (T_GLUE, 'parfillskip')));
+	list.push (new EndTag ('p')); // webtex special!
 	// skip: linebreaking
 	var hbox = new Box (BT_HBOX);
 	hbox.list = list;
