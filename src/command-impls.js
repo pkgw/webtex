@@ -785,6 +785,45 @@ commands.box = (function BoxCommand_closure () {
 })();
 
 
+commands.vsplit = (function VsplitCommand_closure () {
+    function VsplitCommand () { Command.call (this); }
+    inherit (VsplitCommand, Command);
+    var proto = VsplitCommand.prototype;
+    proto.name = 'vsplit';
+    proto.boxlike = true;
+
+    proto.invoke = function VsplitCommand_invoke (engine) {
+	engine.scan_box_for_accum (this);
+    };
+
+    proto.start_box = function VsplitCommand_start_box (engine) {
+	var reg = engine.scan_char_code ();
+	var box = engine.get_register (T_BOX, reg);
+
+	if (!engine.scan_keyword ('to'))
+	    throw new TexRuntimeError ('expected keyword "to"');
+
+	var depth = engine.scan_dimen (false, false);
+	engine.trace ('vsplit box ' + reg + ' to ' + depth + ' [fake impl]');
+
+	// TODO: use splitmaxdepth, splittopskip, etc. See TeXBook p. 124, T:TP~977.
+
+	if (box.btype == BT_VOID) {
+	    engine.handle_finished_box (new Box (BT_VOID));
+	    return;
+	}
+
+	if (box.btype == BT_HBOX)
+	    throw new TexRuntimeError ('cannot \\vsplit an hbox');
+
+	engine.set_register (T_BOX, reg, new Box (BT_VOID));
+	engine.handle_finished_box (box);
+    };
+
+    return VsplitCommand;
+})();
+
+
 commands.wd = (function WdCommand_closure () {
     function WdCommand () { Command.call (this); }
     inherit (WdCommand, Command);
