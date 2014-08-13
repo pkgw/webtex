@@ -1336,9 +1336,13 @@ var Engine = (function Engine_closure () {
 		throw new TexRuntimeError ('not implemented');
 	    else {
 		var u = v.as_dimen ();
-		if (u != null)
+		if (u != null) {
 		    // We got a full-on dimen value; return it
-		    return Dimen.new_product (negfactor, u.as_scaled ());
+		    var d = Dimen.new_product (negfactor, u.as_scaled ());
+		    if (infmode)
+			return [d, 0];
+		    return d;
+		}
 		// We got an int.
 		nonfrac = v.as_int ();
 	    }
