@@ -646,10 +646,16 @@ var Engine = (function Engine_closure () {
 
 	this.accum (new StartTag ('p', {})); // webtex special!
 
+	// We don't run the linebreaking algorithm so we should insert
+	// \leftskip manually. TeX doesn't bother to insert it if it's zero.
+	var ls = this.get_parameter (T_GLUE, 'leftskip');
+	if (ls.is_nonzero ())
+	    this.accum (new BoxGlue (ls));
+
 	if (indent) {
 	    var b = new Box (BT_HBOX);
 	    b.width = this.get_parameter (T_DIMEN, 'parindent');
-	    this.accum (b);
+	    this.accum (new BoxGlue (b));
 	}
 
 	var tl = this.get_parameter (T_TOKLIST, 'everypar');
@@ -673,8 +679,11 @@ var Engine = (function Engine_closure () {
 
 	list.push (new Penalty (new TexInt (10000)));
 	list.push (new BoxGlue (this.get_parameter (T_GLUE, 'parfillskip')));
+	// We don't run the linebreaking algorithm. Instead we think of this
+	// "paragraph" as one giant wide line. That makes it appropriate to
+	// insert a \rightskip at the end of the line.
+	list.push (new BoxGlue (this.get_parameter (T_GLUE, 'rightskip')));
 	list.push (new EndTag ('p')); // webtex special!
-	// skip: linebreaking
 	var hbox = new Box (BT_HBOX);
 	hbox.list = list;
 	// skip: interline glue and penalties
