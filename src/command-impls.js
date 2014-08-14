@@ -1609,7 +1609,7 @@ commands.the = function cmd_the (engine) {
      * \the<tokens> -- non text: inserts the tokens
      */
 
-    var tok = engine.next_tok_throw ();
+    var tok = engine.next_x_tok_throw ();
     var val = tok.tocmd (engine).as_valref (engine);
     if (val == null)
 	throw new TexRuntimeError ('unable to get internal value (for ' +
