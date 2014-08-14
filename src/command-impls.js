@@ -824,6 +824,40 @@ commands.vsplit = (function VsplitCommand_closure () {
 })();
 
 
+commands.lastbox = (function LastboxCommand_closure () {
+    function LastboxCommand () { Command.call (this); }
+    inherit (LastboxCommand, Command);
+    var proto = LastboxCommand.prototype;
+    proto.name = 'lastbox';
+    proto.boxlike = true;
+
+    proto.invoke = function LastboxCommand_invoke (engine) {
+	engine.scan_box_for_accum (this);
+    };
+
+    proto.start_box = function LastboxCommand_start_box (engine) {
+	var m = engine.mode ();
+	if (m == M_VERT)
+	    throw new TexRuntimeError ('cannot use \\lastbox in vertical mode');
+	if (m == M_MATH || m == M_DMATH) {
+	    engine.handle_finished_box (new Box (BT_VOID));
+	    return;
+	}
+
+	var last = engine.get_last_listable ();
+	if (last == null || last.ltype != LT_BOX || last.btype == BT_VOID) {
+	    engine.handle_finished_box (new Box (BT_VOID));
+	    return;
+	}
+
+	engine.pop_last_listable ();
+	engine.handle_finished_box (last);
+    };
+
+    return LastboxCommand;
+})();
+
+
 commands.wd = (function WdCommand_closure () {
     function WdCommand () { Command.call (this); }
     inherit (WdCommand, Command);

@@ -1934,6 +1934,17 @@ var Engine = (function Engine_closure () {
 	return c[l - 1];
     };
 
+    proto.pop_last_listable = function Engine_pop_last_listable () {
+	var l = this.build_stack.length;
+	if (l == 0)
+	    throw new TexInternalError ('no build_stack to pop from');
+	var c = this.build_stack[l - 1];
+	l = c.length;
+	if (l == 0)
+	    throw new TexInternalError ('build_stack empty');
+	return c.pop ();
+    };
+
 
     // Miscellaneous
 
