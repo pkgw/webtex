@@ -572,22 +572,32 @@ var Engine = (function Engine_closure () {
 	// onto the input stack (T:TP back_input) before doing so, because the
 	// output routine must execute and may insert tokens between this
 	// command and any arguments it may have.
+	var m = this.mode ();
 
-	if (this.mode () == M_VERT) {
+	if (m == M_VERT || m == M_IVERT) {
 	    this.push (Token.new_cmd (cmd));
 	    this.begin_graf (true);
 	    return true; // command will be rerun
 	}
 
-	if (this.mode () == M_IVERT)
-	    // No begin_graf, so no need to rerun command.
-	    this.enter_mode (M_RHORZ);
 	return false;
     };
 
-    proto.ensure_vertical = function Engine_ensure_vertical () {
-	if (this.mode () != M_VERT && this.mode () != M_IVERT)
-	    this.enter_mode (M_IVERT);
+    proto.ensure_vertical = function Engine_ensure_vertical (cmd) {
+	// Here, we want to escape to vmode. If we're in horizontal mode,
+	// insert a \par then reread the current command.
+	var m = this.mode ();
+
+	if (m == M_VERT || m == M_IVERT)
+	    return false;
+
+	if (this.mode () == M_HORZ) {
+	    this.push (Token.new_cmd (this.commands['par']));
+	    this.push (Token.new_cmd (cmd));
+	    return true;
+	}
+
+	throw new TexRuntimeError ('need to, but cannot, escape to vertical mode');
     };
 
     proto.handle_bgroup = function Engine_handle_bgroup () {

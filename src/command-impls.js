@@ -1017,7 +1017,9 @@ commands.unhbox = function cmd_unhbox (engine) {
 
 
 commands.unvbox = function cmd_unvbox (engine) {
-    engine.ensure_vertical ();
+    if (engine.ensure_vertical (this))
+	return; // command will be reread after this graf is finished.
+
     var reg = engine.scan_char_code ();
     var box = engine.get_register (T_BOX, reg);
 
@@ -1054,7 +1056,9 @@ commands.unhcopy = function cmd_unhcopy (engine) {
 
 
 commands.unvcopy = function cmd_unvcopy (engine) {
-    engine.ensure_vertical ();
+    if (engine.ensure_vertical (this))
+	return; // command will be reread after this graf is finished.
+
     var reg = engine.scan_char_code ();
     var box = engine.get_register (T_BOX, reg);
 
@@ -1126,7 +1130,9 @@ commands.hskip = function cmd_hskip (engine) {
 
 
 commands.vfil = function cmd_vfil (engine) {
-    engine.ensure_vertical ();
+    if (engine.ensure_vertical (this))
+	return; // command will be reread after this graf is finished.
+
     var g = new Glue ();
     g.stretch.sp = Scaled.new_from_parts (1, 0);
     g.stretch_order = 1;
@@ -1136,7 +1142,9 @@ commands.vfil = function cmd_vfil (engine) {
 
 
 commands.vfill = function cmd_vfill (engine) {
-    engine.ensure_vertical ();
+    if (engine.ensure_vertical (this))
+	return; // command will be reread after this graf is finished.
+
     var g = new Glue ();
     g.stretch.sp = Scaled.new_from_parts (1, 0);
     g.stretch_order = 2;
@@ -1146,7 +1154,9 @@ commands.vfill = function cmd_vfill (engine) {
 
 
 commands.vss = function cmd_vss (engine) {
-    engine.ensure_vertical ();
+    if (engine.ensure_vertical (this))
+	return; // command will be reread after this graf is finished.
+
     var g = new Glue ();
     g.stretch.sp = Scaled.new_from_parts (1, 0);
     g.stretch_order = 1;
@@ -1157,7 +1167,9 @@ commands.vss = function cmd_vss (engine) {
 };
 
 commands.vfilneg = function cmd_vfilneg (engine) {
-    engine.ensure_vertical ();
+    if (engine.ensure_vertical (this))
+	return; // command will be reread after this graf is finished.
+
     var g = new Glue ();
     g.stretch.sp = Scaled.new_from_parts (-1, 0);
     g.stretch_order = 1;
@@ -1166,7 +1178,9 @@ commands.vfilneg = function cmd_vfilneg (engine) {
 };
 
 commands.vskip = function cmd_vskip (engine) {
-    engine.ensure_vertical ();
+    if (engine.ensure_vertical (this))
+	return; // command will be reread after this graf is finished.
+
     var g = engine.scan_glue (false);
     engine.trace ('vskip of ' + g);
     engine.accum (new BoxGlue (g));
