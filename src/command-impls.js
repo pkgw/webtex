@@ -996,7 +996,9 @@ commands.vrule = function cmd_vrule (engine) {
 
 
 commands.unhbox = function cmd_unhbox (engine) {
-    engine.ensure_horizontal ();
+    if (engine.ensure_horizontal (this))
+	return; // this command will be reread after new paragraph is started.
+
     var reg = engine.scan_char_code ();
     var box = engine.get_register (T_BOX, reg);
 
@@ -1034,7 +1036,9 @@ commands.unvbox = function cmd_unvbox (engine) {
 
 
 commands.unhcopy = function cmd_unhcopy (engine) {
-    engine.ensure_horizontal ();
+    if (engine.ensure_horizontal (this))
+	return; // this command will be reread after new paragraph is started.
+
     var reg = engine.scan_char_code ();
     var box = engine.get_register (T_BOX, reg);
 
@@ -1066,7 +1070,9 @@ commands.unvcopy = function cmd_unvcopy (engine) {
 
 
 commands.hfil = function cmd_hfil (engine) {
-    engine.ensure_horizontal ();
+    if (engine.ensure_horizontal (this))
+	return; // this command will be reread after new paragraph is started.
+
     var g = new Glue ();
     g.stretch.sp = Scaled.new_from_parts (1, 0);
     g.stretch_order = 1;
@@ -1075,7 +1081,9 @@ commands.hfil = function cmd_hfil (engine) {
 };
 
 commands.hfill = function cmd_hfill (engine) {
-    engine.ensure_horizontal ();
+    if (engine.ensure_horizontal (this))
+	return; // this command will be reread after new paragraph is started.
+
     var g = new Glue ();
     g.stretch.sp = Scaled.new_from_parts (1, 0);
     g.stretch_order = 2;
@@ -1084,7 +1092,9 @@ commands.hfill = function cmd_hfill (engine) {
 };
 
 commands.hss = function cmd_hss (engine) {
-    engine.ensure_horizontal ();
+    if (engine.ensure_horizontal (this))
+	return; // this command will be reread after new paragraph is started.
+
     var g = new Glue ();
     g.stretch.sp = Scaled.new_from_parts (1, 0);
     g.stretch_order = 1;
@@ -1095,7 +1105,9 @@ commands.hss = function cmd_hss (engine) {
 };
 
 commands.hfilneg = function cmd_hfilneg (engine) {
-    engine.ensure_horizontal ();
+    if (engine.ensure_horizontal (this))
+	return; // this command will be reread after new paragraph is started.
+
     var g = new Glue ();
     g.stretch.sp = Scaled.new_from_parts (-1, 0);
     g.stretch_order = 1;
@@ -1104,7 +1116,9 @@ commands.hfilneg = function cmd_hfilneg (engine) {
 };
 
 commands.hskip = function cmd_hskip (engine) {
-    engine.ensure_horizontal ();
+    if (engine.ensure_horizontal (this))
+	return; // this command will be reread after new paragraph is started.
+
     var g = engine.scan_glue (false);
     engine.trace ('hskip of ' + g);
     engine.accum (new BoxGlue (g));

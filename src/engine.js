@@ -567,11 +567,22 @@ var Engine = (function Engine_closure () {
 	return list;
     };
 
-    proto.ensure_horizontal = function Engine_ensure_horizontal () {
-	if (this.mode () == M_VERT)
+    proto.ensure_horizontal = function Engine_ensure_horizontal (cmd) {
+	// If we must start a new paragraph, we have to push the command back
+	// onto the input stack (T:TP back_input) before doing so, because the
+	// output routine must execute and may insert tokens between this
+	// command and any arguments it may have.
+
+	if (this.mode () == M_VERT) {
+	    this.push (Token.new_cmd (cmd));
 	    this.begin_graf (true);
-	else if (this.mode () == M_IVERT)
+	    return true; // command will be rerun
+	}
+
+	if (this.mode () == M_IVERT)
+	    // No begin_graf, so no need to rerun command.
 	    this.enter_mode (M_RHORZ);
+	return false;
     };
 
     proto.ensure_vertical = function Engine_ensure_vertical () {
