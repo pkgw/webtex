@@ -591,9 +591,9 @@ var Engine = (function Engine_closure () {
 	if (m == M_VERT || m == M_IVERT)
 	    return false;
 
-	if (this.mode () == M_HORZ) {
-	    this.push (Token.new_cmd (this.commands['par']));
+	if (m == M_HORZ) {
 	    this.push (Token.new_cmd (cmd));
+	    this.push (Token.new_cmd (this.commands['par']));
 	    return true;
 	}
 
@@ -654,8 +654,9 @@ var Engine = (function Engine_closure () {
 	// T:TP 1091. Due to our different page-builder approach,
 	// we run it unconditionally at the top of the function,
 	// before doing the stuff to start the next paragraph.
-	this.trace ('@ new paragraph - run page builder');
-	this.run_page_builder ();
+	this.trace ('@ new paragraph - maybe run page builder');
+	if (this.mode () == M_VERT)
+	    this.run_page_builder ();
 
 	this.set_special_value (T_INT, 'prevgraf', 0);
 
@@ -709,7 +710,8 @@ var Engine = (function Engine_closure () {
 	hbox.list = list;
 	// skip: interline glue and penalties
 	this.accum (hbox);
-	this.run_page_builder ();
+	if (this.mode () == M_VERT)
+	    this.run_page_builder ();
 
 	this.set_parameter (T_INT, 'looseness', 0);
 	this.set_parameter (T_DIMEN, 'hangindent', new Dimen ());
