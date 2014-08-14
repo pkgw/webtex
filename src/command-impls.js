@@ -1740,3 +1740,14 @@ commands.nonstopmode = function cmd_nonstopmode (engine) {
 commands.scrollmode = function cmd_scrollmode (engine) {
     engine.trace ('scrollmode');
 };
+
+commands.show = function cmd_show (engine) {
+    var tok = engine.next_tok ();
+    engine.trace ('show: noop for ' + tok);
+};
+
+commands.showbox = function cmd_showbox (engine) {
+    var reg = engine.scan_register_num ();
+    var box = engine.get_register (T_BOX, reg);
+    engine.trace ('showbox ' + reg + ' = ' + box.uitext ());
+};
