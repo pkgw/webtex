@@ -65,6 +65,48 @@ var RandomAccessFile = (function RandomAccessFile_closure () {
 }) ();
 
 
+var FSIOLayer = (function FSIOLayer_closure () {
+    var fs = require ('fs');
+
+    function FSIOLayer (virtprefix, fsprefix) {
+	this.virtprefix = virtprefix;
+	this.fsprefix = fsprefix;
+    }
+
+    var proto = FSIOLayer.prototype;
+
+    proto.try_open_linebuffer = function FSIOLayer_try_open_linebuffer (texfn) {
+	if (texfn.slice (0, this.virtprefix.length) != this.virtprefix)
+	    // Not within our virtual filesystem prefix.
+	    return null;
+
+	// Once again async I/O issues rear their heads. Ideally we'd just
+	// delegate to make_fs_linebuffer, but it throws an exception
+	// asynchronously if the desired file doesn't exist. We'd like to know
+	// that now so we can return `null`. We *could* queue some kind of
+	// operation and return NeedMoreData but that is a pain. So we commit
+	// a CLASSIC RACE CONDITION MISTAKE and see if we can open the file
+	// synchronously before delegating to the async code. I should come
+	// back and fix this.
+
+	var p = this.fsprefix + texfn.slice (this.virtprefix.length);
+
+	try {
+	    var fd = fs.openSync (p, 'r');
+	} catch (e) {
+	    return null; // assume ENOENT and not some other error ...
+	}
+
+	fs.closeSync (fd);
+	return make_fs_linebuffer (p);
+    };
+
+    return FSIOLayer;
+}) ();
+
+WEBTEX.Node.FSIOLayer = FSIOLayer;
+
+
 WEBTEX.IOBackend.makeInflater = function (datacb) {
     var zlib = require ('zlib');
     var inflate = zlib.createInflate ();
