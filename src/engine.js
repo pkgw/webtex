@@ -846,7 +846,15 @@ var Engine = (function Engine_closure () {
 	if (lb == null)
 	    throw new TexRuntimeError ('can\'t find any matching files for "' +
 				       texfn + '"');
-	this.inputstack.push_linebuf (lb);
+
+	this.inputstack.push_linebuf (lb, function patchit () {
+	    var p ='__wtpatches__/' + texfn + '.post';
+	    var lb = this.iostack.try_open_linebuffer (p);
+	    if (lb != null) {
+		this.trace ('@ auto-inputting patch file ' + p);
+		this.inputstack.push_linebuf (lb, null);
+	    }
+	}.bind (this));
     };
 
     proto.handle_endinput = function Engine_handle_endinput () {
