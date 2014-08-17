@@ -1,0 +1,45 @@
+@font-face {
+  font-family: 'TeX Gyre Pagella';
+  font-style: normal;
+  font-weight: 400;
+  src: url(./texgyrepagella-regular.otf) format ('opentype');
+}
+
+@font-face {
+  font-family: 'TeX Gyre Pagella';
+  font-style: italic;
+  font-weight: 400;
+  src: url(./texgyrepagella-italic.otf) format ('opentype');
+}
+
+@font-face {
+  font-family: 'TeX Gyre Pagella';
+  font-style: normal;
+  font-weight: 700;
+  src: url(./texgyrepagella-bold.otf) format ('opentype');
+}
+
+@font-face {
+  font-family: 'TeX Gyre Pagella';
+  font-style: italic;
+  font-weight: 700;
+  src: url(./texgyrepagella-bolditalic.otf) format ('opentype');
+}
+
+body {
+  background: #fff;
+  background-color: #fff;
+}
+
+.webtex {
+  font-family: "TeX Gyre Pagella";
+  font-style: normal;
+  font-weight: 400;
+  font-size: 24px;
+  letter-spacing: normal;
+  color: rgba(0, 0, 0, 0.8);
+  text-align: justify;
+  text-rendering: optimizelegibility;
+  line-height: 1.3;
+  hyphens: auto;
+}
