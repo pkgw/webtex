@@ -1,0 +1,14 @@
+% -*- latex -*-
+\makeatletter
+
+% LaTeX tries to let people deal with errors interactively, but that's kind of
+% nuts.
+
+\gdef\PackageError#1#2#3{\errmessage{error in package "#1": #2}}
+\gdef\ClassError#1#2#3{\errmessage{error in class "#1": #2}}
+\gdef\@latex@error#1#2{\errmessage{LaTeX error: #1}}
+\global\let\@latexerr\@latex@error
+\gdef\@missingfileerror#1#2{\errmessage{input file "#1.#2" not found}}
+
+% Done patching.
+\makeatother
