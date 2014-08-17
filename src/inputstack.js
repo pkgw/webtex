@@ -186,10 +186,12 @@ var InputStack = (function InputStack_closure () {
 	if (initial_linebuf == null) {
 	    this.next_toknums = [];
 	    this.inputs = [];
+	    this.cleanups = [];
 	} else {
 	    this.next_toknums = [0];
 	    var ordsrc = new OrdSource (initial_linebuf, args);
 	    this.inputs = [new TokenizerInput (ordsrc, engine)];
+	    this.cleanups = [null];
 	}
     }
 
@@ -201,6 +203,7 @@ var InputStack = (function InputStack_closure () {
 	c.next_recent_tok = this.next_recent_tok;
 	c.next_toknums = this.next_toknums.slice ();
 	c.inputs = this.inputs.slice ();
+	c.cleanups = this.cleanups.slice ();
 	return c;
     };
 
@@ -232,18 +235,23 @@ var InputStack = (function InputStack_closure () {
 
 	this.inputs.pop ();
 	this.next_toknums.pop ();
+	var cb = this.cleanups.pop ();
+	if (cb != null)
+	    cb ();
 	return this.next_tok ();
     };
 
     proto.push_toklist = function InputStack_push_toklist (toks) {
 	this.inputs.push (new ToklistInput (toks));
 	this.next_toknums.push (0);
+	this.cleanups.push (null);
     };
 
-    proto.push_linebuf = function InputStack_push_linebuf (lb) {
+    proto.push_linebuf = function InputStack_push_linebuf (lb, callback) {
 	var ordsrc = new OrdSource (lb, this.misc_args);
 	this.inputs.push (new TokenizerInput (ordsrc, this.engine));
 	this.next_toknums.push (0);
+	this.cleanups.push (callback || null);
     };
 
     proto.pop_current_linebuf = function InputStack_pop_current_linebuf () {
@@ -263,6 +271,12 @@ var InputStack = (function InputStack_closure () {
 
 	this.inputs = this.inputs.slice (0, i);
 	this.next_toknums = this.next_toknums.slice (0, i);
+
+	while (this.cleanups.length > this.inputs.length) {
+	    var cb = this.cleanups.pop ();
+	    if (cb != null)
+		cb ();
+	}
     };
 
     proto.describe_recent = function InputStack_describe_recent () {
