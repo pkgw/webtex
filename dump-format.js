@@ -1,13 +1,14 @@
-if (process.argv.length < 4) {
-    console.log ('usage: node ' + process.argv[1] + ' <webtex.js> <fmtname>');
+if (process.argv.length < 5) {
+    console.log ('usage: node ' + process.argv[1] + ' <webtex.js> <patchdir> <fmtname>');
     process.exit (1);
 }
 
 var console = require ('console');
 var util = require ('util');
 var webtex = require (process.argv[2]);
+var patchdir = process.argv[3];
 
-var lb = webtex.LineBuffer.new_static (['\\input ' + process.argv[3]]);
+var lb = webtex.LineBuffer.new_static (['\\input ' + process.argv[4]]);
 
 webtex.Node.promise_engine ({
     jobname: process.argv[3],
@@ -17,6 +18,8 @@ webtex.Node.promise_engine ({
     //debug_input_lines: true,
     //debug_trace: true,
 }).then (function (engine) {
+    engine.iostack.push (new webtex.Node.FSIOLayer ('__wtpatches__/', patchdir));
+
     function iterate () {
 	var rv = engine.step ();
 
