@@ -21,7 +21,7 @@
 var ZipReader = WEBTEX.ZipReader = (function ZipReader_closure () {
     var ZIP_EOCDR_MAGIC = 0x06054b50;
     var ZIP_DIREC_MAGIC = 0x02014b50;
-    var ZIP_ENTRY_MAGIC = 0x03044b50;
+    var ZIP_ENTRY_MAGIC = 0x04034b50;
 
     function ZipReader (readfunc, zipsize) {
 	if (zipsize < 22)
@@ -99,9 +99,7 @@ var ZipReader = WEBTEX.ZipReader = (function ZipReader_closure () {
 	            cmntlen = dv.getUint16 (offset + 32, true),
 	            recofs = dv.getUint32 (offset + 42, true);
 
-		var dataofs = recofs + 30 + fnlen + extralen;
-
-		if (dataofs + csize > this.zipsize) {
+		if (recofs + csize > this.zipsize) {
 		    this.error_state = 'bad Zip: bad data size/offset';
 		    throw new Error (this.error_state);
 		}
@@ -127,7 +125,7 @@ var ZipReader = WEBTEX.ZipReader = (function ZipReader_closure () {
 		dirinfo[fn] = {'csize': csize,
 			       'ucsize': ucsize,
 			       'compression': compression,
-			       'dataofs': dataofs};
+			       'recofs': recofs};
 		offset += 46 + fnlen + extralen + cmntlen;
 	    }
 
@@ -156,32 +154,62 @@ var ZipReader = WEBTEX.ZipReader = (function ZipReader_closure () {
 	var info = this.dirinfo[entname];
 	var state = {'info': info, 'cb': callback};
 	state.entname = entname;
-	state.nleft = info.csize;
-	state.curofs = info.dataofs;
-	// The buffer must be at least 32k for zlib to work since it uses a
-	// lookback buffer of that size.
-	state.buflen = 32768;
 
-	if (info.compression) {
-	    var inflate = WEBTEX.IOBackend.makeInflater (callback);
-	    state.cb = function (err, buf) {
-		if (err != null) {
-		    callback (err, null);
-		    return;
-		}
+	this.readfunc (info.recofs, 30, function (err, buf) {
+	    // We need to read the pre-entry record to know where the data
+	    // actually start -- the lengths of the comment/extra fields are
+	    // *not* guaranteed to be the same as in the central directory, so
+	    // having read the latter is not enough.
+	    if (err != null) {
+		callback (err, null);
+		return;
+	    }
 
-		if (buf == null)
-		    inflate.end ();
-		else
-		    inflate.wt_write (buf);
-	    };
-	}
+	    var dv = new DataView (buf);
+	    var magic = dv.getUint32 (0, true);
+	    if (magic != ZIP_ENTRY_MAGIC) {
+		this.error_state = 'bad Zip: wrong magic number in entry';
+		throw new Error (this.error_state);
+	    }
 
-	this.readfunc (state.curofs,
-		       Math.min (state.nleft, state.buflen),
-		       function (err, buf) {
-			   this._cb_do_stream (err, buf, state);
-		       }.bind (this));
+	    var csize = dv.getUint32 (18, true),
+	        fnlen = dv.getUint16 (26, true),
+	        extralen = dv.getUint16 (28, true);
+	    var dataofs = state.info.recofs + 30 + fnlen + extralen;
+
+	    if (dataofs + csize > this.zipsize) {
+		this.error_state = 'bad Zip: bad entry data size/offset';
+		throw new Error (this.error_state);
+	    }
+
+	    // OK, now we can start reading the file data.
+	    state.nleft = csize;
+	    state.curofs = dataofs;
+	    // The buffer must be at least 32k for zlib to work since it uses
+	    // a lookback buffer of that size.
+	    state.buflen = 32768;
+
+	    if (state.info.compression) {
+		var inflate = WEBTEX.IOBackend.makeInflater (callback);
+		state.cb = function (err, buf) {
+		    if (err != null) {
+			callback (err, null);
+			return;
+		    }
+
+		    if (buf == null)
+			inflate.end ();
+		    else
+			inflate.wt_write (buf);
+		};
+	    }
+
+	    this.readfunc (state.curofs,
+			   Math.min (state.nleft, state.buflen),
+			   function (err, buf) {
+			       this._cb_do_stream (err, buf, state);
+			   }.bind (this));
+	}.bind (this));
     };
 
     proto._cb_do_stream = function ZipReader__cb_do_stream (err, buf, state) {
