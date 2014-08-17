@@ -1,14 +1,29 @@
 % -*- latex -*-
 \makeatletter
-
+%
+% LaTeX ends with \let\reserved@a\@filelist, which we're about to clobber,
+% so preserve that:
+%
+\let\@filelist\reserved@a
+%
 % LaTeX tries to let people deal with errors interactively, but that's kind of
 % nuts.
-
+%
+\DeclareRobustCommand\GenericError[4]{\errmessage{#2}}
 \gdef\PackageError#1#2#3{\errmessage{error in package "#1": #2}}
 \gdef\ClassError#1#2#3{\errmessage{error in class "#1": #2}}
 \gdef\@latex@error#1#2{\errmessage{LaTeX error: #1}}
 \global\let\@latexerr\@latex@error
 \gdef\@missingfileerror#1#2{\errmessage{input file "#1.#2" not found}}
-
+%
+% Now put the LaTeX temporaries back how they should be.
+%
+\let\reserved@a\@filelist
+\let\reserved@b=\@undefined
+\let\reserved@c=\@undefined
+\let\reserved@d=\@undefined
+\let\reserved@e=\@undefined
+\let\reserved@f=\@undefined
+\let\@filelist\@gobble
 % Done patching.
 \makeatother
