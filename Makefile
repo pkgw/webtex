@@ -79,6 +79,6 @@ $(builddir)/latex.dump.json: dump-format.js $(builddir)/node-webtex.min.js test/
 	node dump-format.js ./$(builddir)/node-webtex.min.js test/tex/latex.ltx >$@.new && mv -f $@.new $@
 
 update-bundle: $(builddir)/latex.dump.json
-	./make-tex-bundle.py packages.txt texcache $^
+	./make-tex-bundle.py packages.txt texcache texpatches $^
 
 .PHONY: all clean fattest standard minified test update-bundle

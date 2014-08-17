@@ -10,12 +10,14 @@ cache_ident = 'tl2013'
 url_base = 'ftp://tug.org/historic/systems/texlive/2013/tlnet-final/archive/'
 pkg_extension = '.tar.xz'
 skip_roots = frozenset (('makeindex', 'tlpkg'))
+patch_suffixes = ['.post']
 
 
 class Bundler (object):
-    def __init__ (self, specfile, cachedir, otherfiles):
+    def __init__ (self, specfile, cachedir, patchdir, otherfiles):
         self.specfile = specfile
         self.cachedir = cachedir
+        self.patchdir = patchdir
         self.otherfiles = otherfiles
         self.elemshas = {}
 
@@ -94,9 +96,21 @@ class Bundler (object):
                     # (lame), so we read the whole file into memory.
                     contents = tar.extractfile (info).read ()
                     zip.writestr (base, contents)
-
                     s = hashlib.sha1 ()
                     s.update (contents)
+
+                    # Include any patches that may exist for this file.
+                    for sfx in patch_suffixes:
+                        p = os.path.join (self.patchdir, cache_ident, base + sfx)
+                        if not os.path.exists (p):
+                            continue
+
+                        contents = io.open (p, 'rt').read ()
+                        zip.writestr ('__wtpatches__/' + base + sfx, contents)
+                        s.update (sfx)
+                        s.update (contents)
+
+                    s.update ('eof')
                     self.elemshas[base] = s.digest ()
 
 
@@ -122,12 +136,12 @@ class Bundler (object):
 
 
 def commandline (argv):
-    if len (sys.argv) < 3:
-        print ('usage: make-tex-bundle.py <specfile-path> <cachedir> [otherfiles...]',
+    if len (sys.argv) < 4:
+        print ('usage: make-tex-bundle.py <specfile-path> <cachedir> <patchdir> [otherfiles...]',
                file=sys.stderr)
         sys.exit (1)
 
-    b = Bundler (sys.argv[1], sys.argv[2], sys.argv[3:])
+    b = Bundler (sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4:])
     b.go ()
 
 
