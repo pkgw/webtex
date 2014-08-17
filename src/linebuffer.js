@@ -7,6 +7,13 @@ var LineBuffer = WEBTEX.LineBuffer = (function LineBuffer_closure () {
 
     var proto = LineBuffer.prototype;
 
+    LineBuffer.new_static = function LineBuffer_new_static (staticlines) {
+	var lb = new LineBuffer ();
+	lb.cachedlines = staticlines;
+	lb.saw_eof = true;
+	return lb;
+    };
+
     proto.feed_data = function LineBuffer_feed_data (chunk) {
 	if (typeof chunk !== 'string')
 	    throw new TexInternalError ('LineBuffers must be fed strings; got' + chunk);

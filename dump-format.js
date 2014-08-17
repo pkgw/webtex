@@ -1,5 +1,5 @@
 if (process.argv.length < 4) {
-    console.log ('usage: node ' + process.argv[1] + ' <webtex.js> <filename>');
+    console.log ('usage: node ' + process.argv[1] + ' <webtex.js> <fmtname>');
     process.exit (1);
 }
 
@@ -7,9 +7,11 @@ var console = require ('console');
 var util = require ('util');
 var webtex = require (process.argv[2]);
 
+var lb = webtex.LineBuffer.new_static (['\\input ' + process.argv[3]]);
+
 webtex.Node.promise_engine ({
     jobname: process.argv[3],
-    inputpath: process.argv[3],
+    input_linebuf: lb,
     shiptarget: null,
     bundlepath: 'misc/minimal-bundle-tl2013.zip',
     //debug_input_lines: true,

@@ -102,8 +102,13 @@ function promise_engine (args) {
 	args.iostack = new IOStack ();
 	args.iostack.push (bundle);
 
-	args.initial_linebuf = make_fs_linebuffer (args.inputpath);
-	delete args.inputpath;
+	if (args.input_linebuf != null) {
+	    args.initial_linebuf = args.input_linebuf;
+	    delete args.input_linebuf;
+	} else {
+	    args.initial_linebuf = make_fs_linebuffer (args.inputpath);
+	    delete args.inputpath;
+	}
 
 	return new Engine (args);
     });
