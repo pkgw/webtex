@@ -34,6 +34,43 @@ var lt_names = ['box', 'rule', 'character', 'glue', 'kern', 'mark', 'penalty',
 		'leader', 'special', 'starttag', 'endtag'];
 
 
+// Math styles
+
+var MS_DISPLAY = 0,      // large display style
+    MS_TEXT = 1,         // small inline text style
+    MS_SCRIPT = 2,       // tiny sub/superscript style
+    MS_SCRIPTSCRIPT = 3; // double-tiny style
+
+var ms_names = ['display', 'text', 'script', 'scriptscript'];
+
+// Math atom types
+
+var MT_ORD = 0,      // ordinal
+    MT_OP = 1,	     // operator
+    MT_BIN = 2,	     // binary operator
+    MT_REL = 3,      // relation
+    MT_OPEN = 4,     // open delimiter
+    MT_CLOSE = 5,    // close delimiter
+    MT_PUNCT = 6,    // punctuation
+    MT_INNER = 7,    // inner
+    MT_RADICAL = 8,  // radical
+    MT_FRACTION = 9, // generalized fraction
+    MT_UNDER = 10,   // underlined item
+    MT_OVER = 11,    // overlined item
+    MT_ACCENT = 12,  // accented item
+    MT_VCENTER = 13, // vertically-center subitem
+    MT_LEFT = 14,    // dynamically-sized left delimiter
+    MT_RIGHT = 15,   // dynamically-sized right delimiter
+    MT_STYLE = 16,   // force a specific math style
+    MT_SCHOICE = 17; // style-dependent choice of content
+
+var mt_names = ['ord', 'op', 'bin', 'rel', 'open', 'close', 'punct', 'inner'];
+
+var OLT_DEFAULT = 0,  // operator limit type: infer based on context
+    OLT_LIMITS = 1,   // force limit-style sup/sub
+    OLT_NOLIMITS = 2; // force big-operator-style sub/sup
+
+
 // Box types
 
 var BT_VOID = 0,
