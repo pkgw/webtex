@@ -877,7 +877,19 @@ commands.wd = (function WdCommand_closure () {
     proto.name = 'wd';
 
     proto.invoke = function WdCommand_invoke (engine) {
-	throw new TexInternalError ('not implemented bare \\wd');
+	// NOTE: you can't e.g. do \advance\wd0 so implementing as a settable
+	// Valref is not so important.
+	var reg = engine.scan_char_code ();
+	engine.scan_optional_equals ();
+	var width = engine.scan_dimen ();
+	var box = engine.get_register (T_BOX, reg);
+
+	if (box.btype == BT_VOID) {
+	    engine.trace ('\\wd' + reg + ' = ' + width + ' -- noop on void box');
+	} else {
+	    engine.trace ('\\wd' + reg + ' = ' + width);
+	    box.width = width;
+	}
     };
 
     proto.get_valtype = function WdCommand_get_valtype () {
@@ -901,7 +913,19 @@ commands.ht = (function HtCommand_closure () {
     proto.name = 'ht';
 
     proto.invoke = function HtCommand_invoke (engine) {
-	throw new TexInternalError ('not implemented bare \\ht');
+	// NOTE: you can't e.g. do \advance\ht0 so implementing as a settable
+	// Valref is not so important.
+	var reg = engine.scan_char_code ();
+	engine.scan_optional_equals ();
+	var height = engine.scan_dimen ();
+	var box = engine.get_register (T_BOX, reg);
+
+	if (box.btype == BT_VOID) {
+	    engine.trace ('\\ht' + reg + ' = ' + height + ' -- noop on void box');
+	} else {
+	    engine.trace ('\\ht' + reg + ' = ' + height);
+	    box.height = height;
+	}
     };
 
     proto.get_valtype = function HtCommand_get_valtype () {
@@ -925,6 +949,8 @@ commands.dp = (function DpCommand_closure () {
     proto.name = 'dp';
 
     proto.invoke = function DpCommand_invoke (engine) {
+	// NOTE: you can't e.g. do \advance\dp0 so implementing as a settable
+	// Valref is not so important.
 	var reg = engine.scan_char_code ();
 	engine.scan_optional_equals ();
 	var depth = engine.scan_dimen ();
