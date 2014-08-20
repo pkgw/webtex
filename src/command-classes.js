@@ -694,7 +694,7 @@ var GivenCharCommand = (function GivenCharCommand_closure () {
     };
 
     proto.texmeaning = function GivenCharCommand_texmeaning (engine) {
-	return texchr (engine.escapechar ()) + 'char' +
+	return texchr (engine.escapechar ()) + 'char"' +
 	    this.ord.toString (16).toUpperCase ();
     };
 
@@ -740,7 +740,7 @@ var GivenMathcharCommand = (function GivenMathcharCommand_closure () {
     };
 
     proto.texmeaning = function GivenMathcharCommand_texmeaning (engine) {
-	return texchr (engine.escapechar ()) + 'mathchar' +
+	return texchr (engine.escapechar ()) + 'mathchar"' +
 	    this.mathchar.toString (16).toUpperCase ();
     };
 
