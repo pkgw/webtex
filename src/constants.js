@@ -101,7 +101,7 @@ var M_VERT = 0,  // standard vertical mode
     M_DMATH = 5; // display math mode
 
 var mode_abbrev = [
-    '_vert', 'ivert', '_horz', 'rhorz', '_math', 'dmath'
+    'vert', 'ivert', 'horz', 'rhorz', 'math', 'dmath'
 ];
 
 
