@@ -5,6 +5,7 @@ epsf
 graphics
 hyperref
 hyphen-base
+ifluatex
 ifxetex
 latex
 latexconfig
@@ -13,5 +14,7 @@ natbib
 oberdiek
 plain
 revtex4
+tex-gyre
+tex-gyre-math
 tools
 url
