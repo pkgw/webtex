@@ -1520,7 +1520,7 @@ function _def_family (engine, fam) {
 	throw new TexRuntimeError ('expected \\' + fam + ' to assign a font; ' +
 				   'got ' +tok);
 
-    engine.trace (['fam', slot, '=', val.get (engine), '[noop]'].join (' '));
+    engine.trace ([fam, slot, '=', val.get (engine), '[noop]'].join (' '));
     engine.maybe_insert_after_assign_token ();
 };
 
