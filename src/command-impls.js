@@ -51,6 +51,18 @@ commands._space_ = function cmd__space_ (engine) {
 };
 
 
+commands.char = function cmd_char (engine) {
+    var ord = engine.scan_char_code ();
+    engine.trace ('char ' + ord);
+    engine.push (Token.new_cmd (new GivenCharCommand (ord)));
+};
+
+commands.mathchar = function cmd_mathchar (engine) {
+    var ord = engine.scan_int_15bit ();
+    engine.trace ('mathchar 0x' + ord.toString (16));
+    engine.push (Token.new_cmd (new GivenMathcharCommand (ord)));
+};
+
 // Language infrastructure
 
 commands.relax = function cmd_relax (engine) {
