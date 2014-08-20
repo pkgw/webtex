@@ -892,6 +892,40 @@ var GivenFontCommand = (function GivenFontCommand_closure () {
 })();
 
 
+var FontFamilyCommand = (function FontFamilyCommand_closure () {
+    function FontFamilyCommand (style, stylename) {
+	Command.call (this);
+
+	this.style = style;
+	this.name = stylename + 'font';
+    }
+
+    inherit (FontFamilyCommand, Command);
+    var proto = FontFamilyCommand.prototype;
+    proto.assign_flag_mode = AFM_CONSUME;
+
+    proto.invoke = function FontFamilyCommand_invoke (engine) {
+	var index = engine.scan_int_4bit ();
+	engine.scan_optional_equals ();
+	var newval = engine.scan_valtype (T_FONT);
+	engine.trace (this.name + ' #' + index + ' = ' + newval);
+	(new FontFamilyValref (this.style, index)).set (engine, newval);
+    };
+
+    proto.get_valtype = function FontFamilyCommand_get_valtype () {
+	return T_FONT;
+    };
+
+    proto.as_valref = function FontFamilyCommand_as_valref (engine) {
+	var index = engine.scan_int_4bit ();
+	return new FontFamilyValref (this.style, index);
+    };
+
+    return FontFamilyCommand;
+})();
+
+
+
 // Commands for named parameters
 
 var NamedParamCommand = (function NamedParamCommand_closure () {

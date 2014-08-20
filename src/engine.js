@@ -34,6 +34,10 @@ var EquivTable = (function EquivTable_closure () {
 
 	this._actives = {};
 	this._cseqs = {};
+	this._font_families = {};
+	this._font_families[MS_TEXT] = {};
+	this._font_families[MS_SCRIPT] = {};
+	this._font_families[MS_SCRIPTSCRIPT] = {};
 	this._misc = {};
 
 	if (parent == null)
@@ -157,6 +161,31 @@ var EquivTable = (function EquivTable_closure () {
 	    this.parent.set_cseq (name, value, global);
     };
 
+    proto.get_font_family = function EquivTable_get_font_family (style, index) {
+	if (style < MS_TEXT || style > MS_SCRIPTSCRIPT)
+	    throw new TexRuntimeError ('illegal font family style ' + style);
+	if (index < 0 || index > 15)
+	    throw new TexRuntimeError ('illegal font family number ' + index);
+
+	if (this._font_families[style].hasOwnProperty (index))
+	    return this._font_families[style][index];
+	if (this.parent == null)
+	    return null;
+	return this.parent.get_font_family (style, index);
+    };
+
+    proto.set_font_family = function EquivTable_set_font_family (style, index, value, global) {
+	if (style < MS_TEXT || style > MS_SCRIPTSCRIPT)
+	    throw new TexRuntimeError ('illegal font family style ' + style);
+	if (index < 0 || index > 15)
+	    throw new TexRuntimeError ('illegal font family number ' + index);
+
+	this._font_families[style][index] = value;
+
+	if (global && this.parent != null)
+	    this.parent.set_font_family (style, index, value, global);
+    };
+
     proto.get_misc = function EquivTable_get_misc (name) {
 	if (this._misc.hasOwnProperty (name))
 	    return this._misc[name];
@@ -209,6 +238,12 @@ var EquivTable = (function EquivTable_closure () {
 	this._codes[CT_DELIM][O_PERIOD] = 0;
 
 	this._misc.cur_font = null;
+
+	for (var i = 0; i < 16; i++) {
+	    this._font_families[MS_TEXT][i] = null;
+	    this._font_families[MS_SCRIPT][i] = null;
+	    this._font_families[MS_SCRIPTSCRIPT][i] = null;
+	}
     };
 
     // Serialization. Our equivalent of the \dump primitive.
@@ -313,6 +348,30 @@ var EquivTable = (function EquivTable_closure () {
 	    state.cseqs[name] = this._cseqs[name].get_serialize_ident (state, housekeeping);
 	}
 
+	// Font families.
+
+	state.font_families = {text: [], script: [], scriptscript: []};
+
+	for (i = 0; i < 16; i++) {
+	    var f = this._font_families[MS_TEXT][i];
+	    if (f == null)
+		state.font_families.text.push ('<null>');
+	    else
+		state.font_families.text.push (f.get_serialize_ident (state, housekeeping));
+
+	    var f = this._font_families[MS_SCRIPT][i];
+	    if (f == null)
+		state.font_families.script.push ('<null>');
+	    else
+		state.font_families.script.push (f.get_serialize_ident (state, housekeeping));
+
+	    var f = this._font_families[MS_SCRIPTSCRIPT][i];
+	    if (f == null)
+		state.font_families.scriptscript.push ('<null>');
+	    else
+		state.font_families.scriptscript.push (f.get_serialize_ident (state, housekeeping));
+	}
+
 	// Miscellaneous nestable parameters.
 
 	state.misc = {};
@@ -410,6 +469,11 @@ var Engine = (function Engine_closure () {
 	var nf = new Font (this, 'nullfont', -1000);
 	this._fonts['<null>'] = this._fonts['nullfont'];
 	this.set_misc ('cur_font', nf);
+	for (var i = 0; i < 16; i++) {
+	    this.set_font_family (MS_TEXT, i, nf);
+	    this.set_font_family (MS_SCRIPT, i, nf);
+	    this.set_font_family (MS_SCRIPTSCRIPT, i, nf);
+	}
 
 	if (args.debug_trace)
 	    this.trace = function (t) { global_log ('{' + t + '}'); };
@@ -463,6 +527,15 @@ var Engine = (function Engine_closure () {
 
     proto.set_cseq = function Engine_get_cseq (name, cmd) {
 	this.eqtb.set_cseq (name, cmd, this.assign_flags & AF_GLOBAL);
+	this.maybe_insert_after_assign_token ();
+    };
+
+    proto.get_font_family = function Engine_get_font_family (style, index) {
+	return this.eqtb.get_font_family (style, index);
+    };
+
+    proto.set_font_family = function Engine_set_font_family (style, index, value) {
+	this.eqtb.set_font_family (style, index, value, this.assign_flags & AF_GLOBAL);
 	this.maybe_insert_after_assign_token ();
     };
 
@@ -1074,6 +1147,12 @@ var Engine = (function Engine_closure () {
 	for (var cseq in json.cseqs)
 	    this.set_cseq (cseq, getcmd (json.cseqs[cseq]));
 
+	for (i = 0; i < 16; i++) {
+	    this.set_font_family (MS_TEXT, Font.deserialize (this, json.font_families.text[i]));
+	    this.set_font_family (MS_SCRIPT, Font.deserialize (this, json.font_families.script[i]));
+	    this.set_font_family (MS_SCRIPTSCRIPT, Font.deserialize (this, json.font_families.scriptscript[i]));
+	}
+
 	this.set_misc ('cur_font', Font.deserialize (this, json.misc.cur_font));
     };
 
@@ -1571,6 +1650,14 @@ var Engine = (function Engine_closure () {
 	return this.scan_tok_group (false);
     };
 
+    proto.scan_font_value = function Engine_scan_font_value () {
+	var tok = this.next_x_tok_throw ();
+	var val = tok.tocmd (this).as_valref (this);
+	if (val == null || val.valtype != T_FONT)
+	    throw new TexRuntimeError ('expected a font value, but got ' + tok);
+	return val.get (this);
+    };
+
     proto.scan_valtype = function Engine_scan_valtype (valtype) {
 	if (valtype == T_INT)
 	    return this.scan_int ();
@@ -1583,6 +1670,8 @@ var Engine = (function Engine_closure () {
 	    return this.scan_glue (true);
 	if (valtype == T_TOKLIST)
 	    return this.scan_toks_value ();
+	if (valtype == T_FONT)
+	    return this.scan_font_value ();
 	throw new TexInternalError ('can\'t generically scan value type ' + valtype);
     };
 

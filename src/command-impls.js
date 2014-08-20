@@ -1510,32 +1510,9 @@ commands.hyphenchar = function cmd_hyphenchar (engine) {
 };
 
 
-function _def_family (engine, fam) {
-    var slot = engine.scan_int_4bit ();
-    engine.scan_optional_equals ();
-    var tok = engine.next_tok_throw ();
-    var val = tok.tocmd (engine).as_valref (engine);
-
-    if (val.valtype != T_FONT)
-	throw new TexRuntimeError ('expected \\' + fam + ' to assign a font; ' +
-				   'got ' +tok);
-
-    engine.trace ([fam, slot, '=', val.get (engine), '[noop]'].join (' '));
-    engine.maybe_insert_after_assign_token ();
-};
-
-
-commands.textfont = function cmd_textfont (engine) {
-    return _def_family (engine, 'textfont');
-};
-
-commands.scriptfont = function cmd_scriptfont (engine) {
-    return _def_family (engine, 'scriptfont');
-};
-
-commands.scriptscriptfont = function cmd_scriptscriptfont (engine) {
-    return _def_family (engine, 'scriptscriptfont');
-};
+commands.textfont = new FontFamilyCommand (MS_TEXT, 'text');
+commands.scriptfont = new FontFamilyCommand (MS_SCRIPT, 'script');
+commands.scriptscriptfont = new FontFamilyCommand (MS_SCRIPTSCRIPT, 'scriptscript');
 
 
 // Hyphenation
