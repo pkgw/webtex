@@ -682,17 +682,11 @@ var Engine = (function Engine_closure () {
 	    this.accum (new BoxGlue (b));
 	}
 
-	var tl = this.get_parameter (T_TOKLIST, 'everypar');
-	if (!tl.toks.length)
-	    this.trace ('@ everypar: empty');
-	else {
-	    this.trace ('@ everypar: ' + tl.as_serializable ());
-	    this.push_toks (tl.toks);
-	}
+	this.maybe_push_toklist ('everypar');
     };
 
     proto.end_graf = function Engine_end_graf () {
-	// T:TP 1070.
+	// T:TP 1070, 1096.
 	if (this.mode () != M_HORZ)
 	    return;
 
@@ -1097,6 +1091,16 @@ var Engine = (function Engine_closure () {
 	if (!(toks instanceof Array))
 	    throw new TexInternalError ('illegal push_toks argument: ' + toks);
 	this.inputstack.push_toklist (toks);
+    };
+
+    proto.maybe_push_toklist = function Engine_maybe_push_toklist (name) {
+	var tl = this.get_parameter (T_TOKLIST, name);
+	if (!tl.toks.length)
+	    this.trace ('@ ' + name + ': empty');
+	else {
+	    this.trace ('@ ' + name + ': ' + tl.as_serializable ());
+	    this.push_toks (tl.toks);
+	}
     };
 
     proto.push_string = function Engine_push_string (text) {
