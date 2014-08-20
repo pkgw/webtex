@@ -1453,6 +1453,11 @@ var Engine = (function Engine_closure () {
 	return this.scan_int ().rangecheck (this, 0, 15).value;
     };
 
+    proto.scan_int_15bit = function Engine_scan_int_15bit () {
+	// note: returns JS integer, not TexInt.
+	return this.scan_int ().rangecheck (this, 0, 32767).value;
+    };
+
     proto.scan_dimen = function Engine_scan_dimen (mumode, infmode) {
 	/* `infmode` says whether infinities are allowed. If true, the return
 	 * value is [dimen, infinity_order] rather than just the dimension. */
@@ -1954,7 +1959,7 @@ var Engine = (function Engine_closure () {
     };
 
 
-    // Box construction
+    // Text box construction
 
     proto.scan_box = function Engine_scan_box (callback, is_assignment) {
 	var tok = null;
@@ -2078,6 +2083,23 @@ var Engine = (function Engine_closure () {
 	return c.pop ();
     };
 
+
+    // Math box construction
+
+    function _math_bad_finish (engine) {
+	throw new TexRuntimeError ('got group end when expected math-unshift');
+    };
+
+    proto.enter_math = function Engine_enter_math (mode, is_outer) {
+	this.enter_mode (mode);
+	this.trace ('<is_outer=' + is_outer + '>');
+	this.nest_eqtb ();
+
+	if (is_outer)
+	    this.set_parameter (T_INT, 'fam', -1);
+
+	this.group_exit_stack.push ([_math_bad_finish, []]);
+    };
 
     // Miscellaneous
 

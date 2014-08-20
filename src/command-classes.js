@@ -466,6 +466,39 @@ var MathShiftCommand = (function MathShiftCommand_closure () {
     proto.name = '<math-shift>';
     proto.desc = 'math shift character';
 
+    proto.invoke = function MathShiftCommand_invoke (engine) {
+	// T:TP 1138.
+	if (engine.ensure_horizontal (this))
+	    return; // this command will be reread after new paragraph is started.
+
+	var m = engine.mode ();
+
+	if (m == M_DMATH || m == M_MATH) {
+	    engine.trace ('math shift: exit');
+	    engine.unnest_eqtb ();
+	    var mlist = engine.leave_mode ();
+	    engine.trace ('XXX unused math list ' + mlist);
+	} else {
+	    engine.trace ('math shift: enter');
+
+	    var tok = engine.next_tok_throw ();
+	    if (tok.tocmd (engine) instanceof MathShiftCommand &&
+		(m == M_VERT || m == M_HORZ || m == M_DMATH)) { // XXX don't understand mode check; see T:TP
+		    engine.end_graf ();
+		engine.enter_math (DM_MATH, true);
+		// XXX: pre_display_size_code to an overhang of prev graf (T:TP 1145)
+		// XXX: display_width_code to width of display
+		// XXX: display_indent_code to its indent
+		engine.maybe_push_toklist ('everydisplay');
+		// XXX: no pagebuilder
+	    } else {
+		engine.push (tok);
+		engine.enter_math (M_MATH, true);
+		engine.maybe_push_toklist ('everymath');
+	    }
+	}
+    };
+
     return MathShiftCommand;
 })();
 
