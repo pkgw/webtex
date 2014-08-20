@@ -42,16 +42,6 @@ var EquivTable = (function EquivTable_closure () {
 
     var proto = EquivTable.prototype;
 
-    proto.set_register = function EquivTable_set_register (valtype, reg, value) {
-	if (!vt_ok_for_register[valtype])
-	    throw new TexRuntimeError ('illegal value type for register: ' +
-				       vt_names[valtype]);
-	if (reg < 0 || reg > 255)
-	    throw new TexRuntimeError ('illegal register number ' + reg);
-
-	this._registers[valtype][reg] = Value.coerce (valtype, value);
-    };
-
     proto.get_register = function EquivTable_get_register (valtype, reg) {
 	if (!vt_ok_for_register[valtype])
 	    throw new TexRuntimeError ('illegal value type for register: ' +
@@ -67,12 +57,17 @@ var EquivTable = (function EquivTable_closure () {
 	return this.parent.get_register (valtype, reg);
     };
 
-    proto.set_parameter = function EquivTable_set_parameter (valtype, name, value) {
-	if (!vt_ok_for_parameter[valtype])
-	    throw new TexRuntimeError ('illegal value type for parameter: ' +
+    proto.set_register = function EquivTable_set_register (valtype, reg, value, global) {
+	if (!vt_ok_for_register[valtype])
+	    throw new TexRuntimeError ('illegal value type for register: ' +
 				       vt_names[valtype]);
+	if (reg < 0 || reg > 255)
+	    throw new TexRuntimeError ('illegal register number ' + reg);
 
-	this._parameters[valtype][name] = Value.coerce (valtype, value);
+	this._registers[valtype][reg] = Value.coerce (valtype, value);
+
+	if (global && this.parent != null)
+	    this.parent.set_register (valtype, reg, value, global);
     };
 
     proto.get_parameter = function EquivTable_get_parameter (valtype, name) {
@@ -87,17 +82,15 @@ var EquivTable = (function EquivTable_closure () {
 	return this.parent.get_parameter (valtype, name);
     };
 
-    proto.set_code = function EquivTable_set_code (codetype, ord, value) {
-	if (ord < 0 || ord > 255)
-	    throw new TexRuntimeError ('illegal ordinal number ' + ord);
-	if ((value < 0 && codetype != CT_DELIM) || value > ct_maxvals[codetype])
-	    throw new TexRuntimeError ('illegal ' + ct_names[codetype] +
-				       ' value ' + value);
+    proto.set_parameter = function EquivTable_set_parameter (valtype, name, value, global) {
+	if (!vt_ok_for_parameter[valtype])
+	    throw new TexRuntimeError ('illegal value type for parameter: ' +
+				       vt_names[valtype]);
 
-	if (codetype == CT_CATEGORY)
-	    this._catcodes[ord] = value;
-	else
-	    this._codes[codetype][ord] = value;
+	this._parameters[valtype][name] = Value.coerce (valtype, value);
+
+	if (global && this.parent != null)
+	    this.parent.set_parameter (valtype, name, value, global);
     };
 
     proto.get_code = function EquivTable_get_code (codetype, ord) {
@@ -112,6 +105,22 @@ var EquivTable = (function EquivTable_closure () {
 	return this.parent.get_code (codetype, ord);
     };
 
+    proto.set_code = function EquivTable_set_code (codetype, ord, value, global) {
+	if (ord < 0 || ord > 255)
+	    throw new TexRuntimeError ('illegal ordinal number ' + ord);
+	if ((value < 0 && codetype != CT_DELIM) || value > ct_maxvals[codetype])
+	    throw new TexRuntimeError ('illegal ' + ct_names[codetype] +
+				       ' value ' + value);
+
+	if (codetype == CT_CATEGORY)
+	    this._catcodes[ord] = value;
+	else
+	    this._codes[codetype][ord] = value;
+
+	if (global && this.parent != null)
+	    this.parent.set_code (codetype, ord, value, global);
+    };
+
     proto.get_active = function EquivTable_get_active (ord) {
 	if (ord < 0 || ord > 255)
 	    throw new TexRuntimeError ('illegal ordinal number ' + ord);
@@ -123,11 +132,14 @@ var EquivTable = (function EquivTable_closure () {
 	return this.parent.get_active (ord);
     };
 
-    proto.set_active = function EquivTable_set_active (ord, value) {
+    proto.set_active = function EquivTable_set_active (ord, value, global) {
 	if (ord < 0 || ord > 255)
 	    throw new TexRuntimeError ('illegal ordinal number ' + ord);
 
 	this._actives[ord] = value;
+
+	if (global && this.parent != null)
+	    this.parent.set_active (ord, value, global);
     };
 
     proto.get_cseq = function EquivTable_get_cseq (name) {
@@ -138,8 +150,11 @@ var EquivTable = (function EquivTable_closure () {
 	return this.parent.get_cseq (name);
     };
 
-    proto.set_cseq = function EquivTable_set_cseq (name, value) {
+    proto.set_cseq = function EquivTable_set_cseq (name, value, global) {
 	this._cseqs[name] = value;
+
+	if (global && this.parent != null)
+	    this.parent.set_cseq (name, value, global);
     };
 
     proto.get_font = function EquivTable_get_font (name) {
@@ -416,10 +431,7 @@ var Engine = (function Engine_closure () {
     };
 
     proto.set_register = function Engine_get_register (valtype, reg, value) {
-	if (this.assign_flags & AF_GLOBAL)
-	    this.eqtb.toplevel.set_register (valtype, reg, value);
-	else
-	    this.eqtb.set_register (valtype, reg, value);
+	this.eqtb.set_register (valtype, reg, value, this.assign_flags & AF_GLOBAL);
 	this.maybe_insert_after_assign_token ();
     };
 
@@ -428,10 +440,7 @@ var Engine = (function Engine_closure () {
     };
 
     proto.set_parameter = function Engine_get_parameter (valtype, name, value) {
-	if (this.assign_flags & AF_GLOBAL)
-	    this.eqtb.toplevel.set_parameter (valtype, name, value);
-	else
-	    this.eqtb.set_parameter (valtype, name, value);
+	this.eqtb.set_parameter (valtype, name, value, this.assign_flags & AF_GLOBAL);
 	this.maybe_insert_after_assign_token ();
     };
 
@@ -440,10 +449,7 @@ var Engine = (function Engine_closure () {
     };
 
     proto.set_code = function Engine_get_code (valtype, ord, value) {
-	if (this.assign_flags & AF_GLOBAL)
-	    this.eqtb.toplevel.set_code (valtype, ord, value);
-	else
-	    this.eqtb.set_code (valtype, ord, value);
+	this.eqtb.set_code (valtype, ord, value, this.assign_flags & AF_GLOBAL);
 	this.maybe_insert_after_assign_token ();
     };
 
@@ -452,10 +458,7 @@ var Engine = (function Engine_closure () {
     };
 
     proto.set_active = function Engine_get_active (ord, value) {
-	if (this.assign_flags & AF_GLOBAL)
-	    this.eqtb.toplevel.set_active (ord, value);
-	else
-	    this.eqtb.set_active (ord, value);
+	this.eqtb.set_active (ord, value, this.assign_flags & AF_GLOBAL);
 	this.maybe_insert_after_assign_token ();
     };
 
@@ -464,10 +467,7 @@ var Engine = (function Engine_closure () {
     };
 
     proto.set_cseq = function Engine_get_cseq (name, cmd) {
-	if (this.assign_flags & AF_GLOBAL)
-	    this.eqtb.toplevel.set_cseq (name, cmd);
-	else
-	    this.eqtb.set_cseq (name, cmd);
+	this.eqtb.set_cseq (name, cmd, this.assign_flags & AF_GLOBAL);
 	this.maybe_insert_after_assign_token ();
     };
 
@@ -476,6 +476,7 @@ var Engine = (function Engine_closure () {
     };
 
     proto.set_font = function Engine_get_font (name, value) {
+	// XXX this is wrong
 	if (this.assign_flags & AF_GLOBAL)
 	    this.eqtb.toplevel.set_font (name, value);
 	else
