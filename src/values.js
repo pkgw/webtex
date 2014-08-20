@@ -841,12 +841,14 @@ var Toklist = WEBTEX.Toklist = (function Toklist_closure () {
 
 
 var Font = (function Font_closure () {
-    function Font (ident, scale) {
+    function Font (engine, ident, scale) {
 	this.ident = ident;
 	this.scale = scale;
 	this.dimens = {};
 	this.hyphenchar = null;
 	this.skewchar = null;
+
+	engine.set_font (ident, this);
     }
 
     inherit (Font, Value);
@@ -882,8 +884,8 @@ var Font = (function Font_closure () {
 	return this._serialize_ident;
     };
 
-    Font.deserialize = function Font_deserialize (data) {
-	var font = new Font (data[0], data[1]);
+    Font.deserialize = function Font_deserialize (engine, data) {
+	var font = new Font (engine, data[0], data[1]);
 	font.dimens = data[2];
 	font.hyphenchar = data[3];
 	font.skewchar = data[4];

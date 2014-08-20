@@ -1384,7 +1384,7 @@ commands.font = (function FontCommand_closure () {
 		throw new TexRuntimeError ('illegal font magnification factor ' + (-s));
 	}
 
-	var font = new Font (fn, s);
+	var font = new Font (engine, fn, s);
 	var cmd = new GivenFontCommand (font);
 	engine.trace ('font ' + cstok + ' = ' + font);
 	cstok.assign_cmd (engine, cmd);
@@ -1395,7 +1395,7 @@ commands.font = (function FontCommand_closure () {
     };
 
     proto.as_valref = function FontCommand_as_valref (engine) {
-	return new ConstantValref (T_FONT, engine.get_font ('<current>'));
+	return new ConstantValref (T_FONT, engine.get_misc ('cur_font'));
     };
 
     return FontCommand;
@@ -1411,7 +1411,7 @@ commands.nullfont = (function NullFontCommand_closure () {
 
     proto.invoke = function NullFontCommand_invoke (engine) {
 	engine.trace ('activate null font');
-	engine.set_font ('<current>', engine.get_font ('<null>'));
+	engine.set_misc ('cur_font', engine.get_font ('<null>'));
     };
 
     proto.get_valtype = function NullFontCommand_get_valtype () {

@@ -34,7 +34,7 @@ var EquivTable = (function EquivTable_closure () {
 
 	this._actives = {};
 	this._cseqs = {};
-	this._fonts = {};
+	this._misc = {};
 
 	if (parent == null)
 	    this._toplevel_init ();
@@ -157,16 +157,16 @@ var EquivTable = (function EquivTable_closure () {
 	    this.parent.set_cseq (name, value, global);
     };
 
-    proto.get_font = function EquivTable_get_font (name) {
-	if (this._fonts.hasOwnProperty (name))
-	    return this._fonts[name];
+    proto.get_misc = function EquivTable_get_misc (name) {
+	if (this._misc.hasOwnProperty (name))
+	    return this._misc[name];
 	if (this.parent == null)
 	    return null;
-	return this.parent.get_font (name);
+	return this.parent.get_misc (name);
     };
 
-    proto.set_font = function EquivTable_set_font (name, value) {
-	this._fonts[name] = value;
+    proto.set_misc = function EquivTable_set_misc (name, value) {
+	this._misc[name] = value;
     };
 
     proto._toplevel_init = function EquivTable__toplevel_init () {
@@ -207,13 +207,13 @@ var EquivTable = (function EquivTable_closure () {
 	this._catcodes[O_PERCENT] = C_COMMENT;
 	this._catcodes[O_BACKSLASH] = C_ESCAPE;
 	this._codes[CT_DELIM][O_PERIOD] = 0;
+
+	this._misc.cur_font = null;
     };
 
     // Serialization. Our equivalent of the \dump primitive.
 
-    proto.serialize = function Eqtb_serialize () {
-	var state = {};
-	var housekeeping = {commands: {}};
+    proto.serialize = function Eqtb_serialize (state, housekeeping) {
 	var i = 0;
 	var name = null;
 
@@ -302,18 +302,6 @@ var EquivTable = (function EquivTable_closure () {
 	    state.codes.delim.push (this._codes[CT_DELIM][i]);
 	}
 
-	// Fonts -- need to set these up since given-font commands can delegate here.
-
-	state.fonts = [];
-
-	for (name in this._fonts) {
-	    if (!this._fonts.hasOwnProperty (name))
-		continue;
-
-	    // Don't need to use the return value here.
-	    this._fonts[name].get_serialize_ident (state, housekeeping);
-	}
-
 	// Control seqs.
 
 	state.cseqs = {};
@@ -324,6 +312,11 @@ var EquivTable = (function EquivTable_closure () {
 
 	    state.cseqs[name] = this._cseqs[name].get_serialize_ident (state, housekeeping);
 	}
+
+	// Miscellaneous nestable parameters.
+
+	state.misc = {};
+	state.misc.cur_font = this._misc.cur_font.get_serialize_ident (state, housekeeping);
 
 	return state;
     };
@@ -375,6 +368,8 @@ var Engine = (function Engine_closure () {
 	this.set_special_value (T_DIMEN, 'pageshrink', new Dimen ());
 	this.set_special_value (T_DIMEN, 'pagedepth', new Dimen ());
 
+	this._fonts = {};
+
 	this.mode_stack = [M_VERT];
 	this.build_stack = [[]];
 	this.group_exit_stack = [];
@@ -412,9 +407,9 @@ var Engine = (function Engine_closure () {
 	this.set_parameter (T_INT, 'day', d.getDay ());
 	this.set_parameter (T_INT, 'time', d.getHours () * 60 + d.getMinutes ());
 
-	var nf = new Font ('nullfont', -1000);
-	this.set_font ('<null>', nf);
-	this.set_font ('<current>', nf);
+	var nf = new Font (this, 'nullfont', -1000);
+	this._fonts['<null>'] = this._fonts['nullfont'];
+	this.set_misc ('cur_font', nf);
 
 	if (args.debug_trace)
 	    this.trace = function (t) { global_log ('{' + t + '}'); };
@@ -471,16 +466,14 @@ var Engine = (function Engine_closure () {
 	this.maybe_insert_after_assign_token ();
     };
 
-    proto.get_font = function Engine_get_font (name) {
-	return this.eqtb.get_font (name);
+    proto.get_misc = function Engine_get_misc (name) {
+	return this.eqtb.get_misc (name);
     };
 
-    proto.set_font = function Engine_get_font (name, value) {
-	// XXX this is wrong
-	if (this.assign_flags & AF_GLOBAL)
-	    this.eqtb.toplevel.set_font (name, value);
-	else
-	    this.eqtb.set_font (name, value);
+    proto.set_misc = function Engine_set_misc (name, value) {
+	// XXX: track whether any of the miscellaneous parameters allow
+	// \global assignments. So far, none do.
+	this.eqtb.set_misc (name, value);
 	this.maybe_insert_after_assign_token ();
     };
 
@@ -490,6 +483,14 @@ var Engine = (function Engine_closure () {
 
     proto.set_special_value = function Engine_set_special_value (valtype, name, value) {
 	this.special_values[valtype][name] = Value.coerce (valtype, value);
+    };
+
+    proto.get_font = function Engine_get_font (name) {
+	return this._fonts[name];
+    };
+
+    proto.set_font = function Engine_set_font (name, value) {
+	this._fonts[name] = value;
     };
 
     // Infrastructure.
@@ -949,9 +950,14 @@ var Engine = (function Engine_closure () {
     proto.serialize = function Engine_serialize () {
 	this._check_clean ();
 
-	// We don't actually need to add anything here beyond what's taken
-	// care of in the eqtb.
-	return this.eqtb.serialize ();
+	var state = {fonts: []};
+	var housekeeping = {commands: {}};
+
+	for (var name in this._fonts)
+	    // Don't need to use return value here.
+	    this._fonts[name].get_serialize_ident (state, housekeeping);
+
+	return this.eqtb.serialize (state, housekeeping);
     };
 
     var command_ctors = {
@@ -984,15 +990,15 @@ var Engine = (function Engine_closure () {
     proto.restore_serialized_state = function Engine_restore_serialized_state (json) {
 	this._check_clean ();
 
-	var housekeeping = {};
+	var housekeeping = {fonts: {}};
 	var i = 0;
 
 	// First step is to rebuild saved fonts.
 
-	var fontids = housekeeping.fonts = {};
+	housekeeping.fonts['<null>'] = this._fonts['<null>'];
 
 	for (i = 0; i < json.fonts.length; i++)
-	    fontids[i] = Font.deserialize (json.fonts[i]);
+	    housekeeping.fonts[i] = Font.deserialize (this, json.fonts[i]);
 
 	// Next step is to rebuild all of the saved commands.
 
@@ -1073,6 +1079,8 @@ var Engine = (function Engine_closure () {
 
 	for (var cseq in json.cseqs)
 	    this.set_cseq (cseq, getcmd (json.cseqs[cseq]));
+
+	this.set_misc ('cur_font', Font.deserialize (this, json.misc.cur_font));
     };
 
     // Tokenization. I'd like to separate this out into its own class,

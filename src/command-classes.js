@@ -610,7 +610,7 @@ var InsertLetterCommand = (function InsertLetterCommand_closure () {
 	if (engine.ensure_horizontal (this))
 	    return; // this command will be reread after new paragraph is started.
 	engine.trace ('accum letter ' + escchr (this.ord));
-	engine.accum (new Character (engine.get_font ('<current>'), this.ord));
+	engine.accum (new Character (engine.get_misc ('cur_font'), this.ord));
     };
 
     return InsertLetterCommand;
@@ -632,7 +632,7 @@ var InsertOtherCommand = (function InsertOtherCommand_closure () {
 	if (engine.ensure_horizontal (this))
 	    return; // this command will be reread after new paragraph is started.
 	engine.trace ('accum other ' + escchr (this.ord));
-	engine.accum (new Character (engine.get_font ('<current>'), this.ord));
+	engine.accum (new Character (engine.get_misc ('cur_font'), this.ord));
     };
 
     return InsertOtherCommand;
@@ -674,7 +674,7 @@ var GivenCharCommand = (function GivenCharCommand_closure () {
 	if (engine.ensure_horizontal (this))
 	    return; // this command will be reread after new paragraph is started.
 	engine.trace ('accum given-char ' + escchr (this.ord));
-	engine.accum (new Character (engine.get_font ('<current>'), this.ord));
+	engine.accum (new Character (engine.get_misc ('cur_font'), this.ord));
     };
 
     proto.samecmd = function GivenCharCommand_samecmd (other) {
@@ -858,7 +858,6 @@ var GivenFontCommand = (function GivenFontCommand_closure () {
     var proto = GivenFontCommand.prototype;
     proto.name = '<given-font>';
     proto.multi_instanced = true;
-    proto.assign_flag_mode = AFM_CONSUME;
 
     proto._serialize_data = function GivenFontCommand__serialize_data (state, housekeeping) {
 	return this.font.get_serialize_ident (state, housekeeping);
@@ -874,7 +873,7 @@ var GivenFontCommand = (function GivenFontCommand_closure () {
 
     proto.invoke = function GivenFontCommand_invoke (engine) {
 	engine.trace ('activate font ' + this.font);
-	engine.set_font ('<current>', this.font);
+	engine.set_misc ('cur_font', this.font);
     };
 
     proto.get_valtype = function GivenFontCommand_get_valtype () {
