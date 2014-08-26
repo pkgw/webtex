@@ -42,6 +42,33 @@ var Bundle = (function Bundle_closure () {
 	return null;
     };
 
+    proto.promise_contents = function Bundle_promise_contents (path) {
+	// Use of this function is generally discouraged since it builds up a
+	// big buffer all in one go, but sometimes that approach is the most
+	// sensible.
+	return new webtex.Promise (function (resolve, reject) {
+	    var state = {};
+	    state.prev = new ArrayBuffer (0);
+
+	    this.zipreader.stream_entry (path, function (err, buf) {
+		if (err != null) {
+		    reject (err);
+		    return;
+		}
+
+		if (buf == null) {
+		    resolve (state.prev);
+		    return;
+		}
+
+		var tmp = new Uint8Array (state.prev.byteLength + buf.byteLength);
+		tmp.set (new Uint8Array (state.prev, 0));
+		tmp.set (new Uint8Array (buf), state.prev.byteLength)
+		state.prev = tmp.buffer;
+	    });
+	});
+    };
+
     proto.promise_json = function Bundle_promise_json (path) {
 	return new Promise (function (resolve, reject) {
 	    var jp = new JSONStreamParser ();
