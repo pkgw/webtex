@@ -101,6 +101,24 @@ var FSIOLayer = (function FSIOLayer_closure () {
 	return make_fs_linebuffer (p);
     };
 
+    proto.promise_contents = function FSIOLayer_promise_contents (texfn) {
+	if (texfn.slice (0, this.virtprefix.length) != this.virtprefix)
+	    // Not within our virtual filesystem prefix.
+	    return null;
+
+	// We do synchronous I/O here to avoid the race condition issue
+	// present in try_open_linebuffer. In theory this is suboptimal
+	// because we may block the thread on I/O, but ... whatever.
+
+	var p = this.fsprefix + texfn.slice (this.virtprefix.length);
+
+	try {
+	    return buffer_to_arraybuffer (fs.readFileSync (p));
+	} catch (e) {
+	    return null; // assume ENOENT and not some other error ...
+	}
+    };
+
     return FSIOLayer;
 }) ();
 
