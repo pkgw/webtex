@@ -8,7 +8,9 @@ hyperref
 hyphen-base
 ifluatex
 ifxetex
+knuth-lib
 latex
+latex-fonts
 latexconfig
 microtype
 natbib
