@@ -21,6 +21,7 @@ sharedjs = \
   $(builddir)/engine-helpers.js \
   src/engine.js \
   src/readzip.js \
+  src/tfmreader.js \
   src/bundle.js
 
 
