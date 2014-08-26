@@ -148,6 +148,10 @@ var TfmReader = WEBTEX.TfmReader = (function TfmReader_closure () {
 	for (var i = 0; i < num_dps; i++)
 	    depths[i] = this.fw2s (dv.getUint32 (depth_ofs + 4 * i, false));
 
+	var ics = new Array (num_ics);
+	for (var i = 0; i < num_ics; i++)
+	    ics[i] = this.fw2s (dv.getUint32 (ic_ofs + 4 * i, false));
+
 	// Read in the character data.
 
 	for (var i = 0; i < num_chars; i++) {
@@ -164,6 +168,8 @@ var TfmReader = WEBTEX.TfmReader = (function TfmReader_closure () {
 	    this.ord_depths[first_code + i] = depths[idx];
 
 	    idx = (x >> 10) & 0x3F; // ital corr
+	    this.ord_ics[first_code + i] = ics[idx];
+
 	    idx = (x >>  8) & 0x03; // tag
 	    idx = x & 0xFF; // remainder
 	}
@@ -186,6 +192,10 @@ var TfmReader = WEBTEX.TfmReader = (function TfmReader_closure () {
 
     proto.depth = function TfmReader_depth (ord) {
 	return this.ord_depths[ord];
+    };
+
+    proto.italic_correction = function TfmReader_italic_correction (ord) {
+	return this.ord_ics[ord];
     };
 
     return TfmReader;
