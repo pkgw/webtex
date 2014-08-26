@@ -56,6 +56,11 @@ var IOStack = (function IOStack_closure () {
 	// Layers must implement try_open_linebuffer(path). It should
 	// return a LineBuffer, null if the path is unavailable, or
 	// NeedMoreData if that's the case.
+	//
+	// They should also implement promise_contents(path), which returns a
+	// Promise, null, or NeedsMoreData. Semantics generally as above. The
+	// Promise should resolve to an ArrayBuffer of data or reject if
+	// there's a problem.
 	this.layers.push (layer);
     };
 
@@ -79,6 +84,35 @@ var IOStack = (function IOStack_closure () {
 		var path = paths[j];
 
 		var rv = layer.try_open_linebuffer (path);
+		if (rv === NeedMoreData)
+		    throw rv;
+		if (rv == null)
+		    continue;
+
+		return rv;
+	    }
+	}
+
+	return null;
+    };
+
+    proto.promise_contents = function IOStack_promise_contents (texfn) {
+	// XXX: code duplication with the above.
+	var paths = texpaths (texfn);
+
+	for (var i = 0; i < paths.length; i++) {
+	    if (this.written_paths.hasOwnProperty (paths[i]))
+		throw new TexRuntimeError ('system file ' + texfn +
+					   ' shadowed by locally-written version');
+	}
+
+	for (var i = this.layers.length - 1; i >= 0; i--) {
+	    var layer = this.layers[i];
+
+	    for (var j = 0; j < paths.length; j++) {
+		var path = paths[j];
+
+		var rv = layer.promise_contents (path);
 		if (rv === NeedMoreData)
 		    throw rv;
 		if (rv == null)

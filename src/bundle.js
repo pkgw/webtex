@@ -46,7 +46,15 @@ var Bundle = (function Bundle_closure () {
 	// Use of this function is generally discouraged since it builds up a
 	// big buffer all in one go, but sometimes that approach is the most
 	// sensible.
-	return new webtex.Promise (function (resolve, reject) {
+
+	// Existence check not racy since the zip reader is immutable.
+	var stat = this.zipreader.has_entry (path);
+	if (stat == false)
+	    return null;
+	if (stat === NeedMoreData)
+	    return stat;
+
+	return new Promise (function (resolve, reject) {
 	    var state = {};
 	    state.prev = new ArrayBuffer (0);
 
@@ -66,7 +74,7 @@ var Bundle = (function Bundle_closure () {
 		tmp.set (new Uint8Array (buf), state.prev.byteLength)
 		state.prev = tmp.buffer;
 	    });
-	});
+	}.bind (this));
     };
 
     proto.promise_json = function Bundle_promise_json (path) {
