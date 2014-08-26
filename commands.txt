@@ -40,7 +40,7 @@ begingroup		n	n	inval
 botmark			n	n	inval	# -> "top_bot_mark"
 box			n	n	inval	# -> "make_box"
 catcode			n	n	consume # -> "def_code"
-char			n	n	inval	# "char_num" command
+_char			n	n	inval	# "char_num" command
 chardef			n	n	consume	# -> "shorthand_def"
 cleaders		n	n	inval # -> "leader_ship"
 closein			n	n	inval # -> "in_stream"

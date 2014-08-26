@@ -51,7 +51,7 @@ commands._space_ = function cmd__space_ (engine) {
 };
 
 
-commands.char = function cmd_char (engine) {
+commands._char = function cmd__char (engine) {
     var ord = engine.scan_char_code ();
     engine.trace ('char ' + ord);
     engine.push (Token.new_cmd (new GivenCharCommand (ord)));

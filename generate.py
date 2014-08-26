@@ -54,13 +54,14 @@ all_tables = [
 ]
 
 _load_pname_escapes = {
-    '_space_': ' ',
+    '_char': 'char',
     '_dash_': '-',
     '_else': 'else',
     '_fslash_': '/',
     '_if': 'if',
     '_let': 'let',
     '_long': 'long',
+    '_space_': ' ',
 }
 
 def load_all ():
