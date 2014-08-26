@@ -848,6 +848,25 @@ var Font = (function Font_closure () {
 	this.hyphenchar = null;
 	this.skewchar = null;
 
+	// I thought about lazy loading of the metrics, but that means that
+	// every font-dimen operation needs an engine as an argument. Easier
+	// just to load automatically.
+
+	if (ident == 'nullfont') {
+	    this.metrics = null; // XXX: special NullMetrics class.
+	} else {
+	    this.metrics = null;
+	    var rv = engine.iostack.promise_contents (ident + '.tfm');
+	    if (rv == null)
+		throw new TexRuntimeError ('missing needed font metrics file ' +
+					   ident + '.tfm');
+	    rv.then (function (contents) {
+		this.metrics = new TfmReader (contents, scale);
+	    }.bind (this)).catch (function (err) {
+		throw err;
+	    });
+	}
+
 	engine.set_font (ident, this);
     }
 
