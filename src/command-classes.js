@@ -643,7 +643,7 @@ var InsertLetterCommand = (function InsertLetterCommand_closure () {
 	if (engine.ensure_horizontal (this))
 	    return; // this command will be reread after new paragraph is started.
 	engine.trace ('accum letter ' + escchr (this.ord));
-	engine.accum (new Character (engine.get_misc ('cur_font'), this.ord));
+	engine.accum (engine.get_misc ('cur_font').box_for_ord (this.ord));
     };
 
     return InsertLetterCommand;
@@ -665,7 +665,7 @@ var InsertOtherCommand = (function InsertOtherCommand_closure () {
 	if (engine.ensure_horizontal (this))
 	    return; // this command will be reread after new paragraph is started.
 	engine.trace ('accum other ' + escchr (this.ord));
-	engine.accum (new Character (engine.get_misc ('cur_font'), this.ord));
+	engine.accum (engine.get_misc ('cur_font').box_for_ord (this.ord));
     };
 
     return InsertOtherCommand;
@@ -707,7 +707,7 @@ var GivenCharCommand = (function GivenCharCommand_closure () {
 	if (engine.ensure_horizontal (this))
 	    return; // this command will be reread after new paragraph is started.
 	engine.trace ('accum given-char ' + escchr (this.ord));
-	engine.accum (new Character (engine.get_misc ('cur_font'), this.ord));
+	engine.accum (engine.get_misc ('cur_font').box_for_ord (this.ord));
     };
 
     proto.samecmd = function GivenCharCommand_samecmd (other) {

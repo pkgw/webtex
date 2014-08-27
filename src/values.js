@@ -852,6 +852,8 @@ var Font = (function Font_closure () {
 	// every font-dimen operation needs an engine as an argument. Easier
 	// just to load automatically.
 
+	this.metrics_error = null;
+
 	if (ident == 'nullfont') {
 	    this.metrics = null; // XXX: special NullMetrics class.
 	} else {
@@ -863,8 +865,10 @@ var Font = (function Font_closure () {
 	    rv.then (function (contents) {
 		this.metrics = new TfmReader (contents, scale);
 	    }.bind (this))['catch'] (function (err) { // <- crazy call for YUI JS minifier
-		throw err;
-	    });
+		// Throwing err does nothing here. We have to stash it.
+		engine.warn ('swallowed error reading font metrics: ' + err.stack);
+		this.metrics_error = err;
+	    }.bind (this));
 	}
 
 	engine.set_font (ident, this);
@@ -909,6 +913,14 @@ var Font = (function Font_closure () {
 	font.hyphenchar = data[3];
 	font.skewchar = data[4];
 	return font;
+    };
+
+    proto.box_for_ord = function Font_box_for_ord (ord) {
+	if (this.metrics_error != null)
+	    throw this.metrics_error;
+	if (this.metrics == null)
+	    throw NeedMoreData;
+	return this.metrics.box_for_ord (ord);
     };
 
     return Font;

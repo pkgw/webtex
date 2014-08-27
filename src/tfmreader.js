@@ -135,6 +135,8 @@ var TfmReader = WEBTEX.TfmReader = (function TfmReader_closure () {
 	for (var i = 0; i < num_ics; i++)
 	    ics[i] = this.fw2s (dv.getUint32 (ic_ofs + 4 * i, false));
 
+	widths[0] = null; // TeX defines wd=0 to always mean invalid character.
+
 	// Read in the character data.
 
 	for (var i = 0; i < num_chars; i++) {
@@ -178,6 +180,19 @@ var TfmReader = WEBTEX.TfmReader = (function TfmReader_closure () {
 
     proto.italic_correction = function TfmReader_italic_correction (ord) {
 	return this.ord_ics[ord];
+    };
+
+    proto.box_for_ord = function TfmReader_box_for_ord (ord) {
+	if (this.ord_widths[ord] == null) {
+	    // TODO: TeX warns in this case; then returns a zero-size box
+	    return new Character (this, ord);
+	}
+
+	var rv = new Character (this, ord);
+	rv.width = this.ord_widths[ord];
+	rv.height = this.ord_heights[ord];
+	rv.depth = this.ord_depths[ord];
+	return rv;
     };
 
     return TfmReader;
