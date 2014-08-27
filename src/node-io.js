@@ -38,16 +38,19 @@ var RandomAccessFile = (function RandomAccessFile_closure () {
 
     function RandomAccessFile (path) {
 	this.fd = fs.openSync (path, 'r');
-	this.buf = new Buffer (2048);
     }
 
     var proto = RandomAccessFile.prototype;
 
     proto.read_range = function RandomAccessFile_read_range (offset, length, callback) {
-	if (this.buf.length < length)
-	    this.buf = new Buffer (length);
+	// TODO: continually allocating buffers could get slow. You can't have
+	// a single static buffer since multiple asynchronous read commands
+	// might stomp on each other, but you could have a pool of buffers
+	// with flags indicating which ones are available. I'll cross that
+	// bridge when I get there.
+	var buf = new Buffer (length);
 
-	fs.read (this.fd, this.buf, 0, length, offset, function (err, nbytes, buf) {
+	fs.read (this.fd, buf, 0, length, offset, function (err, nbytes, buf) {
 	    var ab = buffer_to_arraybuffer (buf.slice (0, nbytes));
 	    callback (err, ab);
 	});
