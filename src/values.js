@@ -862,7 +862,7 @@ var Font = (function Font_closure () {
 					   ident + '.tfm');
 	    rv.then (function (contents) {
 		this.metrics = new TfmReader (contents, scale);
-	    }.bind (this)).catch (function (err) {
+	    }.bind (this))['catch'] (function (err) { // <- crazy call for YUI JS minifier
 		throw err;
 	    });
 	}
