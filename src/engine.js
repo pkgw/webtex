@@ -1148,12 +1148,12 @@ var Engine = (function Engine_closure () {
 	    this.set_cseq (cseq, getcmd (json.cseqs[cseq]));
 
 	for (i = 0; i < 16; i++) {
-	    this.set_font_family (MS_TEXT, Font.deserialize (this, json.font_families.text[i]));
-	    this.set_font_family (MS_SCRIPT, Font.deserialize (this, json.font_families.script[i]));
-	    this.set_font_family (MS_SCRIPTSCRIPT, Font.deserialize (this, json.font_families.scriptscript[i]));
+	    this.set_font_family (MS_TEXT, housekeeping.fonts[json.font_families.text[i]]);
+	    this.set_font_family (MS_SCRIPT, housekeeping.fonts[json.font_families.script[i]]);
+	    this.set_font_family (MS_SCRIPTSCRIPT, housekeeping.fonts[json.font_families.scriptscript[i]]);
 	}
 
-	this.set_misc ('cur_font', Font.deserialize (this, json.misc.cur_font));
+	this.set_misc ('cur_font', housekeeping.fonts[json.misc.cur_font]);
     };
 
     // Tokenization. I'd like to separate this out into its own class,
