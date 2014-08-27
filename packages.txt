@@ -1,6 +1,7 @@
 amsfonts
 amsmath
 cm
+ec
 emulateapj
 epsf
 graphics
