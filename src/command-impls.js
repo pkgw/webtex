@@ -1416,6 +1416,7 @@ commands.font = (function FontCommand_closure () {
 	    s = engine.scan_dimen ()
 	    if (s.sp.value <= 0) // FIXME: || s > SC_MAX
 		throw new TexRuntimeError ('illegal font size ' + s);
+	    s = s.sp.value;
 	} else if (engine.scan_keyword ('scaled')) {
 	    s = -engine.scan_int ().value;
 	    if (s >= 0 || s < -32768)
