@@ -6,8 +6,6 @@
 'use strict';
 
 var TfmReader = WEBTEX.TfmReader = (function TfmReader_closure () {
-    var console = require ('console'); // XXXX
-
     function div (a, b) {
 	return a / b >> 0; // XXX: C&P from values.js
     }
@@ -75,19 +73,6 @@ var TfmReader = WEBTEX.TfmReader = (function TfmReader_closure () {
 	if (num_wds == 0 || num_hts == 0 || num_dps == 0 || num_ics == 0)
 	    throw new TexRuntimeError ('illegal TFM file format (4)');
 
-	console.log ('file len: ' + file_len);
-	console.log ('header len: ' + header_len);
-	console.log ('first code: ' + first_code);
-	console.log ('last code: ' + last_code);
-	console.log ('wt len: ' + num_wds);
-	console.log ('ht len: ' + num_hts);
-	console.log ('dt len: ' + num_dps);
-	console.log ('ic len: ' + num_ics);
-	console.log ('lk len: ' + num_lks);
-	console.log ('kt len: ' + num_kns);
-	console.log ('xt len: ' + num_xcs);
-	console.log ('fp len: ' + num_fps);
-
 	// Prep for storing char data.
 
 	var num_chars = last_code - first_code + 1;
@@ -119,7 +104,6 @@ var TfmReader = WEBTEX.TfmReader = (function TfmReader_closure () {
 	// being unity. Otherwise, it's a Scaled value, and we should replace
 	// the design size with it.
 	var design_size = dv.getUint32 (header_ofs + 4, false);
-	//console.log ('raw ds: ' + design_size.toString (16));
 	design_size >>= 4; // TFM fix_word to TeX Scaled.
 
 	if (scale_factor != -1000) {
@@ -131,7 +115,6 @@ var TfmReader = WEBTEX.TfmReader = (function TfmReader_closure () {
 	    }
 	}
 
-	console.log ('DS as scaled: ' + new Scaled (design_size));
 	this.fw2s = prep_fix_word_math (design_size);
 
 	// Create Scaleds out of all of the metrics.
@@ -158,7 +141,6 @@ var TfmReader = WEBTEX.TfmReader = (function TfmReader_closure () {
 	    var x = dv.getUint32 (char_info_ofs + i * 4, false);
 
 	    var idx = (x >> 24) & 0xFF;
-	    //console.log ('delta ' + i + ' w: ' + idx);
 	    this.ord_widths[first_code + i] = widths[idx];
 
 	    idx = (x >> 20) & 0x0F;
