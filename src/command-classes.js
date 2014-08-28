@@ -640,6 +640,8 @@ var InsertLetterCommand = (function InsertLetterCommand_closure () {
     proto.desc = 'the letter';
 
     proto.invoke = function InsertLetter_invoke (engine) {
+	// T:TP 1155: if math mode, do math magic.
+
 	if (engine.ensure_horizontal (this))
 	    return; // this command will be reread after new paragraph is started.
 	engine.trace ('accum letter ' + escchr (this.ord));
@@ -662,6 +664,8 @@ var InsertOtherCommand = (function InsertOtherCommand_closure () {
     proto.desc = 'the character';
 
     proto.invoke = function InsertOther_invoke (engine) {
+	// T:TP 1155: if math mode, do math magic.
+
 	if (engine.ensure_horizontal (this))
 	    return; // this command will be reread after new paragraph is started.
 	engine.trace ('accum other ' + escchr (this.ord));
@@ -704,6 +708,8 @@ var GivenCharCommand = (function GivenCharCommand_closure () {
     };
 
     proto.invoke = function GivenCharCommand_invoke (engine) {
+	// T:TP 1155: if math mode, do math magic.
+
 	if (engine.ensure_horizontal (this))
 	    return; // this command will be reread after new paragraph is started.
 	engine.trace ('accum given-char ' + escchr (this.ord));
