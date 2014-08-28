@@ -244,6 +244,9 @@ var EquivTable = (function EquivTable_closure () {
 	    this._font_families[MS_SCRIPT][i] = null;
 	    this._font_families[MS_SCRIPTSCRIPT][i] = null;
 	}
+
+	// Needed for Engine initialization to work:
+	this._parameters[T_INT].globaldefs = 0;
     };
 
     // Serialization. Our equivalent of the \dump primitive.
@@ -485,12 +488,22 @@ var Engine = (function Engine_closure () {
 
     // Wrappers for the EquivTable.
 
+    proto._global_flag = function Engine__global_flag () {
+	// TeXBook p. 275
+	var gd = this.get_parameter (T_INT, 'globaldefs').value;
+	if (gd > 0)
+	    return true;
+	if (gd < 0)
+	    return false;
+	return this.assign_flags & AF_GLOBAL;
+    };
+
     proto.get_register = function Engine_get_register (valtype, reg) {
 	return this.eqtb.get_register (valtype, reg);
     };
 
     proto.set_register = function Engine_get_register (valtype, reg, value) {
-	this.eqtb.set_register (valtype, reg, value, this.assign_flags & AF_GLOBAL);
+	this.eqtb.set_register (valtype, reg, value, this._global_flag ());
 	this.maybe_insert_after_assign_token ();
     };
 
@@ -499,7 +512,7 @@ var Engine = (function Engine_closure () {
     };
 
     proto.set_parameter = function Engine_get_parameter (valtype, name, value) {
-	this.eqtb.set_parameter (valtype, name, value, this.assign_flags & AF_GLOBAL);
+	this.eqtb.set_parameter (valtype, name, value, this._global_flag ());
 	this.maybe_insert_after_assign_token ();
     };
 
@@ -508,7 +521,7 @@ var Engine = (function Engine_closure () {
     };
 
     proto.set_code = function Engine_get_code (valtype, ord, value) {
-	this.eqtb.set_code (valtype, ord, value, this.assign_flags & AF_GLOBAL);
+	this.eqtb.set_code (valtype, ord, value, this._global_flag ());
 	this.maybe_insert_after_assign_token ();
     };
 
@@ -517,7 +530,7 @@ var Engine = (function Engine_closure () {
     };
 
     proto.set_active = function Engine_get_active (ord, value) {
-	this.eqtb.set_active (ord, value, this.assign_flags & AF_GLOBAL);
+	this.eqtb.set_active (ord, value, this._global_flag ());
 	this.maybe_insert_after_assign_token ();
     };
 
@@ -526,7 +539,7 @@ var Engine = (function Engine_closure () {
     };
 
     proto.set_cseq = function Engine_get_cseq (name, cmd) {
-	this.eqtb.set_cseq (name, cmd, this.assign_flags & AF_GLOBAL);
+	this.eqtb.set_cseq (name, cmd, this._global_flag ());
 	this.maybe_insert_after_assign_token ();
     };
 
@@ -535,7 +548,7 @@ var Engine = (function Engine_closure () {
     };
 
     proto.set_font_family = function Engine_set_font_family (style, index, value) {
-	this.eqtb.set_font_family (style, index, value, this.assign_flags & AF_GLOBAL);
+	this.eqtb.set_font_family (style, index, value, this._global_flag ());
 	this.maybe_insert_after_assign_token ();
     };
 
