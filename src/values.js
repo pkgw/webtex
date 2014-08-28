@@ -844,7 +844,6 @@ var Font = (function Font_closure () {
     function Font (engine, ident, scale) {
 	this.ident = ident;
 	this.scale = scale;
-	this.dimens = {};
 	this.hyphenchar = null;
 	this.skewchar = null;
 
@@ -856,14 +855,22 @@ var Font = (function Font_closure () {
 
 	if (ident == 'nullfont') {
 	    this.metrics = null; // XXX: special NullMetrics class.
+	    this.dimens = null; // ditto?
 	} else {
-	    this.metrics = null;
+	    this.metrics = NeedMoreData;
+	    this.dimens = NeedMoreData;
+
 	    var rv = engine.iostack.promise_contents (ident + '.tfm');
 	    if (rv == null)
 		throw new TexRuntimeError ('missing needed font metrics file ' +
 					   ident + '.tfm');
 	    rv.then (function (contents) {
 		this.metrics = new TfmReader (contents, scale);
+		this.dimens = [];
+		for (var i = 0; i < this.metrics.font_dimens.length; i++) {
+		    this.dimens.push (new Dimen ());
+		    this.dimens[i].sp = this.metrics.font_dimens[i];
+		}
 	    }.bind (this))['catch'] (function (err) { // <- crazy call for YUI JS minifier
 		// Throwing err does nothing here. We have to stash it.
 		engine.warn ('swallowed error reading font metrics: ' + err.stack);
@@ -915,10 +922,36 @@ var Font = (function Font_closure () {
 	return font;
     };
 
+    proto.get_dimen = function Font_get_dimen (number) {
+	if (this.metrics_error != null)
+	    throw this.metrics_error;
+	if (this.dimens === NeedMoreData)
+	    throw NeedMoreData;
+
+	// TeX font dimens are 1-based; we offset.
+	if (number > this.dimens.length)
+	    throw new TexRuntimeError ('undefined fontdimen #' + number + ' for ' + this);
+	return this.dimens[number - 1];
+    };
+
+    proto.set_dimen = function Font_set_dimen (number, value) {
+	if (this.metrics_error != null)
+	    throw this.metrics_error;
+	if (this.dimens === NeedMoreData)
+	    throw NeedMoreData;
+
+	// XXX: we're supposed to only allow the number of parameters to be
+	// extended "just after the font has been loaded". (TeXBook p. 433).
+
+	while (this.dimens.length < number)
+	    this.dimens.push (new Dimen ());
+	this.dimens[number - 1] = value;
+    };
+
     proto.box_for_ord = function Font_box_for_ord (ord) {
 	if (this.metrics_error != null)
 	    throw this.metrics_error;
-	if (this.metrics == null)
+	if (this.metrics === NeedMoreData)
 	    throw NeedMoreData;
 	return this.metrics.box_for_ord (ord);
     };

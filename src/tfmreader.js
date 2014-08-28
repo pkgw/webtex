@@ -83,6 +83,8 @@ var TfmReader = WEBTEX.TfmReader = (function TfmReader_closure () {
 	this.ord_heights = new Array (256);
 	this.ord_depths = new Array (256);
 	this.ord_ics = new Array (256);
+	this.font_dimens = [];
+
 	//this.ord_tags = new Array (256); cf. T:TP 544.
 	//this.ord_remainder = new Array (256);
 
@@ -157,6 +159,17 @@ var TfmReader = WEBTEX.TfmReader = (function TfmReader_closure () {
 	    idx = (x >>  8) & 0x03; // tag
 	    idx = x & 0xFF; // remainder
 	}
+
+	// Font dimens. The zeroth parameter is the italic slant and should
+	// NOT be scaled by the design size, unlike everything else. We do
+	// that wrong for now since I doubt it'll matter. (Famous last words?)
+	// Note that font dimens are overridable in TeX, so Font objects copy
+	// these out on init.
+
+	for (var i = 0; i < num_fps; i++)
+	    this.font_dimens.push (this.fw2s (dv.getUint32 (fp_ofs + 4 * i, false)));
+	for (var i = num_fps; i < 7; i++)
+	    this.font_dimens.push (new Scaled (0));
     }
 
     var proto = TfmReader.prototype;

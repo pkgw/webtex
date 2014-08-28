@@ -1477,18 +1477,20 @@ commands.fontdimen = (function FontDimenCommand_closure () {
     proto.name = 'fontdimen';
 
     proto.invoke = function FontDimenCommand_invoke (engine) {
-	var num = engine.scan_int ();
+	var num = engine.scan_int ().value;
 	var tok = engine.next_tok_throw ();
-	var font = tok.tocmd (engine).as_valref (engine);
+	var val = tok.tocmd (engine).as_valref (engine);
 
-	if (font.valtype != T_FONT)
+	if (val.valtype != T_FONT)
 	    throw new TexRuntimeError ('expected \\fontdimen to be followed ' +
 				       'by a font; got ' + tok);
 
+	var font = val.get (engine);
 	engine.scan_optional_equals ();
 	var val = engine.scan_dimen ();
 	engine.trace (['fontdimen', font, num, '=', val].join (' '));
-	font.get (engine).dimens[num] = val;
+	font.set_dimen (num, val);
+	engine.maybe_insert_after_assign_token ();
     };
 
     proto.get_valtype = function FontDimenCommand_get_valtype () {
@@ -1496,7 +1498,7 @@ commands.fontdimen = (function FontDimenCommand_closure () {
     };
 
     proto.as_valref = function FontDimenCommand_as_valref (engine) {
-	var num = engine.scan_int ();
+	var num = engine.scan_int ().value;
 	var tok = engine.next_tok_throw ();
 	var font = tok.tocmd (engine).as_valref (engine);
 
@@ -1504,13 +1506,8 @@ commands.fontdimen = (function FontDimenCommand_closure () {
 	    throw new TexRuntimeError ('expected \\fontdimen to be followed ' +
 				       'by a font; got ' + tok);
 
-	var val = font.get (engine).dimens[num];
-	if (val == null) {
-	    engine.warn ('making up fontdimen for ' + font + ' ' + num);
-	    val = new Dimen ();
-	    val.sp = Scaled.new_from_parts (12, 0);
-	}
-
+	var val = font.get (engine).get_dimen (num);
+	engine.trace ('got: ' + val);
 	// FIXME: should be settable.
 	return new ConstantValref (T_DIMEN, val);
     };
@@ -1527,9 +1524,11 @@ commands.skewchar = function cmd_skewchar (engine) {
 	throw new TexRuntimeError ('expected \\skewchar to be followed by a font; ' +
 				   'got ' + tok);
 
+    var font = val.get (engine);
     engine.scan_optional_equals ();
     var ord = engine.scan_char_code ();
-    engine.trace (['skewchar', val.get (engine), '=', escchr (ord)].join (' '));
+    engine.trace (['skewchar', font, '=', escchr (ord)].join (' '));
+    font.skewchar = ord;
     engine.maybe_insert_after_assign_token ();
 };
 
@@ -1542,9 +1541,11 @@ commands.hyphenchar = function cmd_hyphenchar (engine) {
 	throw new TexRuntimeError ('expected \\hyphenchar to be followed by a font; ' +
 				   'got ' + tok);
 
+    var font = val.get (engine);
     engine.scan_optional_equals ();
     var ord = engine.scan_char_code ();
-    engine.trace (['hyphenchar', val.get (engine), '=', escchr (ord), '[noop]'].join (' '));
+    engine.trace (['hyphenchar', font, '=', escchr (ord)].join (' '));
+    font.hyphenchar = ord;
     engine.maybe_insert_after_assign_token ();
 };
 
