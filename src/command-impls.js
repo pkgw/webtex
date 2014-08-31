@@ -745,10 +745,30 @@ commands.vbox = (function VboxCommand_closure () {
     };
 
     proto.start_box = function VboxCommand_start_box (engine) {
-	engine.handle_vbox ();
+	engine.handle_vbox (false);
     };
 
     return VboxCommand;
+})();
+
+
+commands.vtop = (function VtopCommand_closure () {
+    function VtopCommand () { Command.call (this); }
+    inherit (VtopCommand, Command);
+    var proto = VtopCommand.prototype;
+    proto.name = 'vtop';
+    proto.boxlike = true;
+
+    proto.invoke = function VtopCommand_invoke (engine) {
+	engine.trace ('vtop (for accumulation)');
+	engine.scan_box_for_accum (this);
+    };
+
+    proto.start_box = function VtopCommand_start_box (engine) {
+	engine.handle_vbox (true);
+    };
+
+    return VtopCommand;
 })();
 
 

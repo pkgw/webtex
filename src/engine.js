@@ -2038,7 +2038,7 @@ var Engine = (function Engine_closure () {
 	boxop (this, box);
     };
 
-    proto._handle_box = function Engine__handle_box (boxtype, newmode) {
+    proto._handle_box = function Engine__handle_box (boxtype, newmode, is_vtop) {
 	var is_exact, spec;
 
 	if (this.scan_keyword ('to')) {
@@ -2059,6 +2059,8 @@ var Engine = (function Engine_closure () {
 	    var box = new Box (boxtype);
 	    box.list = this.leave_mode ();
 	    box.set_glue (this, is_exact, spec);
+	    if (is_vtop)
+		box.adjust_as_vtop ();
 	    engine.handle_finished_box (box);
 	}
 
@@ -2070,11 +2072,11 @@ var Engine = (function Engine_closure () {
     };
 
     proto.handle_hbox = function Engine_handle_hbox () {
-	this._handle_box (BT_HBOX, M_RHORZ);
+	this._handle_box (BT_HBOX, M_RHORZ, false);
     };
 
-    proto.handle_vbox = function Engine_handle_vbox () {
-	this._handle_box (BT_VBOX, M_IVERT);
+    proto.handle_vbox = function Engine_handle_vbox (is_vtop) {
+	this._handle_box (BT_VBOX, M_IVERT, is_vtop);
     };
 
 

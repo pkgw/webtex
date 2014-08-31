@@ -254,6 +254,20 @@ var Box = (function Box_closure () {
 	}
     };
 
+    proto.adjust_as_vtop = function Box_adjust_as_vtop () {
+	if (this.btype != BT_VBOX)
+	    throw new TexRuntimeError ('adjust_as_vtop on inappropriate box ' + this);
+
+	var tot_height = this.height.sp.value + this.depth.sp.value;
+	var height = 0;
+
+	if (this.list[0] instanceof Boxlike)
+	    height = this.list[0].height.sp.value;
+
+	this.height.sp.value = height;
+	this.depth.sp.value = tot_height - height;
+    };
+
     return Box;
 }) ();
 
