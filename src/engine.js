@@ -790,7 +790,7 @@ var Engine = (function Engine_closure () {
 	list.push (new EndTag ('p')); // webtex special!
 	var hbox = new Box (BT_HBOX);
 	hbox.list = list;
-	hbox.set_glue (false, new Dimen ());
+	hbox.set_glue (this, false, new Dimen ());
 	// skip: interline glue and penalties
 	this.accum (hbox);
 	if (this.mode () == M_VERT)
@@ -871,7 +871,7 @@ var Engine = (function Engine_closure () {
 
 	var vbox = new Box (BT_VBOX);
 	vbox.list = list;
-	vbox.set_glue (false, new Dimen ());
+	vbox.set_glue (this, false, new Dimen ());
 	this.set_register (T_BOX, 255, vbox);
 	this.build_stack[0] = [];
 	this._running_output = true;
@@ -2053,11 +2053,12 @@ var Engine = (function Engine_closure () {
 	}
 
 	function finish_box (engine) {
-	    this.trace ('< <--- ' + bt_names[boxtype] + '>');
+	    this.trace ('< <--- ' + bt_names[boxtype] + '; setting is_exact=' +
+			is_exact + ' spec=' + spec + ' >');
 	    this.unnest_eqtb ();
 	    var box = new Box (boxtype);
 	    box.list = this.leave_mode ();
-	    box.set_glue (is_exact, spec);
+	    box.set_glue (this, is_exact, spec);
 	    engine.handle_finished_box (box);
 	}
 

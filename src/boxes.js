@@ -99,17 +99,17 @@ var Box = (function Box_closure () {
 	return b;
     };
 
-    proto.set_glue = function Box_set_glue (is_exact, spec) {
+    proto.set_glue = function Box_set_glue (engine, is_exact, spec) {
 	// XXX way to object orientate.
 	if (this.btype == BT_HBOX)
-	    this._set_hbox (is_exact, spec);
+	    this._set_hbox (engine, is_exact, spec);
 	else if (this.btype == BT_VBOX)
-	    this._set_vbox (is_exact, spec);
+	    this._set_vbox (engine, is_exact, spec);
 	else
 	    throw new TexInternalError ('trying to set void box ' + this);
     };
 
-    proto._set_hbox = function Box__set_hbox (is_exact, spec) {
+    proto._set_hbox = function Box__set_hbox (engine, is_exact, spec) {
 	// XXX: currently we don't care about the box's internal structure, so
 	// we only do what's necessary to calculate the final ht/wd/dp. Well,
 	// we do a few more things, but we don't actually save those results.
@@ -171,11 +171,87 @@ var Box = (function Box_closure () {
 	    this.width.sp.value = nat_width - setdelta;
 	}
 
-	this.height.sp.value = Math.max (height, 0);
-	this.depth.sp.value = Math.max (depth, 0);
+	this.height.sp.value = height;
+	this.depth.sp.value = depth;
     };
 
-    proto._set_vbox = function Box__set_vbox (is_exact, spec) {
+    proto._set_vbox = function Box__set_vbox (engine, is_exact, spec) {
+	// XXX: currently we don't care about the box's internal structure, so
+	// we only do what's necessary to calculate the final ht/wd/dp. Well,
+	// we do a few more things, but we don't actually save those results.
+
+	var nat_height = 0;
+	var stretches = [0, 0, 0, 0];
+	var shrinks = [0, 0, 0, 0];
+	var width = 0;
+	var prev_depth = 0;
+
+	for (var i = 0; i < this.list.length; i++) {
+	    var item = this.list[i];
+
+	    if (item instanceof Boxlike) {
+		nat_height += item.width.sp.value + prev_depth;
+		prev_depth = item.depth.sp.value;
+		width = Math.max (width, item.width.sp.value + item.shift_amount.sp.value);
+	    } else if (item instanceof Kern) {
+		nat_height += item.amount.sp.value + prev_depth;
+		prev_depth = 0;
+	    } else if (item instanceof BoxGlue) {
+		var g = item.amount;
+		nat_height += g.width.sp.value + prev_depth;
+		stretches[g.stretch_order] += g.stretch.sp.value;
+		shrinks[g.shrink_order] += g.shrink.sp.value;
+		prev_depth = 0;
+	    }
+	}
+
+	var settype = 0; // 0: exact; 1: stretch; 2: shrink
+	var setdelta = 0; // always nonnegative
+
+	if (is_exact) {
+	    // We're setting the box to an exact height.
+	    if (spec.sp.value > nat_height) {
+		settype = 1;
+		setdelta = spec.sp.value - nat_height;
+	    } else if (spec.sp.value < nat_height) {
+		settype = 2;
+		setdelta = nat_height - spec.sp.value;
+	    }
+	} else {
+	    // We're adjusting the box's height from its natural value.
+	    if (spec.sp.value > 0) {
+		settype = 1;
+		setdelta = spec.sp.value;
+	    } else if (spec.sp.value < 0) {
+		settype = 2;
+		setdelta = -spec.sp.value;
+	    }
+	}
+
+	if (settype == 0) {
+	    // Natural height. TODO here and each case: record results.
+	    this.height.sp.value = nat_height;
+	} else if (settype == 1) {
+	    // We're stretching the box.
+	    this.height.sp.value = nat_height + setdelta;
+	} else {
+	    // We're shrinking it.
+	    this.height.sp.value = nat_height - setdelta;
+	}
+
+	this.width.sp.value = width;
+
+	// Depth is prev_depth, unless \boxmaxdepth makes us shift the
+	// reference point.
+	var bmd = engine.get_parameter (T_DIMEN, 'boxmaxdepth').sp.value;
+
+	if (prev_depth <= bmd) {
+	    this.depth.sp.value = prev_depth;
+	} else {
+	    var tot_height = prev_depth + this.height.sp.value;
+	    this.depth.sp.value = bmd;
+	    this.height.sp.value = tot_height - bmd;
+	}
     };
 
     return Box;
