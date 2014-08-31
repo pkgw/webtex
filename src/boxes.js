@@ -39,7 +39,7 @@ var Boxlike = (function Boxlike_closure () {
 	this.height = new Dimen ();
 	this.depth = new Dimen ();
 	this.shift_amount = new Dimen ();
-	// TODO: glue_order, glue_sign, glue_set: see T:TP 135.
+	// TODO?: glue_order, glue_sign, glue_set: see T:TP 135.
     }
 
     inherit (Boxlike, Listable);
@@ -97,6 +97,85 @@ var Box = (function Box_closure () {
 	var b = new Box (this.btype);
 	this._copyto (b);
 	return b;
+    };
+
+    proto.set_glue = function Box_set_glue (is_exact, spec) {
+	// XXX way to object orientate.
+	if (this.btype == BT_HBOX)
+	    this._set_hbox (is_exact, spec);
+	else if (this.btype == BT_VBOX)
+	    this._set_vbox (is_exact, spec);
+	else
+	    throw new TexInternalError ('trying to set void box ' + this);
+    };
+
+    proto._set_hbox = function Box__set_hbox (is_exact, spec) {
+	// XXX: currently we don't care about the box's internal structure, so
+	// we only do what's necessary to calculate the final ht/wd/dp. Well,
+	// we do a few more things, but we don't actually save those results.
+
+	var nat_width = 0;
+	var stretches = [0, 0, 0, 0];
+	var shrinks = [0, 0, 0, 0];
+	var height = 0;
+	var depth = 0;
+
+	for (var i = 0; i < this.list.length; i++) {
+	    var item = this.list[i];
+
+	    if (item instanceof Boxlike) {
+		nat_width += item.width.sp.value;
+		height = Math.max (height, item.height.sp.value - item.shift_amount.sp.value);
+		depth = Math.max (depth, item.depth.sp.value + item.shift_amount.sp.value);
+	    } else if (item instanceof Kern) {
+		nat_width += item.amount.sp.value;
+	    } else if (item instanceof BoxGlue) {
+		var g = item.amount;
+		nat_width += g.width.sp.value;
+		stretches[g.stretch_order] += g.stretch.sp.value;
+		shrinks[g.shrink_order] += g.shrink.sp.value;
+	    }
+	}
+
+	var settype = 0; // 0: exact; 1: stretch; 2: shrink
+	var setdelta = 0; // always nonnegative
+
+	if (is_exact) {
+	    // We're setting the box to an exact width.
+	    if (spec.sp.value > nat_width) {
+		settype = 1;
+		setdelta = spec.sp.value - nat_width;
+	    } else if (spec.sp.value < nat_width) {
+		settype = 2;
+		setdelta = nat_width - spec.sp.value;
+	    }
+	} else {
+	    // We're adjusting the box's width from its natural value.
+	    if (spec.sp.value > 0) {
+		settype = 1;
+		setdelta = spec.sp.value;
+	    } else if (spec.sp.value < 0) {
+		settype = 2;
+		setdelta = -spec.sp.value;
+	    }
+	}
+
+	if (settype == 0) {
+	    // Natural width. TODO here and each case: record results.
+	    this.width.sp.value = nat_width;
+	} else if (settype == 1) {
+	    // We're stretching the box.
+	    this.width.sp.value = nat_width + setdelta;
+	} else {
+	    // We're shrinking it.
+	    this.width.sp.value = nat_width - setdelta;
+	}
+
+	this.height.sp.value = Math.max (height, 0);
+	this.depth.sp.value = Math.max (depth, 0);
+    };
+
+    proto._set_vbox = function Box__set_vbox (is_exact, spec) {
     };
 
     return Box;

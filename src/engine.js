@@ -765,7 +765,7 @@ var Engine = (function Engine_closure () {
 	if (indent) {
 	    var b = new Box (BT_HBOX);
 	    b.width = this.get_parameter (T_DIMEN, 'parindent');
-	    this.accum (new BoxGlue (b));
+	    this.accum (b);
 	}
 
 	this.maybe_push_toklist ('everypar');
@@ -790,6 +790,7 @@ var Engine = (function Engine_closure () {
 	list.push (new EndTag ('p')); // webtex special!
 	var hbox = new Box (BT_HBOX);
 	hbox.list = list;
+	hbox.set_glue (false, new Dimen ());
 	// skip: interline glue and penalties
 	this.accum (hbox);
 	if (this.mode () == M_VERT)
@@ -870,6 +871,7 @@ var Engine = (function Engine_closure () {
 
 	var vbox = new Box (BT_VBOX);
 	vbox.list = list;
+	vbox.set_glue (false, new Dimen ());
 	this.set_register (T_BOX, 255, vbox);
 	this.build_stack[0] = [];
 	this._running_output = true;
@@ -2055,6 +2057,7 @@ var Engine = (function Engine_closure () {
 	    this.unnest_eqtb ();
 	    var box = new Box (boxtype);
 	    box.list = this.leave_mode ();
+	    box.set_glue (is_exact, spec);
 	    engine.handle_finished_box (box);
 	}
 
