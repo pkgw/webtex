@@ -30,7 +30,9 @@ var MathNode = (function MathNode_closure () {
 
 
 var AtomNode = (function AtomNode_closure () {
-    // An "atom" that contains a nucleus, subscript, and/or superscript.
+    // An "atom" that contains a nucleus, subscript, and/or superscript. Each
+    // of these can be a MathChar, MathTextChar, Box, list (of MathNodes), or
+    // null.
     //
     // Most of the math types are represented as an AtomNode instance: Ord,
     // Op, Bin, Rel, Open, Close, Punct, Inner, Under*, Over*, Vcenter*.
@@ -47,6 +49,24 @@ var AtomNode = (function AtomNode_closure () {
     var proto = AtomNode.prototype;
 
     return AtomNode;
+}) ();
+
+
+var MathChar = (function MathChar_closure () {
+    function MathChar (fam, ord) {
+	this.fam = fam;
+	this.ord = ord;
+    }
+    return MathChar;
+}) ();
+
+
+var MathTextChar = (function MathTextChar_closure () {
+    function MathTextChar (fam, ord) {
+	this.fam = fam;
+	this.ord = ord;
+    }
+    return MathTextChar;
 }) ();
 
 
@@ -137,4 +157,38 @@ var StyleChoiceNode = (function StyleChoiceNode_closure () {
     var proto = StyleChoiceNode.prototype;
 
     return StyleChoiceNode;
+}) ();
+
+
+var mathlib = (function mathlib_closure () {
+    var ml = {};
+
+    ml.set_math_char = function mathlib_set_math_char (ord, mathcode, cur_fam) {
+	// T:TP 1155.
+	if (mathcode >= 0x8000) {
+	    // Treat as active character. Right semantics here?
+	    var cmd = engine.get_active (ord);
+	    if (cmd == null)
+		throw new TexRuntimeError ('mathcode ' + mathcode + 'implies active ' +
+					   'character but it isn\'t');
+	    engine.push (Token.new_cmd (cmd));
+	    return null;
+	}
+
+	var ord = mathcode & 0xFF;
+	var fam = (mathcode >> 8) & 0xF;
+	var mtype = (mathcode >> 13) & 0x7;
+
+	if (mathcode >= 0x7000) {
+	    if (cur_fam >= 0 && cur_fam < 16)
+		fam = cur_fam;
+	    mtype = MT_ORD;
+	}
+
+	var atom = new AtomNode (mtype);
+	atom.nuc = new MathChar (fam, ord);
+	return atom;
+    };
+
+    return ml;
 }) ();

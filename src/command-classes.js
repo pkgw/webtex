@@ -640,7 +640,17 @@ var InsertLetterCommand = (function InsertLetterCommand_closure () {
     proto.desc = 'the letter';
 
     proto.invoke = function InsertLetter_invoke (engine) {
-	// T:TP 1155: if math mode, do math magic.
+	if (engine.mode () == M_MATH || engine.mode () == M_DMATH) {
+	    // XXX copy-pasted in letter and GivenChar
+	    var mc = engine.get_code (CT_MATH, this.ord);
+	    engine.trace ('math-accum letter ' + escchr (this.ord) + ' -> 0x' +
+			  mc.toString (16));
+	    var fam = engine.get_parameter (T_INT, 'fam');
+	    var node = mathlib.set_math_char (this.ord, mc, fam);
+	    if (node != null) // may get null if character is active.
+		engine.accum (node);
+	    return;
+	}
 
 	if (engine.ensure_horizontal (this))
 	    return; // this command will be reread after new paragraph is started.
@@ -664,7 +674,17 @@ var InsertOtherCommand = (function InsertOtherCommand_closure () {
     proto.desc = 'the character';
 
     proto.invoke = function InsertOther_invoke (engine) {
-	// T:TP 1155: if math mode, do math magic.
+	if (engine.mode () == M_MATH || engine.mode () == M_DMATH) {
+	    // XXX copy-pasted in letter and GivenChar
+	    var mc = engine.get_code (CT_MATH, this.ord);
+	    engine.trace ('math-accum other ' + escchr (this.ord) + ' -> 0x' +
+			  mc.toString (16));
+	    var fam = engine.get_parameter (T_INT, 'fam');
+	    var node = mathlib.set_math_char (this.ord, mc, fam);
+	    if (node != null) // may get null if character is active.
+		engine.accum (node);
+	    return;
+	}
 
 	if (engine.ensure_horizontal (this))
 	    return; // this command will be reread after new paragraph is started.
@@ -708,7 +728,17 @@ var GivenCharCommand = (function GivenCharCommand_closure () {
     };
 
     proto.invoke = function GivenCharCommand_invoke (engine) {
-	// T:TP 1155: if math mode, do math magic.
+	if (engine.mode () == M_MATH || engine.mode () == M_DMATH) {
+	    // XXX copy-pasted in letter and GivenChar
+	    var mc = engine.get_code (CT_MATH, this.ord);
+	    engine.trace ('math-accum given-char ' + escchr (this.ord) + ' -> 0x' +
+			  mc.toString (16));
+	    var fam = engine.get_parameter (T_INT, 'fam');
+	    var node = mathlib.set_math_char (this.ord, mc, fam);
+	    if (node != null) // may get null if character is active.
+		engine.accum (node);
+	    return;
+	}
 
 	if (engine.ensure_horizontal (this))
 	    return; // this command will be reread after new paragraph is started.
