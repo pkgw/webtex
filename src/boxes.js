@@ -1,4 +1,8 @@
-// Box-related data types.
+// Box-related data types = things that can go in lists = Listables.
+//
+// The Listables are Box (hbox and vbox), Rule, Insert, Mark, Adjust,
+// Ligature, Disc(retionary linebreak), Whatsit, Math, BoxGlue, Kern, Penalty,
+// Unset. Then there are the math "noads" but those are defined in math.js.
 
 'use strict';
 

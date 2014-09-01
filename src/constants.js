@@ -16,7 +16,8 @@ var vt_names = ['int', 'dimen', 'glue', 'muglue', 'toklist', 'box', 'font'];
 
 
 // "listable" types -- things that can go in horizontal, vertical, or math lists.
-// Rather than generic "whatsits", we implement them more specifically.
+// Rather than generic "whatsits", we implement them more specifically. Our
+// index numbers don't agree with TeX's *_node constants.
 
 var LT_BOX = 0,
     LT_RULE = 1,
@@ -26,15 +27,23 @@ var LT_BOX = 0,
     LT_MARK = 5,
     LT_PENALTY = 6,
     LT_LEADER = 7,
-    LT_SPECIAL = 8, // a \special{}
-    LT_STARTTAG = 9, // an HTML start tag
-    LT_ENDTAG = 10; // an HTML end tag
+    LT_INSERT = 8,
+    LT_ADJUST = 9,
+    LT_LIGATURE = 10,
+    LT_DISCRETIONARY = 11,
+    LT_MATH = 12,
+    LT_UNSET = 13,
+    LT_SPECIAL = 14, // a \special{}
+    LT_IO = 15, // a \write{}, etc.
+    LT_STARTTAG = 16, // an HTML start tag
+    LT_ENDTAG = 17; // an HTML end tag
 
 var lt_names = ['box', 'rule', 'character', 'glue', 'kern', 'mark', 'penalty',
 		'leader', 'special', 'starttag', 'endtag'];
 
 
-// Math styles
+// Math styles. We also overload and use these for font sizes, in which case
+// MS_DISPLAY is invalid.
 
 var MS_DISPLAY = 0,      // large display style
     MS_TEXT = 1,         // small inline text style
@@ -43,26 +52,27 @@ var MS_DISPLAY = 0,      // large display style
 
 var ms_names = ['display', 'text', 'script', 'scriptscript'];
 
-// Math atom types
+// Math atom types. Single mathchars can produce nodes of the first 7 types.
+// I offset the types so that they don't clash with LT_* types.
 
-var MT_ORD = 0,      // ordinal
-    MT_OP = 1,	     // operator
-    MT_BIN = 2,	     // binary operator
-    MT_REL = 3,      // relation
-    MT_OPEN = 4,     // open delimiter
-    MT_CLOSE = 5,    // close delimiter
-    MT_PUNCT = 6,    // punctuation
-    MT_INNER = 7,    // inner
-    MT_RADICAL = 8,  // radical
-    MT_FRACTION = 9, // generalized fraction
-    MT_UNDER = 10,   // underlined item
-    MT_OVER = 11,    // overlined item
-    MT_ACCENT = 12,  // accented item
-    MT_VCENTER = 13, // vertically-center subitem
-    MT_LEFT = 14,    // dynamically-sized left delimiter
-    MT_RIGHT = 15,   // dynamically-sized right delimiter
-    MT_STYLE = 16,   // force a specific math style
-    MT_SCHOICE = 17; // style-dependent choice of content
+var MT_ORD = 100,      // ordinal. Ordinary?
+    MT_OP = 101,       // operator
+    MT_BIN = 102,      // binary operator
+    MT_REL = 103,      // relation
+    MT_OPEN = 104,     // open delimiter
+    MT_CLOSE = 105,    // close delimiter
+    MT_PUNCT = 106,    // punctuation
+    MT_INNER = 107,    // inner
+    MT_RADICAL = 108,  // radical
+    MT_FRACTION = 109, // generalized fraction
+    MT_UNDER = 110,    // underlined item
+    MT_OVER = 111,     // overlined item
+    MT_ACCENT = 112,   // accented item
+    MT_VCENTER = 113,  // vertically-center subitem
+    MT_LEFT = 114,     // dynamically-sized left delimiter
+    MT_RIGHT = 115,    // dynamically-sized right delimiter
+    MT_STYLE = 116,    // force a specific math style
+    MT_SCHOICE = 117;  // style-dependent choice of content
 
 var mt_names = ['ord', 'op', 'bin', 'rel', 'open', 'close', 'punct', 'inner'];
 

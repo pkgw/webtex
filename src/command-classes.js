@@ -477,7 +477,11 @@ var MathShiftCommand = (function MathShiftCommand_closure () {
 	    engine.trace ('math shift: exit');
 	    engine.unnest_eqtb ();
 	    var mlist = engine.leave_mode ();
-	    engine.trace ('XXX unused math list ' + mlist);
+	    var mstyle = MS_DISPLAY;
+	    if (m == M_MATH)
+		mstyle = MS_TEXT;
+	    var hlist = mathlib.mlist_to_hlist (engine, mlist, mstyle, false, false);
+	    engine.warn ('XXX unused math hlist: ' + hlist);
 	} else {
 	    engine.trace ('math shift: enter');
 
