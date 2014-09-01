@@ -47,13 +47,12 @@ var Listable = (function Listable_closure () {
 
 
 var Boxlike = (function Boxlike_closure () {
-    // A Listable that is like a box itself: it has width, height, depth.
+    // A box-like listable has width, height, depth.
     function Boxlike (type) {
 	this.width = new Dimen ();
 	this.height = new Dimen ();
 	this.depth = new Dimen ();
 	this.shift_amount = new Dimen ();
-	// TODO?: glue_order, glue_sign, glue_set: see T:TP 135.
     }
 
     inherit (Boxlike, Listable);
@@ -80,6 +79,8 @@ var ListBox = (function ListBox_closure () {
 	this.ltype = LT_BOX;
 	this.btype = btype;
 	this.list = [];
+	this.glue_state = 0; // 0 -> glue not set
+	this.glue_set = null;
     }
 
     inherit (ListBox, Boxlike);
@@ -157,9 +158,7 @@ var HBox = (function HBox_closure () {
     };
 
     proto.set_glue = function HBox_set_glue (engine, is_exact, spec) {
-	// XXX: currently we don't care about the box's internal structure, so
-	// we only do what's necessary to calculate the final ht/wd/dp. Well,
-	// we do a few more things, but we don't actually save those results.
+	// T:TP 649
 
 	var nat_width = 0;
 	var stretches = [0, 0, 0, 0];
@@ -208,14 +207,39 @@ var HBox = (function HBox_closure () {
 	}
 
 	if (settype == 0) {
-	    // Natural width. TODO here and each case: record results.
+	    // Natural width.
 	    this.width.sp.value = nat_width;
+	    this.glue_state = 1; // ordinary (zeroth-order infinite) stretch
+	    this.glue_set = 0.; // ... but no actual stretching.
 	} else if (settype == 1) {
 	    // We're stretching the box.
 	    this.width.sp.value = nat_width + setdelta;
+
+	    if (stretches[3] != 0)
+		this.glue_state = 4;
+	    else if (stretches[2] != 0)
+		this.glue_state = 3;
+	    else if (stretches[1] != 0)
+		this.glue_state = 2;
+	    else
+		this.glue_state = 1;
+
+	    // Note: here, TeX does indeed use floating-point math.
+	    this.glue_set = (1.0 * stretches[this.glue_state - 1]) / setdelta;
 	} else {
 	    // We're shrinking it.
 	    this.width.sp.value = nat_width - setdelta;
+
+	    if (shrinks[3] != 0)
+		this.glue_state = -4;
+	    else if (shrinks[2] != 0)
+		this.glue_state = -3;
+	    else if (shrinks[1] != 0)
+		this.glue_state = -2;
+	    else
+		this.glue_state = -1;
+
+	    this.glue_set = (1.0 * shrinks[-this.glue_state - 1]) / setdelta;
 	}
 
 	this.height.sp.value = height;
@@ -245,10 +269,6 @@ var VBox = (function VBox_closure () {
     };
 
     proto.set_glue = function VBox_set_glue (engine, is_exact, spec) {
-	// XXX: currently we don't care about the box's internal structure, so
-	// we only do what's necessary to calculate the final ht/wd/dp. Well,
-	// we do a few more things, but we don't actually save those results.
-
 	var nat_height = 0;
 	var stretches = [0, 0, 0, 0];
 	var shrinks = [0, 0, 0, 0];
@@ -298,14 +318,38 @@ var VBox = (function VBox_closure () {
 	}
 
 	if (settype == 0) {
-	    // Natural height. TODO here and each case: record results.
+	    // Natural height.
 	    this.height.sp.value = nat_height;
+	    this.glue_state = 1; // ordinary (zeroth-order infinite) stretch
+	    this.glue_set = 0.; // ... but no actual stretching.
 	} else if (settype == 1) {
 	    // We're stretching the box.
 	    this.height.sp.value = nat_height + setdelta;
+
+	    if (stretches[3] != 0)
+		this.glue_state = 4;
+	    else if (stretches[2] != 0)
+		this.glue_state = 3;
+	    else if (stretches[1] != 0)
+		this.glue_state = 2;
+	    else
+		this.glue_state = 1;
+
+	    this.glue_set = (1.0 * stretches[this.glue_state - 1]) / setdelta;
 	} else {
 	    // We're shrinking it.
 	    this.height.sp.value = nat_height - setdelta;
+
+	    if (shrinks[3] != 0)
+		this.glue_state = -4;
+	    else if (shrinks[2] != 0)
+		this.glue_state = -3;
+	    else if (shrinks[1] != 0)
+		this.glue_state = -2;
+	    else
+		this.glue_state = -1;
+
+	    this.glue_set = (1.0 * shrinks[-this.glue_state - 1]) / setdelta;
 	}
 
 	this.width.sp.value = width;
