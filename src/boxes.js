@@ -1,8 +1,11 @@
 // Box-related data types = things that can go in lists = Listables.
 //
-// The Listables are Box (hbox and vbox), Rule, Insert, Mark, Adjust,
-// Ligature, Disc(retionary linebreak), Whatsit, Math, BoxGlue, Kern, Penalty,
-// Unset. Then there are the math "noads" but those are defined in math.js.
+// The standard TeX Listables are Box (hbox and vbox), Rule, Insert, Mark,
+// Adjust, Ligature, Disc(retionary linebreak), Whatsit, Math, BoxGlue, Kern,
+// Penalty, Unset. Then there are the math "noads" but those are defined in
+// math.js.
+//
+// We separate Whatsits into IO and Specials and add our own items.
 
 'use strict';
 
@@ -461,6 +464,86 @@ var VBox = (function VBox_closure () {
     };
 
     return VBox;
+}) ();
+
+
+var CanvasBox = (function CanvasBox_closure () {
+    // A CanvasBox is a ListBox that has had the locations of its drawable
+    // sub-elements extracted and precomputed, leaving only non-drawable
+    // sub-elements in its official 'list'. We use these for equations so that
+    // the HTML chrome doesn't have to try to guess which kerns, etc., are
+    // important for layout; if kerning and box-shifting matters in the UI
+    // presentation, the relevant effects should be encapulated in a CanvasBox.
+
+    function CanvasBox (srcbox) {
+	if (!(srcbox instanceof HBox || srcbox instanceof VBox))
+	    throw new TexInternalError ('CanvasBox source should be HBox or VBox; got ' + srcbox);
+
+	ListBox.call (this, BT_CBOX);
+	this.graphics = [];
+
+	this.width = srcbox.width.clone ();
+	this.height = srcbox.height.clone ();
+	this.depth = srcbox.depth.clone ();
+	this.shift_amount = srcbox.shift_amount.clone ();
+
+	// TODO, I think: record true width/height/depth of subcomponents.
+
+	srcbox.traverse (0, 0, function (x, y, item) {
+	    if (item instanceof Character || item instanceof Rule) {
+		this.graphics.push ([x, y, item]);
+	    } else {
+		this.list.push (item);
+	    }
+	}.bind (this));
+    }
+
+    inherit (CanvasBox, ListBox);
+    var proto = CanvasBox.prototype;
+
+    proto._uisummary = function CanvasBox__uisummary () {
+	return 'CanvasBox ' + this._uishape () + ' #items=' + this.list.length +
+	    ' #graphics=' + this.graphics.length;
+    };
+
+    proto._uiitems = function ListBox__uiitems () {
+	var uilist = [this._uisummary () + ' items {'];
+
+	for (var i = 0; i < this.list.length; i++) {
+	    var sublist = this.list[i]._uiitems ();
+	    for (var j = 0; j < sublist.length; j++)
+		uilist.push ('  ' + sublist[j]);
+	}
+
+	uilist.push ('} graphics {');
+
+	for (var i = 0; i < this.graphics.length; i++) {
+	    var q = this.graphics[i];
+	    uilist.push ('  x=' + q[0] + ' y=' + q[1] + ' ' + q[2]);
+	}
+
+	uilist.push ('}');
+	return uilist;
+    };
+
+    proto._copyto = function CanvasBox__copyto (other) {
+	ListBox.prototype._copyto.call (this, other);
+	other.graphics = this.graphics.slice ();
+    };
+
+    proto.clone = function CanvasBox_clone () {
+	var b = new CanvasBox ();
+	this._copyto (b);
+	return b;
+    };
+
+    proto.traverse = function CanvasBox_traverse (x0, y0, callback) {
+	for (var i = 0; i < this.list.length; i++) {
+	    callback (x0, y0, this.list[i]);
+	}
+    };
+
+    return CanvasBox;
 }) ();
 
 

@@ -480,10 +480,16 @@ var MathShiftCommand = (function MathShiftCommand_closure () {
 	    var mstyle = MS_DISPLAY;
 	    if (m == M_MATH)
 		mstyle = MS_TEXT;
+
 	    var hlist = mathlib.mlist_to_hlist (engine, mlist, mstyle, false, false);
+	    var box = new HBox ();
+	    box.list = hlist;
+	    box.set_glue (engine, false, new Dimen ());
+	    box = new CanvasBox (box); // our magic!
+
 	    var ms = engine.get_parameter (T_DIMEN, 'mathsurround');
 	    engine.accum (new MathDelim (ms, false));
-	    engine.accum_list (hlist);
+	    engine.accum (box);
 	    engine.accum (new MathDelim (ms, true));
 	    engine.unnest_eqtb ();
 	} else {

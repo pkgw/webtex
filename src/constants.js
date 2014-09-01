@@ -85,9 +85,10 @@ var OLT_DEFAULT = 0,  // operator limit type: infer based on context
 
 var BT_VOID = 0,
     BT_HBOX = 1,
-    BT_VBOX = 2;
+    BT_VBOX = 2,
+    BT_CBOX = 3; // webtex extension - canvas box
 
-var bt_names = ['void', 'hbox', 'vbox'];
+var bt_names = ['void', 'hbox', 'vbox', 'cbox'];
 
 
 // "Code types" -- not the best name for these things ...
