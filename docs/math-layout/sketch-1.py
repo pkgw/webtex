@@ -281,7 +281,7 @@ def mlist_to_hlist (): # <726>
 
         if q.type == Bin:
             # Change type of q if not in bin op context.
-            if r_type in (Bin, Op, Rel, Open, Punc, Left):
+            if r_type in (Bin, Op, Rel, Open, Punct, Left):
                 q.type = Ord
                 goto rewswitch
         elif q.type in (Rel, Close, Punct, Right):
@@ -385,7 +385,7 @@ def mlist_to_hlist (): # <726>
             if char_exists (cur_i):
                 delta = cur_f.char_italic (cur_i)
                 p = Character (cur_f, cur_c)
-                if q.nucleus.math_type == MathTextChar and cur_f.space != 0:
+                if q.nucleus.math_type == MathTextChar and space(cur_f) != 0:
                     delta = 0
                 if q.subscr.math_type == Empty and delta != 0:
                     p.next = Kern (delta)
@@ -875,7 +875,7 @@ def make_ord (q): #<752>
             if q.nucleus.math_type == MathChar:
                 p = q.next
                 if p is not None:
-                    if p.type >= Ord and p.type <= Punct: # XXX fixup
+                    if p.type in (Ord, Op, Bin, Rel, Open, Close, Punct):
                         if p.nucleus.math_type == MathChar:
                             if p.nucleus.fam == q.nucleus.fam:
                                 q.nucleus.math_type = MathTextChar
