@@ -1300,7 +1300,7 @@ commands.moveright = function cmd_moveright (engine) {
 };
 
 commands.moveleft = function cmd_moveleft (engine) {
-    _cmd_box_shift (engine, 'moveleft', false);
+    _cmd_box_shift (engine, 'moveleft', true);
 };
 
 
