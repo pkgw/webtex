@@ -474,14 +474,18 @@ var MathShiftCommand = (function MathShiftCommand_closure () {
 	var m = engine.mode ();
 
 	if (m == M_DMATH || m == M_MATH) {
+	    // T:TP 1194 -- after_math(). XXX: this code is a poor approximation so far.
 	    engine.trace ('math shift: exit');
-	    engine.unnest_eqtb ();
 	    var mlist = engine.leave_mode ();
 	    var mstyle = MS_DISPLAY;
 	    if (m == M_MATH)
 		mstyle = MS_TEXT;
 	    var hlist = mathlib.mlist_to_hlist (engine, mlist, mstyle, false, false);
-	    engine.warn ('XXX unused math hlist: ' + hlist);
+	    var ms = engine.get_parameter (T_DIMEN, 'mathsurround');
+	    engine.accum (new MathDelim (ms, false));
+	    engine.accum_list (hlist);
+	    engine.accum (new MathDelim (ms, true));
+	    engine.unnest_eqtb ();
 	} else {
 	    engine.trace ('math shift: enter');
 

@@ -315,6 +315,25 @@ var Character = (function Character_closure () {
 }) ();
 
 
+var MathDelim = (function MathDelim_closure () {
+    function MathDelim (width, is_after) {
+	Boxlike.call (this);
+	this.ltype = LT_MATH;
+	this.width = width;
+	this.is_after = is_after;
+    }
+
+    inherit (MathDelim, Boxlike);
+    var proto = MathDelim.prototype;
+
+    proto._uisummary = function MathDelim__uisummary () {
+	return 'MathDelim w=' + this.width;
+    };
+
+    return MathDelim;
+}) ();
+
+
 var Mark = (function Mark_closure () {
     function Mark (toks) {
 	this.ltype = LT_MARK;
