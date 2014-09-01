@@ -211,7 +211,7 @@ var EquivTable = (function EquivTable_closure () {
 	    this._registers[T_GLUE][i] = new Glue ();
 	    this._registers[T_MUGLUE][i] = new Glue ();
 	    this._registers[T_TOKLIST][i] = new Toklist ();
-	    this._registers[T_BOX][i] = new Box (BT_VOID);
+	    this._registers[T_BOX][i] = new VoidBox ();
 	}
 
 	for (var i = 0; i < 26; i++) {
@@ -763,7 +763,7 @@ var Engine = (function Engine_closure () {
 	    this.accum (new BoxGlue (ls));
 
 	if (indent) {
-	    var b = new Box (BT_HBOX);
+	    var b = new HBox ();
 	    b.width = this.get_parameter (T_DIMEN, 'parindent');
 	    this.accum (b);
 	}
@@ -788,7 +788,7 @@ var Engine = (function Engine_closure () {
 	// insert a \rightskip at the end of the line.
 	list.push (new BoxGlue (this.get_parameter (T_GLUE, 'rightskip')));
 	list.push (new EndTag ('p')); // webtex special!
-	var hbox = new Box (BT_HBOX);
+	var hbox = new HBox ();
 	hbox.list = list;
 	hbox.set_glue (this, false, new Dimen ());
 	// skip: interline glue and penalties
@@ -869,7 +869,7 @@ var Engine = (function Engine_closure () {
 
 	// See TeXBook p. 125.
 
-	var vbox = new Box (BT_VBOX);
+	var vbox = new VBox ();
 	vbox.list = list;
 	vbox.set_glue (this, false, new Dimen ());
 	this.set_register (T_BOX, 255, vbox);
@@ -958,7 +958,7 @@ var Engine = (function Engine_closure () {
 	} else {
 	    this.trace ('... forcing page build');
 
-	    var hb = new Box (BT_HBOX);
+	    var hb = new HBox ();
 	    hb.width = this.get_parameter (T_DIMEN, 'hsize');
 	    this.accum (hb);
 
@@ -2056,7 +2056,7 @@ var Engine = (function Engine_closure () {
 	    this.trace ('< <--- ' + bt_names[boxtype] + '; setting is_exact=' +
 			is_exact + ' spec=' + spec + ' >');
 	    this.unnest_eqtb ();
-	    var box = new Box (boxtype);
+	    var box = Listable.new_box (boxtype);
 	    box.list = this.leave_mode ();
 	    box.set_glue (this, is_exact, spec);
 	    if (is_vtop)

@@ -289,7 +289,7 @@ var mathlib = (function mathlib_closure () {
     }
 
     function hpack_natural (engine, hlist) {
-	var b = new Box (BT_HBOX);
+	var b = new HBox ();
 
 	if (hlist != null) {
 	    b.list = hlist;

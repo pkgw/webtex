@@ -32,6 +32,16 @@ var Listable = (function Listable_closure () {
 	return this._uiitems ().join ('\n');
     };
 
+    Listable.new_box = function Listable_new_box (btype) {
+	if (btype == BT_VOID)
+	    return new VoidBox ();
+	if (btype == BT_HBOX)
+	    return new HBox ();
+	if (btype == BT_VBOX)
+	    return new VBox ();
+	throw new TexInternalError ('unexpected box type ' + btype);
+    };
+
     return Listable;
 }) ();
 
@@ -60,24 +70,24 @@ var Boxlike = (function Boxlike_closure () {
 }) ();
 
 
-var Box = (function Box_closure () {
-    function Box (btype) {
+var ListBox = (function ListBox_closure () {
+    function ListBox (btype) {
 	Boxlike.call (this);
 	this.ltype = LT_BOX;
 	this.btype = btype;
 	this.list = [];
     }
 
-    inherit (Box, Boxlike);
-    var proto = Box.prototype;
+    inherit (ListBox, Boxlike);
+    var proto = ListBox.prototype;
 
-    proto._uisummary = function Box__uisummary () {
+    proto._uisummary = function ListBox__uisummary () {
 	return 'Box ' + bt_names[this.btype] + ' w=' + this.width +
 	    ' h=' + this.height + ' d=' + this.depth + ' #items=' +
 	    this.list.length;
     };
 
-    proto._uiitems = function Box__uiitems () {
+    proto._uiitems = function ListBox__uiitems () {
 	var uilist = [this._uisummary () + ' {'];
 
 	for (var i = 0; i < this.list.length; i++) {
@@ -91,29 +101,60 @@ var Box = (function Box_closure () {
 	return uilist;
     };
 
-    proto._copyto = function Box__copyto (other) {
+    proto._copyto = function ListBox__copyto (other) {
 	Boxlike.prototype._copyto.call (this, other);
 	other.btype = this.btype;
 	other.list = this.list.slice ();
     };
 
-    proto.clone = function Box_clone () {
-	var b = new Box (this.btype);
+    return ListBox;
+}) ();
+
+
+var VoidBox = (function VoidBox_closure () {
+    // A VoidBox inherits ListBox, but doesn't chain to its constructor or
+    // anything, so that it just doesn't have width/height/etc defined.
+    // However, VoidBoxes will count as instanceof ListBox.
+
+    function VoidBox () {
+	this.ltype = LT_BOX;
+	this.btype = BT_VOID;
+    }
+
+    inherit (VoidBox, ListBox);
+    var proto = VoidBox.prototype;
+
+    proto._uisummary = function VoidBox__uisummary () {
+	return 'VoidBox';
+    };
+
+    proto._uiitems = function VoidBox__uiitems () {
+	return [this._uisummary ()];
+    };
+
+    proto._copyto = function VoidBox__copyto (other) {
+	other.btype = this.btype;
+    };
+
+    return VoidBox;
+}) ();
+
+
+var HBox = (function HBox_closure () {
+    function HBox () {
+	ListBox.call (this, BT_HBOX);
+    }
+
+    inherit (HBox, ListBox);
+    var proto = HBox.prototype;
+
+    proto.clone = function HBox_clone () {
+	var b = new HBox ();
 	this._copyto (b);
 	return b;
     };
 
-    proto.set_glue = function Box_set_glue (engine, is_exact, spec) {
-	// XXX way to object orientate.
-	if (this.btype == BT_HBOX)
-	    this._set_hbox (engine, is_exact, spec);
-	else if (this.btype == BT_VBOX)
-	    this._set_vbox (engine, is_exact, spec);
-	else
-	    throw new TexInternalError ('trying to set void box ' + this);
-    };
-
-    proto._set_hbox = function Box__set_hbox (engine, is_exact, spec) {
+    proto.set_glue = function HBox_set_glue (engine, is_exact, spec) {
 	// XXX: currently we don't care about the box's internal structure, so
 	// we only do what's necessary to calculate the final ht/wd/dp. Well,
 	// we do a few more things, but we don't actually save those results.
@@ -179,7 +220,25 @@ var Box = (function Box_closure () {
 	this.depth.sp.value = depth;
     };
 
-    proto._set_vbox = function Box__set_vbox (engine, is_exact, spec) {
+    return HBox;
+}) ();
+
+
+var VBox = (function VBox_closure () {
+    function VBox () {
+	ListBox.call (this, BT_VBOX);
+    }
+
+    inherit (VBox, ListBox);
+    var proto = VBox.prototype;
+
+    proto.clone = function VBox_clone () {
+	var b = new VBox ();
+	this._copyto (b);
+	return b;
+    };
+
+    proto.set_glue = function VBox_set_glue (engine, is_exact, spec) {
 	// XXX: currently we don't care about the box's internal structure, so
 	// we only do what's necessary to calculate the final ht/wd/dp. Well,
 	// we do a few more things, but we don't actually save those results.
@@ -258,10 +317,7 @@ var Box = (function Box_closure () {
 	}
     };
 
-    proto.adjust_as_vtop = function Box_adjust_as_vtop () {
-	if (this.btype != BT_VBOX)
-	    throw new TexRuntimeError ('adjust_as_vtop on inappropriate box ' + this);
-
+    proto.adjust_as_vtop = function VBox_adjust_as_vtop () {
 	var tot_height = this.height.sp.value + this.depth.sp.value;
 	var height = 0;
 
@@ -272,7 +328,7 @@ var Box = (function Box_closure () {
 	this.depth.sp.value = tot_height - height;
     };
 
-    return Box;
+    return VBox;
 }) ();
 
 

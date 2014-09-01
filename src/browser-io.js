@@ -157,7 +157,7 @@ var DOMTarget = (function DOMTarget_closure () {
 	    var item = box_stack[ibox].list[j_stack[ibox]];
 	    j_stack[ibox]++; // This item is dealt with.
 
-	    if (item instanceof Box) {
+	    if (item instanceof ListBox) {
 		box_stack.push (item);
 		j_stack.push (0);
 		ibox++;

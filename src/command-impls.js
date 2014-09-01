@@ -809,7 +809,7 @@ commands.box = (function BoxCommand_closure () {
 	var reg = engine.scan_char_code ();
 	var box = engine.get_register (T_BOX, reg);
 	engine.trace ('fetch box ' + reg);
-	engine.set_register (T_BOX, reg, new Box (BT_VOID));
+	engine.set_register (T_BOX, reg, new VoidBox ());
 	engine.handle_finished_box (box);
     };
 
@@ -841,14 +841,14 @@ commands.vsplit = (function VsplitCommand_closure () {
 	// TODO: use splitmaxdepth, splittopskip, etc. See TeXBook p. 124, T:TP~977.
 
 	if (box.btype == BT_VOID) {
-	    engine.handle_finished_box (new Box (BT_VOID));
+	    engine.handle_finished_box (new VoidBox ());
 	    return;
 	}
 
 	if (box.btype == BT_HBOX)
 	    throw new TexRuntimeError ('cannot \\vsplit an hbox');
 
-	engine.set_register (T_BOX, reg, new Box (BT_VOID));
+	engine.set_register (T_BOX, reg, new VoidBox ());
 	engine.handle_finished_box (box);
     };
 
@@ -872,13 +872,13 @@ commands.lastbox = (function LastboxCommand_closure () {
 	if (m == M_VERT)
 	    throw new TexRuntimeError ('cannot use \\lastbox in vertical mode');
 	if (m == M_MATH || m == M_DMATH) {
-	    engine.handle_finished_box (new Box (BT_VOID));
+	    engine.handle_finished_box (new VoidBox ());
 	    return;
 	}
 
 	var last = engine.get_last_listable ();
 	if (last == null || last.ltype != LT_BOX || last.btype == BT_VOID) {
-	    engine.handle_finished_box (new Box (BT_VOID));
+	    engine.handle_finished_box (new VoidBox ());
 	    return;
 	}
 
@@ -1069,7 +1069,7 @@ commands.unhbox = function cmd_unhbox (engine) {
 	throw new TexRuntimeError ('trying to unhbox a non-hbox');
 
     engine.trace ('unhbox ' + reg + ' (non-void)');
-    engine.set_register (T_BOX, reg, new Box (BT_VOID));
+    engine.set_register (T_BOX, reg, new VoidBox ());
     engine.accum_list (box.list);
 };
 
@@ -1090,7 +1090,7 @@ commands.unvbox = function cmd_unvbox (engine) {
 	throw new TexRuntimeError ('trying to unvbox a non-vbox');
 
     engine.trace ('unvbox ' + reg + ' (non-void)');
-    engine.set_register (T_BOX, reg, new Box (BT_VOID));
+    engine.set_register (T_BOX, reg, new VoidBox ());
     engine.accum_list (box.list);
 };
 
@@ -1331,7 +1331,7 @@ commands.unskip = function cmd_unskip (engine) {
 commands.shipout = function cmd_shipout (engine) {
     function ship_it_good (engine, box) {
 	// Note: any box type (void, hbox, vbox) is OK to ship out.
-	engine.set_register (T_BOX, 255, new Box (BT_VOID));
+	engine.set_register (T_BOX, 255, new VoidBox ());
 	engine.ship_it (box);
     };
 

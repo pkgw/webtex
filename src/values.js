@@ -112,7 +112,7 @@ var Value = (function Value_closure () {
 	}
 
 	if (valtype == T_BOX) {
-	    if (!(value instanceof Box))
+	    if (!(value instanceof ListBox))
 		throw new TexInternalError ('cannot coerce to box: ' + value);
 	    return value;
 	}
