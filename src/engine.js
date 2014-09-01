@@ -765,6 +765,7 @@ var Engine = (function Engine_closure () {
 	if (indent) {
 	    var b = new HBox ();
 	    b.width = this.get_parameter (T_DIMEN, 'parindent');
+	    b.set_glue (this, false, new Dimen ());
 	    this.accum (b);
 	}
 

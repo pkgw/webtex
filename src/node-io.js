@@ -214,8 +214,11 @@ var ConsoleDumpTarget = (function ConsoleDumpTarget_closure () {
     var proto = ConsoleDumpTarget.prototype;
 
     proto.process = function ConsoleDumpTarget_process (box) {
-	console.log ('=== shipped out: ===');
-	console.log (box.uitext ());
+	console.log ('==== shipped out: ====');
+	box.traverse (0, 0, function (x, y, item) {
+	    console.log ('x=' + x + ' y=' + y + ' ' + item);
+	});
+	console.log ('==== (end of shipout) ====');
     };
 
     return ConsoleDumpTarget;

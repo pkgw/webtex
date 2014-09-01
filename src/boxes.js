@@ -52,7 +52,7 @@ var Boxlike = (function Boxlike_closure () {
 	this.width = new Dimen ();
 	this.height = new Dimen ();
 	this.depth = new Dimen ();
-	this.shift_amount = new Dimen ();
+	this.shift_amount = new Dimen (); // positive is down (right) in H (V) box
     }
 
     inherit (Boxlike, Listable);
@@ -133,6 +133,10 @@ var VoidBox = (function VoidBox_closure () {
 
     proto._copyto = function VoidBox__copyto (other) {
 	other.btype = this.btype;
+    };
+
+    proto.traverse = function VoidBox_traverse (x0, y0, callback) {
+	throw new TexInternalError ('cannot traverse a VoidBox');
     };
 
     return VoidBox;
@@ -244,6 +248,44 @@ var HBox = (function HBox_closure () {
 
 	this.height.sp.value = height;
 	this.depth.sp.value = depth;
+    };
+
+    proto.traverse = function HBox_traverse (x0, y0, callback) {
+	if (this.glue_state == 0)
+	    throw new TexInternalError ('cannot traverse unglued box ' + this);
+
+	var gs = this.glue_state;
+	var gr = this.glue_set; // the glue set ratio
+	var x = x0;
+
+	for (var i = 0; i < this.list.length; i++) {
+	    var item = this.list[i];
+
+	    if (item instanceof ListBox) {
+		item.traverse (x, y0 + item.shift_amount.sp.value, callback);
+		x += item.width.sp.value;
+	    } else if (item instanceof Boxlike) {
+		callback (x, y0 + item.shift_amount.sp.value, item);
+		x += item.width.sp.value;
+	    } else if (item instanceof Kern) {
+		x += item.amount.sp.value;
+	    } else if (item instanceof BoxGlue) {
+		var g = item.amount;
+		var dx = g.width.sp.value;
+
+		if (gs > 0) {
+		    if (g.stretch_order == gs - 1)
+			dx += gr * g.stretch.sp.value;
+		} else {
+		    if (g.shrink_order == -gs - 1)
+			dx += gr * g.shrink.sp.value;
+		}
+
+		x += dx;
+	    } else {
+		callback (x, y0, item);
+	    }
+	}
     };
 
     return HBox;
@@ -376,6 +418,46 @@ var VBox = (function VBox_closure () {
 
 	this.height.sp.value = height;
 	this.depth.sp.value = tot_height - height;
+    };
+
+    proto.traverse = function VBox_traverse (x0, y0, callback) {
+	if (this.glue_state == 0)
+	    throw new TexInternalError ('cannot traverse unglued box' + this);
+
+	var gs = this.glue_state;
+	var gr = this.glue_set; // the glue set ratio
+	var y = y0 - this.height.sp.value;
+
+	for (var i = 0; i < this.list.length; i++) {
+	    var item = this.list[i];
+
+	    if (item instanceof ListBox) {
+		y += item.height.sp.value;
+		item.traverse (x0 + item.shift_amount.sp.value, y, callback);
+		y += item.depth.sp.value;
+	    } else if (item instanceof Boxlike) {
+		y += item.height.sp.value;
+		callback (x0 + item.shift_amount.sp.value, y, item);
+		y += item.depth.sp.value;
+	    } else if (item instanceof Kern) {
+		y += item.amount.sp.value;
+	    } else if (item instanceof BoxGlue) {
+		var g = item.amount;
+		var dy = g.width.sp.value;
+
+		if (gs > 0) {
+		    if (g.stretch_order == gs - 1)
+			dy += gr * g.stretch.sp.value;
+		} else {
+		    if (g.shrink_order == -gs - 1)
+			dy += gr * g.shrink.sp.value;
+		}
+
+		y += dy
+	    } else {
+		callback (x0, y, item);
+	    }
+	}
     };
 
     return VBox;
