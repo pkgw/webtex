@@ -475,6 +475,12 @@ var Dimen = (function Dimen_closure () {
     inherit (Dimen, Value);
     var proto = Dimen.prototype;
 
+    Dimen.new_scaled = function Dimen_new_scaled (sp) {
+	var d = new Dimen ();
+	d.sp = sp;
+	return d;
+    };
+
     Dimen.new_product = function Dimen_new_product (k, x) {
 	// k: tex-int
 	// x: Scaled
@@ -920,6 +926,14 @@ var Font = (function Font_closure () {
 	font.hyphenchar = data[3];
 	font.skewchar = data[4];
 	return font;
+    };
+
+    proto.get_metrics = function Font_get_metrics () {
+	if (this.metrics_error != null)
+	    throw this.metrics_error;
+	if (this.metrics === NeedMoreData)
+	    throw NeedMoreData;
+	return this.metrics;
     };
 
     proto.get_dimen = function Font_get_dimen (number) {
