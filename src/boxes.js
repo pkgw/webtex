@@ -59,6 +59,10 @@ var Boxlike = (function Boxlike_closure () {
     inherit (Boxlike, Listable);
     var proto = Boxlike.prototype;
 
+    proto._uishape = function Boxlike__uishape () {
+	return 'w=' + this.width + ' h=' + this.height + ' d=' + this.depth;
+    };
+
     proto._copyto = function Boxlike__copyto (other) {
 	other.width = this.width.clone ();
 	other.height = this.height.clone ();
@@ -80,12 +84,6 @@ var ListBox = (function ListBox_closure () {
 
     inherit (ListBox, Boxlike);
     var proto = ListBox.prototype;
-
-    proto._uisummary = function ListBox__uisummary () {
-	return 'Box ' + bt_names[this.btype] + ' w=' + this.width +
-	    ' h=' + this.height + ' d=' + this.depth + ' #items=' +
-	    this.list.length;
-    };
 
     proto._uiitems = function ListBox__uiitems () {
 	var uilist = [this._uisummary () + ' {'];
@@ -147,6 +145,10 @@ var HBox = (function HBox_closure () {
 
     inherit (HBox, ListBox);
     var proto = HBox.prototype;
+
+    proto._uisummary = function HBox__uisummary () {
+	return 'HBox ' + this._uishape () + ' #items=' + this.list.length;
+    };
 
     proto.clone = function HBox_clone () {
 	var b = new HBox ();
@@ -231,6 +233,10 @@ var VBox = (function VBox_closure () {
 
     inherit (VBox, ListBox);
     var proto = VBox.prototype;
+
+    proto._uisummary = function VBox__uisummary () {
+	return 'VBox ' + this._uishape () + ' #items=' + this.list.length;
+    };
 
     proto.clone = function VBox_clone () {
 	var b = new VBox ();
@@ -342,8 +348,7 @@ var Rule = (function Rule_closure () {
     var proto = Rule.prototype;
 
     proto._uisummary = function Rule__uisummary () {
-	return 'Rule w=' + this.width + ' h=' + this.height +
-	    ' d=' + this.depth;
+	return 'Rule ' + this._uishape ();
     };
 
     return Rule;
@@ -362,9 +367,8 @@ var Character = (function Character_closure () {
     var proto = Character.prototype;
 
     proto._uisummary = function Character__uisummary () {
-	return 'Character w=' + this.width + ' h=' + this.height +
-	    ' d=' + this.depth + ' ord=' + escchr (this.ord) +
-	    ' font=' + this.font;
+	return 'Character ' + this._uishape () + ' ord=' +
+	    escchr (this.ord) + ' font=' + this.font;
     };
 
     return Character;
