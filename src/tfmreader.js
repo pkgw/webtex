@@ -79,6 +79,8 @@ var TfmReader = WEBTEX.TfmReader = (function TfmReader_closure () {
 	if (num_chars < 0)
 	    num_chars = 0;
 
+	this.first_code = first_code;
+	this.last_code = last_code;
 	this.ord_widths = new Array (256);
 	this.ord_heights = new Array (256);
 	this.ord_depths = new Array (256);
@@ -177,6 +179,11 @@ var TfmReader = WEBTEX.TfmReader = (function TfmReader_closure () {
     proto.has_ord = function TfmReader_has_ord (ord) {
 	// T:TP 543: valid if it is between first_ and last_ code and
 	// its width_index is nonzero.
+	if (ord < this.first_code)
+	    return false;
+	if (ord > this.last_code)
+	    return false;
+	return this.ord_widths[ord] != null;
     };
 
     proto.width = function TfmReader_width (ord) {
@@ -195,13 +202,13 @@ var TfmReader = WEBTEX.TfmReader = (function TfmReader_closure () {
 	return this.ord_ics[ord];
     };
 
-    proto.box_for_ord = function TfmReader_box_for_ord (ord) {
+    proto.box_for_ord = function TfmReader_box_for_ord (font, ord) {
 	if (this.ord_widths[ord] == null) {
 	    // TODO: TeX warns in this case; then returns a zero-size box
-	    return new Character (this, ord);
+	    return new Character (font, ord);
 	}
 
-	var rv = new Character (this, ord);
+	var rv = new Character (font, ord);
 	rv.width.sp = this.ord_widths[ord];
 	rv.height.sp = this.ord_heights[ord];
 	rv.depth.sp = this.ord_depths[ord];

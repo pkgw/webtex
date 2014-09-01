@@ -953,7 +953,7 @@ var Font = (function Font_closure () {
 	    throw this.metrics_error;
 	if (this.metrics === NeedMoreData)
 	    throw NeedMoreData;
-	return this.metrics.box_for_ord (ord);
+	return this.metrics.box_for_ord (this, ord);
     };
 
     return Font;
