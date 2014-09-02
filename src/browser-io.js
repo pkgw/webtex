@@ -137,7 +137,9 @@ var DOMTarget = (function DOMTarget_closure () {
     var proto = DOMTarget.prototype;
 
     var fontmap = {
-	lmmi10: 'LMMathItalic10',
+	lmmi10: '28px LMMathItalic10',
+	lmr7: '19.6px LMRoman7',
+	'rm-lmr7': '19.6px LMRoman7',
     };
 
     proto.process = function DOMTarget_process (box) {
@@ -171,16 +173,15 @@ var DOMTarget = (function DOMTarget_closure () {
 		    queued_text = '';
 		}
 
-		var scale = 0.000039; // XXX should not be hardcoded!!!!!!!!
-		var fontsize = '24px '; // XXX ditto!
+		var scale = 0.000048; // XXX should not be hardcoded!!!!!!!!
 
 		var e = doc.createElement ('canvas');
 		e.class = 'cbox';
 		// Note: widths and heights are integers, so for best results
 		// with small boxes we're going to need to nudge things and
 		// adjust accordingly.
-		e.width = scale * item.width.sp.value;
-		e.height = scale * (item.height.sp.value + item.depth.sp.value);
+		e.width = Math.ceil (scale * item.width.sp.value);
+		e.height = Math.ceil (scale * (item.height.sp.value + item.depth.sp.value));
 		dom_stack[idom].appendChild (e);
 
 		var ctx = e.getContext ('2d');
@@ -197,12 +198,12 @@ var DOMTarget = (function DOMTarget_closure () {
 			var f = fontmap[subitem.font.ident];
 			if (f == null) {
 			    console.warn ('unmapped font ident ' + subitem.font.ident);
-			    f = 'LMMathItalic10';
+			    f = '28px LMMathItalic10';
 			}
 
 			console.log ('CB chr "' + String.fromCharCode (subitem.ord) +
 				     '" font=' + f + ' x=' + x + ' y=' + y);
-			ctx.font = fontsize + f;
+			ctx.font = f;
 			ctx.fillText (String.fromCharCode (subitem.ord), x, y);
 		    } else if (subitem instanceof Rule) {
 			y -= scale * subitem.height.sp.value;

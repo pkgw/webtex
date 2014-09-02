@@ -38,6 +38,13 @@
   src: url(./lmmi10.pfb) format ('type-1');
 }
 
+@font-face {
+  font-family: 'LMRoman7';
+  font-style: normal;
+  font-weight: 400;
+  src: url(./lmr7.pfb) format ('type-1');
+}
+
 
 body {
   background: #fff;
@@ -48,7 +55,7 @@ body {
   font-family: 'Latin Modern Roman';
   font-style: normal;
   font-weight: 400;
-  font-size: 24px;
+  font-size: 28px;
   letter-spacing: normal;
   color: rgba(0, 0, 0, 0.8);
   text-align: justify;
