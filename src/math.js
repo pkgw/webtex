@@ -39,8 +39,8 @@ var AtomNode = (function AtomNode_closure () {
     // null.
     //
     // Most of the math types are represented as an AtomNode instance: Ord,
-    // Op, Bin, Rel, Open, Close, Punct, Inner, Under*, Over*, Vcenter*.
-    // Asterisked types don't use `sub` or `sup`.
+    // Op, Bin, Rel, Open, Close, Punct, Inner, Radical, Under, Over, Accent,
+    // Vcenter.
 
     function AtomNode (ltype) {
 	MathNode.call (this, ltype);
@@ -76,11 +76,11 @@ var MathTextChar = (function MathTextChar_closure () {
 
 var RadicalNode = (function RadicalNode_closure () {
     function RadicalNode () {
-	MathNode.call (this, MT_RADICAL);
+	AtomNode.call (this, MT_RADICAL);
 	this.left_delim = new Delimiter ();
     }
 
-    inherit (RadicalNode, MathNode);
+    inherit (RadicalNode, AtomNode);
     var proto = RadicalNode.prototype;
 
     return RadicalNode;
@@ -89,6 +89,7 @@ var RadicalNode = (function RadicalNode_closure () {
 
 var FractionNode = (function FractionNode_closure () {
     function FractionNode () {
+	// In TeX, numer and denom must always be math lists.
 	MathNode.call (this, MT_FRACTION);
 	this.thickness = null;
 	this.denom = null;
@@ -106,13 +107,12 @@ var FractionNode = (function FractionNode_closure () {
 
 var AccentNode = (function AccentNode_closure () {
     function AccentNode () {
-	MathNode.call (this, MT_ACCENT);
-	this.nuc = null;
+	AtomNode.call (this, MT_ACCENT);
 	this.accent_fam = null;
 	this.accent_ord = null;
     }
 
-    inherit (AccentNode, MathNode);
+    inherit (AccentNode, AtomNode);
     var proto = AccentNode.prototype;
 
     return AccentNode;
