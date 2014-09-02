@@ -558,6 +558,31 @@ var SuperCommand = (function SuperCommand_closure () {
     proto.name = '<superscript>';
     proto.desc = 'superscript character';
 
+    proto.invoke = function SuperCommand_invoke (engine) {
+	if (engine.mode () != M_MATH && engine.mode () != M_DMATH)
+	    throw new TexRuntimeError ('superscript not allowed outside of math mode');
+
+	// T:TP 1176
+	engine.trace ('superscript ...');
+	var prev = engine.get_last_listable ();
+	if (prev != null) {
+	    if (!(prev instanceof AtomNode))
+		prev = null;
+	    else if (prev.sup != null)
+		throw new TexRuntimeError ('double superscripts not allowed');
+	}
+
+	if (prev == null) {
+	    prev = AtomNode (MT_ORD);
+	    engine.accum (prev);
+	}
+
+	mathlib.scan_math (engine, function (eng, subitem) {
+	    engine.trace ('... superscript got ' + subitem);
+	    prev.sup = subitem;
+	});
+    };
+
     SuperCommand.deserialize = function SuperCommand_deserialize (data, hk) {
 	return new SuperCommand (parseInt (data, 10));
     };
@@ -576,6 +601,32 @@ var SubCommand = (function SubCommand_closure () {
 
     proto.name = '<subscript>';
     proto.desc = 'subscript character';
+
+    proto.invoke = function SubCommand_invoke (engine) {
+	// XXX: code duplication with superscript
+	if (engine.mode () != M_MATH && engine.mode () != M_DMATH)
+	    throw new TexRuntimeError ('subscript not allowed outside of math mode');
+
+	// T:TP 1176
+	engine.trace ('subscript ...');
+	var prev = engine.get_last_listable ();
+	if (prev != null) {
+	    if (!(prev instanceof AtomNode))
+		prev = null;
+	    else if (prev.sub != null)
+		throw new TexRuntimeError ('double subscripts not allowed');
+	}
+
+	if (prev == null) {
+	    prev = AtomNode (MT_ORD);
+	    engine.accum (prev);
+	}
+
+	mathlib.scan_math (engine, function (eng, subitem) {
+	    engine.trace ('... subscript got ' + subitem);
+	    prev.sub = subitem;
+	});
+    };
 
     SubCommand.deserialize = function SubCommand_deserialize (data, hk) {
 	return new SubCommand (parseInt (data, 10));
