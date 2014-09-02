@@ -136,6 +136,10 @@ var DOMTarget = (function DOMTarget_closure () {
 
     var proto = DOMTarget.prototype;
 
+    var fontmap = {
+	lmmi10: 'LMMathItalic10',
+    };
+
     proto.process = function DOMTarget_process (box) {
 	var doc = this.top_element.ownerDocument;
 	var dom_stack = [this.top_element];
@@ -157,7 +161,53 @@ var DOMTarget = (function DOMTarget_closure () {
 	    var item = box_stack[ibox].list[j_stack[ibox]];
 	    j_stack[ibox]++; // This item is dealt with.
 
-	    if (item instanceof ListBox) {
+	    if (item instanceof CanvasBox) {
+		// We have to handle this before ListBox because CanvasBoxes
+		// are ListBoxes. Or we could, you know, use object
+		// orientation.
+
+		if (queued_text.length) {
+		    dom_stack[idom].appendChild (doc.createTextNode (queued_text));
+		    queued_text = '';
+		}
+
+		var scale = 0.000039; // XXX should not be hardcoded!!!!!!!!
+		var fontsize = '24px '; // XXX ditto!
+
+		var e = doc.createElement ('canvas');
+		e.class = 'cbox';
+		// Note: widths and heights are integers, so for best results
+		// with small boxes we're going to need to nudge things and
+		// adjust accordingly.
+		e.width = scale * item.width.sp.value;
+		e.height = scale * (item.height.sp.value + item.depth.sp.value);
+		dom_stack[idom].appendChild (e);
+
+		var ctx = e.getContext ('2d');
+		ctx.fillStyle = 'rgba(0,0,0,0.8)';
+		//ctx.strokeRect (0, 0, e.width, e.height); // XXX debugging
+
+		for (var i = 0; i < item.graphics.length; i++) {
+		    var q = item.graphics[i];
+		    var x = scale * q[0];
+		    var y = scale * (item.height.sp.value + q[1]);
+		    var subitem = q[2];
+
+		    if (subitem instanceof Character) {
+			var f = fontmap[subitem.font.ident];
+			console.log ('CB chr "' + String.fromCharCode (subitem.ord) +
+				     '" font=' + f + ' x=' + x + ' y=' + y);
+			ctx.font = fontsize + f;
+			ctx.fillText (String.fromCharCode (subitem.ord), x, y);
+		    } else if (subitem instanceof Rule) {
+			y -= scale * subitem.height.sp.value;
+			ctx.fillRect (x, y, scale * subitem.width.sp.value,
+				      scale * (subitem.height.sp.value + subitem.depth.sp.value));
+		    } else {
+			console.log ('unhandled CanvasBox graphic ' + subitem);
+		    }
+		}
+	    } else if (item instanceof ListBox) {
 		box_stack.push (item);
 		j_stack.push (0);
 		ibox++;
