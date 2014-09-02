@@ -10,6 +10,7 @@ cache_ident = 'tl2013'
 url_base = 'ftp://tug.org/historic/systems/texlive/2013/tlnet-final/archive/'
 pkg_extension = '.tar.xz'
 skip_roots = frozenset (('makeindex', 'tlpkg'))
+skip_prefixes = frozenset (('fonts/map/dvips', ))
 patch_suffixes = ['.post']
 
 
@@ -84,6 +85,12 @@ class Bundler (object):
 
                     pieces = info.name.split ('/')
                     if pieces[0] in skip_roots:
+                        continue
+                    for pfx in skip_prefixes:
+                        if info.name.startswith (pfx):
+                            info = None
+                            break
+                    if info is None:
                         continue
 
                     base = pieces[-1]
