@@ -195,6 +195,11 @@ var DOMTarget = (function DOMTarget_closure () {
 
 		    if (subitem instanceof Character) {
 			var f = fontmap[subitem.font.ident];
+			if (f == null) {
+			    console.warn ('unmapped font ident ' + subitem.font.ident);
+			    f = 'LMMathItalic10';
+			}
+
 			console.log ('CB chr "' + String.fromCharCode (subitem.ord) +
 				     '" font=' + f + ' x=' + x + ' y=' + y);
 			ctx.font = fontsize + f;
