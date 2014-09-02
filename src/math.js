@@ -49,6 +49,9 @@ var AtomNode = (function AtomNode_closure () {
     // Vcenter.
 
     function AtomNode (ltype) {
+	if (ltype < MT_ORD || ltype > MT_VCENTER)
+	    throw new TexInternalError ('illegal Atom type ' + ltype);
+
 	MathNode.call (this, ltype);
 	this.nuc = null;
 	this.sub = null;
@@ -281,7 +284,7 @@ var mathlib = (function mathlib_closure () {
 
 	var ord = mathcode & 0xFF;
 	var fam = (mathcode >> 8) & 0xF;
-	var ltype = (mathcode >> 13) & 0x7 + MT_ORD;
+	var ltype = ((mathcode >> 13) & 0x7) + MT_ORD;
 
 	if (mathcode >= 0x7000) {
 	    if (cur_fam >= 0 && cur_fam < 16)
@@ -313,15 +316,14 @@ var mathlib = (function mathlib_closure () {
 	    c = engine.get_code (CT_MATH, cmd.ord);
 	    check_active = true;
 	} else if (cmd instanceof GivenMathcharCommand) {
-	    c = engine.mathchar;
+	    c = cmd.mathchar;
 	} else if (cmd.samecmd (engine.commands['char'])) {
 	    c = engine.get_code (CT_MATH, engine.scan_char_code ());
 	    check_active = true;
 	} else if (cmd.samecmd (engine.commands['mathchar'])) {
 	    c = engine.scan_int_15bit ();
-	} else if (cmd) {
-	    // delim
 	}
+	// XXX unimplemented: \delimiter case
 
 	if (check_active && c == 0x8000) {
 	    // Treat as active character. Right semantics here?
