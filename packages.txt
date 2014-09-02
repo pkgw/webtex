@@ -13,12 +13,11 @@ knuth-lib
 latex
 latex-fonts
 latexconfig
+lm
 microtype
 natbib
 oberdiek
 plain
 revtex4
-tex-gyre
-tex-gyre-math
 tools
 url
