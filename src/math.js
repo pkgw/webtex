@@ -6,7 +6,7 @@
 
 'use strict';
 
-var Delimiter = (function Delimiter_closre () {
+var Delimiter = (function Delimiter_closure () {
     function Delimiter () {
 	this.small_fam = null;
 	this.small_ord = null;
@@ -15,6 +15,12 @@ var Delimiter = (function Delimiter_closre () {
     }
 
     var proto = Delimiter.prototype;
+
+    proto.toString = function Delimiter_toString () {
+	return '<Delimiter sf=' + this.small_fam + ' so=' + this.small_ord +
+	    ' lf=' + this.large_fam + ' lo=' + this.large_ord + '>';
+    };
+
     return Delimiter;
 }) ();
 
@@ -52,6 +58,19 @@ var AtomNode = (function AtomNode_closure () {
     inherit (AtomNode, MathNode);
     var proto = AtomNode.prototype;
 
+    proto._uisummary = function AtomNode__uisummary () {
+	return 'Atom ' + mt_names[this.ltype - MT_ORD];
+    };
+
+    proto._uiitems = function AtomNode__uiitems () {
+	var uilist = [this._uisummary () + ' {'];
+	ml._addui (uilist, 'nuc', this.nuc);
+	ml._addui (uilist, 'sub', this.sub);
+	ml._addui (uilist, 'sup', this.sup);
+	uilist.push ('}');
+	return uilist;
+    };
+
     return AtomNode;
 }) ();
 
@@ -83,6 +102,10 @@ var RadicalNode = (function RadicalNode_closure () {
     inherit (RadicalNode, AtomNode);
     var proto = RadicalNode.prototype;
 
+    proto._uisummary = function RadicalNode__uisummary () {
+	return 'Radical left=' + this.left_delim;
+    };
+
     return RadicalNode;
 }) ();
 
@@ -101,6 +124,19 @@ var FractionNode = (function FractionNode_closure () {
     inherit (FractionNode, MathNode);
     var proto = FractionNode.prototype;
 
+    proto._uisummary = function FractionNode__uisummary () {
+	return 'Fraction thickness=' + this.thickness + ' left=' + this.left_delim +
+	    ' right=' + this.right_delim;
+    };
+
+    proto._uiitems = function FractionNode__uiitems () {
+	var uilist = [this._uisummary () + ' {'];
+	ml._addui (uilist, 'numer', this.numer);
+	ml._addui (uilist, 'denom', this.denom);
+	uilist.push ('}');
+	return uilist;
+    };
+
     return FractionNode;
 }) ();
 
@@ -114,6 +150,10 @@ var AccentNode = (function AccentNode_closure () {
 
     inherit (AccentNode, AtomNode);
     var proto = AccentNode.prototype;
+
+    proto._uisummary = function AccentNode__uisummary () {
+	return 'Accent fam=' + this.accent_fam + ' ord=' + this.accent_ord;
+    };
 
     return AccentNode;
 }) ();
@@ -130,6 +170,10 @@ var DynDelimNode = (function DynDelimNode_closure () {
     inherit (DynDelimNode, MathNode);
     var proto = DynDelimNode.prototype;
 
+    proto._uisummary = function DynDelimNode__uisummary () {
+	return 'DynDelim ' + this.delimiter;
+    };
+
     return DynDelimNode;
 }) ();
 
@@ -143,6 +187,10 @@ var MathStyleNode = (function MathStyleNode_closure () {
 
     inherit (MathStyleNode, MathNode);
     var proto = MathStyleNode.prototype;
+
+    proto._uisummary = function MathStyleNode__uisummary () {
+	return 'MathStyle ' + ms_names[this.style] + ' c=' + this.cramped;
+    };
 
     return MathStyleNode;
 }) ();
@@ -160,12 +208,64 @@ var StyleChoiceNode = (function StyleChoiceNode_closure () {
     inherit (StyleChoiceNode, MathNode);
     var proto = StyleChoiceNode.prototype;
 
+    proto._uisummary = function StyleChoiceNode__uisummary () {
+	return 'StyleChoice';
+    };
+
+    proto._uiitems = function FractionNode__uiitems () {
+	var uilist = [this._uisummary () + ' {'];
+	ml._addui (uilist, 'display', this.in_display);
+	ml._addui (uilist, 'text', this.in_text);
+	ml._addui (uilist, 'script', this.in_script);
+	ml._addui (uilist, 'scriptscript', this.in_scriptscript);
+	uilist.push ('}');
+	return uilist;
+    };
+
     return StyleChoiceNode;
 }) ();
 
 
 var mathlib = (function mathlib_closure () {
     var ml = {};
+
+    ml._addui = function mathlib__addui (uilist, desc, elem) {
+	if (elem == null)
+	    return;
+
+	if (elem instanceof MathChar) {
+	    uilist.push ('  ' + desc + '= char fam=' + elem.fam + ' ord=' + elem.ord);
+	    return;
+	}
+
+	if (elem instanceof MathTextChar) {
+	    uilist.push ('  ' + desc + '= tchar fam=' + elem.fam + ' ord=' + elem.ord);
+	    return;
+	}
+
+	if (elem instanceof ListBox) {
+	    var pfx = '  ' + desc + '= ';
+	    var sublist = elem._uiitems ();
+
+	    for (var i = 0; i < sublist.length; i++) {
+		uilist.push (pfx + sublist[i]);
+		pfx = '    ';
+	    }
+	} else {
+	    // List of math items
+	    var pfx = '  ' + desc + '= {';
+
+	    for (var i = 0; i < elem.length; i++) {
+		var sublist = elem[i]._uiitems ();
+		for (var j = 0; j < sublist.length; j++) {
+		    uilist.push (pfx + sublist[j]);
+		    pfx = '    ';
+		}
+	    }
+
+	    uilist.push ('  }');
+	}
+    }
 
     ml.set_math_char = function mathlib_set_math_char (ord, mathcode, cur_fam) {
 	// T:TP 1155.

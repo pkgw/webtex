@@ -75,7 +75,9 @@ var MT_ORD = 100,      // ordinal. Ordinary?
     MT_STYLE = 116,    // force a specific math style
     MT_SCHOICE = 117;  // style-dependent choice of content
 
-var mt_names = ['ord', 'op', 'bin', 'rel', 'open', 'close', 'punct', 'inner'];
+var mt_names = ['ord', 'op', 'bin', 'rel', 'open', 'close', 'punct', 'inner',
+	       'radical', 'fraction', 'under', 'over', 'accent', 'vcenter',
+	       'left', 'right', 'style', 'schoice'];
 
 var OLT_DEFAULT = 0,  // operator limit type: infer based on context
     OLT_LIMITS = 1,   // force limit-style sup/sub
