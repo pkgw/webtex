@@ -859,6 +859,17 @@ var GivenMathcharCommand = (function GivenMathcharCommand_closure () {
 	return new GivenMathcharCommand (parseInt (data, 10));
     };
 
+    proto.invoke = function GivenMathcharCommand_invoke (engine) {
+	if (engine.mode () != M_MATH && engine.mode () != M_DMATH)
+	    throw new TexRuntimeError ('cannot insert math character in non-math context');
+
+	engine.trace ('given-math 0x' + this.mathchar.toString (16));
+	var fam = engine.get_parameter (T_INT, 'fam');
+	var node = mathlib.set_math_char (this.mathchar & 0xFF, this.mathchar, fam);
+	if (node != null) // may get null if character is active.
+	    engine.accum (node);
+    }
+
     proto.samecmd = function GivenMathcharCommand_samecmd (other) {
 	if (other == null)
 	    return false;
