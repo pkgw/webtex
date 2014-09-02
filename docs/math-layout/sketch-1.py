@@ -940,7 +940,7 @@ def make_ord (q): #<752>
 
 
 def make_scripts (q, delta): #<756>
-    p = HList (q)
+    p = q.new_hlist
 
     if p.is_char_node ():
         shift_up = 0
@@ -973,10 +973,10 @@ def make_scripts (q, delta): #<756>
         #</757>
     else:
         #<758>
-        x = clean_box (q.subscr, sup_style[cur_style])
+        x = clean_box (q.supscr, sup_style[cur_style])
         x.width += script_space
 
-        if odd(cur_style): # XXX interpret?
+        if odd(cur_style): # -> in a cramped style?
             clr = sup3[cur_size]
         elif cur_style == Display:
             clr = sup1[cur_size]
