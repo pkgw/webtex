@@ -1576,12 +1576,10 @@ var Engine = (function Engine_closure () {
 		    throw new TexRuntimeError ('this quantity must have ' +
 					       'dimensions of "mu"');
 	    } else if (this.scan_keyword ('em')) {
-		this.warn ('faking font em-width');
-		v = Scaled.new_from_parts (18, 0);
+		v = this.get_misc ('cur_font').get_dimen (6).sp;
 		result = v.times_parts (nonfrac, frac);
 	    } else if (this.scan_keyword ('ex')) {
-		this.warn ('faking font ex-width');
-		v = Scaled.new_from_parts (12, 0);
+		v = this.get_misc ('cur_font').get_dimen (5).sp;
 		result = v.times_parts (nonfrac, frac);
 	    } else if (this.scan_keyword ('sp')) {
 		result = new Scaled (nonfrac);
