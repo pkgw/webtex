@@ -46,11 +46,12 @@ var lt_names = ['box', 'rule', 'character', 'glue', 'kern', 'mark', 'penalty',
 // MS_DISPLAY is invalid.
 
 var MS_DISPLAY = 0,      // large display style
-    MS_TEXT = 1,         // small inline text style
-    MS_SCRIPT = 2,       // tiny sub/superscript style
-    MS_SCRIPTSCRIPT = 3; // double-tiny style
+    MS_TEXT = 1,         // inline text style
+    MS_SCRIPT = 2,       // small sub/superscript style
+    MS_SCRIPTSCRIPT = 3; // tiny style
 
 var ms_names = ['display', 'text', 'script', 'scriptscript'];
+var ms_sup_style = [MS_SCRIPT, MS_SCRIPT, MS_SCRIPTSCRIPT, MS_SCRIPTSCRIPT];
 
 // Math atom types. Single mathchars can produce nodes of the first 7 types.
 // I offset the types so that they don't clash with LT_* types.

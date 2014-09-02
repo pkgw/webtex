@@ -194,7 +194,75 @@ var mathlib = (function mathlib_closure () {
 	return atom;
     };
 
+    ml.scan_math = function mathlib_scan_math (engine, callback) {
+	// T:TP 1151
+	var tok = null;
+
+	while (true) {
+	    tok = engine.next_x_tok_throw ();
+	    if (!tok.isspace (engine) && !tok.iscmd (engine, 'relax'))
+		break;
+	}
+
+	var cmd = tok.tocmd (engine);
+	var c = null;
+	var check_active = false;
+
+	if (cmd instanceof InsertLetterCommand || cmd instanceof InsertOtherCommand ||
+	    cmd instanceof GivenCharCommand) {
+	    c = engine.get_code (CT_MATH, cmd.ord);
+	    check_active = true;
+	} else if (cmd instanceof GivenMathcharCommand) {
+	    c = engine.mathchar;
+	} else if (cmd.samecmd (engine.commands['char'])) {
+	    c = engine.get_code (CT_MATH, engine.scan_char_code ());
+	    check_active = true;
+	} else if (cmd.samecmd (engine.commands['mathchar'])) {
+	    c = engine.scan_int_15bit ();
+	} else if (cmd) {
+	    // delim
+	}
+
+	if (check_active && c == 0x8000) {
+	    // Treat as active character. Right semantics here?
+	    cmd = engine.get_active (ord);
+	    if (cmd == null)
+		throw new TexRuntimeError ('mathcode ' + mathcode + 'implies active ' +
+					       'character but it isn\'t');
+	    engine.push (Token.new_cmd (cmd));
+	    ml.scan_math (engine, callback);
+	    return;
+	}
+
+	if (c != null) {
+	    var ord = c & 0xFF;
+	    var fam = (c >> 8) % 16;
+
+	    if (c >= 0x7000) {
+		var cf = engine.get_parameter (T_INT, 'fam');
+		if (cf >= 0 && cf <= 15)
+		    fam = cf;
+	    }
+
+	    callback (engine, new MathChar (fam, ord));
+	    return;
+	}
+
+	// If we got here, we must see a brace-enclosed subformula.
+
+	engine.push (tok);
+	engine.scan_left_brace ();
+	engine.nest_eqtb ();
+	engine.enter_mode (M_MATH);
+	engine.group_exit_stack.push ([function (eng) {
+	    var list = eng.leave_mode ();
+	    eng.unnest_eqtb ();
+	    callback (eng, list);
+	}, []]);
+    };
+
     var SymDimens = {
+	MathXHeight: 5,
 	MathQuad: 6,
 	Num1: 8, // note: no #7
 	Num2: 9,
@@ -211,6 +279,15 @@ var mathlib = (function mathlib_closure () {
 	Delim1: 20,
 	Delim2: 21,
 	AxisHeight: 22,
+    };
+
+    var ExtDimens = {
+	DefaultRuleThickness: 8,
+	BigOpSpacing1: 9,
+	BigOpSpacing2: 10,
+	BigOpSpacing3: 11,
+	BigOpSpacing4: 12,
+	BigOpSpacing5: 13,
     };
 
     var MathState = (function MathState_closure () {
@@ -231,7 +308,13 @@ var mathlib = (function mathlib_closure () {
 	    var f = this.engine.get_font_family (size, 2);
 	    if (f == null)
 		throw new TexRuntimeError ('need math symbol fontdimen but no symbol font defined');
+	    return f.get_dimen (number);
+	};
 
+	proto.ext_dimen = function MathState_ext_dimen (number) {
+	    var f = this.engine.get_font_family (this.size, 2);
+	    if (f == null)
+		throw new TexRuntimeError ('need math ext fontdimen but no ext font defined');
 	    return f.get_dimen (number);
 	};
 
@@ -253,6 +336,19 @@ var mathlib = (function mathlib_closure () {
 
 	proto.clone = function MathState_clone () {
 	    return new MathState (this.engine, this.style, this.cramped);
+	};
+
+	proto.superscript = function MathState_superscript () {
+	    var res = this.clone ();
+	    res.style = ms_sup_style[res.style];
+	    return res;
+	};
+
+	proto.subscript = function MathState_subscript () {
+	    var res = this.clone ();
+	    res.style = ms_sup_style[res.style];
+	    res.cramped = true;
+	    return res;
 	};
 
 	return MathState;
@@ -297,6 +393,115 @@ var mathlib = (function mathlib_closure () {
 	}
 
 	return b;
+    }
+
+    function clean_box (engine, state, p) {
+	var cur_mlist = null;
+	var q = null;
+	var x = null;
+
+	if (p instanceof MathChar) {
+	    cur_mlist = [new AtomNode (MT_ORD)];
+	    cur_mlist[0].nuc = p;
+	} else if (p instanceof ListBox) {
+	    q = p.list;
+	} else if (p instanceof Array) {
+	    cur_mlist = p;
+	} else {
+	    q = [];
+	}
+
+	if (cur_mlist != null)
+	    q = ml.mlist_to_hlist (engine, cur_mlist, state.style, state.cramped, false);
+
+	if (q.length == 0 || q[0] instanceof Character)
+	    x = hpack_natural (engine, q);
+	else if (q.length == 1 && q[0] instanceof ListBox && !q.shift_amount.is_nonzero ())
+	    x = q;
+	else {
+	    x = hpack_natural (engine, q);
+	    if (x.list.length == 2 && x[0] instanceof Character && x[1] instanceof Kern)
+		x.list = [x.list[0]];
+	}
+
+	return x;
+    }
+
+    function make_scripts (engine, state, q, delta) {
+	// T:TP 756
+	var p = q.new_hlist;
+	var shift_up = 0;
+	var shift_down = 0;
+	var t = 0;
+	var clr = 0;
+	var mxh = state.sym_dimen (state.size, SymDimens.MathXHeight).sp.value;
+
+	if (!(p[0] instanceof Character)) {
+	    var z = hpack_natural (engine, p);
+	    if (state.style == MS_DISPLAY || state.style == MS_TEXT)
+		t = MS_SCRIPT;
+	    else
+		t = MS_SCRIPTSCRIPT;
+
+	    shift_up = z.height.sp.value - state.sym_dimen (t, SymDimens.SupDrop).sp.value;
+	    shift_down = z.depth.sp.value + state.sym_dimen (t, SymDimens.SubDrop).sp.value;
+	}
+
+	if (q.sup == null) {
+	    // We're only called if there's a script, so sub most be non-null.
+	    var x = clean_box (engine, state.subscript (), q.sub);
+	    x.width.advance (engine.get_parameter (T_DIMEN, 'scriptspace'));
+
+	    clr = x.height.sp.value - Math.abs (mxh * 4) / 5;
+	    var sub1 = state.sym_dimen (state.size, SymDimens.Sub1).sp.value;
+	    x.shift_amount.sp.value = Math.max (shift_down, clr, sub1);
+	} else {
+	    var x = clean_box (engine, state.superscript (), q.sup);
+	    x.width.advance (engine.get_parameter (T_DIMEN, 'scriptspace'));
+
+	    if (state.cramped)
+		clr = state.sym_dimen (state.size, SymDimens.Sup3).sp.value;
+	    else if (state.style == MS_DISPLAY)
+		clr = state.sym_dimen (state.size, SymDimens.Sup1).sp.value;
+	    else
+		clr = state.sym_dimen (state.size, SymDimens.Sup2).sp.value;
+
+	    shift_up = Math.max (shift_up, clr);
+	    clr = x.depth.sp.value + Math.abs (mxh) / 4
+	    shift_up = Math.max (shift_up, clr);
+
+	    if (q.sub == null)
+		x.shift_amount.sp.value = -shift_up
+	    else {
+		var y = clean_box (engine, state.subscript (), q.sub);
+		y.width.advance (engine.get_parameter (T_DIMEN, 'scriptspace'));
+
+		shift_down = max (shift_down,
+				  state.sym_dimen (state.size, SymDimens.Sub2).sp.value);
+
+		clr = 4 * state.ext_dimen (ExtDimens.DefaultRuleThickness).sp.value;
+		clr -= (shift_up - x.depth.sp.value) - (y.height.sp.value - shift_down);
+		if (clr > 0) {
+		    shift_down += clr;
+		    clr = Math.abs (mxh * 4) / 5 - (shift_up - x.depth.sp.value);
+		    if (clr > 0) {
+			shift_up += clr;
+			shift_down -= clr;
+		    }
+		}
+
+		x.shift_amount.sp.value = delta;
+		var k = new Kern (Dimen.new_scaled ((shift_up - x.depth.sp.value) -
+						    (y.height.sp.value - shift_down)));
+		x = vpack_natural ([x, k, y]);
+		x.shift_amount.sp.value = shift_down;
+	    }
+	}
+
+	if (q.new_hlist == null)
+	    q.new_hlist = [x];
+	else
+	    q.new_hlist.push (x);
     }
 
     ml.mlist_to_hlist = function mlist_to_hlist (engine, mlist, style, cramped, penalties) {
@@ -403,7 +608,7 @@ var mathlib = (function mathlib_closure () {
 	    } else if (q.nuc instanceof Array) {
 		var sublist = mlist_to_hlist (engine, q.nuc, state.style,
 					      state.cramped, false);
-		p = [hpack_natural (sublist)]; // XXX
+		p = [hpack_natural (sublist)];
 	    } else {
 		throw new TexInternalError ('unrecognized nucleus value ' + q.nuc);
 	    }
@@ -411,7 +616,7 @@ var mathlib = (function mathlib_closure () {
 	    q.new_hlist = p;
 
 	    if (q.sub != null || q.sup != null)
-		make_scripts (q, delta);
+		make_scripts (engine, state, q, delta);
 
 	    var z = hpack_natural (q.new_hlist);
 	    max_h = Math.max (max_h, z.height);
