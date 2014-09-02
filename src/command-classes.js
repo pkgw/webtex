@@ -651,7 +651,12 @@ var SpacerCommand = (function SpacerCommand_closure () {
     proto.invoke = function Spacer_invoke (engine) {
 	// T:TP 1041-1044.
 	if (engine.mode () == M_VERT || engine.mode () == M_IVERT) {
-	    engine.trace ('spacer: ignored, vertical model');
+	    engine.trace ('spacer: ignored, vertical mode');
+	    return;
+	}
+
+	if (engine.mode () == M_MATH || engine.mode () == M_DMATH) {
+	    engine.trace ('spacer: ignored, math mode');
 	    return;
 	}
 
@@ -667,19 +672,16 @@ var SpacerCommand = (function SpacerCommand_closure () {
 	    else if (ss.is_nonzero ())
 		g = ss;
 	    else {
-		// TODO: real font glue dimensions, with scaling by
-		// spacefactor. Not a priority since I don't think these will
-		// matter in normal operation.
 		var g = new Glue ();
-		g.width.sp = Scaled.new_from_parts (12, 0);
-
+		var f = engine.get_misc ('cur_font');
+		g.width = f.get_dimen (2);
+		g.stretch = f.get_dimen (3);
+		g.shrink = f.get_dimen (4);
 		if (sf >= 2000)
-		    g.width.sp = Scaled.new_from_parts (16, 0);
+		    g.width.sp = f.get_dimen (7);
+		g.stretch.sp = g.stretch.sp.times_n_over_d (sf, 1000)[0];
+		g.shrink.sp = g.shrink.sp.times_n_over_d (1000, sf)[0];
 	    }
-	} else {
-	    engine.trace ('spacer: math mode, TODO.');
-	    // throw since we need to set 'g' somehow.
-	    throw new TexRuntimeError ('math space unimpl');
 	}
 
 	engine.accum (new BoxGlue (g));
