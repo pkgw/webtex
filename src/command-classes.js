@@ -662,7 +662,7 @@ var SpacerCommand = (function SpacerCommand_closure () {
 
 	if (engine.mode () == M_HORZ || engine.mode () == M_RHORZ) {
 	    engine.trace ('spacer: h mode, accumed.');
-	    var sf = engine.get_special_value (T_INT, 'spacefactor');
+	    var sf = engine.get_special_value (T_INT, 'spacefactor').value;
 	    var xs = engine.get_parameter (T_GLUE, 'xspaceskip');
 	    var ss = engine.get_parameter (T_GLUE, 'spaceskip');
 	    var g = null;
@@ -674,13 +674,14 @@ var SpacerCommand = (function SpacerCommand_closure () {
 	    else {
 		var g = new Glue ();
 		var f = engine.get_misc ('cur_font');
-		g.width = f.get_dimen (2);
-		g.stretch = f.get_dimen (3);
-		g.shrink = f.get_dimen (4);
 		if (sf >= 2000)
-		    g.width.sp = f.get_dimen (7);
-		g.stretch.sp = g.stretch.sp.times_n_over_d (sf, 1000)[0];
-		g.shrink.sp = g.shrink.sp.times_n_over_d (1000, sf)[0];
+		    g.width.set_to (f.get_dimen (7));
+		else
+		    g.width.set_to (f.get_dimen (2));
+		g.stretch.set_to (f.get_dimen (3));
+		g.shrink.set_to (f.get_dimen (4));
+		g.stretch.set_to (g.stretch.sp.times_n_over_d (sf, 1000)[0]);
+		g.shrink.set_to (g.shrink.sp.times_n_over_d (1000, sf)[0]);
 	    }
 	}
 

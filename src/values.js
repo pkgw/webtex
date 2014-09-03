@@ -525,10 +525,13 @@ var Dimen = (function Dimen_closure () {
 	return this.sp.is_nonzero ();
     };
 
-    proto.set_to = function Dimen_set_to (sp) {
-	if (!(sp instanceof Scaled))
-	    throw new TexInternalError ('expected Scaled value, got ' + sp);
-	this.sp = sp;
+    proto.set_to = function Dimen_set_to (val) {
+	if (val instanceof Scaled)
+	    this.sp = val;
+	else if (val instanceof Dimen)
+	    this.sp = val.sp;
+	else
+	    throw new TexInternalError ('expected Scaled or Dimen value, got ' + val);
 	return this;
     };
 
