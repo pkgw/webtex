@@ -92,6 +92,13 @@ var MathChar = (function MathChar_closure () {
 	this.fam = fam;
 	this.ord = ord;
     }
+
+    var proto = MathChar.prototype;
+
+    proto.as_text_char = function MathChar_as_text_char () {
+	return new MathTextChar (this.fam, this.ord);
+    };
+
     return MathChar;
 }) ();
 
@@ -101,6 +108,13 @@ var MathTextChar = (function MathTextChar_closure () {
 	this.fam = fam;
 	this.ord = ord;
     }
+
+    var proto = MathTextChar.prototype;
+
+    proto.as_plain_char = function MathTextChar_as_plain_char () {
+	return new MathChar (this.fam, this.ord);
+    };
+
     return MathTextChar;
 }) ();
 
@@ -469,34 +483,104 @@ var mathlib = (function mathlib_closure () {
 	return MathState;
     }) ();
 
-    function make_ord (q, next) {
-	if (q.sub != null || q.sup != null)
-	    return;
-	if (!(q.nuc instanceof MathChar))
-	    return;
-	if (next == null)
-	    return;
+    function make_ord (state, mlist, i) {
+	var q = mlist[i];
 
-	switch (next.ltype) {
-	case MT_ORD:
-	case MT_OP:
-	case MT_BIN:
-	case MT_REL:
-	case MT_OPEN:
-	case MT_CLOSE:
-	case MT_PUNCT:
-	    break;
-	default:
-	    return;
+	outer: while (true) {
+	    if (q.sub != null || q.sup != null)
+		return;
+	    if (!(q.nuc instanceof MathChar))
+		return;
+
+	    if (i == mlist.length - 1)
+		return;
+
+	    var p = mlist[i+1];
+
+	    switch (p.ltype) {
+	    case MT_ORD:
+	    case MT_OP:
+	    case MT_BIN:
+	    case MT_REL:
+	    case MT_OPEN:
+	    case MT_CLOSE:
+	    case MT_PUNCT:
+		break;
+	    default:
+		return;
+	    }
+
+	    if (!(p.nuc instanceof MathChar))
+		return;
+
+	    if (p.nuc.fam != q.nuc.fam)
+		return;
+
+	    q.nuc = q.nuc.as_text_char ();
+	    var f = state.font (q.nuc.fam);
+	    var m = f.get_metrics ();
+	    if (!m.is_lig (q.nuc.ord))
+		return;
+
+	    var lk = m.ligkern;
+	    var ofs = m.rembyte (q.nuc.ord)
+	    var data = lk[ofs];
+
+	    if (((data >> 24) & 0xFF) > 0x80) { // skip_byte > stop_flag?
+		ofs = 256 * ((data >> 8) & 0xFF) + (data & 0xFF); // op_byte, rem_byte
+		data = lk[ofs];
+	    }
+
+	    while (true) {
+		if (((data >> 16) & 0xFF) == p.nuc.ord) { // next_char matches?
+		    if (((data >> 24) & 0xFF) <= 0x80) { // skip_byte <= stop_flag?
+			var op = ((data >> 8) & 0xFF);
+
+			if (op >= 0x80) { // op_byte >= kern_flag?
+			    var k = 256 * op + (data & 0xFF); // op_byte, rem_byte
+			    mlist.splice (i + 1, 0, new Kern (Dimen.new_scaled (k)));
+			} else {
+			    switch (op) {
+			    case 1: case 5:
+				q.nuc.ord = data & 0xFF; // rem_byte
+				break;
+			    case 2: case 6:
+				p.nuc.ord = data & 0xFF; // rem_byte
+				break;
+			    case 3: case 7: case 11:
+				var r = new AtomNode ();
+				if (op < 11)
+				    r.nuc = new MathChar (q.nuc.fam,
+							  data & 0xFF); // rem_byte
+				else
+				    r.nuc = new MathTextChar (q.nuc.fam,
+							      data & 0xFF); // rem_byte
+				mlist.splice (i + 1, 0, r);
+				break;
+			    default:
+				mlist.splice (i + 1, 1);
+				q.nuc.ord = data & 0xFF; // rem_byte
+				q.sub = p.sub;
+				q.sup = p.sup;
+				break;
+			    }
+
+			    if (op > q)
+				return;
+			    if (q.nuc instanceof MathTextChar)
+				q.nuc = q.nuc.as_plain_char ();
+			    continue outer;
+			}
+		    }
+		}
+
+		if (((data >> 24) & 0xFF) > 0x80) // skip_byte > stop_flag?
+		    return;
+
+		ofs += ((data >> 24) & 0xFF) + 1; // ofs += skip_byte + 1
+		data = lk[ofs];
+	    }
 	}
-
-	if (!(next.nuc instanceof MathChar))
-	    return;
-
-	if (next.nuc.fam != q.nuc.fam)
-	    return;
-
-	throw new TexInternalError ('implement make_ord');
     }
 
     function hpack_natural (engine, hlist) {
@@ -721,6 +805,8 @@ var mathlib = (function mathlib_closure () {
 	    }
 
 	    switch (q.ltype) {
+	    case MT_BIN:
+		break;
 	    case MT_REL:
 	    case MT_CLOSE:
 	    case MT_PUNCT:
@@ -736,10 +822,7 @@ var mathlib = (function mathlib_closure () {
 		// XXX goto done_with_noad
 		break;
 	    case MT_ORD:
-		var next = null;
-		if (i < m_len)
-		    next = mlist[i+1];
-		make_ord (q, next);
+		make_ord (state, mlist, i);
 		break;
 	    case MT_OP:
 		delta = make_op (state, q);

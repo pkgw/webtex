@@ -10,6 +10,11 @@ var TfmReader = WEBTEX.TfmReader = (function TfmReader_closure () {
 	return a / b >> 0; // XXX: C&P from values.js
     }
 
+    var TAG_NONE = 0,
+        TAG_LIG = 1,
+        TAG_LIST = 2,
+        TAG_EXT = 3;
+
     function prep_fix_word_math (z) {
 	// T:TP 572
 	var alpha = 16;
@@ -85,6 +90,8 @@ var TfmReader = WEBTEX.TfmReader = (function TfmReader_closure () {
 	this.ord_heights = new Array (256);
 	this.ord_depths = new Array (256);
 	this.ord_ics = new Array (256);
+	this.ord_tags = new Array (256);
+	this.ord_rembytes = new Array (256);
 	this.font_dimens = [];
 
 	//this.ord_tags = new Array (256); cf. T:TP 544.
@@ -139,6 +146,10 @@ var TfmReader = WEBTEX.TfmReader = (function TfmReader_closure () {
 	for (var i = 0; i < num_ics; i++)
 	    ics[i] = this.fw2s (dv.getUint32 (ic_ofs + 4 * i, false));
 
+	this.ligkern = new Array (num_lks);
+	for (var i = 0; i < num_lks; i++)
+	    this.ligkern[i] = dv.getUint32 (lk_ofs + 4 * i, false);
+
 	widths[0] = null; // TeX defines wd=0 to always mean invalid character.
 
 	// Read in the character data.
@@ -159,7 +170,10 @@ var TfmReader = WEBTEX.TfmReader = (function TfmReader_closure () {
 	    this.ord_ics[first_code + i] = ics[idx];
 
 	    idx = (x >>  8) & 0x03; // tag
+	    this.ord_tags[first_code + i] = idx;
+
 	    idx = x & 0xFF; // remainder
+	    this.ord_rembytes[first_code + i] = idx;
 	}
 
 	// Font dimens. The zeroth parameter is the italic slant and should
@@ -184,6 +198,14 @@ var TfmReader = WEBTEX.TfmReader = (function TfmReader_closure () {
 	if (ord > this.last_code)
 	    return false;
 	return this.ord_widths[ord] != null;
+    };
+
+    proto.is_lig = function TfmReader_is_lig (ord) {
+	return this.ord_tags[ord] == TAG_LIG;
+    };
+
+    proto.rembyte = function TfmReader_is_lig (ord) {
+	return this.ord_rembytes[ord];
     };
 
     proto.width = function TfmReader_width (ord) {
