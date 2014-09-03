@@ -942,6 +942,10 @@ var Font = (function Font_closure () {
 	if (this.dimens === NeedMoreData)
 	    throw NeedMoreData;
 
+	if (this.dimens == null)
+	    // nullfont case
+	    return new Dimen ();
+
 	// TeX font dimens are 1-based; we offset.
 	if (number > this.dimens.length)
 	    throw new TexRuntimeError ('undefined fontdimen #' + number + ' for ' + this);
