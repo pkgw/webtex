@@ -6,6 +6,11 @@
 
 'use strict';
 
+var LIMTYPE_NORMAL = 0, // <- limits-style or not depending on context
+    LIMTYPE_LIMITS = 1,
+    LIMTYPE_NOLIMITS = 2;
+
+
 var Delimiter = (function Delimiter_closure () {
     function Delimiter () {
 	this.small_fam = null;
@@ -30,6 +35,10 @@ var MathNode = (function MathNode_closure () {
     // vertical list.
     function MathNode (ltype) {
 	this.ltype = ltype;
+
+	// Blah too lazy to subclass just for this
+	if (ltype == MT_OP)
+	    this.limtype = LIMTYPE_NORMAL;
     }
 
     inherit (MathNode, Listable);
@@ -392,6 +401,10 @@ var mathlib = (function mathlib_closure () {
 	BigOpSpacing5: 13,
     };
 
+    function half (x) {
+	return (x + 1) >> 1;
+    }
+
     var MathState = (function MathState_closure () {
 	function MathState (engine, style, cramped) {
 	    this.engine = engine;
@@ -483,7 +496,7 @@ var mathlib = (function mathlib_closure () {
 	if (next.nuc.fam != q.nuc.fam)
 	    return;
 
-	throw TexInternalError ('implement make_ord');
+	throw new TexInternalError ('implement make_ord');
     }
 
     function hpack_natural (engine, hlist) {
@@ -497,7 +510,7 @@ var mathlib = (function mathlib_closure () {
 	return b;
     }
 
-    function clean_box (engine, state, p) {
+    function clean_box (state, p) {
 	var cur_mlist = null;
 	var q = null;
 	var x = null;
@@ -514,19 +527,89 @@ var mathlib = (function mathlib_closure () {
 	}
 
 	if (cur_mlist != null)
-	    q = ml.mlist_to_hlist (engine, cur_mlist, state.style, state.cramped, false);
+	    q = ml.mlist_to_hlist (state.engine, cur_mlist, state.style, state.cramped, false);
 
 	if (q.length == 0 || q[0] instanceof Character)
-	    x = hpack_natural (engine, q);
+	    x = hpack_natural (state.engine, q);
 	else if (q.length == 1 && q[0] instanceof ListBox && !q.shift_amount.is_nonzero ())
 	    x = q;
 	else {
-	    x = hpack_natural (engine, q);
+	    x = hpack_natural (state.engine, q);
 	    if (x.list.length == 2 && x[0] instanceof Character && x[1] instanceof Kern)
 		x.list = [x.list[0]];
 	}
 
 	return x;
+    }
+
+    function make_op (state, q) {
+	var delta;
+
+	if (q.limtype == LIMTYPE_NORMAL && state.style == MS_DISPLAY)
+	    q.limtype = LIMTYPE_LIMITS;
+
+	if (!(q.nuc instanceof MathChar))
+	    delta = 0;
+	else {
+	    // XXX skipping list-tag char stuff
+	    var f = state.font (q.nuc.fam);
+	    var m = f.get_metrics ();
+	    delta = m.italic_correction (q.nuc.ord);
+	    var x = clean_box (state, q.nuc);
+
+	    if (q.sub != null && q.limtype != LIMTYPE_LIMITS)
+		x.width.sp.value -= delta // remove italic correction
+
+	    x.shift_amount.sp.value = half ((x.height.sp.value - x.depth.sp.value)
+					    - state.sym_dimen (state.size, SymDimens.AxisHeight));
+	    q.nuc = x;
+	}
+
+	if (q.limtype != LIMTYPE_LIMITS)
+	    return delta;
+
+	var x = clean_box (state.superscript (), q.sup);
+	var y = clean_box (state, q.nuc);
+	var z = clean_box (state.subscript (), q.sub);
+	var v = new VBox ();
+	v.width.sp.value = Math.max (x.width.sp.value, y.width.sp.value, z.width.sp.value);
+
+	x = rebox (x, v.width.sp.value);
+	y = rebox (y, v.width.sp.value);
+	z = rebox (z, v.width.sp.value);
+	x.shift_amount.sp.value = half (delta);
+	z.shift_amount.sp.value = -x.shift_amount.sp.value;
+	v.height = y.height.clone ();
+	v.depth = y.height.clone ();
+
+	if (q.sup == null) {
+	    v.list = [y];
+	} else {
+	    var shift_up = state.ext_dimen (ExtDimens.BigOpSpacing3).sp.value - x.depth.sp.value;
+	    shift_up = Math.max (shift_up, state.ext_dimen (ExtDimens.BigOpSpacing1).sp.value);
+	    var k1 = new Kern (Dimen.new_scaled (shift_up));
+	    var k2 = new Kern (state.ext_dimen (ExtDimens.BigOpSpacing5));
+	    v.list = [k2, x, k1, y];
+	    v.height.advance (state.ext_dimen (ExtDimens.BigOpSpacing5));
+	    v.height.advance (x.height);
+	    v.height.advance (x.depth);
+	    v.height.sp.value += shift_up;
+	}
+
+	if (q.sub != null) {
+	    var shift_down = state.ext_dimen (ExtDimens.BigOpSpacing4).sp.value - z.height.sp.value;
+	    shift_down = Math.max (shift_down, state.ext_dimen (ExtDimens.BigOpSpacing2).sp.value);
+	    var k1 = new Kern (Dimen.new_scaled (shift_down));
+	    var k2 = new Kern (state.ext_dimen (ExtDimens.BigOpSpacing5));
+	    v.list = v.list.concat ([k1, z, k2]);
+	    v.height.advance (state.ext_dimen (ExtDimens.BigOpSpacing5));
+	    v.height.advance (z.height);
+	    v.height.advance (z.depth);
+	    v.height.sp.value += shift_down;
+	}
+
+	q.new_hlist = v;
+	return delta;
     }
 
     function make_scripts (engine, state, q, delta) {
@@ -551,14 +634,14 @@ var mathlib = (function mathlib_closure () {
 
 	if (q.sup == null) {
 	    // We're only called if there's a script, so sub most be non-null.
-	    var x = clean_box (engine, state.subscript (), q.sub);
+	    var x = clean_box (state.subscript (), q.sub);
 	    x.width.advance (engine.get_parameter (T_DIMEN, 'scriptspace'));
 
 	    clr = x.height.sp.value - Math.abs (mxh * 4) / 5;
 	    var sub1 = state.sym_dimen (state.size, SymDimens.Sub1).sp.value;
 	    x.shift_amount.sp.value = Math.max (shift_down, clr, sub1);
 	} else {
-	    var x = clean_box (engine, state.superscript (), q.sup);
+	    var x = clean_box (state.superscript (), q.sup);
 	    x.width.advance (engine.get_parameter (T_DIMEN, 'scriptspace'));
 
 	    if (state.cramped)
@@ -575,7 +658,7 @@ var mathlib = (function mathlib_closure () {
 	    if (q.sub == null)
 		x.shift_amount.sp.value = -shift_up
 	    else {
-		var y = clean_box (engine, state.subscript (), q.sub);
+		var y = clean_box (state.subscript (), q.sub);
 		y.width.advance (engine.get_parameter (T_DIMEN, 'scriptspace'));
 
 		shift_down = max (shift_down,
@@ -658,8 +741,10 @@ var mathlib = (function mathlib_closure () {
 		    next = mlist[i+1];
 		make_ord (q, next);
 		break;
-	    case MT_FRACTION:
 	    case MT_OP:
+		delta = make_op (state, q);
+		break;
+	    case MT_FRACTION:
 	    case MT_OPEN:
 	    case MT_INNER:
 	    case MT_RADICAL:
@@ -705,7 +790,7 @@ var mathlib = (function mathlib_closure () {
 		}
 	    } else if (q.nuc == null) {
 		p = null;
-	    } else if (q.nuc instanceof Box) {
+	    } else if (q.nuc instanceof ListBox) {
 		p = [q.nuc];
 	    } else if (q.nuc instanceof Array) {
 		var sublist = mlist_to_hlist (engine, q.nuc, state.style,
