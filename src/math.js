@@ -705,7 +705,7 @@ var mathlib = (function mathlib_closure () {
 	var clr = 0;
 	var mxh = state.sym_dimen (state.size, SymDimens.MathXHeight).sp.value;
 
-	if (!(p[0] instanceof Character)) {
+	if (p == null || !(p[0] instanceof Character)) {
 	    var z = hpack_natural (engine, p);
 	    if (state.style == MS_DISPLAY || state.style == MS_TEXT)
 		t = MS_SCRIPT;
