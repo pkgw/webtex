@@ -231,9 +231,9 @@ var TfmReader = WEBTEX.TfmReader = (function TfmReader_closure () {
 	}
 
 	var rv = new Character (font, ord);
-	rv.width.sp = this.ord_widths[ord];
-	rv.height.sp = this.ord_heights[ord];
-	rv.depth.sp = this.ord_depths[ord];
+	rv.width.set_to (this.ord_widths[ord]);
+	rv.height.set_to (this.ord_heights[ord]);
+	rv.depth.set_to (this.ord_depths[ord]);
 	return rv;
     };
 

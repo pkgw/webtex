@@ -476,6 +476,9 @@ var Dimen = (function Dimen_closure () {
     var proto = Dimen.prototype;
 
     Dimen.new_scaled = function Dimen_new_scaled (sp) {
+	if (!(sp instanceof Scaled))
+	    throw new TexInternalError ('expected Scaled value, got ' + sp);
+
 	var d = new Dimen ();
 	d.sp = sp;
 	return d;
@@ -522,6 +525,13 @@ var Dimen = (function Dimen_closure () {
 	return this.sp.is_nonzero ();
     };
 
+    proto.set_to = function Dimen_set_to (sp) {
+	if (!(sp instanceof Scaled))
+	    throw new TexInternalError ('expected Scaled value, got ' + sp);
+	this.sp = sp;
+	return this;
+    };
+
     proto.as_int = function Dimen_as_int () {
 	return this.sp.as_int ();
     };
@@ -544,27 +554,27 @@ var Dimen = (function Dimen_closure () {
 
     Dimen.deserialize = function Dimen_deserialize (data) {
 	var d = new Dimen ();
-	d.sp = Scaled.deserialize (data);
+	d.set_to (Scaled.deserialize (data));
 	return d;
     };
 
     proto.advance = function Dimen_advance (other) {
 	var d = new Dimen ();
-	d.sp = d.sp.advance (other.as_scaled ());
+	d.set_to (d.sp.advance (other.as_scaled ()));
 	return d;
     };
 
     proto.intproduct = function Dimen_intproduct (k) {
 	k = TexInt.xcheck (k);
 	var d = new Dimen ();
-	d.sp = this.sp.intproduct (k);
+	d.set_to (this.sp.intproduct (k));
 	return d;
     };
 
     proto.intdivide = function Dimen_intdivide (k) {
 	k = TexInt.xcheck (k);
 	var d = this.clone ();
-	d.sp = this.sp.intdivide (k);
+	d.set_to (this.sp.intdivide (k));
 	return d;
     };
 
@@ -875,7 +885,7 @@ var Font = (function Font_closure () {
 		this.dimens = [];
 		for (var i = 0; i < this.metrics.font_dimens.length; i++) {
 		    this.dimens.push (new Dimen ());
-		    this.dimens[i].sp = this.metrics.font_dimens[i];
+		    this.dimens[i].set_to (this.metrics.font_dimens[i]);
 		}
 	    }.bind (this))['catch'] (function (err) { // <- crazy call for YUI JS minifier
 		// Throwing err does nothing here. We have to stash it.

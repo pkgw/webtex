@@ -964,7 +964,7 @@ var Engine = (function Engine_closure () {
 	    this.accum (hb);
 
 	    var g = new Glue ();
-	    g.stretch.sp = Scaled.new_from_parts (1, 0);
+	    g.stretch.set_to (Scaled.new_from_parts (1, 0));
 	    g.stretch_order = 2;
 	    this.accum (new BoxGlue (g));
 
