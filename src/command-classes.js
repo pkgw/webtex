@@ -573,7 +573,7 @@ var SuperCommand = (function SuperCommand_closure () {
 	}
 
 	if (prev == null) {
-	    prev = AtomNode (MT_ORD);
+	    prev = new AtomNode (MT_ORD);
 	    engine.accum (prev);
 	}
 
@@ -618,7 +618,7 @@ var SubCommand = (function SubCommand_closure () {
 	}
 
 	if (prev == null) {
-	    prev = AtomNode (MT_ORD);
+	    prev = new AtomNode (MT_ORD);
 	    engine.accum (prev);
 	}
 
