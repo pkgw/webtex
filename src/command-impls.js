@@ -9,9 +9,12 @@ commands.par = function cmd_par (engine) {
     var m = engine.mode ();
 
     if (m == M_VERT || m == M_IVERT) {
-	// Should exercise page builder and reset paragraph shape params
-	// (TeXBook p. 283).
-	engine.trace ('par: vertical -> [bad noop]');
+	// T:TP 1070
+	engine.trace ('par: vertical -> reset params');
+	engine.set_parameter (T_INT, 'looseness', 0);
+	engine.set_parameter (T_DIMEN, 'hangindent', new Dimen ());
+	engine.set_parameter (T_INT, 'hangafter', 1);
+	// TODO: clear \parshape info, which nests in the EqTb.
     } else if (m == M_RHORZ) {
 	engine.trace ('par: rhorz -> noop');
     } else if (m == M_HORZ) {
