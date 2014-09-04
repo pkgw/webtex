@@ -1813,7 +1813,7 @@ var Engine = (function Engine_closure () {
 		this.conditional_stack.push (mode);
 		tok.tocmd (this).invoke (this);
 	    } else {
-		throw new TexInternalError ('mis-nested condition guards?');
+		throw new TexInternalError ('mis-nested condition guards? ' + tok);
 	    }
 	}
     };
@@ -1980,7 +1980,7 @@ var Engine = (function Engine_closure () {
     // Text box construction
 
     proto.scan_box = function Engine_scan_box (callback, is_assignment) {
-	var tok = null;
+	var tok = null; // T:TP 404 -- next non-blank non-relax non-call token:
 
 	while (true) {
 	    tok = this.next_x_tok_throw ();
