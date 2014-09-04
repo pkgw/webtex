@@ -1798,22 +1798,28 @@ var Engine = (function Engine_closure () {
 		return;
 
 	    // This can legally happen if there was an \if inside the
-	    // condition that is almost done parsing but hasn't quite wrapped
-	    // up, e.g.:
-	    //    \ifcase \iftrue1 \fi \else ... \fi
+	    // condition that hasn't wrapped up, e.g.:
+	    //    \ifcase \iftrue1 \else blah \fi \else ... \fi
 	    // parse_int will stop before the \fi, so that a CS_ELSE_FI will
-	    // still be on conditional_stack. Everything will be all right if we just
-	    // eat the \fi.
+	    // still be on conditional_stack.
 	    //
-	    // This solution feels pretty hacky but we'll see whether it
-	    // spirals out of control on us or not.
+	    // We need to just eat up any \ifs that are above us on the stack.
+	    // I'm a little scared by this but it seems to be what we're supposed
+	    // to do: T:TP 500.
 
-	    var tok = this.next_tok_throw ();
-	    if (tok.iscmd (this, 'else') || tok.iscmd (this, 'fi') || tok.iscmd (this, 'or')) {
-		this.conditional_stack.push (mode);
-		tok.tocmd (this).invoke (this);
-	    } else {
-		throw new TexInternalError ('mis-nested condition guards? ' + tok);
+	    var depth = 0;
+
+	    while (true) {
+		var tok = this.next_tok_throw ();
+
+		if (tok.iscmd (this, 'fi')) {
+		    if (depth > 0)
+			depth -= 1;
+		    else
+			break;
+		} else if (tok.isconditional (this)) {
+		    depth += 1;
+		}
 	    }
 	}
     };
@@ -1921,7 +1927,7 @@ var Engine = (function Engine_closure () {
 	    // We were parsing the condition of the \ifcase and it involved
 	    // some kind of open-ended expanding parsing that made it out to
 	    // this \or. TeX inserts a \relax in this case to stop the
-	    // expansion.
+	    // expansion. T:TP 495.
 	    this.push_toks ([Token.new_cmd (this.commands['relax']),
 			     Token.new_cmd (this.commands['or'])]);
 	    this.conditional_stack.push (mode);
