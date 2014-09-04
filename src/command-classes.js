@@ -421,6 +421,7 @@ var BeginGroupCommand = (function BeginGroupCommand_closure () {
     proto.desc = 'begin-group character';
 
     proto.invoke = function BeginGroupCommand_invoke (engine) {
+	engine.trace ('explicit bgroup');
 	engine.handle_bgroup ();
     };
 
@@ -444,6 +445,7 @@ var EndGroupCommand = (function EndGroupCommand_closure () {
     proto.desc = 'end-group character';
 
     proto.invoke = function EndGroupCommand_invoke (engine) {
+	engine.trace ('explicit egroup');
 	engine.handle_egroup ();
     };
 

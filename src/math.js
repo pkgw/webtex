@@ -379,11 +379,11 @@ var mathlib = (function mathlib_closure () {
 	engine.scan_left_brace ();
 	engine.nest_eqtb ();
 	engine.enter_mode (M_MATH);
-	engine.group_exit_stack.push ([function (eng) {
+	engine.enter_group ('submath', function (eng) {
 	    var list = eng.leave_mode ();
 	    eng.unnest_eqtb ();
 	    callback (eng, list);
-	}, []]);
+	});
     };
 
     var SymDimens = {

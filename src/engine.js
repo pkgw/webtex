@@ -688,46 +688,52 @@ var Engine = (function Engine_closure () {
 	throw new TexRuntimeError ('need to, but cannot, escape to vertical mode');
     };
 
+    proto.enter_group = function Engine_enter_group (groupname, callback) {
+	this.trace ('< ---> ' + this.group_exit_stack.length + ' ' + groupname + '>');
+	this.group_exit_stack.push ([groupname, callback, []]);
+    };
+
     proto.handle_bgroup = function Engine_handle_bgroup () {
-	this.trace ('< ---> simple>');
 	this.nest_eqtb ();
-	this.group_exit_stack.push ([this.unnest_eqtb.bind (this), []]);
+	this.enter_group ('simple', function (eng) {
+	    this.unnest_eqtb ();
+	}.bind (this));
     };
 
     proto.handle_egroup = function Engine_handle_egroup () {
 	if (!this.group_exit_stack.length)
 	    throw new TexRuntimeError ('ending a group that wasn\'t started');
 
-	var info = this.group_exit_stack.pop (); // [callback, aftergroup-toklist]
-	info[0] (this);
-	this.push_toks (info[1]);
+	var info = this.group_exit_stack.pop (); // [name, callback, aftergroup-toklist]
+	this.trace ('< <--- ' + this.group_exit_stack.length + ' ' + info[0] + '>');
+	info[1] (this);
+	this.push_toks (info[2]);
     };
 
+    function _end_semisimple (eng) {
+	throw new TexRuntimeError ('expected \\endgroup but got something ' +
+				   'else');
+    }
+    _end_semisimple.is_semisimple = true;
+
     proto.handle_begingroup = function Engine_handle_begingroup () {
-	this.trace ('< ---> semi-simple>');
 	this.nest_eqtb ();
-
-	function end_semisimple (eng) {
-	    throw new TexRuntimeError ('expected \\endgroup but got something ' +
-				       'else');
-	}
-	end_semisimple.is_semisimple = true;
-
-	this.group_exit_stack.push ([end_semisimple, []]);
+	this.enter_group ('semi-simple', _end_semisimple);
     };
 
     proto.handle_endgroup = function Engine_handle_endgroup () {
 	if (!this.group_exit_stack.length)
 	    throw new TexRuntimeError ('stray \\endgroup');
 
-	var info = this.group_exit_stack.pop ();
-	if (info[0].is_semisimple !== true)
+	var info = this.group_exit_stack.pop (); // [name, callback, aftergroup-toklist]
+	if (info[1].is_semisimple !== true)
 	    throw new TexRuntimeError ('got \\endgroup when should have ' +
-				       'gotten other group-ender');
+				       'gotten other group-ender; depth=' +
+				       this.group_exit_stack.length + ' cb=' + info[1]);
 
-	this.trace ('< <--- semi-simple>');
+	this.trace ('< <--- ' + this.group_exit_stack.length + ' ' + info[0] + '>');
 	this.unnest_eqtb ();
-	this.push_toks (info[1]);
+	this.push_toks (info[2]);
     };
 
     proto.handle_aftergroup = function Engine_handle_aftergroup (tok) {
@@ -735,7 +741,7 @@ var Engine = (function Engine_closure () {
 	if (l == 0)
 	    throw new TexRuntimeError ('cannot call \\aftergroup outside of a group');
 
-	this.group_exit_stack[l - 1][1].push (tok);
+	this.group_exit_stack[l - 1][2].push (tok);
     };
 
     proto.begin_graf = function Engine_begin_graf (indent) {
@@ -878,7 +884,6 @@ var Engine = (function Engine_closure () {
 	this._running_output = true;
 
 	function finish_output (eng) {
-	    this.trace ('< <--- output routine>');
 	    this.end_graf ();
 	    this.unnest_eqtb ();
 	    this._running_output = false;
@@ -886,11 +891,10 @@ var Engine = (function Engine_closure () {
 	};
 
 	var outtl = this.get_parameter (T_TOKLIST, 'output');
-	this.trace ('< ---> output routine>');
 	this.trace ('*output -> ' + outtl.as_serializable ());
 	this.trace ('*box255 = ' + vbox.uitext ());
 	this.nest_eqtb ();
-	this.group_exit_stack.push ([finish_output.bind (this), []]);
+	this.enter_group ('output routine', finish_output.bind (this));
 	this.push (Token.new_cmd (this.commands['<end-group>']));
 	this.push_toks (outtl.toks);
 
@@ -2052,8 +2056,7 @@ var Engine = (function Engine_closure () {
 	}
 
 	function finish_box (engine) {
-	    this.trace ('< <--- ' + bt_names[boxtype] + '; setting is_exact=' +
-			is_exact + ' spec=' + spec + ' >');
+	    this.trace ('finish_box is_exact=' + is_exact + ' spec=' + spec);
 	    this.unnest_eqtb ();
 	    var box = Listable.new_box (boxtype);
 	    box.list = this.leave_mode ();
@@ -2064,10 +2067,9 @@ var Engine = (function Engine_closure () {
 	}
 
 	this.scan_left_brace ();
-	this.trace ('< ---> ' + bt_names[boxtype] + '>');
 	this.enter_mode (newmode);
 	this.nest_eqtb ();
-	this.group_exit_stack.push ([finish_box.bind (this), []]);
+	this.enter_group (bt_names[boxtype], finish_box.bind (this));
     };
 
     proto.handle_hbox = function Engine_handle_hbox () {
