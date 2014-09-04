@@ -2106,10 +2106,6 @@ var Engine = (function Engine_closure () {
 
     // Math box construction
 
-    function _math_bad_finish (engine) {
-	throw new TexRuntimeError ('got group end when expected math-unshift');
-    };
-
     proto.enter_math = function Engine_enter_math (mode, is_outer) {
 	this.enter_mode (mode);
 	this.trace ('<is_outer=' + is_outer + '>');
@@ -2117,8 +2113,6 @@ var Engine = (function Engine_closure () {
 
 	if (is_outer)
 	    this.set_parameter (T_INT, 'fam', -1);
-
-	this.group_exit_stack.push ([_math_bad_finish, []]);
     };
 
     // Miscellaneous
