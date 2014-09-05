@@ -987,5 +987,13 @@ var Font = (function Font_closure () {
 	return this.metrics.box_for_ord (this, ord);
     };
 
+    proto.italic_correction = function Font_italic_correction (ord) {
+	if (this.metrics_error != null)
+	    throw this.metrics_error;
+	if (this.metrics === NeedMoreData)
+	    throw NeedMoreData;
+	return this.metrics.italic_correction (ord);
+    };
+
     return Font;
 }) ();

@@ -54,6 +54,30 @@ commands._space_ = function cmd__space_ (engine) {
 };
 
 
+commands._fslash_ = function cmd__fslash_ (engine) {
+    // Italic correction. T:TP 1111, 1112, 1113.
+
+    switch (engine.mode ()) {
+    case M_VERT: case M_IVERT:
+	throw new TexRuntimeError ('cannot use \\/ in vertical mode');
+    case M_MATH: M_DMATH:
+	engine.trace ('italic correction: math');
+	engine.push (new Kern (new Dimen ()));
+	break;
+    case M_HORZ: M_RHORZ:
+	// XXX: ignoring ligatures
+	engine.trace ('italic correction: text');
+	var last = engine.get_last_listable ();
+	if (last instanceof Character) {
+	    var k = new Kern (Dimen.new_scaled (last.font.italic_correction (last.ord)))
+	    // XXX: kern.subtype = Explicit.
+	    engine.accum (k);
+	}
+	break;
+    }
+};
+
+
 commands._char = function cmd__char (engine) {
     var ord = engine.scan_char_code ();
     engine.trace ('char ' + ord);
