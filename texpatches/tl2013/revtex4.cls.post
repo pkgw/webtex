@@ -1,0 +1,8 @@
+% -*- latex -*-
+
+% Defuse ltxgrid. Kill the column-changing commands:
+\let\onecolumngrid\relax
+\let\twocolumngrid\relax
+
+% To be determined: is it wise and/or necessary to return the output routine
+% to the LaTeX standard, rather than ltxgrid's complex one?
