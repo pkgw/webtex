@@ -1395,6 +1395,32 @@ commands.inputlineno = (function InputlinenoCommand_closure () {
 })();
 
 
+commands.lastpenalty = (function LastpenaltyCommand_closure () {
+    // I believe that our implementation isn't quite right, since TeX seems to
+    // only update \lastpenalty during page builder runs (T:TP 991, 994).
+    // We'll see if that gets us into trouble.
+
+    function LastpenaltyCommand () { Command.call (this); }
+    inherit (LastpenaltyCommand, Command);
+    var proto = LastpenaltyCommand.prototype;
+    proto.name = 'lastpenalty';
+
+    proto.invoke = function LastpenaltyCommand_invoke (engine) {
+	throw new TexRuntimeError ('bare \\lastpenalty not allowed');
+    };
+
+    proto.as_valref = function LastpenaltyCommand_as_valref (engine) {
+	var val = 0;
+	var item = engine.get_last_listable ();
+	if (item.ltype == LT_PENALTY)
+	    val = item.amount;
+	return new ConstantValref (T_INT, val);
+    };
+
+    return LastpenaltyCommand;
+})();
+
+
 commands.lastskip = (function LastskipCommand_closure () {
     function LastskipCommand () { Command.call (this); }
     inherit (LastskipCommand, Command);
