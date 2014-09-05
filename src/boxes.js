@@ -51,7 +51,7 @@ var Listable = (function Listable_closure () {
 
 var Boxlike = (function Boxlike_closure () {
     // A box-like listable has width, height, depth.
-    function Boxlike (type) {
+    function Boxlike () {
 	this.width = new Dimen ();
 	this.height = new Dimen ();
 	this.depth = new Dimen ();
@@ -78,6 +78,9 @@ var Boxlike = (function Boxlike_closure () {
 
 var ListBox = (function ListBox_closure () {
     function ListBox (btype) {
+	if (btype < BT_VOID || btype > BT_CBOX)
+	    throw new TexInternalError ('ListBox needs boxtype; got ' + btype);
+
 	Boxlike.call (this);
 	this.ltype = LT_BOX;
 	this.btype = btype;
@@ -566,6 +569,11 @@ var Rule = (function Rule_closure () {
 
 var Character = (function Character_closure () {
     function Character (font, ord) {
+	if (!(font instanceof Font))
+	    throw new TexInternalError ('Character needs font; got ' + font);
+	if (!(ord >= 0 && ord < 256))
+	    throw new TexInternalError ('Character needs ord; got ' + ord);
+
 	Boxlike.call (this);
 	this.ltype = LT_CHARACTER;
 	this.font = font;
@@ -586,6 +594,9 @@ var Character = (function Character_closure () {
 
 var MathDelim = (function MathDelim_closure () {
     function MathDelim (width, is_after) {
+	if (!(width instanceof Dimen))
+	    throw new TexInternalError ('MathDelim needs dimen; got ' + width);
+
 	Boxlike.call (this);
 	this.ltype = LT_MATH;
 	this.width = width;
@@ -605,6 +616,9 @@ var MathDelim = (function MathDelim_closure () {
 
 var Mark = (function Mark_closure () {
     function Mark (toks) {
+	if (!(toks instanceof Array))
+	    throw new TexInternalError ('Mark needs Token array; got ' + toks);
+
 	this.ltype = LT_MARK;
 	this.toks = toks;
     }
@@ -622,6 +636,9 @@ var Mark = (function Mark_closure () {
 
 var Kern = (function Kern_closure () {
     function Kern (amount) {
+	if (!(amount instanceof Dimen))
+	    throw new TexInternalError ('Kern needs Dimen; got ' + amount);
+
 	this.ltype = LT_KERN;
 	this.amount = amount;
     }
@@ -639,6 +656,9 @@ var Kern = (function Kern_closure () {
 
 var Special = (function Special_closure () {
     function Special (toks) {
+	if (!(toks instanceof Array))
+	    throw new TexInternalError ('Special needs Token array; got ' + toks);
+
 	this.ltype = LT_SPECIAL;
 	this.toks = toks;
     }
@@ -657,7 +677,7 @@ var Special = (function Special_closure () {
 var Penalty = (function Penalty_closure () {
     function Penalty (amount) {
 	this.ltype = LT_PENALTY;
-	this.amount = amount;
+	this.amount = TexInt.xcheck (amount).value;
     }
 
     inherit (Penalty, Listable);
@@ -673,6 +693,9 @@ var Penalty = (function Penalty_closure () {
 
 var BoxGlue = (function BoxGlue_closure () {
     function BoxGlue (amount) {
+	if (!(amount instanceof Glue))
+	    throw new TexInternalError ('BoxGlue needs glue; got ' + amount);
+
 	this.ltype = LT_GLUE;
 	this.amount = amount;
     }
@@ -690,6 +713,9 @@ var BoxGlue = (function BoxGlue_closure () {
 
 var StartTag = (function StartTag_closure () {
     function StartTag (name, attrs) {
+	if (typeof (name) != 'string')
+	    throw new TexInternalError ('StartTag needs string; got ' + name);
+
 	this.ltype = LT_STARTTAG;
 	this.name = name;
 	this.attrs = attrs;
@@ -708,6 +734,9 @@ var StartTag = (function StartTag_closure () {
 
 var EndTag = (function EndTag_closure () {
     function EndTag (name) {
+	if (typeof (name) != 'string')
+	    throw new TexInternalError ('StartTag needs string; got ' + name);
+
 	this.ltype = LT_ENDTAG;
 	this.name = name;
     }
