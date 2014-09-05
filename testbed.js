@@ -2,7 +2,7 @@
 
 var targdiv = document.getElementById ('webtex');
 
-var bundleurl = 'texbundles/default.zip';
+var bundleurl = 'build/latest.zip';
 var inputurl = 'test/tex/latex-minimal.tex';
 var dump_bpath = 'latex.dump.json';
 

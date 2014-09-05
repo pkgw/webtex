@@ -15,9 +15,10 @@ patch_suffixes = ['.post']
 
 
 class Bundler (object):
-    def __init__ (self, specfile, cachedir, patchdir, otherfiles):
+    def __init__ (self, specfile, cachedir, destdir, patchdir, otherfiles):
         self.specfile = specfile
         self.cachedir = cachedir
+        self.destdir = destdir
         self.patchdir = patchdir
         self.otherfiles = otherfiles
         self.elemshas = {}
@@ -29,7 +30,7 @@ class Bundler (object):
         except OSError:
             pass # live dangerously by not checking that it's EEXIST. Whatever.
 
-        temp = tempfile.NamedTemporaryFile (dir='.', delete=False)
+        temp = tempfile.NamedTemporaryFile (dir=self.destdir, delete=False)
         temp.close ()
 
         try:
@@ -55,9 +56,18 @@ class Bundler (object):
         for name in sorted (self.elemshas.iterkeys ()):
             s.update (name)
             s.update (self.elemshas[name])
-        zpath = s.hexdigest () + '.zip'
+        zbase = s.hexdigest () + '.zip'
+        zpath = os.path.join (self.destdir, zbase)
         os.rename (temp.name, zpath)
         print ('Created', zpath)
+
+        lpath = os.path.join (self.destdir, 'latest.zip')
+        try:
+            os.unlink (lpath)
+        except OSError:
+            pass # more living dangerously
+        os.symlink (zbase, lpath)
+        print ('Linked', lpath)
 
 
     def load_miscfile (self, zip, path):
@@ -143,12 +153,12 @@ class Bundler (object):
 
 
 def commandline (argv):
-    if len (sys.argv) < 4:
-        print ('usage: make-tex-bundle.py <specfile-path> <cachedir> <patchdir> [otherfiles...]',
-               file=sys.stderr)
+    if len (sys.argv) < 5:
+        print ('usage: make-tex-bundle.py <specfile-path> <cachedir> <destdir> '
+               '<patchdir> [otherfiles...]', file=sys.stderr)
         sys.exit (1)
 
-    b = Bundler (sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4:])
+    b = Bundler (sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5:])
     b.go ()
 
 

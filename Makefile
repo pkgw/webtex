@@ -1,6 +1,7 @@
 builddir = build
 python = python
 minify = java -jar yuicompressor-2.4.8.jar
+texdist = tl2013
 
 sharedjs = \
   src/jsonparse.js \
@@ -24,7 +25,6 @@ sharedjs = \
   src/tfmreader.js \
   src/bundle.js
 
-
 browserjs = \
   src/browser-io.js
 
@@ -36,6 +36,9 @@ browserprejs = \
 
 nodejs = \
   src/node-io.js
+
+bundleextras = \
+  $(builddir)/latex.dump.json
 
 standard: \
   $(builddir)/browser-webtex.js \
@@ -60,6 +63,20 @@ generate.py src/%-helpers-tmpl.js \
 | $(builddir)
 	$(python) $^ $@
 
+# We can't use $^ in the following rule because it converts "./build/..." to
+# "build/...", which breaks Node.js's explicit-module-path system.
+$(builddir)/latex.dump.json: \
+dump-format.js $(builddir)/node-webtex.min.js \
+| $(builddir)
+	node $< ./$(builddir)/node-webtex.min.js texpatches/$(texdist)/ \
+	  latex.ltx >$@.new && mv -f $@.new $@
+
+$(builddir)/latest.zip: \
+make-tex-bundle.py packages.txt $(bundleextras) \
+| $(builddir)
+	$(python) $< packages.txt texcache $(builddir) texpatches $(bundleextras)
+
+
 %.min.js: %.js
 	$(minify) $< >$@.new && mv -f $@.new $@
 
@@ -75,12 +92,4 @@ test: $(builddir)/node-webtex.min.js
 fattest: $(builddir)/node-webtex.js # actually debuggable
 	@cd test && ./run-all-tests.sh ../$<
 
-# We can't use $^ in the following rule because it converts "./build/..." to
-# "build/...", which breaks Node.js's explicit-module-path system.
-$(builddir)/latex.dump.json: dump-format.js $(builddir)/node-webtex.min.js
-	node dump-format.js ./$(builddir)/node-webtex.min.js texpatches/tl2013/ latex.ltx >$@.new && mv -f $@.new $@
-
-update-bundle: $(builddir)/latex.dump.json
-	./make-tex-bundle.py packages.txt texcache texpatches $^
-
-.PHONY: all clean fattest standard minified test update-bundle
+.PHONY: all clean fattest standard minified test

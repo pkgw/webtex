@@ -13,7 +13,7 @@ var pengine = webtex.Node.promise_engine ({
     jobname: process.argv[4],
     inputpath: process.argv[4],
     shiptarget: new webtex.Node.ConsoleDumpTarget (),
-    bundlepath: 'texbundles/default.zip',
+    bundlepath: 'build/latest.zip',
     debug_input_lines: true,
     debug_trace: true,
 });
