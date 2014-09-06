@@ -92,7 +92,7 @@ var TokenizerInput = (function TokenizerInput_closure () {
 
 	if (cc == C_ESCAPE) {
 	    if (this.ordsrc.iseol ())
-		return Token.new_cseq ('');
+		return Token.new_cseq ('\r');
 
 	    o = this.ordsrc.next (catcodes);
 	    if (o === EOF || o === NeedMoreData)
