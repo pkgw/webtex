@@ -1452,20 +1452,16 @@ commands.lastskip = (function LastskipCommand_closure () {
     var proto = LastskipCommand.prototype;
     proto.name = 'lastskip';
 
-    proto._get = function LastskipCommand__get (engine) {
-	var item = engine.get_last_listable ();
-	if (item != null && item.ltype != LT_GLUE)
-	    return new Glue ();
-	return item.amount;
-    };
-
     proto.invoke = function LastskipCommand_invoke (engine) {
-	engine.trace ('lastskip [uneaten]');
-	engine.accum (new BoxGlue (this._get (engine)));
+	throw new TexRuntimeError ('bare \\lastskip not allowed');
     };
 
     proto.as_valref = function LastskipCommand_as_valref (engine) {
-	return new ConstantValref (T_GLUE, this._get (engine));
+	var val = new Glue ();
+	var item = engine.get_last_listable ();
+	if (item != null && item.ltype == LT_GLUE)
+	    val = item.amount.clone ();
+	return new ConstantValref (T_GLUE, val);
     };
 
     return LastskipCommand;
