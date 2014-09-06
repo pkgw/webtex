@@ -511,7 +511,7 @@ var Engine = (function Engine_closure () {
 	return this.eqtb.get_parameter (valtype, name);
     };
 
-    proto.set_parameter = function Engine_get_parameter (valtype, name, value) {
+    proto.set_parameter = function Engine_set_parameter (valtype, name, value) {
 	this.eqtb.set_parameter (valtype, name, value, this._global_flag ());
 	this.maybe_insert_after_assign_token ();
     };
