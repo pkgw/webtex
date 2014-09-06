@@ -1471,6 +1471,29 @@ commands.lastskip = (function LastskipCommand_closure () {
 })();
 
 
+// Mark insertion
+
+commands.botmark = function cmd_botmark (engine) {
+    engine.trace ('botmark [bad noop]');
+};
+
+commands.firstmark = function cmd_firstmark (engine) {
+    engine.trace ('firstmark [bad noop]');
+};
+
+commands.splitbotmark = function cmd_splitbotmark (engine) {
+    engine.trace ('splitbotmark [bad noop]');
+};
+
+commands.splitfirstmark = function cmd_splitfirstmark (engine) {
+    engine.trace ('splitfirstmark [bad noop]');
+};
+
+commands.topmark = function cmd_topmark (engine) {
+    engine.trace ('topmark [bad noop]');
+};
+
+
 // Font stuff
 
 commands.font = (function FontCommand_closure () {
