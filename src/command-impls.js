@@ -1436,7 +1436,7 @@ commands.lastpenalty = (function LastpenaltyCommand_closure () {
     proto.as_valref = function LastpenaltyCommand_as_valref (engine) {
 	var val = 0;
 	var item = engine.get_last_listable ();
-	if (item.ltype == LT_PENALTY)
+	if (item != null && item.ltype == LT_PENALTY)
 	    val = item.amount;
 	return new ConstantValref (T_INT, val);
     };
@@ -1446,6 +1446,7 @@ commands.lastpenalty = (function LastpenaltyCommand_closure () {
 
 
 commands.lastskip = (function LastskipCommand_closure () {
+    // See comment in \lastpenalty about correctness of this implementation.
     function LastskipCommand () { Command.call (this); }
     inherit (LastskipCommand, Command);
     var proto = LastskipCommand.prototype;
@@ -1453,7 +1454,7 @@ commands.lastskip = (function LastskipCommand_closure () {
 
     proto._get = function LastskipCommand__get (engine) {
 	var item = engine.get_last_listable ();
-	if (item.ltype != LT_GLUE)
+	if (item != null && item.ltype != LT_GLUE)
 	    return new Glue ();
 	return item.amount;
     };
@@ -1468,6 +1469,32 @@ commands.lastskip = (function LastskipCommand_closure () {
     };
 
     return LastskipCommand;
+})();
+
+
+commands.lastkern = (function LastkernCommand_closure () {
+    // See comment in \lastpenalty about correctness of this implementation.
+    function LastkernCommand () { Command.call (this); }
+    inherit (LastkernCommand, Command);
+    var proto = LastkernCommand.prototype;
+    proto.name = 'lastkern';
+
+    proto._get = function LastkernCommand__get (engine) {
+    };
+
+    proto.invoke = function LastkernCommand_invoke (engine) {
+	throw new TexRuntimeError ('bare \\lastkern not allowed');
+    };
+
+    proto.as_valref = function LastkernCommand_as_valref (engine) {
+	var val = new Dimen ();
+	var item = engine.get_last_listable ();
+	if (item != null && item.ltype == LT_KERN)
+	    val = item.amount.clone ();
+	return new ConstantValref (T_DIMEN, val);
+    };
+
+    return LastkernCommand;
 })();
 
 
