@@ -21,7 +21,7 @@ var OrdSource = WEBTEX.OrdSource = (function OrdSource_closure () {
 
     var proto = OrdSource.prototype = {};
 
-    proto._ensure_line = function OrdSource__ensure_line () {
+    proto._ensure_line = function OrdSource__ensure_line (endlinechar) {
 	// Returns true if more characters are available.
 	if (this.linebuffer === null)
 	    return EOF;
@@ -42,7 +42,8 @@ var OrdSource = WEBTEX.OrdSource = (function OrdSource_closure () {
 	l = l.replace (/ *$/, ''); // note: just spaces, not any whitespace
 
 	this.curords = map.call (l, function (x) { return x.charCodeAt (0); });
-	this.curords.push (O_RETURN);
+	if (endlinechar >= 0 && endlinechar <= 255)
+	    this.curords.push (endlinechar);
 	this.curindex = 0;
 
 	if (this.debug_input_lines)
@@ -75,11 +76,11 @@ var OrdSource = WEBTEX.OrdSource = (function OrdSource_closure () {
 	return [-1, -1, -1];
     };
 
-    proto._next_lowlevel = function OrdSource__next_lowlevel () {
+    proto._next_lowlevel = function OrdSource__next_lowlevel (endlinechar) {
 	if (this.pushed.length)
 	    return this.pushed.pop ();
 
-	var rv = this._ensure_line ();
+	var rv = this._ensure_line (endlinechar);
 	if (rv === NeedMoreData || rv === EOF)
 	    return rv;
 
@@ -90,8 +91,8 @@ var OrdSource = WEBTEX.OrdSource = (function OrdSource_closure () {
 	return o;
     };
 
-    proto.next = function OrdSource_next (catcodes) {
-	var o = this._next_lowlevel ();
+    proto.next = function OrdSource_next (catcodes, endlinechar) {
+	var o = this._next_lowlevel (endlinechar);
 	if (o === NeedMoreData || o === EOF)
 	    return o;
 
@@ -104,9 +105,9 @@ var OrdSource = WEBTEX.OrdSource = (function OrdSource_closure () {
 	if (n[0] == o &&
 	    lc_hex_ords.indexOf (n[1]) >= 0 &&
 	    lc_hex_ords.indexOf (n[2]) >= 0) {
-	    this._next_lowlevel ();
-	    this._next_lowlevel ();
-	    this._next_lowlevel ();
+	    this._next_lowlevel (endlinechar);
+	    this._next_lowlevel (endlinechar);
+	    this._next_lowlevel (endlinechar);
 	    return lc_hex_ords.indexOf (n[1]) * 16 + lc_hex_ords.indexOf (n[2]);
 	}
 
@@ -116,8 +117,8 @@ var OrdSource = WEBTEX.OrdSource = (function OrdSource_closure () {
 	    else
 		n[1] += 64;
 
-	    this._next_lowlevel ();
-	    this._next_lowlevel ();
+	    this._next_lowlevel (endlinechar);
+	    this._next_lowlevel (endlinechar);
 	    return n[1];
 	}
 

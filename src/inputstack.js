@@ -78,7 +78,8 @@ var TokenizerInput = (function TokenizerInput_closure () {
 
 	// XXX not so great re: encapsulation
 	var catcodes = this.engine.eqtb._catcodes;
-	var o = this.ordsrc.next (catcodes);
+	var endlinechar = this.engine.get_parameter (T_INT, 'endlinechar').value;
+	var o = this.ordsrc.next (catcodes, endlinechar);
 
 	if (o === NeedMoreData)
 	    return o;
@@ -92,9 +93,11 @@ var TokenizerInput = (function TokenizerInput_closure () {
 
 	if (cc == C_ESCAPE) {
 	    if (this.ordsrc.iseol ())
+		// XXX: probably wrong if endlinechar is non-standard. What to
+		// do if it's -1??
 		return Token.new_cseq ('\r');
 
-	    o = this.ordsrc.next (catcodes);
+	    o = this.ordsrc.next (catcodes, endlinechar);
 	    if (o === EOF || o === NeedMoreData)
 		// We buffer things line-by-line so these conditions should
 		// never happen -- cseq's can't span between lines.
@@ -112,7 +115,7 @@ var TokenizerInput = (function TokenizerInput_closure () {
 	    }
 
 	    while (1) {
-		o = this.ordsrc.next (catcodes);
+		o = this.ordsrc.next (catcodes, endlinechar);
 		if (o === EOF || o === NeedMoreData)
 		    throw new TexRuntimeError ('unexpectly ran out of data (1)');
 
