@@ -1784,6 +1784,47 @@ commands.jobname = function cmd_jobname (engine) {
 };
 
 
+commands.romannumeral = function cmd_romannumeral (engine) {
+    // T:TP 69. "Readers who like puzzles might enjoy trying to figure out how
+    // this tricky code works; therefore no explanation will be given." Here's
+    // another puzzle: "GFY, DEK."
+    var table = ['m', 2, 'd', 5, 'c', 2, 1, 5, 'x', 2, 'v', 5, 'i'];
+    var v = 1000;
+    var n = engine.scan_int ().value;
+    var n_orig = n;
+    var k = 0, j = 0, u = 0;
+    var result = '';
+
+    while (true) {
+	while (n >= v) {
+	    result += table[j];
+	    n -= v;
+	}
+
+	if (n <= 0)
+	    break;
+
+	k = j + 2;
+	var u = v / table[k - 1] >> 0;
+	if (table[k - 1] == 2) {
+	    k += 2;
+	    u = u / table[k - 1] >> 0;
+	}
+
+	if (n + u >= v) {
+	    result += table[k];
+	    n += u;
+	} else {
+	    j += 2;
+	    v = v / table[j-1] >> 0;
+	}
+    }
+
+    engine.trace ('romannumeral ' + n_orig + ' -> ' + result);
+    engine.push_string (result);
+};
+
+
 // User interaction, I/O
 
 commands.message = function cmd_message (engine) {
