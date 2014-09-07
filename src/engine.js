@@ -2007,8 +2007,15 @@ var Engine = (function Engine_closure () {
 
     proto.scan_box_for_accum = function Engine_scan_box_for_accum (cmd) {
 	function accum_box (engine, box) {
-	    engine.trace ('... accumulate the finished box');
-	    engine.accum (box);
+	    if (engine.mode () == M_MATH || engine.mode () == M_DMATH) {
+		engine.trace ('... accumulate the finished box (math)');
+		var ord = new AtomNode (MT_ORD);
+		ord.nuc = box;
+		engine.accum (ord);
+	    } else {
+		engine.trace ('... accumulate the finished box (non-math)');
+		engine.accum (box);
+	    }
 	}
 
 	this.boxop_stack.push ([accum_box, false]);

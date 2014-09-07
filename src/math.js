@@ -615,8 +615,8 @@ var mathlib = (function mathlib_closure () {
 
 	if (q.length == 0 || q[0] instanceof Character)
 	    x = hpack_natural (state.engine, q);
-	else if (q.length == 1 && q[0] instanceof ListBox && !q.shift_amount.is_nonzero ())
-	    x = q;
+	else if (q.length == 1 && q[0] instanceof ListBox && !q[0].shift_amount.is_nonzero ())
+	    x = q[0];
 	else {
 	    x = hpack_natural (state.engine, q);
 	    if (x.list.length == 2 && x[0] instanceof Character && x[1] instanceof Kern)
@@ -791,7 +791,7 @@ var mathlib = (function mathlib_closure () {
 
 	    if (q.ltype == MT_BIN) {
 		// If we have a binary operator but it doesn't seem to be in
-		// the right context, treat it as an ordinal instead.
+		// the right context, treat it as an ordinary instead.
 		switch (r_type) {
 		case MT_BIN:
 		case MT_OP:
