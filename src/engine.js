@@ -910,7 +910,7 @@ var Engine = (function Engine_closure () {
 	this.shiptarget.process (box);
     };
 
-    proto.handle_un_listify = function Engine_handle_unskip (targtype) {
+    proto.handle_un_listify = function Engine_handle_un_listify (targtype) {
 	// TODO?: TeXBook p. 280: not allowed in vmode if main vertical list
 	// has been entirely contributed to current page.
 
