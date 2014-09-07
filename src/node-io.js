@@ -129,8 +129,11 @@ WEBTEX.Node.FSIOLayer = FSIOLayer;
 
 
 WEBTEX.IOBackend.makeInflater = function (datacb) {
+    // The "raw" zlib inflater is appropriate for Zip file contents; the
+    // non-"raw" one expects a 2-byte header and 4-byte trailer that aren't
+    // present in Zip streams.
     var zlib = require ('zlib');
-    var inflate = zlib.createInflate ();
+    var inflate = zlib.createInflateRaw ();
 
     function wt_write (arrbuf) {
 	// Need to convert ArrayBuffer to node.js Buffer.
@@ -141,15 +144,6 @@ WEBTEX.IOBackend.makeInflater = function (datacb) {
     inflate.on ('end', function () { datacb (null, null); });
     inflate.on ('error', function (err) { datacb (err, null); });
     inflate.wt_write = wt_write;
-
-    // zlib expects this header, but the underlying Zip inflated stream
-    // doesn't contain it. Zlib also expects a 4-byte CRC trailer that isn't
-    // in the Zip file stream, but doesn't seem to care if we don't provide
-    // it.
-    var header = new Buffer (2);
-    header.writeUInt8 (0x78, 0);
-    header.writeUInt8 (0x9c, 1);
-    inflate.write (header);
 
     return inflate;
 }
