@@ -71,6 +71,14 @@ var OrdSource = WEBTEX.OrdSource = (function OrdSource_closure () {
 	    // Easy case.
 	    return this.curords.slice (this.curindex, this.curindex + 3);
 
+	if (this.curindex + 2 <= this.curords.length)
+	    // Insane corner case. If \endlinechar is -1 and the line ends
+	    // with a ^^X code, the lack of the EOL character means that we
+	    // won't have 3 full characters available. I think that we're not
+	    // getting the semantics fully right for the same reason that we
+	    // can't process ^^X escapes across newlines, but whatever.
+	    return this.curords.slice (this.curindex, this.curindex + 2).concat ([-1]);
+
 	// Assume we're not doing a ^^X escape across a newline. These
 	// values won't propagate out of next().
 	return [-1, -1, -1];
