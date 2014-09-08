@@ -409,6 +409,7 @@ var Engine = (function Engine_closure () {
 
 	this.inputstack = new InputStack (args.initial_linebuf, this, args);
 	this._force_end = false;
+	this._roadblocks = {};
 
 	this.eqtb = new EquivTable (null);
 
@@ -588,6 +589,11 @@ var Engine = (function Engine_closure () {
     // Driving everything
 
     proto.step = function Engine_step () {
+	// Some kind of async I/O operation needs to finish before we can
+	// safely continue.
+	if (Object.keys (this._roadblocks).length)
+	    return NeedMoreData;
+
 	var initial_is = this.inputstack.clone ();
 
 	var tok = this.next_x_tok ();
@@ -623,6 +629,28 @@ var Engine = (function Engine_closure () {
 	// initial_is since we don't need to go back to it.
 	this.inputstack.checkpoint ();
 	return true;
+    };
+
+    proto.issue_roadblock = function Engine_issue_roadblock (desc) {
+	var i = 0;
+
+	while (true) {
+	    if (!this._roadblocks.hasOwnProperty (i)) {
+		this._roadblocks[i] = desc;
+		this.trace ('*** issued roadblock ' + i + ' for: ' + desc);
+		return i;
+	    }
+
+	    i++;
+	}
+    };
+
+    proto.clear_roadblock = function Engine_clear_roadblock (id) {
+	if (!this._roadblocks.hasOwnProperty (id))
+	    throw new TexInternalError ('clearing nonexistant roadblock ' + id);
+	var desc = this._roadblocks[id];
+	this.trace ('*** cleared roadblock ' + id + ' for: ' + desc);
+	delete this._roadblocks[id];
     };
 
     // Mode and grouping stuff.
