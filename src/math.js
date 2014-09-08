@@ -788,6 +788,14 @@ var mathlib = (function mathlib_closure () {
 	    var delta = 0;
 	    var q = mlist[i];
 	    var p = null;
+	    var process_atom = true; // gotos to "check_dimensions",
+				     // "done_with_noad", or "done_with_node"
+				     // mean setting this to false.
+	    var check_dimensions = true; // gotos to "done_with_noad" or
+					 // "done_with_node" mean setting this
+					 // to false.
+	    var remember_as_prev = true; // gotos to "done_with_node" mean
+					 // setting this to false.
 
 	    if (q.ltype == MT_BIN) {
 		// If we have a binary operator but it doesn't seem to be in
@@ -815,11 +823,14 @@ var mathlib = (function mathlib_closure () {
 		// turns out not to have been in the right context.
 		if (r_type == MT_BIN)
 		    r.ltype = MT_ORD;
-		if (q.ltype == MT_RIGHT)
-		    {} // XXX goto done_with_noad;
+		if (q.ltype == MT_RIGHT) {
+		    // goto done_with_noad:
+		    process_atom = check_dimensions = false;
+		}
 		break;
 	    case MT_LEFT:
-		// XXX goto done_with_noad
+		// goto done_with_noad:
+		process_atom = check_dimensions = false;
 		break;
 	    case MT_ORD:
 		make_ord (state, mlist, i);
@@ -836,8 +847,23 @@ var mathlib = (function mathlib_closure () {
 	    case MT_ACCENT:
 	    case MT_VCENTER:
 	    case MT_STYLE:
-	    case MT_SCHOICE:
 		throw new TexInternalError ('unimplemented math ' + q);
+	    case MT_SCHOICE:
+		if (state.style == MS_DISPLAY)
+		    p = q.in_display;
+		else if (state.style == MS_TEXT)
+		    p = q.in_text;
+		else if (state.style == MS_SCRIPT)
+		    p = q.in_script;
+		else if (state.style == MS_SCRIPTSCRIPT)
+		    p = q.in_scriptscript;
+		// Ugh, super not cool that we're mutating the list, but
+		// that's what TeX does.
+		var newq = new MathStyleNode (state.style, state.cramped);
+		Array.prototype.splice.apply (mlist, [i, 1, newq].concat (p));
+		// goto done_with_node:
+		process_atom = check_dimensions = remember_as_prev = false;
+		break;
 	    case LT_INSERT:
 	    case LT_MARK:
 	    case LT_ADJUST:
@@ -846,6 +872,7 @@ var mathlib = (function mathlib_closure () {
 	    case LT_IO:
 	    case LT_DISCRETIONARY:
 		// XXX goto done_with_node
+		process_atom = check_dimensions = remember_as_prev = false;
 		break;
 	    case LT_RULE:
 	    case LT_GLUE:
@@ -855,45 +882,51 @@ var mathlib = (function mathlib_closure () {
 		throw new TexInternalError ('unrecognized math ' + q);
 	    }
 
-	    if (q.nuc instanceof MathChar || q.nuc instanceof MathTextChar) {
-		var f = state.font (q.nuc.fam);
-		var m = f.get_metrics ();
-		if (!m.has_ord (q.nuc.ord)) {
-		    engine.warn ('missing character fam=' + q.nuc.fam + ' ord=' + q.nuc.ord);
-		    p = null;
-		} else {
-		    delta = m.italic_correction (q.nuc.ord);
-		    p = [f.box_for_ord (q.nuc.ord)];
-		    if (q.nuc instanceof MathTextChar && f.get_dimen (2).is_nonzero ())
-			delta = 0;
-		    if (q.sub == null && delta != 0) {
-			p.push (new Kern (Dimen.new_scaled (delta)));
-			delta = 0;
+	    if (process_atom) {
+		if (q.nuc instanceof MathChar || q.nuc instanceof MathTextChar) {
+		    var f = state.font (q.nuc.fam);
+		    var m = f.get_metrics ();
+		    if (!m.has_ord (q.nuc.ord)) {
+			engine.warn ('missing character fam=' + q.nuc.fam + ' ord=' + q.nuc.ord);
+			p = null;
+		    } else {
+			delta = m.italic_correction (q.nuc.ord);
+			p = [f.box_for_ord (q.nuc.ord)];
+			if (q.nuc instanceof MathTextChar && f.get_dimen (2).is_nonzero ())
+			    delta = 0;
+			if (q.sub == null && delta != 0) {
+			    p.push (new Kern (Dimen.new_scaled (delta)));
+			    delta = 0;
+			}
 		    }
+		} else if (q.nuc == null) {
+		    p = null;
+		} else if (q.nuc instanceof ListBox) {
+		    p = [q.nuc];
+		} else if (q.nuc instanceof Array) {
+		    var sublist = mlist_to_hlist (engine, q.nuc, state.style,
+						  state.cramped, false);
+		    p = [hpack_natural (sublist)];
+		} else {
+		    throw new TexInternalError ('unrecognized nucleus value ' + q.nuc);
 		}
-	    } else if (q.nuc == null) {
-		p = null;
-	    } else if (q.nuc instanceof ListBox) {
-		p = [q.nuc];
-	    } else if (q.nuc instanceof Array) {
-		var sublist = mlist_to_hlist (engine, q.nuc, state.style,
-					      state.cramped, false);
-		p = [hpack_natural (sublist)];
-	    } else {
-		throw new TexInternalError ('unrecognized nucleus value ' + q.nuc);
+
+		q.new_hlist = p;
+
+		if (q.sub != null || q.sup != null)
+		    make_scripts (engine, state, q, delta);
 	    }
 
-	    q.new_hlist = p;
+	    if (check_dimensions) {
+		var z = hpack_natural (q.new_hlist);
+		max_h = Math.max (max_h, z.height);
+		max_d = Math.max (max_d, z.depth);
+	    }
 
-	    if (q.sub != null || q.sup != null)
-		make_scripts (engine, state, q, delta);
-
-	    var z = hpack_natural (q.new_hlist);
-	    max_h = Math.max (max_h, z.height);
-	    max_d = Math.max (max_d, z.depth);
-
-	    r = q;
-	    r_type = r.ltype;
+	    if (remember_as_prev) {
+		r = q;
+		r_type = r.ltype;
+	    }
 
 	    i += 1;
 	}
@@ -944,7 +977,7 @@ var mathlib = (function mathlib_closure () {
 		t = make_left_right (q, state, max_d, max_h);
 		break;
 	    case MT_STYLE:
-		throw TexInternalError ('implement 763');
+		throw new TexInternalError ('implement 763');
 	    case LT_PENALTY:
 	    case LT_IO:
 	    case LT_SPECIAL:
@@ -955,9 +988,9 @@ var mathlib = (function mathlib_closure () {
 	    case LT_MARK:
 	    case LT_GLUE:
 	    case LT_KERN:
-		throw TexInternalError ('implement regular nodes');
+		throw new TexInternalError ('implement regular nodes');
 	    default:
-		throw TexInternalError ('unexpected math node ' + q);
+		throw new TexInternalError ('unexpected math node ' + q);
 	    }
 
 	    // XXX: insert appropriate spacing

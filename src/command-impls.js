@@ -1699,6 +1699,52 @@ commands.scriptfont = new FontFamilyCommand (MS_SCRIPT, 'script');
 commands.scriptscriptfont = new FontFamilyCommand (MS_SCRIPTSCRIPT, 'scriptscript');
 
 
+// Math commands
+
+commands.mathchoice = function cmd_mathchoice (engine) {
+    // T:TP 1171-1174
+    engine.trace ('mathchoice');
+
+    if (engine.mode () != M_MATH && engine.mode () != M_DMATH)
+	throw new TexRuntimeError ('\\mathchoice may only be used in math mode');
+
+    var mc = new StyleChoiceNode ();
+    engine.accum (mc);
+    mc._cur = 0;
+
+    function finish_one (eng) {
+	var list = engine.leave_mode ();
+	engine.unnest_eqtb ();
+	// XXX? this is fin_mlist() [TTP 1184]; we're skipping 'incompleat_node' futzing
+
+	if (mc._cur == 0)
+	    mc.in_display = list;
+	else if (mc._cur == 1)
+	    mc.in_text = list;
+	else if (mc._cur == 2)
+	    mc.in_script = list;
+	else if (mc._cur == 3)
+	    mc.in_scriptscript = list;
+
+	mc._cur += 1;
+	if (mc._cur < 4)
+	    scan_one ();
+	else
+	    engine.trace ('... finished mathchoice: ' + mc);
+    }
+
+    function scan_one () {
+	// XXX? this is push_math() [TTP 1136]; we're skipping 'incompleat_node' futzing
+	engine.nest_eqtb ();
+	engine.enter_mode (M_MATH);
+	engine.enter_group ('mathchoice', finish_one);
+	engine.scan_left_brace ();
+    }
+
+    scan_one ();
+};
+
+
 // Hyphenation
 
 commands.patterns = function cmd_patterns (engine) {
