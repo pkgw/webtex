@@ -570,6 +570,31 @@ commands._if = function cmd_if (engine) {
 };
 
 
+commands.ifcat = function cmd_ifcat (engine) {
+    engine.start_parsing_if_condition ();
+    var t1 = engine.next_x_tok (), t2 = engine.next_x_tok ();
+    engine.done_parsing_if_condition ();
+
+    // The comparison rules here are a bit funky.
+
+    function key (tok) {
+	if (tok.ischar ())
+	    return tok.catcode;
+	if (tok.iscslike ()) { // active chars will be caught by above
+	    var cmd = tok.tocmd (engine);
+	    if (cmd instanceof GivenCharCommand)
+		throw new TexInternalError ('not implemented');
+	    return 16;
+	}
+	throw new TexRuntimeError ('illegal comparison subject ' + tok);
+    }
+
+    var result = (key (t1) == key (t2));
+    engine.trace ('ifcat ' + t1 + ' ~ ' + t2 + ' => ' + result);
+    engine.handle_if (result);
+};
+
+
 commands.ifx = function cmd_ifx (engine) {
     var t1 = engine.next_tok_throw (), t2 = engine.next_tok_throw (), result;
 
