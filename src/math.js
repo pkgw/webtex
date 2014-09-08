@@ -945,6 +945,8 @@ var mathlib = (function mathlib_closure () {
 	    var q = mlist[i];
 	    var t = MT_ORD;
 	    // XXX: penalty
+	    var do_usual = true; // gotos to "delete_q" or "done" mean set this to false
+	    var save_r_type = true; // gotos to "delete_q" mean set this to false
 
 	    switch (q.ltype) {
 	    case MT_OP:
@@ -977,7 +979,12 @@ var mathlib = (function mathlib_closure () {
 		t = make_left_right (q, state, max_d, max_h);
 		break;
 	    case MT_STYLE:
-		throw new TexInternalError ('implement 763');
+		state.style = q.style;
+		state.cramped = q.cramped;
+		state.update_sizes ();
+		// goto delete_q:
+		do_usual = false;
+		break;
 	    case LT_PENALTY:
 	    case LT_IO:
 	    case LT_SPECIAL:
@@ -993,14 +1000,17 @@ var mathlib = (function mathlib_closure () {
 		throw new TexInternalError ('unexpected math node ' + q);
 	    }
 
-	    // XXX: insert appropriate spacing
+	    if (do_usual) {
+		// XXX: insert appropriate spacing
 
-	    if (q.new_hlist != null)
-		outlist = outlist.concat (q.new_hlist);
+		if (q.new_hlist != null)
+		    outlist = outlist.concat (q.new_hlist);
 
-	    // XXX: penalties?
+		// XXX: penalties?
 
-	    r_type = t;
+		r_type = t;
+	    }
+
 	    i++;
 	}
 
