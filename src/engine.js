@@ -1636,9 +1636,13 @@ var Engine = (function Engine_closure () {
 	var t = this._scan_signs ();
 	var negfactor = t[0], tok = t[1];
 
-	var v = tok.tocmd (this).as_glue (this);
-	if (v != null)
-	    return v.intproduct (negfactor);
+	// Here's another case where we need to use get_valtype() because if
+	// we get the valref instance, we may eat upcoming tokens that will
+	// then be needed when scan_dimen() also tries to examine the value
+	// type.
+	var cmd = tok.tocmd (this);
+	if (cmd.get_valtype () == T_GLUE)
+	    return tok.tocmd (this).as_glue (this).intproduct (negfactor);
 
 	var g = new Glue ();
 	this.push (tok);
