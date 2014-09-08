@@ -901,8 +901,13 @@ var Engine = (function Engine_closure () {
 	// Not happy about this recursion but other functions really want the
 	// page builder to operate atomically.
 
-	while (this._running_output)
-	    this.step ();
+	while (this._running_output) {
+	    var rv = this.step ();
+	    if (rv === NeedMoreData)
+		throw new TexInternalError ('can\'t fetch more data inside output routine');
+	    if (rv === EOF)
+		throw new TexRuntimeError ('EOF inside output routine??');
+	}
     };
 
     proto.ship_it = function Engine_ship_it (box) {
