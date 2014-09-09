@@ -257,6 +257,8 @@ var HBox = (function HBox_closure () {
     };
 
     proto.traverse = function HBox_traverse (x0, y0, callback) {
+	if (this.list.length == 0)
+	    return; // ignore unglued error in this case.
 	if (this.glue_state == 0)
 	    throw new TexInternalError ('cannot traverse unglued box ' + this);
 
@@ -427,6 +429,8 @@ var VBox = (function VBox_closure () {
     };
 
     proto.traverse = function VBox_traverse (x0, y0, callback) {
+	if (this.list.length == 0)
+	    return; // ignore unglued error in this case.
 	if (this.glue_state == 0)
 	    throw new TexInternalError ('cannot traverse unglued box' + this);
 
