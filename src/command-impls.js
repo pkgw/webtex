@@ -1756,6 +1756,28 @@ commands.mathchoice = function cmd_mathchoice (engine) {
 };
 
 
+function _cmd_limit_switch (engine, desc, value) {
+    // T:TP 1158, 1159
+    engine.trace (desc);
+    var last = engine.get_last_listable ();
+
+    if (last == null ||
+	!(last instanceof AtomNode) ||
+	last.ltype != MT_OP)
+	throw new TexRuntimeError ('\\' + desc + ' must follow an operator');
+
+    last.limtype = value;
+};
+
+commands.nolimits = function cmd_nolimits (engine) {
+    _cmd_limit_switch (engine, 'nolimits', LIMTYPE_NOLIMITS);
+};
+
+commands.limits = function cmd_limits (engine) {
+    _cmd_limit_switch (engine, 'limits', LIMTYPE_LIMITS);
+};
+
+
 // Hyphenation
 
 commands.patterns = function cmd_patterns (engine) {
