@@ -1392,6 +1392,31 @@ commands.shipout = function cmd_shipout (engine) {
 };
 
 
+commands.insert = function cmd_insert (engine) {
+    var num = engine.scan_char_code ();
+    if (num == 255)
+	throw new TexRuntimeError ('\\insert255 is forbidden');
+
+    // T:TP 1099: "begin_insert_or_adjust"
+    engine.trace ('insert ' + num);
+    engine.scan_left_brace ();
+
+    // T:TP 1070: "normal_paragraph"
+    engine.set_parameter (T_INT, 'looseness', 0);
+    engine.set_parameter (T_DIMEN, 'hangindent', new Dimen ());
+    engine.set_parameter (T_INT, 'hangafter', 1);
+    // TODO: clear \parshape info, which nests in the EqTb.
+
+    engine.nest_eqtb ();
+    engine.enter_mode (M_IVERT);
+    engine.enter_group ('insert', function (eng) {
+	var list = engine.leave_mode ();
+	engine.unnest_eqtb ();
+	// T:TP 1100 should go here.
+	engine.warn ('ignoring finished insert #' + num);
+    });
+};
+
 // "Special registers" with single global values:
 //
 // ints: \prevgraf, \deadcycles, \insertpenalties, \spacefactor.
