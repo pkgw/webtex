@@ -1701,6 +1701,17 @@ commands.scriptscriptfont = new FontFamilyCommand (MS_SCRIPTSCRIPT, 'scriptscrip
 
 // Math commands
 
+commands.mathord = new MathComponentCommand ('mathord', MT_ORD);
+commands.mathop = new MathComponentCommand ('mathop', MT_OP);
+commands.mathbin = new MathComponentCommand ('mathbin', MT_BIN);
+commands.mathrel = new MathComponentCommand ('mathrel', MT_REL);
+commands.mathopen = new MathComponentCommand ('mathopen', MT_OPEN);
+commands.mathclose = new MathComponentCommand ('mathclose', MT_CLOSE);
+commands.mathpunct = new MathComponentCommand ('mathpunct', MT_PUNCT);
+commands.mathinner = new MathComponentCommand ('mathinner', MT_INNER);
+commands.underline = new MathComponentCommand ('underline', MT_UNDER);
+commands.overline = new MathComponentCommand ('overline', MT_OVER);
+
 commands.mathchoice = function cmd_mathchoice (engine) {
     // T:TP 1171-1174
     engine.trace ('mathchoice');
