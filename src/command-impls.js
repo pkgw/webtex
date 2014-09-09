@@ -1778,6 +1778,11 @@ commands.limits = function cmd_limits (engine) {
 };
 
 
+commands.mkern = function cmd_mkern (engine) {
+    throw new TexInternalError ('must implement math_kern correctly in math.js');
+};
+
+
 // Hyphenation
 
 commands.patterns = function cmd_patterns (engine) {

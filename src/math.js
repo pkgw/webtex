@@ -483,6 +483,11 @@ var mathlib = (function mathlib_closure () {
 	return MathState;
     }) ();
 
+    function math_kern (state, p) {
+	// XXX TODO: if this is a special \mkern kern, we need to scale its
+	// size by the current math unit (stored in 'state'). See T:TP 717.
+    }
+
     function make_ord (state, mlist, i) {
 	var q = mlist[i];
 
@@ -775,7 +780,6 @@ var mathlib = (function mathlib_closure () {
 
     ml.mlist_to_hlist = function mlist_to_hlist (engine, mlist, style, cramped, penalties) {
 	var state = new MathState (engine, style, cramped);
-	var m_len = mlist.length;
 	var i = 0;
 	var r_type = MT_OP;
 	var r = null;
@@ -784,7 +788,7 @@ var mathlib = (function mathlib_closure () {
 
 	state.update_sizes ();
 
-	while (i < m_len) {
+	while (i < mlist.length) {
 	    var delta = 0;
 	    var q = mlist[i];
 	    var p = null;
@@ -808,7 +812,7 @@ var mathlib = (function mathlib_closure () {
 		case MT_PUNCT:
 		case MT_LEFT:
 		    q.ltype = MT_ORD;
-		    continue;
+		    continue; // note: intentionally not incrementing 'i'
 		}
 	    }
 
@@ -871,12 +875,16 @@ var mathlib = (function mathlib_closure () {
 	    case LT_PENALTY:
 	    case LT_IO:
 	    case LT_DISCRETIONARY:
-		// XXX goto done_with_node
+		// goto done_with_node:
+		process_atom = check_dimensions = remember_as_prev = false;
+		break;
+	    case LT_KERN:
+		math_kern (state, q);
+		// goto done_with_node:
 		process_atom = check_dimensions = remember_as_prev = false;
 		break;
 	    case LT_RULE:
 	    case LT_GLUE:
-	    case LT_KERN:
 		throw new TexInternalError ('unimplemented not-quite-math ' + q);
 	    default:
 		throw new TexInternalError ('unrecognized math ' + q);
@@ -941,7 +949,7 @@ var mathlib = (function mathlib_closure () {
 	i = 0;
 	var outlist = [];
 
-	while (i < m_len) {
+	while (i < mlist.length) {
 	    var q = mlist[i];
 	    var t = MT_ORD;
 	    // XXX: penalty
@@ -995,7 +1003,9 @@ var mathlib = (function mathlib_closure () {
 	    case LT_MARK:
 	    case LT_GLUE:
 	    case LT_KERN:
-		throw new TexInternalError ('implement regular nodes');
+		outlist.push (q);
+		do_usual = false;
+		break;
 	    default:
 		throw new TexInternalError ('unexpected math node ' + q);
 	    }

@@ -1050,7 +1050,7 @@ def make_left_right (q, style, max_d, max_h): #<762>
 
 
 def math_kern (p, m): #<717>
-    # p is a Glue node
+    # p is a Kern node
     # m is the current math unit
 
     if p.subtype == MuGlue:
