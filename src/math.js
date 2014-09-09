@@ -570,7 +570,7 @@ var mathlib = (function mathlib_closure () {
 				break;
 			    }
 
-			    if (op > q)
+			    if (op > 3)
 				return;
 			    if (q.nuc instanceof MathTextChar)
 				q.nuc = q.nuc.as_plain_char ();
@@ -579,7 +579,7 @@ var mathlib = (function mathlib_closure () {
 		    }
 		}
 
-		if (((data >> 24) & 0xFF) > 0x80) // skip_byte > stop_flag?
+		if (((data >> 24) & 0xFF) >= 0x80) // skip_byte > stop_flag?
 		    return;
 
 		ofs += ((data >> 24) & 0xFF) + 1; // ofs += skip_byte + 1
