@@ -293,7 +293,7 @@ var mathlib = (function mathlib_closure () {
 	}
     }
 
-    ml.set_math_char = function mathlib_set_math_char (ord, mathcode, cur_fam) {
+    ml.set_math_char = function mathlib_set_math_char (engine, ord, mathcode, cur_fam) {
 	// T:TP 1155.
 	if (mathcode >= 0x8000) {
 	    // Treat as active character. Right semantics here?

@@ -716,7 +716,7 @@ var InsertLetterCommand = (function InsertLetterCommand_closure () {
 	    engine.trace ('math-accum letter ' + escchr (this.ord) + ' -> 0x' +
 			  mc.toString (16));
 	    var fam = engine.get_parameter (T_INT, 'fam');
-	    var node = mathlib.set_math_char (this.ord, mc, fam);
+	    var node = mathlib.set_math_char (engine, this.ord, mc, fam);
 	    if (node != null) // may get null if character is active.
 		engine.accum (node);
 	    return;
@@ -750,7 +750,7 @@ var InsertOtherCommand = (function InsertOtherCommand_closure () {
 	    engine.trace ('math-accum other ' + escchr (this.ord) + ' -> 0x' +
 			  mc.toString (16));
 	    var fam = engine.get_parameter (T_INT, 'fam');
-	    var node = mathlib.set_math_char (this.ord, mc, fam);
+	    var node = mathlib.set_math_char (engine, this.ord, mc, fam);
 	    if (node != null) // may get null if character is active.
 		engine.accum (node);
 	    return;
@@ -804,7 +804,7 @@ var GivenCharCommand = (function GivenCharCommand_closure () {
 	    engine.trace ('math-accum given-char ' + escchr (this.ord) + ' -> 0x' +
 			  mc.toString (16));
 	    var fam = engine.get_parameter (T_INT, 'fam');
-	    var node = mathlib.set_math_char (this.ord, mc, fam);
+	    var node = mathlib.set_math_char (engine, this.ord, mc, fam);
 	    if (node != null) // may get null if character is active.
 		engine.accum (node);
 	    return;
@@ -868,7 +868,7 @@ var GivenMathcharCommand = (function GivenMathcharCommand_closure () {
 
 	engine.trace ('given-math 0x' + this.mathchar.toString (16));
 	var fam = engine.get_parameter (T_INT, 'fam');
-	var node = mathlib.set_math_char (this.mathchar & 0xFF, this.mathchar, fam);
+	var node = mathlib.set_math_char (engine, this.mathchar & 0xFF, this.mathchar, fam);
 	if (node != null) // may get null if character is active.
 	    engine.accum (node);
     }
