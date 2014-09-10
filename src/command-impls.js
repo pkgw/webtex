@@ -597,16 +597,8 @@ commands.ifcat = function cmd_ifcat (engine) {
 
 commands.ifx = function cmd_ifx (engine) {
     var t1 = engine.next_tok_throw (), t2 = engine.next_tok_throw (), result;
-
-    if (t1.kind != t2.kind)
-	result = false;
-    else if (t1.ischar ())
-	result = (t1.ord == t2.ord);
-    else {
-	var cmd1 = t1.tocmd (engine), cmd2 = t2.tocmd (engine);
-	result = cmd1.samecmd (cmd2);
-    }
-
+    var cmd1 = t1.tocmd (engine), cmd2 = t2.tocmd (engine);
+    result = cmd1.samecmd (cmd2);
     engine.trace ('ifx ' + t1 + ' ~ ' + t2 + ' => ' + result);
     engine.handle_if (result);
 };
