@@ -1705,6 +1705,10 @@ var Engine = (function Engine_closure () {
 	if (tok === NeedMoreData || tok === EOF)
 	    throw tok;
 
+	var cmd = tok.tocmd (this);
+	if (cmd.get_valtype () == T_TOKLIST)
+	    return cmd.as_valref (this).get (this);
+
 	// TODO: \tokpar=<toklist register or toklist param>
 	if (!tok.iscat (C_BGROUP))
 	    throw new TexSyntaxError ('expected { in toklist assignment; got ' + tok);

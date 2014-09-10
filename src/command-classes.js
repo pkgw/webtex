@@ -501,7 +501,7 @@ var MathShiftCommand = (function MathShiftCommand_closure () {
 	    if (tok.tocmd (engine) instanceof MathShiftCommand &&
 		(m == M_VERT || m == M_HORZ || m == M_DMATH)) { // XXX don't understand mode check; see T:TP
 		    engine.end_graf ();
-		engine.enter_math (DM_MATH, true);
+		engine.enter_math (M_DMATH, true);
 		// XXX: pre_display_size_code to an overhang of prev graf (T:TP 1145)
 		// XXX: display_width_code to width of display
 		// XXX: display_indent_code to its indent
