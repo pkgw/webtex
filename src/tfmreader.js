@@ -107,8 +107,8 @@ var TfmReader = WEBTEX.TfmReader = (function TfmReader_closure () {
 	var ic_ofs = depth_ofs + num_dps * 4;
 	var lk_ofs = ic_ofs + num_ics * 4;
 	var kt_ofs = lk_ofs + num_lks * 4;
-	var xt_ofs = kt_ofs + num_kns * 4;
-	var fp_ofs = xt_ofs + num_xcs * 4;
+	var xc_ofs = kt_ofs + num_kns * 4;
+	var fp_ofs = xc_ofs + num_xcs * 4;
 
 	// T:TP 568. scale_factor is a JS int. If it's is < 0, it's the
 	// negative of a scale factor to apply to the design size, with -1000
@@ -146,9 +146,15 @@ var TfmReader = WEBTEX.TfmReader = (function TfmReader_closure () {
 	for (var i = 0; i < num_ics; i++)
 	    ics[i] = this.fw2s (dv.getUint32 (ic_ofs + 4 * i, false));
 
+	// Read in other necessary tables.
+
 	this.ligkern = new Array (num_lks);
 	for (var i = 0; i < num_lks; i++)
 	    this.ligkern[i] = dv.getUint32 (lk_ofs + 4 * i, false);
+
+	this.extensible = new Array (num_xcs);
+	for (var i = 0; i < num_xcs; i++)
+	    this.extensible[i] = dv.getUint32 (xc_ofs + 4 * i, false);
 
 	widths[0] = null; // TeX defines wd=0 to always mean invalid character.
 
@@ -204,7 +210,15 @@ var TfmReader = WEBTEX.TfmReader = (function TfmReader_closure () {
 	return this.ord_tags[ord] == TAG_LIG;
     };
 
-    proto.rembyte = function TfmReader_is_lig (ord) {
+    proto.is_list = function TfmReader_is_list (ord) {
+	return this.ord_tags[ord] == TAG_LIST;
+    };
+
+    proto.is_extensible = function TfmReader_is_extensible (ord) {
+	return this.ord_tags[ord] == TAG_EXT;
+    };
+
+    proto.rembyte = function TfmReader_rembyte (ord) {
 	return this.ord_rembytes[ord];
     };
 
@@ -235,6 +249,12 @@ var TfmReader = WEBTEX.TfmReader = (function TfmReader_closure () {
 	rv.height.set_to (this.ord_heights[ord]);
 	rv.depth.set_to (this.ord_depths[ord]);
 	return rv;
+    };
+
+    proto.extensible_recipe = function TfmReader_extensible_recipe (ord) {
+	if (!this.is_extensible (ord))
+	    throw new TexInternalError ('no extensible recipe for ' + ord);
+	return this.extensible[this.ord_rembytes[ord]];
     };
 
     return TfmReader;

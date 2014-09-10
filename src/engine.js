@@ -1513,6 +1513,11 @@ var Engine = (function Engine_closure () {
 	return this.scan_int ().rangecheck (this, 0, 32767).value;
     };
 
+    proto.scan_int_27bit = function Engine_scan_int_27bit () {
+	// note: returns JS integer, not TexInt.
+	return this.scan_int ().rangecheck (this, 0, 0x7FFFFFF).value;
+    };
+
     proto.scan_dimen = function Engine_scan_dimen (mumode, infmode) {
 	/* `infmode` says whether infinities are allowed. If true, the return
 	 * value is [dimen, infinity_order] rather than just the dimension. */

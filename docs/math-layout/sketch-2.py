@@ -210,3 +210,120 @@ def make_scripts (q, delta): #<756>
         while p.next is not None:
             p = p.next
         p.next = x
+
+
+
+def var_delimiter (d, s, v): #<706>
+    # s: current style
+    # v: desired delim height
+
+    f = None # null_font; selected font
+    c = None # selected ord
+    w = 0 # largest height seen so far
+    z = d.small_fam # fam of current attempt
+    x = d.small_char # ord of current attempt
+    foundit = False
+
+    for z, x in zip ((d.small_fam, d.large_fam), (d.small_char, d.large_char)):
+        #<707>
+        if z == 0 and (x is invalid): # one-off
+            continue
+        if foundit:
+            break
+
+        for (z = z + s; z >= 0; z -= 16):
+            g = get_math_font (~z, s) # one-off family/font breakdown
+            if g is None:
+                continue
+
+            #<708>
+            y = x # iterator so that we preserve x
+            if (y not in font g):
+                continue
+
+            while True:
+                q = g.char_info (y)
+                if not char_exists (q):
+                    break
+
+                if q.char_tag == Ext:
+                    f = g
+                    c = y
+                    # yargh pain to indicate success:
+                    foundit = True
+                    z = -1
+                    break
+
+                u = g.char_height (q) + g.char_depth (q) # one-off
+                if u > w:
+                    f = g
+                    c = y
+                    w = u
+                    if u >= v:
+                        foundit = True
+                        z = -1
+                        break
+
+                if q.char_tag != List:
+                    break
+
+                y = q.rem_byte
+            #</708>
+        #</707>
+
+    # uses: f, q, c,
+
+    if f is None:
+        b = HBox ()
+        b.width = get_dimen_par ('nulldelimiterspace')
+        #<710>
+    elif q.char_tag != Ext:
+        b = char_box (f, c)
+    else:
+        #<713>
+        b = VBox ()
+        r = font_info[exten_base[f] + q.rem_byte].qqqq # ??
+        #<714>
+        c = r.ext_rep
+        u = height_plus_depth (f, c)
+        w = 0
+        q = f.char_info (c)
+        b.width = f.char_width (q) + f.char_italic (q)
+        c = r.ext_bot
+        if c is not None:
+            w += height_plus_depth (f, c)
+        c = r.ext_mid
+        if c is not None:
+            w += height_plus_depth (f, c)
+        c = r.ext_top
+        if c is not None:
+            w += height_plus_depth (f, c)
+        n = 0
+        if u > 0:
+            while w < v:
+                w += u
+                n += 1
+                if r.ext_mid is not None:
+                    w += u
+        #</714>
+        c = r.ext_bot
+        if c is not None:
+            stack_into_box (b, f, c)
+        c = r.ext_rep
+        for m in xrange (1, n+1):
+            stack_into_box (b, f, c)
+        c = r.ext_mid
+        if c is not None:
+            stack_into_box (b, f, c)
+            c = r.ext_rep
+            for m in xrange (1, n+1):
+                stack_into_box (b, f, c)
+        c = r.ext_top
+        if c is not None:
+            stack_into_box (b, f, c)
+        b.depth = w - b.height
+        #</713>
+    #</710>
+
+    b.shift_amount = half (b.height - b.depth) - axis_height(s)
+    return b

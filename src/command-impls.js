@@ -1729,6 +1729,23 @@ commands.mathinner = new MathComponentCommand ('mathinner', MT_INNER);
 commands.underline = new MathComponentCommand ('underline', MT_UNDER);
 commands.overline = new MathComponentCommand ('overline', MT_OVER);
 
+commands.radical = function cmd_radical (engine) {
+    // T:TP 1162-1163
+    engine.trace ('radical');
+
+    if (engine.mode () != M_MATH && engine.mode () != M_DMATH)
+	throw new TexRuntimeError ('\\radical may only be used in math mode');
+
+    var n = new RadicalNode ();
+    engine.accum (n);
+
+    n.left_delim = mathlib.scan_delimiter (engine, true);
+    mathlib.scan_math (engine, function (eng, subitem) {
+	engine.trace ('... radical got: ' + subitem);
+	n.nuc = subitem;
+    });
+};
+
 commands.mathchoice = function cmd_mathchoice (engine) {
     // T:TP 1171-1174
     engine.trace ('mathchoice');

@@ -984,6 +984,10 @@ var Font = (function Font_closure () {
 	this.dimens[number - 1] = value;
     };
 
+    proto.has_ord = function Font_has_ord (ord) {
+	return this.get_metrics ().has_ord (ord);
+    };
+
     proto.box_for_ord = function Font_box_for_ord (ord) {
 	if (this.metrics_error != null)
 	    throw this.metrics_error;

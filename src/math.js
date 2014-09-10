@@ -386,6 +386,37 @@ var mathlib = (function mathlib_closure () {
 	});
     };
 
+    ml.scan_delimiter = function mathlib_scan_delimiter (engine, is_radical) {
+	var val = null;
+
+	if (is_radical)
+	    val = engine.scan_int_27bit ();
+	else {
+	    var tok = null; // T:TP 404 -- next non-blank non-relax non-call token:
+
+	    while (true) {
+		tok = this.next_x_tok_throw ();
+		if (!tok.isspace (this) && !tok.iscmd (this, 'relax'))
+		    break;
+	    }
+
+	    var cmd = tok.tocmd (engine);
+	    if (cmd instanceof InsertLetterCommand ||
+		cmd instanceof InsertOtherCommand)
+		val = engine.get_code (CT_DELIM, cmd.ord);
+	    else
+		// XXX: not handling \delimiter
+		throw new TexRuntimeError ('expected math delimiter; got ' + tok);
+	}
+
+	var d = new Delimiter ();
+	d.small_fam = (val >> 20) & 0xF;
+	d.small_ord = (val >> 12) & 0xFF;
+	d.large_fam = (val >> 8) & 0xF;
+	d.large_ord = (val >> 0) & 0xFF;
+	return d;
+    };
+
     var SymDimens = {
 	MathXHeight: 5,
 	MathQuad: 6,
@@ -480,8 +511,19 @@ var mathlib = (function mathlib_closure () {
 	    return res;
 	};
 
+	proto.to_cramped = function MathState_to_cramped () {
+	    var res = this.clone ();
+	    res.cramped = true;
+	    return res;
+	};
+
 	return MathState;
     }) ();
+
+
+    function height_plus_depth (metrics, ord) {
+	return metrics.height (ord).value + metrics.depth (ord).value;
+    }
 
     function math_kern (state, p) {
 	// XXX TODO: if this is a special \mkern kern, we need to scale its
@@ -599,6 +641,17 @@ var mathlib = (function mathlib_closure () {
 	return b;
     }
 
+    function vpack_natural (engine, vlist) {
+	var b = new VBox ();
+
+	if (vlist != null) {
+	    b.list = vlist;
+	    b.set_glue (engine, false, new Dimen ());
+	}
+
+	return b;
+    }
+
     function clean_box (state, p) {
 	var cur_mlist = null;
 	var q = null;
@@ -629,6 +682,158 @@ var mathlib = (function mathlib_closure () {
 	}
 
 	return x;
+    }
+
+    function fraction_rule (t) {
+	var r = new Rule ();
+	r.height.set_to (t);
+	return r;
+    }
+
+    function overbar (b, k, t) {
+	t = new Scaled (t); // this auto-calls TexInt.xcheck()
+	k = new Scaled (k);
+	return vpack_natural ([new Kern (Dimen.new_scaled (t)),
+			       fraction_rule (Dimen.new_scaled (t)),
+			       new Kern (Dimen.new_scaled (k)),
+			       b]);
+    }
+
+    function var_delimiter (state, delim, v) {
+	// delim: Delimiter
+	// v: desired delimiter height
+
+	var f = null; // selected font
+	var c = null; // selected ord
+
+	// First we figure out the right size character to use.
+
+	var foundit = false;
+	var w = 0; // best seen height so far
+	var info = [[delim.small_fam, delim.small_ord],
+		    [delim.large_fam, delim.large_ord]];
+
+	for (var i = 0; i < 2; i++) {
+	    var z = info[i][0]; // fam of current attempt
+	    var x = info[i][1]; // ord of current attempt
+
+	    if (foundit)
+		break;
+	    if (z == 0 && x == null)
+		continue;
+
+	    for (var s = state.size; s > 0; s--) { // size in current attempt
+		var g = state.engine.get_font_family (s, z);
+		if (g == null)
+		    continue;
+
+		var m = g.get_metrics ();
+		var y = x;
+
+		while (true) {
+		    if (!m.has_ord (y))
+			break;
+
+		    if (m.is_extensible (y)) {
+			// Extensibles can get arbitrarily large, so we must
+			// be done.
+			f = g;
+			c = y;
+			// sigh, gotos can be kinda useful:
+			foundit = true;
+			s = -1;
+			break;
+		    }
+
+		    var u = m.height (y).value + m.depth (y).value;
+		    if (u > w) {
+			f = g;
+			c = y;
+			w = u;
+
+			if (u >= v) {
+			    // big enough; go with it
+			    foundit = true;
+			    s = -1;
+			    break;
+			}
+		    }
+
+		    if (!m.is_list (y))
+			break;
+
+		    y = m.rembyte (y);
+		}
+	    }
+	}
+
+	// Now, build the delimiter character.
+	var b = null;
+
+	if (f == null) {
+	    b = new HBox ();
+	    b.width.set_to (state.engine.get_parameter (T_DIMEN, 'nulldelimiterspace'));
+	} else if (!f.get_metrics ().is_extensible (c)) {
+	    b = new HBox ();
+	    b.list = [new Character (f, c)];
+	    b.set_glue (state.engine, false, new Dimen ());
+	} else {
+	    // Need to build a giant delimiter manually :-(
+	    b = new VBox ();
+	    var m = f.get_metrics ();
+	    var r = m.extensible_recipe (c);
+	    var rep = (r >>  0) & 0xFF;
+	    var bot = (r >>  8) & 0xFF;
+	    var mid = (r >> 16) & 0xFF;
+	    var top = (r >> 24) & 0xFF;
+
+	    c = rep;
+	    var u = height_plus_depth (m, c);
+	    w = 0;
+	    b.width.set_to (m.width (c));
+	    b.width.advance (m.italic_correction (c));
+
+	    if (bot != 0)
+		w += height_plus_depth (m, bot);
+
+	    if (mid != 0)
+		w += height_plus_depth (m, mid);
+
+	    if (top != 0)
+		w += height_plus_depth (m, top);
+
+	    // how many pieces?
+	    var n = 0;
+	    if (u > 0) {
+		while (w < v) {
+		    w += u;
+		    n += 1;
+		    if (mid != 0)
+			w += u;
+		}
+	    }
+
+	    if (bot != 0)
+		stack_into_box (b, f, bot);
+
+	    for (var i = 0; i < n; i++)
+		stack_into_box (b, f, rep);
+
+	    if (mid != 0) {
+		stack_into_box (b, f, mid);
+		for (var i = 0; i < n; i++)
+		    stack_into_box (b, f, rep);
+	    }
+
+	    if (top != 0)
+		stack_into_box (b, f, top);
+
+	    b.depth.sp.value = w - b.height.sp.value;
+	}
+
+	b.shift_amount.sp.value = half (b.height.sp.value - b.depth.sp.value)
+	    - state.sym_dimen (state.size, SymDimens.AxisHeight);
+	return b;
     }
 
     function make_op (state, q) {
@@ -699,6 +904,31 @@ var mathlib = (function mathlib_closure () {
 
 	q.new_hlist = v;
 	return delta;
+    }
+
+    function make_radical (state, q) {
+	var drt = state.ext_dimen (ExtDimens.DefaultRuleThickness).sp.value;
+	var mxh = state.sym_dimen (state.size, SymDimens.MathXHeight).sp.value;
+
+	// T:TP 737
+	var x = clean_box (state.to_cramped (), q.nuc);
+	var clr;
+
+	if (state.style == MS_DISPLAY)
+	    clr = drt + Math.abs (mxh) >> 2;
+	else {
+	    clr = drt;
+	    clr += Math.abs (clr) >> 2;
+	}
+
+	var y = var_delimiter (state, q.left_delim,
+			       x.height.sp.value + x.depth.sp.value + clr + drt);
+	var delta = y.depth.sp.value - (x.height.sp.value + x.depth.sp.value + clr);
+	if (delta > 0)
+	    clr += half (delta);
+
+	y.shift_amount.sp.value = -(x.height.sp.value + clr);
+	q.nuc = hpack_natural (state.engine, [y, overbar (x, clr, y.height.sp.value)]);
     }
 
     function make_scripts (engine, state, q, delta) {
@@ -842,10 +1072,12 @@ var mathlib = (function mathlib_closure () {
 	    case MT_OP:
 		delta = make_op (state, q);
 		break;
+	    case MT_RADICAL:
+		make_radical (state, q);
+		break;
 	    case MT_FRACTION:
 	    case MT_OPEN:
 	    case MT_INNER:
-	    case MT_RADICAL:
 	    case MT_OVER:
 	    case MT_UNDER:
 	    case MT_ACCENT:
