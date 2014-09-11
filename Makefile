@@ -10,6 +10,7 @@ sharedjs = \
   src/values.js \
   src/boxes.js \
   src/math.js \
+  src/align.js \
   src/valrefs.js \
   src/util.js \
   src/token.js \
