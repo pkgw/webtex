@@ -407,6 +407,7 @@ function _cmd_def (engine, cname, expand_replacement) {
 	    if (tok.iscat (C_BGROUP)) {
 		tmpl_toks.push (tok);
 		end_with_lbrace = true;
+		engine.align_state--; // TTP 394 ... I think??
 		break;
 	    }
 

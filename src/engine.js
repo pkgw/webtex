@@ -1229,11 +1229,9 @@ var Engine = (function Engine_closure () {
 	// un-does changes to align_state that will have just happened.
 	this.inputstack.push_toklist ([tok]);
 
-	var cmd = tok.tocmd (this);
-
-	if (cmd instanceof BeginGroupCommand)
+	if (tok.iscat (C_BGROUP))
 	    this.align_state -= 1;
-	else if (cmd instanceof EndGroupCommand)
+	else if (tok.iscat (C_EGROUP))
 	    this.align_state += 1;
     };
 
@@ -1272,16 +1270,14 @@ var Engine = (function Engine_closure () {
 	if (tok === EOF || tok === NeedMoreData)
 	    return tok;
 
-	///if (this.align_state == 0 &&
-	///    (tok.tocmd (this) instanceof AlignTabCommand ||
-	///     tok.iscmd (this, 'span') ||
-	///     tok.iscmd (this, 'cr') ||
-	///     tok.iscmd (this, 'crcr'))) {
-
-	if (tok.tocmd (this) instanceof AlignTabCommand ||
-	     tok.iscmd (this, 'span') ||
-	     tok.iscmd (this, 'cr') ||
-	     tok.iscmd (this, 'crcr')) {
+	if (tok.iscat (C_BGROUP)) {
+	    this.align_state += 1;
+	} else if (tok.iscat (C_EGROUP)) {
+	    this.align_state -= 1;
+	} else if (tok.tocmd (this) instanceof AlignTabCommand ||
+		   tok.iscmd (this, 'span') ||
+		   tok.iscmd (this, 'cr') ||
+		   tok.iscmd (this, 'crcr')) {
 	    this.trace ('next_tok aligney: ' + tok + ' as=' + this.align_state);
 
 	    if (this.align_state == 0) {
@@ -1462,9 +1458,14 @@ var Engine = (function Engine_closure () {
 	    if (tok === NeedMoreData)
 		throw tok;
 
-	    if (tok.ischar ())
-		// FIXME: possible align_state futzing
+	    if (tok.ischar ()) {
+		// Undo align-state shift that we don't want here.
+		if (tok.iscat (C_BGROUP))
+		    this.align_state--;
+		else if (tok.iscat (C_EGROUP))
+		    this.align_state++;
 		return new TexInt (negfactor * tok.ord);
+	    }
 
 	    var csname = tok.name;
 	    if (csname.length == 1)
