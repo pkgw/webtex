@@ -244,10 +244,10 @@ var InputStack = (function InputStack_closure () {
 	return this.next_tok ();
     };
 
-    proto.push_toklist = function InputStack_push_toklist (toks) {
+    proto.push_toklist = function InputStack_push_toklist (toks, callback) {
 	this.inputs.push (new ToklistInput (toks));
 	this.next_toknums.push (0);
-	this.cleanups.push (null);
+	this.cleanups.push (callback || null);
     };
 
     proto.push_linebuf = function InputStack_push_linebuf (lb, callback) {

@@ -439,6 +439,9 @@ var Engine = (function Engine_closure () {
 	this.boxop_stack = [];
 	this.conditional_stack = [];
 
+	this.align_stack = [];
+	this.align_state = 1000000;
+
 	this.assign_flags = 0;
 	this.after_assign_token = null;
 
@@ -455,6 +458,7 @@ var Engine = (function Engine_closure () {
 	engine_init_param_cseqs (this);
 	this.commands['<space>'] = new Command.catcode_commands[C_SPACE] (O_SPACE);
 	this.commands['<end-group>'] = new Command.catcode_commands[C_EGROUP] (O_LEFT_BRACE);
+	this.commands['<endv>'] = new commands._endv_ ();
 
 	// T:TP sec 240; has to go after $init_parameters
 	this.set_parameter (T_INT, 'mag', 1000);
@@ -1219,12 +1223,12 @@ var Engine = (function Engine_closure () {
 	this.inputstack.push_toklist ([tok]);
     };
 
-    proto.push_toks = function Engine_push_toks (toks) {
+    proto.push_toks = function Engine_push_toks (toks, callback) {
 	if (toks instanceof Toklist)
 	    toks = toks.toks; // convenience.
 	if (!(toks instanceof Array))
 	    throw new TexInternalError ('illegal push_toks argument: ' + toks);
-	this.inputstack.push_toklist (toks);
+	this.inputstack.push_toklist (toks, callback);
     };
 
     proto.maybe_push_toklist = function Engine_maybe_push_toklist (name) {
@@ -1249,7 +1253,46 @@ var Engine = (function Engine_closure () {
     proto.next_tok = function Engine_next_tok () {
 	if (this._force_end)
 	    return EOF;
-	return this.inputstack.next_tok ();
+
+	var tok = this.inputstack.next_tok ();
+	if (tok === EOF || tok === NeedMoreData)
+	    return tok;
+
+	///if (this.align_state == 0 &&
+	///    (tok.tocmd (this) instanceof AlignTabCommand ||
+	///     tok.iscmd (this, 'span') ||
+	///     tok.iscmd (this, 'cr') ||
+	///     tok.iscmd (this, 'crcr'))) {
+
+	if (tok.tocmd (this) instanceof AlignTabCommand ||
+	     tok.iscmd (this, 'span') ||
+	     tok.iscmd (this, 'cr') ||
+	     tok.iscmd (this, 'crcr')) {
+	    this.trace ('next_tok aligney: ' + tok + ' as=' + this.align_state);
+
+	    if (this.align_state == 0) {
+		// T:TP 789 -- insert "v" part of align statement
+		var l = this.align_stack.length;
+		if (l == 0)
+		    throw new TexRuntimeError ('interwoven align preambles are not allowed');
+
+		// TeX inserts \endtemplate; however, \endtemplate just gets
+		// transformed to \endv; \endtemplate has some semi-magical
+		// error checking properties. We're not interested in that.
+		this.push (Token.new_cmd (this.commands['<endv>']));
+
+		var astate = this.align_stack[l-1];
+		if (!astate.col_is_omit) {
+		    this.push_toks (astate.columns[astate.cur_col].v_tmpl);
+		}
+
+		this.align_state = 1000000;
+		astate.col_ender = tok.tocmd (this);
+		return this.next_tok ();
+	    }
+	}
+
+	return tok;
     };
 
     proto.next_x_tok = function Engine_next_x_tok () {
@@ -2174,6 +2217,345 @@ var Engine = (function Engine_closure () {
 
 	if (is_outer)
 	    this.set_parameter (T_INT, 'fam', -1);
+    };
+
+    // Alignments
+
+    function _end_align (eng) {
+	throw new TexInternalError ('expected end of alignment');
+    }
+    _end_align.is_align = true;
+
+    proto.init_align = function Engine_init_align (is_valign) {
+	// T:TP 774
+	var astate = new AlignState ();
+	this.align_stack.push (astate);
+	this.align_state = -1000000;
+
+	this.nest_eqtb ();
+
+	switch (this.mode ()) {
+	case M_DMATH:
+	    if (this.get_last_listable () != null)
+		// XXX todo: or if there is an incompleat_node
+		throw new TexRuntimeError ('cannot use alignments in non-empty math displays');
+	    this.enter_mode (M_IVERT);
+	    // XXX: ignoring prev_depth
+	    break;
+	case M_VERT:
+	    this.enter_mode (M_IVERT);
+	    break;
+	case M_HORZ:
+	    this.enter_mode (M_RHORZ);
+	    break;
+	default:
+	    this.enter_mode (this.mode ());
+	    break;
+	}
+
+	// XXX this is scan_spec (TTP:645), which is duplicated in _handle_box.
+
+	var is_exact, spec;
+
+	if (this.scan_keyword ('to')) {
+	    is_exact = true;
+	    spec = this.scan_dimen ();
+	} else if (this.scan_keyword ('spread')) {
+	    is_exact = false;
+	    spec = this.scan_dimen ();
+	} else {
+	    is_exact = false;
+	    spec = new Dimen ();
+	}
+
+	this.scan_left_brace ();
+
+	// T:TP 777.
+	this.align_state = -1000000; // seems redundant but who knows?
+	var tok = null;
+
+	while (true) {
+	    astate.tabskips.push (this.get_parameter (T_GLUE, 'tabskip').clone ());
+
+	    if (tok != null && tok.iscmd (this, 'cr'))
+		break;
+
+	    var col = new AlignColumn ();
+
+	    while (true) {
+		// T:TP 783
+		tok = alignlib.get_preamble_token (this);
+		var cmd = tok.tocmd (this);
+
+		if (cmd instanceof MacroParameterCommand)
+		    break;
+
+		if (cmd instanceof AlignTabCommand ||
+		    cmd.samecmd (this.commands['cr']) ||
+		    cmd.samecmd (this.commands['crcr'])) {
+		    if (col.u_tmpl.length == 0 &&
+			astate.loop_idx == -1 &&
+			cmd instanceof AlignTabCommand) {
+			// This is where "&&" is indicating the beginning of a
+			// loop in the column specifications.
+			astate.loop_idx = astate.columns.length;
+		    } else {
+			throw new TexRuntimeError ('need a # between &s in alignment');
+		    }
+		}
+
+		if (col.u_tmpl.length == 0 && cmd instanceof SpacerCommand)
+		    continue;
+
+		col.u_tmpl.push (tok);
+	    }
+
+	    while (true) {
+		// T:TP 783
+		tok = alignlib.get_preamble_token (this);
+		var cmd = tok.tocmd (this);
+
+		if (cmd instanceof AlignTabCommand ||
+		    cmd.samecmd (this.commands['cr']) ||
+		    cmd.samecmd (this.commands['crcr']))
+		    break;
+
+		if (cmd instanceof MacroParameterCommand)
+		    throw new TexRuntimeError ('only one # allowed between &s');
+
+		col.v_tmpl.push (tok);
+	    }
+
+	    astate.columns.push (col);
+	}
+
+	this.enter_group ('align', _end_align);
+
+	this.maybe_push_toklist ('everycr');
+	this.align_peek ();
+    };
+
+    proto.align_peek = function Engine_align_peek () {
+	while (true) {
+	    this.align_state = 1000000;
+
+	    var tok = this.chomp_spaces ();
+
+	    if (tok.iscmd (this, 'noalign')) {
+		this.scan_left_brace ();
+		this.enter_group ('noalign', function (eng) {
+		    throw new TexInternalError ('finished noalign');
+		});
+
+		if (this.mode () == M_IVERT) {
+		    // T:TP 1070: normal_paragraph
+		    this.set_parameter (T_INT, 'looseness', 0);
+		    this.set_parameter (T_DIMEN, 'hangindent', new Dimen ());
+		    this.set_parameter (T_INT, 'hangafter', 1);
+		    // TODO: clear \parshape info, which nests in the EqTb.
+		}
+		return;
+	    } else if (tok.tocmd (this) instanceof EndGroupCommand) {
+		this.finish_align ();
+		return;
+	    } else if (tok.iscmd (this, 'crcr')) {
+		continue; // \crcr after \cr ; -> ignore it
+	    } else {
+		this.align_begin_row ();
+		this.align_begin_col (tok);
+		return;
+	    }
+	}
+    };
+
+    proto.align_begin_row = function Engine_align_begin_row () {
+	this.trace ('align: begin row');
+	this.nest_eqtb ();
+
+	switch (this.mode ()) {
+	case M_VERT: case M_IVERT:
+	    this.enter_mode (M_RHORZ);
+	    break;
+	case M_HORZ: case M_RHORZ:
+	    this.enter_mode (M_IVERT);
+	    break;
+	default:
+	    throw new TexInternalError ('align row in math mode?');
+	}
+
+	this.set_special_value (T_INT, 'spacefactor', 0);
+	// XXX: ignore prev_depth
+    };
+
+    proto.align_begin_span = function Engine_align_begin_span () {
+	this.trace ('align: begin span');
+	this.nest_eqtb ();
+
+	if (this.mode () == M_RHORZ)
+	    this.set_special_value (T_INT, 'spacefactor', 1000);
+	else {
+	    // T:TP 1070: normal_paragraph
+	    this.set_parameter (T_INT, 'looseness', 0);
+	    this.set_parameter (T_DIMEN, 'hangindent', new Dimen ());
+	    this.set_parameter (T_INT, 'hangafter', 1);
+	    // TODO: clear \parshape info, which nests in the EqTb.
+	    // XXX: ignoring ignore_depth
+	}
+
+	var astate = this.align_stack[this.align_stack.length - 1];
+	astate.cur_span_col = astate.cur_col;
+    };
+
+    proto.align_begin_col = function Engine_align_begin_col (tok) {
+	this.trace ('align: begin col');
+
+	if (tok.iscmd (this, 'omit')) {
+	    this.align_state = 0;
+	    this.col_is_omit = true;
+	} else {
+	    var astate = this.align_stack[this.align_stack.length - 1];
+	    this.push (tok);
+	    this.push_toks (astate.columns[astate.cur_col].u_tmpl, function () {
+		// TTP 324, partially:
+		if (this.align_state > 500000)
+		    this.align_state = 0;
+	    }.bind (this));
+	    this.col_is_omit = false;
+	}
+    };
+
+    proto.align_end_col = function Engine_align_end_col () {
+	// returns true if current row was also finished
+	this.trace ('align: end col');
+
+	var l = this.align_stack.length;
+	if (l == 0)
+	    throw new TexInternalError ('ending column outside of align');
+
+	var astate = this.align_stack[l-1];
+	var col = null;
+
+	if (this.align_state < 500000)
+	    throw new TexRuntimeError ('interwoven align preambles are not allowed');
+
+	if (astate.cur_col == astate.columns.length - 1 &&
+	    astate.col_ender instanceof AlignTabCommand) {
+	    if (astate.loop_idx < 0)
+		throw new TexRuntimeError ('too many &s in alignment row');
+
+	    // XXX: T:TP 793. various tokens created and inserted right here
+	    throw new TexInternalError ('alignment loops not implemented');
+	}
+
+	col = astate.columns[astate.cur_col];
+	astate.cur_col++;
+
+	if (!(astate.col_ender.samecmd ('span'))) {
+	    // TTP 796 - package the current cell. XXX: I think TeX futzes
+	    // with the current list being built without actually leaving the
+	    // current mode. I'm doing the same for now, even though it feels
+	    // gross.
+
+	    var w, b;
+
+	    if (this.mode () == M_RHORZ) {
+		b = new HBox ();
+		b.list = this.build_stack.pop ();
+		this.build_stack.push ([]);
+		b.set_glue (this, false, new Dimen ());
+		w = b.width.sp.value;
+	    } else {
+		b = new VBox ();
+		b.list = this.build_stack.pop ();
+		this.build_stack.push ([]);
+		b.set_glue (this, false, new Dimen ());
+		w = b.height.sp.value;
+	    }
+
+	    var n = astate.cur_col - astate.cur_span_col + 1;
+	    if (!col.span_widths.hasOwnProperty (n))
+		col.span_widths[n] = w;
+	    else
+		col.span_widths[n] = Math.max (col.span_widths[n], w);
+
+	    // XXX: TTP796 calculates glue order here. I don't think we need
+	    // to?
+
+	    this.unnest_eqtb ();
+	    this.accum (b);
+
+	    // TTP 795 appends tabskip glue, but we save that til later.
+
+	    if (!astate.col_ender instanceof AlignTabCommand) {
+		astate.cur_col = 0;
+		return true;
+	    }
+
+	    this.align_begin_span ();
+	}
+
+	this.align_state = 1000000;
+	var tok = this.chomp_spaces ();
+	this.align_begin_col (tok);
+	return false;
+    };
+
+    proto.align_end_row = function Engine_align_end_row () {
+	//TTP 799
+	this.trace ('align: end row');
+
+	var l = this.align_stack.length;
+	if (l == 0)
+	    throw new TexInternalError ('ending row outside of align');
+
+	// XXX diverging somewhat significantly from TeX impl
+	var astate = this.align_stack[l-1];
+	this.accum (this.build_stack.pop ());
+	this.unnest_eqtb ();
+
+	if (this.mode () != M_RHORZ)
+	    this.set_special_value (T_INT, 'spacefactor', 1000);
+
+	this.maybe_push_toklist ('everycr');
+	this.align_peek ();
+    };
+
+    proto.finish_align = function Engine_finish_align () {
+	// TTP 800
+	this.trace ('align: finish whole thing');
+
+	var info = this.group_exit_stack.pop (); // [name, callback, aftergroup-toklist]
+	if (info[1].is_align !== true)
+	    throw new TexRuntimeError ('ended alignment when should have ' +
+				       'gotten other group-ender; depth=' +
+				       this.group_exit_stack.length + ' cb=' + info[1]);
+
+	var list = this.leave_mode ();
+
+	var o = 0;
+	if (this.mode () == M_DMATH)
+	    o = this.get_parameter (T_DIMEN, 'displayindent').sp.value;
+
+	// TTP 801
+	// TTP 804
+	// TTP 805
+
+	this.align_stack.pop ();
+
+	// TTP 812
+    };
+
+    proto.handle_endv = function Engine_handle_endv () {
+	// TTP 1131. XXX: various input stack munging that I don't understand.
+	var l = this.group_exit_stack.length;
+	if (!l)
+	    throw new TexRuntimeError ('\\endv outside of alignment group (1)');
+
+	if (this.group_exit_stack[l - 1][1].is_align !== true)
+	    throw new TexRuntimeError ('\\endv outside of alignment group (2)');
+
+	if (this.align_end_col ())
+	    this.align_end_row ();
     };
 
     // Miscellaneous

@@ -4,9 +4,29 @@
 
 'use strict';
 
+var AlignColumn = (function AlignColumn_closure () {
+    function AlignColumn () {
+	this.u_tmpl = [];
+	this.v_tmpl = [];
+	this.span_widths = {};
+    }
+
+    var proto = AlignColumn.prototype;
+
+    return AlignColumn;
+}) ();
+
+
 var AlignState = (function AlignState_closure () {
     function AlignState () {
-	this.preamble = [];
+	this.tabskips = [];
+	this.columns = [];
+	this.rows = [];
+	this.loop_idx = -1;
+	this.cur_col = 0;
+	this.cur_span_col = 0;
+	this.col_is_omit = false;
+	this.col_ender = null;
     }
 
     var proto = AlignState.prototype;
@@ -22,7 +42,7 @@ var alignlib = (function alignlib_closure () {
 	while (true) {
 	    var tok = engine.next_tok ();
 
-	    while (tok.iscmd (this, 'span')) {
+	    while (tok.iscmd (engine, 'span')) {
 		// "When \span appears in a preamble, it causes the next token
 		// to be expanded, i.e., 'ex-span-ded,' before TEX reads on."
 		// - TeXBook p. 238.

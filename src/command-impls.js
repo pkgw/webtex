@@ -1866,6 +1866,50 @@ commands.vcenter = function cmd_vcenter (engine) {
 };
 
 
+// Alignments
+
+commands.cr = function cmd_cr (engine) {
+    throw new TexRuntimeError ('\\cr may only be used inside alignments');
+};
+
+commands.crcr = function cmd_crcr (engine) {
+    throw new TexRuntimeError ('\\crcr may only be used inside alignments');
+};
+
+commands.omit = function cmd_omit (engine) {
+    throw new TexRuntimeError ('\\omit may only be used inside alignments');
+};
+
+commands.span = function cmd_span (engine) {
+    throw new TexRuntimeError ('\\span may only be used inside alignments');
+};
+
+commands._endv_ = (function EndvCommand_closure () {
+    function EndvCommand () { Command.call (this); }
+    inherit (EndvCommand, Command);
+    var proto = EndvCommand.prototype;
+    proto.name = '<endv>';
+
+    proto.invoke = function EndvCommand_invoke (engine) {
+	if (engine.mode () == M_MATH || engine.mode () == M_DMATH)
+	    throw new TexRuntimeError ('\\endv may not be used in math mode');
+
+	engine.handle_endv ();
+    };
+
+    return EndvCommand;
+})();
+
+commands.halign = function cmd_halign (engine) {
+    engine.trace ('halign');
+    engine.init_align (false);
+};
+
+commands.valign = function cmd_valign (engine) {
+    engine.trace ('valign');
+    engine.init_align (true);
+};
+
 // Hyphenation
 
 commands.patterns = function cmd_patterns (engine) {
