@@ -1817,6 +1817,55 @@ commands.mkern = function cmd_mkern (engine) {
 };
 
 
+commands.vcenter = function cmd_vcenter (engine) {
+    engine.trace ('vcenter');
+
+    if (engine.mode () != M_MATH && engine.mode () != M_DMATH)
+	throw new TexRuntimeError ('\\vcenter may only be used in math mode');
+
+    // XXX this is scan_spec (TTP:645), which is duplicated in
+    // Engine._handle_box and Engine.init_align.
+
+    var is_exact, spec;
+
+    if (engine.scan_keyword ('to')) {
+	is_exact = true;
+	spec = engine.scan_dimen ();
+    } else if (engine.scan_keyword ('spread')) {
+	is_exact = false;
+	spec = engine.scan_dimen ();
+    } else {
+	is_exact = false;
+	spec = new Dimen ();
+    }
+
+    engine.scan_left_brace ();
+
+    // T:TP 1070 -- XXX this is normal_paragraph
+    engine.set_parameter (T_INT, 'looseness', 0);
+    engine.set_parameter (T_DIMEN, 'hangindent', new Dimen ());
+    engine.set_parameter (T_INT, 'hangafter', 1);
+    // TODO: clear \parshape info, which nests in the EqTb.
+
+    engine.nest_eqtb ();
+    engine.enter_mode (M_IVERT);
+    engine.enter_group ('vcenter', function (eng) {
+	engine.end_graf ();
+	var box = new VBox ();
+	box.list = engine.leave_mode ();
+	engine.unnest_eqtb ();
+	box.set_glue (engine, is_exact, spec);
+
+	var atom = new AtomNode (MT_VCENTER);
+	atom.nuc = box;
+	engine.accum (atom);
+    });
+
+    // XXX: prev_depth = ignore_depth;
+    engine.maybe_push_toklist ('everyvbox');
+};
+
+
 // Hyphenation
 
 commands.patterns = function cmd_patterns (engine) {

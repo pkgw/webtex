@@ -931,6 +931,15 @@ var mathlib = (function mathlib_closure () {
 	q.nuc = hpack_natural (state.engine, [y, overbar (x, clr, y.height.sp.value)]);
     }
 
+    function make_vcenter (engine, q) {
+	if (!q.nuc instanceof VBox)
+	    throw new TexInternalError ('vcenter needs VBox');
+
+	var delta = v.height.sp.value + v.depth.sp.value;
+	v.height.sp.value = state.sym_dimen (state.size, SymDimens.AxisHeight) + half (delta);
+	v.depth.sp.value = delta - v.height.sp.value;
+    }
+
     function make_scripts (engine, state, q, delta) {
 	// T:TP 756
 	var p = q.new_hlist;
@@ -1075,13 +1084,15 @@ var mathlib = (function mathlib_closure () {
 	    case MT_RADICAL:
 		make_radical (state, q);
 		break;
+	    case MT_VCENTER:
+		make_vcenter (state, q);
+		break;
 	    case MT_FRACTION:
 	    case MT_OPEN:
 	    case MT_INNER:
 	    case MT_OVER:
 	    case MT_UNDER:
 	    case MT_ACCENT:
-	    case MT_VCENTER:
 	    case MT_STYLE:
 		throw new TexInternalError ('unimplemented math ' + q);
 	    case MT_SCHOICE:
