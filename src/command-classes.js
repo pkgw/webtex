@@ -303,7 +303,7 @@ var MacroCommand = (function MacroCommand_closure () {
 		    // We also need to add the first x to the expansion since
 		    // we now know that it isn't matching the template.
 		    expansion.push (this.tmpl[match_start]);
-		    engine.push (tok);
+		    engine.push_back (tok);
 		    engine.push_toks (this.tmpl.slice (match_start + 1,
 						       match_start + cur_match_idx));
 		    cur_match_idx = 0;
@@ -508,7 +508,7 @@ var MathShiftCommand = (function MathShiftCommand_closure () {
 		engine.maybe_push_toklist ('everydisplay');
 		// XXX: no pagebuilder
 	    } else {
-		engine.push (tok);
+		engine.push_back (tok);
 		engine.enter_math (M_MATH, true);
 		engine.maybe_push_toklist ('everymath');
 	    }

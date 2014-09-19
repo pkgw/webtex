@@ -375,7 +375,7 @@ var mathlib = (function mathlib_closure () {
 
 	// If we got here, we must see a brace-enclosed subformula.
 
-	engine.push (tok);
+	engine.push_back (tok);
 	engine.scan_left_brace ();
 	engine.nest_eqtb ();
 	engine.enter_mode (M_MATH);

@@ -110,9 +110,9 @@ commands.expandafter = function cmd_expandafter (engine) {
     if (cmd2.expandable)
 	cmd2.invoke (engine);
     else
-	engine.push (tok2);
+	engine.push_back (tok2);
 
-    engine.push (tok1);
+    engine.push_back (tok1);
 };
 
 
@@ -122,7 +122,7 @@ commands.noexpand = function cmd_noexpand (engine) {
 
 
 commands.ignorespaces = function cmd_ignorespaces (engine) {
-    engine.push (engine.chomp_spaces ());
+    engine.push_back (engine.chomp_spaces ());
 };
 
 commands.endcsname = function cmd_endcsname (engine) {
@@ -460,7 +460,7 @@ function _cmd_def (engine, cname, expand_replacement) {
 			repl_toks = repl_toks.concat (nv.get (engine).toks);
 			continue;
 		    } else {
-			engine.push (next);
+			engine.push_back (next);
 		    }
 		}
 

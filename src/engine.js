@@ -695,7 +695,7 @@ var Engine = (function Engine_closure () {
 	var m = this.mode ();
 
 	if (m == M_VERT || m == M_IVERT) {
-	    this.push (Token.new_cmd (cmd));
+	    this.push_back (Token.new_cmd (cmd));
 	    this.begin_graf (true);
 	    return true; // command will be rerun
 	}
@@ -712,7 +712,7 @@ var Engine = (function Engine_closure () {
 	    return false;
 
 	if (m == M_HORZ) {
-	    this.push (Token.new_cmd (cmd));
+	    this.push_back (Token.new_cmd (cmd));
 	    this.push (Token.new_cmd (this.commands['par']));
 	    return true;
 	}
@@ -1223,6 +1223,20 @@ var Engine = (function Engine_closure () {
 	this.inputstack.push_toklist ([tok]);
     };
 
+    proto.push_back = function Engine_push_back (tok) {
+	// This is a special version of push() that is to be used when the most
+	// recently-read token is being returned to the input stream. It
+	// un-does changes to align_state that will have just happened.
+	this.inputstack.push_toklist ([tok]);
+
+	var cmd = tok.tocmd (this);
+
+	if (cmd instanceof BeginGroupCommand)
+	    this.align_state -= 1;
+	else if (cmd instanceof EndGroupCommand)
+	    this.align_state += 1;
+    };
+
     proto.push_toks = function Engine_push_toks (toks, callback) {
 	if (toks instanceof Toklist)
 	    toks = toks.toks; // convenience.
@@ -1341,7 +1355,7 @@ var Engine = (function Engine_closure () {
 	    throw tok;
 	if (tok == EOF || tok.isspace (this))
 	    return;
-	this.push (tok);
+	this.push_back (tok);
     };
 
     proto.chomp_spaces = function Engine_chomp_spaces () {
@@ -1386,7 +1400,7 @@ var Engine = (function Engine_closure () {
 		return true;
 
 	    // Found a non-space, non-equals.
-	    this.push (tok);
+	    this.push_back (tok);
 	    return false;
 	}
     };
@@ -1477,7 +1491,7 @@ var Engine = (function Engine_closure () {
 		    break;
 		var v = tok.maybe_octal_value ();
 		if (v < 0) {
-		    this.push (tok);
+		    this.push_back (tok);
 		    break;
 		}
 		sawany = true;
@@ -1494,7 +1508,7 @@ var Engine = (function Engine_closure () {
 		    break;
 		var v = tok.maybe_hex_value ();
 		if (v < 0) {
-		    this.push (tok);
+		    this.push_back (tok);
 		    break;
 		}
 		sawany = true;
@@ -1510,7 +1524,7 @@ var Engine = (function Engine_closure () {
 		    break;
 		var v = tok.maybe_decimal_value ();
 		if (v < 0) {
-		    this.push (tok);
+		    this.push_back (tok);
 		    break;
 		}
 		sawany = true;
@@ -1593,7 +1607,7 @@ var Engine = (function Engine_closure () {
 	    if (tok.isotherchar (O_PERIOD) || tok.isotherchar (O_COMMA)) {
 		nonfrac = 0;
 	    } else {
-		this.push (tok);
+		this.push_back (tok);
 		nonfrac = this.scan_int ().value;
 		if (nonfrac < 0) {
 		    negfactor = -negfactor;
@@ -1607,7 +1621,7 @@ var Engine = (function Engine_closure () {
 	    } else if (tok == EOF) {
 		/* nothing */
 	    } else if (!tok.isotherchar (O_PERIOD) && !tok.isotherchar (O_COMMA)) {
-		this.push (tok)
+		this.push_back (tok)
 	    } else {
 		// We have a fractional part to deal with.
 		var digits = [];
@@ -1621,7 +1635,7 @@ var Engine = (function Engine_closure () {
 		    var v = tok.maybe_decimal_value ();
 		    if (v < 0) {
 			if (!tok.isspace (this))
-			    this.push (tok);
+			    this.push_back (tok);
 			break;
 		    }
 		    digits.push (v);
@@ -1645,7 +1659,7 @@ var Engine = (function Engine_closure () {
 	if (val != null) {
 	    result = val.times_parts (nonfrac, frac);
 	} else {
-	    this.push (tok);
+	    this.push_back (tok);
 
 	    if (infmode && this.scan_keyword ('fil')) {
 		inf_order = 1;
@@ -1728,7 +1742,7 @@ var Engine = (function Engine_closure () {
 	    return tok.tocmd (this).as_glue (this).intproduct (negfactor);
 
 	var g = new Glue ();
-	this.push (tok);
+	this.push_back (tok);
 	g.width = this.scan_dimen (mumode, false).intproduct (negfactor);
 
 	if (this.scan_keyword ('plus')) {
@@ -1853,7 +1867,7 @@ var Engine = (function Engine_closure () {
 		break;
 
 	    if (!tok.ischar ()) {
-		this.push (tok);
+		this.push_back (tok);
 		break;
 	    }
 
@@ -2414,7 +2428,7 @@ var Engine = (function Engine_closure () {
 	    this.col_is_omit = true;
 	} else {
 	    var astate = this.align_stack[this.align_stack.length - 1];
-	    this.push (tok);
+	    this.push_back (tok);
 	    this.push_toks (astate.columns[astate.cur_col].u_tmpl, function () {
 		// TTP 324, partially:
 		if (this.align_state > 500000)
