@@ -2403,6 +2403,8 @@ var Engine = (function Engine_closure () {
 
 	this.set_special_value (T_INT, 'spacefactor', 0);
 	// XXX: ignore prev_depth
+	// XXX: stuff about inserting tabskip
+	this.align_begin_span ();
     };
 
     proto.align_begin_span = function Engine_align_begin_span () {
@@ -2468,7 +2470,7 @@ var Engine = (function Engine_closure () {
 	col = astate.columns[astate.cur_col];
 	astate.cur_col++;
 
-	if (!(astate.col_ender.samecmd ('span'))) {
+	if (!(astate.col_ender.samecmd (this.commands['span']))) {
 	    // TTP 796 - package the current cell. XXX: I think TeX futzes
 	    // with the current list being built without actually leaving the
 	    // current mode. I'm doing the same for now, even though it feels
