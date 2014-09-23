@@ -931,10 +931,11 @@ var mathlib = (function mathlib_closure () {
 	q.nuc = hpack_natural (state.engine, [y, overbar (x, clr, y.height.sp.value)]);
     }
 
-    function make_vcenter (engine, q) {
+    function make_vcenter (state, q) {
 	if (!q.nuc instanceof VBox)
 	    throw new TexInternalError ('vcenter needs VBox');
 
+	var v = q.nuc;
 	var delta = v.height.sp.value + v.depth.sp.value;
 	v.height.sp.value = state.sym_dimen (state.size, SymDimens.AxisHeight) + half (delta);
 	v.depth.sp.value = delta - v.height.sp.value;
