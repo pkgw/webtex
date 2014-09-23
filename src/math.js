@@ -832,7 +832,7 @@ var mathlib = (function mathlib_closure () {
 	}
 
 	b.shift_amount.sp.value = half (b.height.sp.value - b.depth.sp.value)
-	    - state.sym_dimen (state.size, SymDimens.AxisHeight);
+	    - state.sym_dimen (state.size, SymDimens.AxisHeight).sp.value;
 	return b;
     }
 
@@ -855,7 +855,7 @@ var mathlib = (function mathlib_closure () {
 		x.width.sp.value -= delta // remove italic correction
 
 	    x.shift_amount.sp.value = half ((x.height.sp.value - x.depth.sp.value)
-					    - state.sym_dimen (state.size, SymDimens.AxisHeight));
+					    - state.sym_dimen (state.size, SymDimens.AxisHeight).sp.value);
 	    q.nuc = x;
 	}
 
@@ -937,7 +937,7 @@ var mathlib = (function mathlib_closure () {
 
 	var v = q.nuc;
 	var delta = v.height.sp.value + v.depth.sp.value;
-	v.height.sp.value = state.sym_dimen (state.size, SymDimens.AxisHeight) + half (delta);
+	v.height.sp.value = state.sym_dimen (state.size, SymDimens.AxisHeight).sp.value + half (delta);
 	v.depth.sp.value = delta - v.height.sp.value;
     }
 
