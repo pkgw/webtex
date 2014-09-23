@@ -4,9 +4,11 @@ var EquivTable = (function EquivTable_closure () {
 
 	if (parent == null) {
 	    this.toplevel = this;
+	    this.depth = 0;
 	    this._catcodes = new Array (256);
 	} else {
 	    this.toplevel = parent.toplevel;
+	    this.depth = parent.depth + 1;
 	    this._catcodes = parent._catcodes.slice ();
 	}
 
@@ -664,9 +666,10 @@ var Engine = (function Engine_closure () {
     };
 
     proto.unnest_eqtb = function Engine_unnest_eqtb () {
-	this.eqtb = this.eqtb.parent;
-	if (this.eqtb == null)
+	if (this.eqtb.parent == null)
+	    // if we check after the fact, our standard error-printing mechanism fails.
 	    throw new TexInternalError ('unnested eqtb too far');
+	this.eqtb = this.eqtb.parent;
     };
 
     proto.mode = function Engine_mode () {
