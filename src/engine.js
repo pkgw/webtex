@@ -2501,7 +2501,7 @@ var Engine = (function Engine_closure () {
 
 	    // TTP 795 appends tabskip glue, but we save that til later.
 
-	    if (!astate.col_ender instanceof AlignTabCommand) {
+	    if (!(astate.col_ender instanceof AlignTabCommand)) {
 		astate.cur_col = 0;
 		return true;
 	    }
