@@ -1005,6 +1005,11 @@ var Engine = (function Engine_closure () {
 	} else {
 	    this.trace ('... forcing page build');
 
+	    // XXXXXX since we've defused the page builder
+	    this.trace ('... just kidding. Forcing exit.');
+	    this._force_end = true;
+	    return;
+
 	    var hb = new HBox ();
 	    hb.width = this.get_parameter (T_DIMEN, 'hsize');
 	    this.accum (hb);
