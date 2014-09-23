@@ -2300,7 +2300,7 @@ var Engine = (function Engine_closure () {
 	while (true) {
 	    astate.tabskips.push (this.get_parameter (T_GLUE, 'tabskip').clone ());
 
-	    if (tok != null && tok.iscmd (this, 'cr'))
+	    if (tok != null && (tok.iscmd (this, 'cr') || tok.iscmd (this, 'crcr')))
 		break;
 
 	    var col = new AlignColumn ();
