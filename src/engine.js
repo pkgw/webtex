@@ -2525,7 +2525,7 @@ var Engine = (function Engine_closure () {
 
 	// XXX diverging somewhat significantly from TeX impl
 	var astate = this.align_stack[l-1];
-	this.accum (this.build_stack.pop ());
+	this.accum (this.leave_mode ());
 	this.unnest_eqtb ();
 
 	if (this.mode () != M_RHORZ)
@@ -2558,6 +2558,7 @@ var Engine = (function Engine_closure () {
 	this.align_stack.pop ();
 
 	// TTP 812
+	this.unnest_eqtb ();
     };
 
     proto.handle_endv = function Engine_handle_endv () {
