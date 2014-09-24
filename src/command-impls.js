@@ -1719,6 +1719,11 @@ commands.scriptscriptfont = new FontFamilyCommand (MS_SCRIPTSCRIPT, 'scriptscrip
 
 // Math commands
 
+commands.displaystyle = new MathStyleCommand ('displaystyle', MS_DISPLAY);
+commands.textstyle = new MathStyleCommand ('textstyle', MS_TEXT);
+commands.scriptstyle = new MathStyleCommand ('scriptstyle', MS_SCRIPT);
+commands.scriptscriptstyle = new MathStyleCommand ('scriptscriptstyle', MS_SCRIPTSCRIPT);
+
 commands.mathord = new MathComponentCommand ('mathord', MT_ORD);
 commands.mathop = new MathComponentCommand ('mathop', MT_OP);
 commands.mathbin = new MathComponentCommand ('mathbin', MT_BIN);

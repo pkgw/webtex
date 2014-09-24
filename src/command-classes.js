@@ -1109,6 +1109,26 @@ var MathComponentCommand = (function MathComponentCommand_closure () {
 })();
 
 
+var MathStyleCommand = (function MathStyleCommand_closure () {
+    function MathStyleCommand (name, mathstyle) {
+	Command.call (this);
+	this.mathstyle = mathstyle;
+	this.name = name;
+    }
+
+    inherit (MathStyleCommand, Command);
+    var proto = MathStyleCommand.prototype;
+
+    proto.invoke = function MathStyleCommand_invoke (engine) {
+	if (engine.mode () != M_MATH && engine.mode () != M_DMATH)
+	    throw new TexRuntimeError ('\\' + this.name + ' illegal outside of math mode');
+	engine.trace (this.name);
+	engine.accum (new MathStyleNode (this.mathstyle, false));
+    };
+
+    return MathStyleCommand;
+})();
+
 
 // Commands for named parameters
 

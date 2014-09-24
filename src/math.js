@@ -1088,13 +1088,19 @@ var mathlib = (function mathlib_closure () {
 	    case MT_VCENTER:
 		make_vcenter (state, q);
 		break;
+	    case MT_STYLE:
+		state.style = q.style;
+		state.cramped = q.cramped;
+		state.update_sizes ();
+		// goto done_with_node:
+		process_atom = check_dimensions = remember_as_prev = false;
+		break;
 	    case MT_FRACTION:
 	    case MT_OPEN:
 	    case MT_INNER:
 	    case MT_OVER:
 	    case MT_UNDER:
 	    case MT_ACCENT:
-	    case MT_STYLE:
 		throw new TexInternalError ('unimplemented math ' + q);
 	    case MT_SCHOICE:
 		if (state.style == MS_DISPLAY)
