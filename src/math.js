@@ -941,6 +941,13 @@ var mathlib = (function mathlib_closure () {
 	v.depth.sp.value = delta - v.height.sp.value;
     }
 
+    function make_over (state, q) {
+	var drt = state.ext_dimen (ExtDimens.DefaultRuleThickness).sp.value;
+	q.nuc = overbar (clean_box (state.to_cramped (), q.nuc),
+			 3 * drt,
+			 drt);
+    }
+
     function make_scripts (engine, state, q, delta) {
 	// T:TP 756
 	var p = q.new_hlist;
@@ -1095,10 +1102,12 @@ var mathlib = (function mathlib_closure () {
 		// goto done_with_node:
 		process_atom = check_dimensions = remember_as_prev = false;
 		break;
+	    case MT_OVER:
+		make_over (state, q);
+		break;
 	    case MT_FRACTION:
 	    case MT_OPEN:
 	    case MT_INNER:
-	    case MT_OVER:
 	    case MT_UNDER:
 	    case MT_ACCENT:
 		throw new TexInternalError ('unimplemented math ' + q);
