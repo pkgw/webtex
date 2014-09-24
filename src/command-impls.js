@@ -1885,6 +1885,10 @@ commands.span = function cmd_span (engine) {
     throw new TexRuntimeError ('\\span may only be used inside alignments');
 };
 
+commands.noalign = function cmd_noalign (engine) {
+    throw new TexRuntimeError ('\\noalign may only be used inside alignments');
+};
+
 commands._endv_ = (function EndvCommand_closure () {
     function EndvCommand () { Command.call (this); }
     inherit (EndvCommand, Command);

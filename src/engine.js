@@ -2325,6 +2325,8 @@ var Engine = (function Engine_closure () {
 		    } else {
 			throw new TexRuntimeError ('need a # between &s in alignment');
 		    }
+
+		    continue;
 		}
 
 		if (col.u_tmpl.length == 0 && cmd instanceof SpacerCommand)
@@ -2332,6 +2334,8 @@ var Engine = (function Engine_closure () {
 
 		col.u_tmpl.push (tok);
 	    }
+
+	    this.trace ('align: u = ' + new Toklist (col.u_tmpl).as_serializable ());
 
 	    while (true) {
 		// T:TP 783
@@ -2349,6 +2353,7 @@ var Engine = (function Engine_closure () {
 		col.v_tmpl.push (tok);
 	    }
 
+	    this.trace ('align: v = ' + new Toklist (col.v_tmpl).as_serializable ());
 	    astate.columns.push (col);
 	}
 
@@ -2367,8 +2372,10 @@ var Engine = (function Engine_closure () {
 	    if (tok.iscmd (this, 'noalign')) {
 		this.scan_left_brace ();
 		this.enter_group ('noalign', function (eng) {
-		    throw new TexInternalError ('finished noalign');
-		});
+		    // TTP 1133
+		    this.end_graf ();
+		    this.align_peek ();
+		}.bind (this));
 
 		if (this.mode () == M_IVERT) {
 		    // T:TP 1070: normal_paragraph

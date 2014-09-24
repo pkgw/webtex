@@ -530,6 +530,13 @@ var AlignTabCommand = (function AlignTabCommand_closure () {
     proto.name = '<align-tab>';
     proto.desc = 'alignment tab character';
 
+    proto.invoke = function AlignTabCommand_invoke (engine) {
+	// The invoke() function is never called if the alignment tab appears
+	// properly inside an alignment.
+	throw new TexRuntimeError ('alignment tab characters may only occur ' +
+				   'inside alignments');
+    };
+
     return AlignTabCommand;
 })();
 
