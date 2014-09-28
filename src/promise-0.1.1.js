@@ -4,6 +4,9 @@
 //   https://github.com/jakearchibald/es6-promise
 // version 0.1.1
 //
+// This version has been modified to replace references to 'window' to
+// 'globalScope', needed for things to work with our Web Worker approach.
+//
 // It is copyright 2013 Yehuda Katz, Tom Dale, and contributors and licensed
 // under the MIT license. It has been modified to add this header and remove
 // trailing whitespace.
@@ -164,7 +167,7 @@ define("promise/asap",
   ["exports"],
   function(__exports__) {
     "use strict";
-    var browserGlobal = (typeof window !== 'undefined') ? window : {};
+    var browserGlobal = (typeof globalScope !== 'undefined') ? globalScope : {};
     var BrowserMutationObserver = browserGlobal.MutationObserver || browserGlobal.WebKitMutationObserver;
     var local = (typeof global !== 'undefined') ? global : this;
 
@@ -324,24 +327,24 @@ define("promise/polyfill",
 
     function polyfill() {
       var es6PromiseSupport =
-        "Promise" in window &&
+        "Promise" in globalScope &&
         // Some of these methods are missing from
         // Firefox/Chrome experimental implementations
-        "cast" in window.Promise &&
-        "resolve" in window.Promise &&
-        "reject" in window.Promise &&
-        "all" in window.Promise &&
-        "race" in window.Promise &&
+        "cast" in globalScope.Promise &&
+        "resolve" in globalScope.Promise &&
+        "reject" in globalScope.Promise &&
+        "all" in globalScope.Promise &&
+        "race" in globalScope.Promise &&
         // Older version of the spec had a resolver object
         // as the arg rather than a function
         (function() {
           var resolve;
-          new window.Promise(function(r) { resolve = r; });
+          new globalScope.Promise(function(r) { resolve = r; });
           return isFunction(resolve);
         }());
 
       if (!es6PromiseSupport) {
-        window.Promise = RSVPPromise;
+        globalScope.Promise = RSVPPromise;
       }
     }
 
