@@ -27,13 +27,18 @@ sharedjs = \
   src/bundle.js
 
 browserjs = \
-  src/browser-io.js
+  src/browser-io.js \
+  src/browser-api.js
 
 browserprejs = \
   src/promise-0.1.1.js \
   src/inflate.js \
   src/network.js \
   src/emulate-setimmediate.js
+
+workerjs = \
+  src/worker-io.js \
+  src/worker-api.js
 
 nodejs = \
   src/node-io.js
@@ -43,7 +48,8 @@ bundleextras = \
 
 standard: \
   $(builddir)/browser-webtex.js \
-  $(builddir)/node-webtex.js \
+  $(builddir)/worker-webtex.js \
+  $(builddir)/node-webtex.js
 
 minified: \
   $(builddir)/browser-webtex.min.js \
@@ -51,6 +57,11 @@ minified: \
 
 $(builddir)/browser-webtex.js: \
 generate.py src/browser-wrapper.js $(browserprejs) $(sharedjs) $(browserjs) \
+| $(builddir)
+	$(python) $^ $@
+
+$(builddir)/worker-webtex.js: \
+generate.py src/worker-wrapper.js $(browserprejs) $(sharedjs) $(workerjs) \
 | $(builddir)
 	$(python) $^ $@
 
