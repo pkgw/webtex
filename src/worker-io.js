@@ -102,3 +102,15 @@ var RandomAccessURL = (function RandomAccessURL_closure () {
 
     return RandomAccessURL;
 }) ();
+
+function fetch_url_str (url) {
+    var req = new XMLHttpRequest ();
+    req.open ('GET', url, false);
+    req.send (null);
+
+    if (req.status !== 200)
+	throw new TexRuntimeError ('cannot fetch URL ' + url +
+				   ': got status ' + req.status);
+
+    return req.responseText;
+};

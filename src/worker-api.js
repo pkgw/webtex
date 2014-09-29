@@ -48,8 +48,13 @@ workerApiEndpoints.test = function webtex_worker_test (data) {
     var bundle = new Bundle (z);
     delete data.bundleurl;
 
-    var lb = bundle.try_open_linebuffer ('null.tex');
-    post_message ('echo', {'data': lb.get ()});
+    data.iostack = new IOStack ();
+    data.iostack.push (bundle);
+    var inp = fetch_url_str (data.inputurl);
+    data.initial_linebuf = LineBuffer.new_static (inp.split ('\n'));
+    delete data.inputurl;
+
+    post_message ('echo', {'data': data.initial_linebuf.get ()});
 };
 
 onmessage = function webtex_worker_onmessage (event) {
