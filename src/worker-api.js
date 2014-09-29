@@ -45,6 +45,8 @@ workerApiEndpoints.parse = function webtex_worker_parse (data) {
 workerApiEndpoints.test = function webtex_worker_test (data) {
     var rau = new RandomAccessURL (data.bundleurl);
     post_message ('echo', {'bundle-size': rau.size ()});
+    var c = rau.read_range_str (0, 7);
+    post_message ('echo', {'sample': c});
 };
 
 onmessage = function webtex_worker_onmessage (event) {
