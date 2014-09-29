@@ -11,6 +11,11 @@
  * me to make sense of the structure. My needs are simple enough that I think
  * it'll be easier just to write a new implementation in a familiar style.
  *
+ * NOTE: until revision f5a498, this file was implemented asynchronously. I've
+ * convinced myself that we need to use synchronous I/O throughout webtex, so
+ * I've gone and reorganized things. Check out the older version to see how I
+ * made things work in an async style.
+ *
  * NOTE: I'm completely cavalier about CRC checks, file format sanity, etc.,
  * here. I don't think this will come back to bite me in the ass but we'll
  * see ...
@@ -30,215 +35,148 @@ var ZipReader = WEBTEX.ZipReader = (function ZipReader_closure () {
 
 	this.readfunc = readfunc;
 	this.zipsize = zipsize;
-	this.error_state = null;
-	this.dirinfo = null;
+
+	// Check end-of-central-directory record.
+
+	var buf = readfunc (this.zipsize - 22, 22);
+	var dv = new DataView (buf);
+
+	if (dv.getUint32 (0, true) != ZIP_EOCDR_MAGIC)
+	    throw new Error ('EOCDR wrong magic');
+
+	this._nfiles = dv.getUint16 (8, true);
+	this._cdofs = dv.getUint32 (16, true);
+
+	if (this._cdofs > this.zipsize - 22)
+	    throw new Error ('EOCDR directory offset invalid: ofs ' +
+		this._cdofs + '; total size ' + this.zipsize);
+
+	// Read central directory records.
+
+	buf = readfunc (this._cdofs, this.zipsize - 22 - this._cdofs);
+	dv = new DataView (buf);
+	var dirinfo = {};
+	var offset = 0;
+
+	for (var i = 0; i < this._nfiles; i++) {
+	    var magic = dv.getUint32 (offset, true);
+	    if (magic != ZIP_DIREC_MAGIC)
+		throw new Error ('bad Zip: wrong magic number in entry');
+
+	    var flags = dv.getUint16 (offset + 8, true);
+	    if (flags & 0x1)
+		throw new Error ('bad Zip: encrypted entries');
+
+	    if (offset + 46 > buf.byteLength)
+		throw new Error ('bad Zip: overlarge central directory');
+
+	    var compression = dv.getUint16 (offset + 10, true),
+	        csize = dv.getUint32 (offset + 20, true),
+	        ucsize = dv.getUint32 (offset + 24, true),
+	        fnlen = dv.getUint16 (offset + 28, true),
+	        extralen = dv.getUint16 (offset + 30, true),
+	        cmntlen = dv.getUint16 (offset + 32, true),
+	        recofs = dv.getUint32 (offset + 42, true);
+
+	    if (recofs + csize > this.zipsize)
+		throw new Error ('bad Zip: bad data size/offset');
+
+	    if (csize == 0xFFFFFFFF || ucsize == 0xFFFFFFFF)
+		throw new Error ('bad Zip: I can\'t handle ZIP64');
+
+	    if (offset + 46 + fnlen + extralen + cmntlen > buf.byteLength)
+		throw new Error ('bad Zip: overlarge central directory (2)');
+
+	    if (compression && compression != 8)
+		throw new Error ('bad Zip: I can only handle DEFLATE compression');
+
+	    var fnslice = new Uint8Array (buf, offset + 46, fnlen);
+	    var fn = String.fromCharCode.apply (null, fnslice);
+
+	    dirinfo[fn] = {'csize': csize,
+			   'ucsize': ucsize,
+			   'compression': compression,
+			   'recofs': recofs};
+	    offset += 46 + fnlen + extralen + cmntlen;
+	}
+
+	this.dirinfo = dirinfo;
     }
 
     var proto = ZipReader.prototype;
 
-    proto._promise_data = function ZipReader__promise_data (ofs, len) {
-	return new Promise (function (resolve, reject) {
-	    this.readfunc (ofs, len, function (err, buf) {
-		if (err != null) {
-		    reject (err);
-		} else {
-		    resolve (buf);
-		}
-	    });
-	}.bind (this));
-    };
-
-    proto.promise_ready = function ZipReader_promise_ready () {
-	return this._promise_data (this.zipsize - 22, 22).then (function (buf) {
-	    var dv = new DataView (buf);
-
-	    if (dv.getUint32 (0, true) != ZIP_EOCDR_MAGIC) {
-		this.error_state = 'EOCDR wrong magic';
-		throw new Error (this.error_state);
-	    }
-
-	    this._nfiles = dv.getUint16 (8, true);
-	    this._cdofs = dv.getUint32 (16, true);
-
-	    if (this._cdofs > this.zipsize - 22) {
-		this.error_state = 'EOCDR directory offset invalid: ofs ' +
-		    this._cdofs + '; total size ' + this.zipsize;
-		throw new Error (this.error_state);
-	    }
-
-	    return this._promise_data (this._cdofs,
-				       this.zipsize - 22 - this._cdofs);
-	}.bind (this)).then (function (buf) {
-	    var dv = new DataView (buf);
-	    var dirinfo = {};
-	    var offset = 0;
-
-	    for (var i = 0; i < this._nfiles; i++) {
-		var magic = dv.getUint32 (offset, true);
-		if (magic != ZIP_DIREC_MAGIC) {
-		    this.error_state = 'bad Zip: wrong magic number in entry';
-		    throw new Error (this.error_state);
-		}
-
-		var flags = dv.getUint16 (offset + 8, true);
-		if (flags & 0x1) {
-		    this.error_state = 'bad Zip: encrypted entries';
-		    throw new Error (this.error_state);
-		}
-
-		if (offset + 46 > buf.byteLength) {
-		    this.error_state = 'bad Zip: overlarge central directory';
-		    throw new Error (this.error_state);
-		}
-
-		var compression = dv.getUint16 (offset + 10, true),
-	            csize = dv.getUint32 (offset + 20, true),
-	            ucsize = dv.getUint32 (offset + 24, true),
-	            fnlen = dv.getUint16 (offset + 28, true),
-	            extralen = dv.getUint16 (offset + 30, true),
-	            cmntlen = dv.getUint16 (offset + 32, true),
-	            recofs = dv.getUint32 (offset + 42, true);
-
-		if (recofs + csize > this.zipsize) {
-		    this.error_state = 'bad Zip: bad data size/offset';
-		    throw new Error (this.error_state);
-		}
-
-		if (csize == 0xFFFFFFFF || ucsize == 0xFFFFFFFF) {
-		    this.error_state = 'bad Zip: I can\'t handle ZIP64';
-		    throw new Error (this.error_state);
-		}
-
-		if (offset + 46 + fnlen + extralen + cmntlen > buf.byteLength) {
-		    this.error_state = 'bad Zip: overlarge central directory (2)';
-		    throw new Error (this.error_state);
-		}
-
-		if (compression && compression != 8) {
-		    this.error_state = 'bad Zip: I can only handle DEFLATE compression';
-		    throw new Error (this.error_state);
-		}
-
-		var fnslice = new Uint8Array (buf, offset + 46, fnlen);
-		var fn = String.fromCharCode.apply (null, fnslice);
-
-		dirinfo[fn] = {'csize': csize,
-			       'ucsize': ucsize,
-			       'compression': compression,
-			       'recofs': recofs};
-		offset += 46 + fnlen + extralen + cmntlen;
-	    }
-
-	    this.dirinfo = dirinfo;
-	    return this;
-	}.bind (this));
-    };
-
     proto.has_entry = function ZipReader_has_entry (entname) {
-	if (this.error_state != null)
-	    throw new TexRuntimeError ('previous Zip error: ' + this.error_state);
-	if (this.dirinfo == null)
-	    return NeedMoreData;
-
 	return this.dirinfo.hasOwnProperty (entname);
     };
 
-    proto.stream_entry = function ZipReader_stream_entry (entname, callback) {
-	if (this.error_state != null)
-	    throw new TexRuntimeError ('previous Zip error: ' + this.error_state);
-	if (this.dirinfo == null)
-	    throw NeedMoreData;
+    proto.get_entry_ab = function ZipReader_get_entry_ab (entname) {
 	if (!this.dirinfo.hasOwnProperty (entname))
 	    throw new TexRuntimeError ('no such Zip entry ' + entname);
 
 	var info = this.dirinfo[entname];
-	var state = {'info': info, 'cb': callback};
-	state.entname = entname;
 
-	this.readfunc (info.recofs, 30, function (err, buf) {
-	    // We need to read the pre-entry record to know where the data
-	    // actually start -- the lengths of the comment/extra fields are
-	    // *not* guaranteed to be the same as in the central directory, so
-	    // having read the latter is not enough.
+	// We need to read the pre-entry record to know where the data
+	// actually start -- the lengths of the comment/extra fields are *not*
+	// guaranteed to be the same as in the central directory, so having
+	// read the latter is not enough.
+
+	var buf = this.readfunc (info.recofs, 30);
+	var dv = new DataView (buf);
+	var magic = dv.getUint32 (0, true);
+	if (magic != ZIP_ENTRY_MAGIC)
+	    throw new Error ('bad Zip: wrong magic number in entry');
+
+	var csize = dv.getUint32 (18, true),
+	    fnlen = dv.getUint16 (26, true),
+	    extralen = dv.getUint16 (28, true);
+	var dataofs = info.recofs + 30 + fnlen + extralen;
+
+	if (dataofs + csize > this.zipsize)
+	    throw new Error ('bad Zip: bad entry data size/offset');
+
+	// OK, now we can read the actual data.
+
+	var buf = this.readfunc (dataofs, csize);
+
+	if (!info.compression)
+	    return buf;
+
+	// We need to decompress.
+
+	var state = {buf: new ArrayBuffer (0), err: null};
+
+	var inflate = WEBTEX.IOBackend.makeInflater (function (err, data) {
+	    if (state.err != null)
+		return;
+
 	    if (err != null) {
-		callback (err, null);
+		state.err = err;
 		return;
 	    }
 
-	    var dv = new DataView (buf);
-	    var magic = dv.getUint32 (0, true);
-	    if (magic != ZIP_ENTRY_MAGIC) {
-		this.error_state = 'bad Zip: wrong magic number in entry';
-		throw new Error (this.error_state);
-	    }
+	    if (data == null)
+		// Indicates EOF, but not relevant in our synchronous model.
+		return;
 
-	    var csize = dv.getUint32 (18, true),
-	        fnlen = dv.getUint16 (26, true),
-	        extralen = dv.getUint16 (28, true);
-	    var dataofs = state.info.recofs + 30 + fnlen + extralen;
+	    var tmp = new Uint8Array (state.buf.byteLength + data.byteLength);
+	    tmp.set (new Uint8Array (state.buf), 0);
+	    tmp.set (new Uint8Array (data), state.buf.byteLength);
+	    state.buf = tmp.buffer;
+	});
 
-	    if (dataofs + csize > this.zipsize) {
-		this.error_state = 'bad Zip: bad entry data size/offset';
-		throw new Error (this.error_state);
-	    }
+	inflate.wt_write (buf);
+	inflate.end ();
 
-	    // OK, now we can start reading the file data.
-	    state.nleft = csize;
-	    state.curofs = dataofs;
-	    // The buffer must be at least 32k for zlib to work since it uses
-	    // a lookback buffer of that size.
-	    state.buflen = 32768;
+	if (state.err)
+	    throw state.err;
 
-	    if (state.info.compression) {
-		var inflate = WEBTEX.IOBackend.makeInflater (callback);
-		state.cb = function (err, buf) {
-		    if (err != null) {
-			callback (err, null);
-			return;
-		    }
-
-		    if (buf == null)
-			inflate.end ();
-		    else
-			inflate.wt_write (buf);
-		};
-	    }
-
-	    this.readfunc (state.curofs,
-			   Math.min (state.nleft, state.buflen),
-			   function (err, buf) {
-			       this._cb_do_stream (err, buf, state);
-			   }.bind (this));
-	}.bind (this));
+	return state.buf;
     };
 
-    proto._cb_do_stream = function ZipReader__cb_do_stream (err, buf, state) {
-	if (this.error_state != null) {
-	    state.cb (this.error_state, null);
-	    return;
-	}
-
-	if (err != null) {
-	    this.error_state = 'Zip entry read error: ' + err;
-	    state.cb (err, null);
-	    return;
-	}
-
-	state.cb (err, buf);
-	state.nleft -= buf.byteLength;
-	state.curofs += buf.byteLength;
-
-	if (state.nleft <= 0)
-	    state.cb (null, null) // XXX better convention?
-	else {
-	    this.readfunc (state.curofs,
-			   Math.min (state.nleft, state.buflen),
-			   function (err, buf) {
-			       this._cb_do_stream (err, buf, state)
-			   }.bind (this));
-	}
+    proto.get_entry_str = function ZipReader_get_entry_ab (entname) {
+	var ab = this.get_entry_ab (entname);
+	return String.fromCharCode.apply (null, new Uint8Array (ab));
     };
 
     return ZipReader;
-
 }) ();
