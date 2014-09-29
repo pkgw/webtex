@@ -44,12 +44,12 @@ workerApiEndpoints.parse = function webtex_worker_parse (data) {
 
 workerApiEndpoints.test = function webtex_worker_test (data) {
     var rau = new RandomAccessURL (data.bundleurl);
-    //post_message ('echo', {'bundle-size': rau.size ()});
-    //var c = rau.read_range_str (0, 7);
-    //post_message ('echo', {'sample': c});
     var z = new ZipReader (rau.read_range_ab.bind (rau), rau.size ());
-    var t = z.get_entry_str ('null.tex');
-    post_message ('echo', {'data': t});
+    var bundle = new Bundle (z);
+    delete data.bundleurl;
+
+    var lb = bundle.try_open_linebuffer ('null.tex');
+    post_message ('echo', {'data': lb.get ()});
 };
 
 onmessage = function webtex_worker_onmessage (event) {

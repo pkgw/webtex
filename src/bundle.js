@@ -12,90 +12,40 @@ var Bundle = (function Bundle_closure () {
     }
 
     proto.try_open_linebuffer = function Bundle_try_open_linebuffer (texfn) {
+	// XXX crappy API hangover from days of asynchronous model!
 	var paths = texpaths (texfn);
 
 	while (paths.length) {
 	    var path = paths.shift ();
 
-	    var rv = this.zipreader.has_entry (path);
-	    if (rv === NeedMoreData)
-		throw rv;
-	    if (rv == false)
+	    if (!this.zipreader.has_entry (path))
 		continue;
 
-	    var lb = new LineBuffer ();
-	    this.zipreader.stream_entry (path, function (err, buf) {
-		if (err != null)
-		    throw new TexRuntimeError ('quasi-unhandled I/O error: ' + err);
-
-		if (buf == null) {
-		    lb.end ();
-		    return;
-		}
-
-		var arr = new Uint8Array (buf);
-		lb.feed_data (String.fromCharCode.apply (null, arr));
-	    });
-	    return lb;
+	    var lines = this.zipreader.get_entry_str (path).split ('\n');
+	    return LineBuffer.new_static (lines);
 	}
 
 	return null;
     };
 
-    proto.promise_contents = function Bundle_promise_contents (path) {
-	// Use of this function is generally discouraged since it builds up a
-	// big buffer all in one go, but sometimes that approach is the most
-	// sensible.
-
-	// Existence check not racy since the zip reader is immutable.
-	var stat = this.zipreader.has_entry (path);
-	if (stat == false)
+    proto.get_contents_ab = function Bundle_get_contents_ab (path) {
+	// XXX crappy API hangover from days of asynchronous model!
+	if (this.zipreader.has_entry (path))
 	    return null;
-	if (stat === NeedMoreData)
-	    return stat;
 
-	return new Promise (function (resolve, reject) {
-	    var state = {};
-	    state.prev = new ArrayBuffer (0);
-
-	    this.zipreader.stream_entry (path, function (err, buf) {
-		if (err != null) {
-		    reject (err);
-		    return;
-		}
-
-		if (buf == null) {
-		    resolve (state.prev);
-		    return;
-		}
-
-		var tmp = new Uint8Array (state.prev.byteLength + buf.byteLength);
-		tmp.set (new Uint8Array (state.prev, 0));
-		tmp.set (new Uint8Array (buf), state.prev.byteLength)
-		state.prev = tmp.buffer;
-	    });
-	}.bind (this));
+	return this.zipreader.get_entry_ab (path);
     };
 
     proto.promise_json = function Bundle_promise_json (path) {
-	return new Promise (function (resolve, reject) {
-	    var jp = new JSONStreamParser ();
-	    jp.onError = reject;
-	    jp.onValue = function (value) {
-		jp._last_value = value;
-	    };
+	// XXX crappy API hangover from days of asynchronous model!
 
-	    this.zipreader.stream_entry (path, function (err, buf) {
-		if (err != null) {
-		    reject (err);
-		} else if (buf == null) {
-		    resolve (jp._last_value);
-		} else {
-		    var arr = new Uint8Array (buf);
-		    jp.write (String.fromCharCode.apply (null, arr));
-		}
-	    });
-	}.bind (this));
+	var jp = new JSONStreamParser ();
+	jp.onError = function (err) { throw err; };
+	jp.onValue = function (value) { jp._last_value = value; };
+
+	var buf = this.zipreader.get_entry_txt (path);
+	jp.write (buf);
+	return jp._last_value;
     };
 
     return Bundle;
