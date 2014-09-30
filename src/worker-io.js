@@ -4,6 +4,28 @@ WEBTEX.IOBackend.makeInflater = function (callback) {
     return new JSInflater (callback);
 };
 
+function ab_to_str (arraybuf) {
+    // A naive fromCharCode.apply() call can lead to exceptions about too many
+    // arguments.
+    //
+    // XXX assuming no multi-byte/UTF8-type characters!!
+
+    var s = '';
+    var b = new Uint8Array (arraybuf);
+    var nleft = b.byteLength;
+    var nchunk = 4096;
+    var ofs = 0;
+
+    while (nleft > nchunk) {
+	s += String.fromCharCode.apply (null, b.subarray (ofs, ofs + nchunk));
+	ofs += nchunk;
+	nleft -= nchunk;
+    }
+
+    s += String.fromCharCode.apply (null, b.subarray (ofs, ofs + nleft));
+    return s;
+}
+
 var RandomAccessURL = (function RandomAccessURL_closure () {
     function RandomAccessURL (url) {
 	this.url = url;
@@ -78,8 +100,7 @@ var RandomAccessURL = (function RandomAccessURL_closure () {
     proto.read_range_str = function RandomAccessURL_read_range_str (offset, length) {
 	// TODO: just get the response as text directly, rather than
 	// double-converting. We do this for now to keep things simple.
-	var ab = this.read_range_ab (offset, length);
-	return String.fromCharCode.apply (null, new Uint8Array (ab));
+	return ab_to_str (this.read_range_ab (offset, length));
     };
 
     proto._get_size = function RandomAccessURL__get_size () {

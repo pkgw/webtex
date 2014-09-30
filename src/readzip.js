@@ -173,9 +173,8 @@ var ZipReader = WEBTEX.ZipReader = (function ZipReader_closure () {
 	return state.buf;
     };
 
-    proto.get_entry_str = function ZipReader_get_entry_ab (entname) {
-	var ab = this.get_entry_ab (entname);
-	return String.fromCharCode.apply (null, new Uint8Array (ab));
+    proto.get_entry_str = function ZipReader_get_entry_str (entname) {
+	return ab_to_str (this.get_entry_ab (entname));
     };
 
     return ZipReader;

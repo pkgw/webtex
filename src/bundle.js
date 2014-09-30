@@ -36,15 +36,12 @@ var Bundle = (function Bundle_closure () {
 	return this.zipreader.get_entry_ab (path);
     };
 
-    proto.promise_json = function Bundle_promise_json (path) {
+    proto.get_contents_json = function Bundle_get_contents_json (path) {
 	// XXX crappy API hangover from days of asynchronous model!
-
 	var jp = new JSONStreamParser ();
 	jp.onError = function (err) { throw err; };
 	jp.onValue = function (value) { jp._last_value = value; };
-
-	var buf = this.zipreader.get_entry_txt (path);
-	jp.write (buf);
+	jp.write (this.zipreader.get_entry_str (path));
 	return jp._last_value;
     };
 

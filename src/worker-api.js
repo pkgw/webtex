@@ -32,7 +32,7 @@ workerApiEndpoints.parse = function webtex_worker_parse (data) {
     stream_url_to_linebuffer (inputurl, data.initial_linebuf);
     delete data.inputurl;
 
-    var prom = bundle.promise_json (data.dump_bpath);
+    var prom = bundle.get_contents_json (data.dump_bpath);
     delete data.dump_bpath;
 
     var eng = new Engine (data);
@@ -54,7 +54,9 @@ workerApiEndpoints.test = function webtex_worker_test (data) {
     data.initial_linebuf = LineBuffer.new_static (inp.split ('\n'));
     delete data.inputurl;
 
-    post_message ('echo', {'data': data.initial_linebuf.get ()});
+    var dumpjson = bundle.get_contents_json (data.dump_bpath);
+    delete data.dump_bpath;
+    post_message ('echo', dumpjson);
 };
 
 onmessage = function webtex_worker_onmessage (event) {
