@@ -21,28 +21,6 @@ workerApiEndpoints.echo = function webtex_worker_echo (data) {
 
 
 workerApiEndpoints.parse = function webtex_worker_parse (data) {
-    var rau = make_random_access_url (data.bundleurl);
-    var z = new ZipReader (rau.read_range.bind (rau), rau.size ());
-    var bundle = new Bundle (z);
-    delete data.bundleurl;
-
-    data.iostack = new IOStack ();
-    data.iostack.push (bundle);
-    data.initial_linebuf = new LineBuffer ();
-    stream_url_to_linebuffer (inputurl, data.initial_linebuf);
-    delete data.inputurl;
-
-    var prom = bundle.get_contents_json (data.dump_bpath);
-    delete data.dump_bpath;
-
-    var eng = new Engine (data);
-    eng.restore_serialized_state (dumpjson);
-
-    while (eng.step ()) {
-    }
-};
-
-workerApiEndpoints.test = function webtex_worker_test (data) {
     var rau = new RandomAccessURL (data.bundleurl);
     var z = new ZipReader (rau.read_range_ab.bind (rau), rau.size ());
     var bundle = new Bundle (z);
@@ -60,10 +38,8 @@ workerApiEndpoints.test = function webtex_worker_test (data) {
     var eng = new Engine (data);
     eng.restore_serialized_state (dumpjson);
 
-    eng.step ();
-    eng.step ();
-    eng.step ();
-    post_message ('echo', {status: 'made-it'});
+    while (eng.step ()) {
+    }
 };
 
 onmessage = function webtex_worker_onmessage (event) {

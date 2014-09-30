@@ -9,7 +9,7 @@ var worker_url = 'build/worker-webtex.js';
 var debug_trace = true;
 var debug_input_lines = true;
 
-WEBTEX.Web.test (worker_url, 'test', {
+WEBTEX.Web.test (worker_url, 'parse', {
     jobname: 'plain',
     inputurl: inputurl,
     bundleurl: bundleurl,
