@@ -876,30 +876,14 @@ var Font = (function Font_closure () {
 	    this.metrics = null; // XXX: special NullMetrics class.
 	    this.dimens = null; // ditto?
 	} else {
-	    this.metrics = NeedMoreData;
-	    this.dimens = NeedMoreData;
+	    var contents = engine.iostack.get_contents_ab (ident + '.tfm');
+	    this.metrics = new TfmReader (contents, scale);
+	    this.dimens = [];
 
-	    var rv = engine.iostack.promise_contents (ident + '.tfm');
-	    if (rv == null)
-		throw new TexRuntimeError ('missing needed font metrics file ' +
-					   ident + '.tfm');
-
-	    var rbid = engine.issue_roadblock ('load font metrics for ' + ident);
-
-	    rv.then (function (contents) {
-		this.metrics = new TfmReader (contents, scale);
-		this.dimens = [];
-		for (var i = 0; i < this.metrics.font_dimens.length; i++) {
-		    this.dimens.push (new Dimen ());
-		    this.dimens[i].set_to (this.metrics.font_dimens[i]);
-		}
-		engine.clear_roadblock (rbid);
-	    }.bind (this))['catch'] (function (err) { // <- crazy call for YUI JS minifier
-		// Throwing err does nothing here. We have to stash it.
-		engine.warn ('swallowed error reading font metrics: ' + err.stack);
-		this.metrics_error = err;
-		engine.clear_roadblock (rbid);
-	    }.bind (this));
+	    for (var i = 0; i < this.metrics.font_dimens.length; i++) {
+		this.dimens.push (new Dimen ());
+		this.dimens[i].set_to (this.metrics.font_dimens[i]);
+	    }
 	}
 
 	engine.set_font (ident, this);

@@ -53,14 +53,11 @@ var IOStack = (function IOStack_closure () {
     var proto = IOStack.prototype;
 
     proto.push = function IOStack_push (layer) {
-	// Layers must implement try_open_linebuffer(path). It should
-	// return a LineBuffer, null if the path is unavailable, or
-	// NeedMoreData if that's the case.
+	// Layers must implement try_open_linebuffer(path), which returns a
+	// LineBuffer or null if the path is unavailable.
 	//
-	// They should also implement promise_contents(path), which returns a
-	// Promise, null, or NeedsMoreData. Semantics generally as above. The
-	// Promise should resolve to an ArrayBuffer of data or reject if
-	// there's a problem.
+	// They should also implement get_contents_ab(path), which returns an
+	// ArrayBuffer or null. Semantics as above.
 	this.layers.push (layer);
     };
 
@@ -84,8 +81,6 @@ var IOStack = (function IOStack_closure () {
 		var path = paths[j];
 
 		var rv = layer.try_open_linebuffer (path);
-		if (rv === NeedMoreData)
-		    throw rv;
 		if (rv == null)
 		    continue;
 
@@ -96,7 +91,7 @@ var IOStack = (function IOStack_closure () {
 	return null;
     };
 
-    proto.promise_contents = function IOStack_promise_contents (texfn) {
+    proto.get_contents_ab = function IOStack_get_contents_ab (texfn) {
 	// XXX: code duplication with the above.
 	var paths = texpaths (texfn);
 
@@ -112,9 +107,7 @@ var IOStack = (function IOStack_closure () {
 	    for (var j = 0; j < paths.length; j++) {
 		var path = paths[j];
 
-		var rv = layer.promise_contents (path);
-		if (rv === NeedMoreData)
-		    throw rv;
+		var rv = layer.get_contents_ab (path);
 		if (rv == null)
 		    continue;
 

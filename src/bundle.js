@@ -30,7 +30,7 @@ var Bundle = (function Bundle_closure () {
 
     proto.get_contents_ab = function Bundle_get_contents_ab (path) {
 	// XXX crappy API hangover from days of asynchronous model!
-	if (this.zipreader.has_entry (path))
+	if (!this.zipreader.has_entry (path))
 	    return null;
 
 	return this.zipreader.get_entry_ab (path);
@@ -38,6 +38,9 @@ var Bundle = (function Bundle_closure () {
 
     proto.get_contents_json = function Bundle_get_contents_json (path) {
 	// XXX crappy API hangover from days of asynchronous model!
+	if (!this.zipreader.has_entry (path))
+	    return null;
+
 	var jp = new JSONStreamParser ();
 	jp.onError = function (err) { throw err; };
 	jp.onValue = function (value) { jp._last_value = value; };

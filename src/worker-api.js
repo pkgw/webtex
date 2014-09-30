@@ -56,7 +56,14 @@ workerApiEndpoints.test = function webtex_worker_test (data) {
 
     var dumpjson = bundle.get_contents_json (data.dump_bpath);
     delete data.dump_bpath;
-    post_message ('echo', dumpjson);
+
+    var eng = new Engine (data);
+    eng.restore_serialized_state (dumpjson);
+
+    eng.step ();
+    eng.step ();
+    eng.step ();
+    post_message ('echo', {status: 'made-it'});
 };
 
 onmessage = function webtex_worker_onmessage (event) {
