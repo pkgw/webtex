@@ -36,3 +36,23 @@ WEBTEX.test_drive_node = function webtex_node_test_drive_node (data) {
     while (eng.step () === true) {
     }
 };
+
+
+WEBTEX.setup_process_format = function webtex_node_setup_process_format (data) {
+    // Arguments:
+    // - bundlepath
+    // - initial_linebuf
+    //
+    // Rest are passed to Engine. (Include: jobname, debug_trace,
+    // debug_input_lines.)
+
+    var raf = new RandomAccessFile (data.bundlepath);
+    var z = new ZipReader (raf.read_range_ab.bind (raf), raf.size ());
+    var bundle = new Bundle (z);
+    delete data.bundlepath;
+
+    data.iostack = new IOStack ();
+    data.iostack.push (bundle);
+
+    return new Engine (data);
+};
