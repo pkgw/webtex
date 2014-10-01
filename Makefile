@@ -4,6 +4,7 @@ minify = java -jar yuicompressor-2.4.8.jar
 texdist = tl2013
 
 sharedjs = \
+  src/inflate.js \
   src/jsonparse.js \
   src/preamble.js \
   src/constants.js \
@@ -26,42 +27,42 @@ sharedjs = \
   src/tfmreader.js \
   src/bundle.js
 
-browserjs = \
-  src/browser-io.js \
-  src/browser-api.js
-
 browserprejs = \
   src/promise-0.1.1.js \
-  src/inflate.js \
   src/network.js \
   src/emulate-setimmediate.js
 
-workerjs = \
+browserworkerjs = \
   src/worker-io.js \
   src/worker-api.js
 
+browsermasterjs = \
+  src/master-api.js
+
 nodejs = \
-  src/node-io.js
+  src/node-io.js \
+  src/node-api.js
 
 bundleextras = \
   $(builddir)/latex.dump.json
 
 standard: \
-  $(builddir)/browser-webtex.js \
-  $(builddir)/worker-webtex.js \
+  $(builddir)/browser-master-webtex.js \
+  $(builddir)/browser-worker-webtex.js \
   $(builddir)/node-webtex.js
 
 minified: \
-  $(builddir)/browser-webtex.min.js \
+  $(builddir)/browser-master-webtex.min.js \
+  $(builddir)/browser-worker-webtex.min.js \
   $(builddir)/node-webtex.min.js
 
-$(builddir)/browser-webtex.js: \
-generate.py src/browser-wrapper.js $(browserprejs) $(sharedjs) $(browserjs) \
+$(builddir)/browser-master-webtex.js: \
+generate.py src/browser-master-wrapper.js $(browserprejs) $(sharedjs) $(browsermasterjs) \
 | $(builddir)
 	$(python) $^ $@
 
-$(builddir)/worker-webtex.js: \
-generate.py src/worker-wrapper.js $(browserprejs) $(sharedjs) $(workerjs) \
+$(builddir)/browser-worker-webtex.js: \
+generate.py src/worker-wrapper.js $(browserprejs) $(sharedjs) $(browserworkerjs) \
 | $(builddir)
 	$(python) $^ $@
 
@@ -82,6 +83,12 @@ dump-format.js $(builddir)/node-webtex.min.js \
 | $(builddir)
 	node $< ./$(builddir)/node-webtex.min.js texpatches/$(texdist)/ \
 	  latex.ltx >$@.new && mv -f $@.new $@
+
+$(builddir)/plain.dump.json: \
+dump-format.js $(builddir)/node-webtex.min.js \
+| $(builddir)
+	node $< ./$(builddir)/node-webtex.min.js texpatches/$(texdist)/ \
+	  plain.tex >$@.new && mv -f $@.new $@
 
 $(builddir)/latest.zip: \
 make-tex-bundle.py packages.txt $(bundleextras) \

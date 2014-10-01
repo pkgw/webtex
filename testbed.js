@@ -5,11 +5,11 @@ var targdiv = document.getElementById ('webtex');
 var bundleurl = 'latest.zip'; // note: relative to *worker's* URL
 var inputurl = '../test/tex/latex-minimal.tex'; // ditto
 var dump_bpath = 'latex.dump.json';
-var worker_url = 'build/worker-webtex.js';
-var debug_trace = true;
-var debug_input_lines = true;
+var worker_url = 'build/browser-worker-webtex.js';
+var debug_trace = false;
+var debug_input_lines = false;
 
-WEBTEX.Web.test (worker_url, 'parse', {
+WEBTEX.test_drive (worker_url, 'urlparse', {
     jobname: 'plain',
     inputurl: inputurl,
     bundleurl: bundleurl,

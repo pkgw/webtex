@@ -38,9 +38,14 @@ workerApiEndpoints.parse = function webtex_worker_parse (data) {
     var eng = new Engine (data);
     eng.restore_serialized_state (dumpjson);
 
+    post_message ('echo', {message: 'parse start'});
+
     while (eng.step ()) {
     }
+
+    post_message ('echo', {message: 'parse done'});
 };
+
 
 onmessage = function webtex_worker_onmessage (event) {
     var data = event.data;

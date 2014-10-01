@@ -1,4 +1,4 @@
-WEBTEX.Web.test = (function () {
+WEBTEX.test_drive = (function () {
     function test (worker_url, kind, data) {
 	var worker = new Worker (worker_url);
 

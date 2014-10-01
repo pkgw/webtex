@@ -48,7 +48,9 @@ var TfmReader = WEBTEX.TfmReader = (function TfmReader_closure () {
 
     function TfmReader (contents, scale_factor) {
 	// scale_factor is funky; see below.
-	this.contents = contents; // should be ArrayBuffer
+	if (!(contents instanceof ArrayBuffer))
+	    throw new TexInternalError ('TfmReader expected ArrayBuffer; got ' + contents);
+	this.contents = contents;
 	var dv = this.dv = new DataView (contents);
 
 	// T:TP 540:
