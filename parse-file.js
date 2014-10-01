@@ -1,3 +1,6 @@
+var console = require ('console');
+var util = require ('util');
+
 if (process.argv.length < 4) {
     console.log ('usage: node ' + process.argv[1] + ' <webtex.js> <filename>');
     process.exit (1);
@@ -5,36 +8,16 @@ if (process.argv.length < 4) {
 
 var webtex = require (process.argv[2]);
 
-webtex.Node.promise_engine ({
-    jobname: process.argv[3],
-    inputpath: process.argv[3],
-    bundlepath: 'build/latest.zip',
-    debug_input_lines: true,
-    debug_trace: true,
-}).then (function (engine) {
-    function iterate () {
-	try {
-	    var rv = engine.step ();
-	} catch (e) {
-	    console.warn ('--- error encountered ---');
-	    // The temporary variables make it so any input line logging that
-	    // happens when we peek at the upcoming tokens is separated nicely
-	    // from the recent/upcoming report instead of interleaved.
-	    var recent = engine.inputstack.describe_recent ();
-	    var upcoming = engine.inputstack.describe_upcoming ();
-	    console.warn (recent);
-	    console.warn (upcoming);
-	    throw e;
-	}
+var inputpath = process.argv[3];
+var bundlepath = 'build/latest.zip';
+var debug_trace = true;
+var debug_input_lines = true;
 
-	if (rv === true)
-	    setImmediate (iterate);
-	else if (rv === webtex.NeedMoreData)
-	    setTimeout (iterate, 10);
-	// otherwise, EOF and we're done.
-    }
-
-    iterate ();
-}).catch (function (err) {
-    console.log (err.stack);
+WEBTEX.test_drive_node ({
+    jobname: inputpath,
+    inputpath: inputpath,
+    bundlepath: bundlepath,
+    debug_trace: debug_trace,
+    debug_input_lines: debug_input_lines,
+    //shiptarget: new webtex.Node.ConsoleDumpTarget (),
 });

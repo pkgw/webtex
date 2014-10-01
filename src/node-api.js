@@ -20,11 +20,18 @@ WEBTEX.test_drive_node = function webtex_node_test_drive_node (data) {
     data.initial_linebuf = make_fs_linebuffer (data.inputpath);
     delete data.inputpath;
 
-    var dumpjson = get_fs_json (data.dumppath);
-    delete data.dumppath;
+    var dumpjson = null;
+    var dumppath = data.dumppath || null;
+
+    if (dumppath != null) {
+	dumpjson = get_fs_json (data.dumppath);
+	delete data.dumppath;
+    }
 
     var eng = new Engine (data);
-    eng.restore_serialized_state (dumpjson);
+
+    if (dumpjson != null)
+	eng.restore_serialized_state (dumpjson);
 
     while (eng.step () === true) {
     }
