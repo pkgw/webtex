@@ -1,7 +1,7 @@
 // Node-based API endpoints -- we take paths to data files rather than
 // URLs (as used in the browser).
 
-WEBTEX.test_drive_node = function webtex_node_test_drive_node (data) {
+WEBTEX.setup_process_basic = function webtex_node_setup_process_bassic (data) {
     // Arguments:
     // - bundlepath
     // - inputpath
@@ -33,8 +33,7 @@ WEBTEX.test_drive_node = function webtex_node_test_drive_node (data) {
     if (dumpjson != null)
 	eng.restore_serialized_state (dumpjson);
 
-    while (eng.step () === true) {
-    }
+    return eng;
 };
 
 
