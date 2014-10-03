@@ -42,12 +42,10 @@ workerApiEndpoints.parse = function webtex_worker_parse (data) {
     var eng = new Engine (data);
     eng.restore_serialized_state (dumpjson);
 
-    post_message ('echo', {message: 'parse start'});
-
-    while (eng.step ()) {
+    while (eng.step () === true) {
     }
 
-    post_message ('echo', {message: 'parse done'});
+    post_message ('parse_finish', {});
 };
 
 

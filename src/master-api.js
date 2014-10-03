@@ -1,25 +1,9 @@
-WEBTEX.test_drive = (function () {
-    function test (worker_url, kind, data) {
-	var worker = new Worker (worker_url);
+WEBTEX.test_drive = function test_drive (worker_url, data) {
+    var master = new Master (worker_url);
 
-	worker.onerror = function (errevent) {
-	    console.error ('worker error: ' + errevent.message + ' (' +
-			   errevent.filename + ':' + errevent.lineno + ')');
-	};
+    master.handle_render = function handle_render (data) {
+	console.log ('render: ' + JSON.stringify (data));
+    };
 
-	worker.onmessage = function (event) {
-	    console.log ('worker event data: ' + JSON.stringify (event.data));
-	};
-
-	worker.post_webtex = function (kind, data) {
-	    if (typeof data != 'object')
-		throw new TexInternalError ('illegal message object ' + data);
-	    data._kind = kind;
-	    this.postMessage (data);
-	}.bind (worker);
-
-	worker.post_webtex (kind, data);
-    }
-
-    return test;
-}) ();
+    master.send_message ('parse', data);
+};

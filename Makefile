@@ -38,6 +38,8 @@ browserworkerjs = \
   src/worker-api.js
 
 browsermasterjs = \
+  src/master-object.js \
+  src/dom-renderer.js \
   src/master-api.js
 
 nodejs = \

@@ -72,7 +72,7 @@ workerShipTargets['html-render'] = (function HTMLRenderTarget_closure () {
 	if (queued_text.length)
 	    rendered.push (queued_text);
 
-	this.post_message ('render', rendered);
+	this.post_message ('render', {'items': rendered});
     };
 
     return HTMLRenderTarget;
