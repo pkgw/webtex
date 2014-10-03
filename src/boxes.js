@@ -550,6 +550,38 @@ var CanvasBox = (function CanvasBox_closure () {
 	}
     };
 
+    proto.to_render_data = function CanvasBox_to_render_data () {
+	var data = {w: this.width.sp.value,
+		    h: this.height.sp.value,
+		    d: this.depth.sp.value};
+	var gl = []; // "graphics list"
+
+	for (var i = 0; i < this.graphics.length; i++) {
+	    var q = this.graphics[i];
+	    var x = q[0];
+	    var y = this.height.sp.value + q[1];
+	    var subitem = q[2];
+
+	    if (subitem instanceof Character) {
+		gl.push ({x: x,
+			  y: y,
+			  font: subitem.font.ident,
+			  ord: subitem.ord});
+	    } else if (subitem instanceof Rule) {
+		y -= subitem.height.sp.value;
+		gl.push ({x: x,
+			  y: y,
+			  w: subitem.width.sp.value,
+			  h: subitem.height.sp.value + subitem.depth.sp.value});
+	    } else {
+		throw new TexInternalError ('unhandled CanvasBox graphic ' + subitem);
+	    }
+	}
+
+	data.gl = gl;
+	return data;
+    };
+
     return CanvasBox;
 }) ();
 

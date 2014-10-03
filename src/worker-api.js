@@ -35,6 +35,10 @@ workerApiEndpoints.parse = function webtex_worker_parse (data) {
     var dumpjson = bundle.get_contents_json (data.dump_bpath);
     delete data.dump_bpath;
 
+    var target_name = data.ship_target_name || null;
+    if (target_name !== null)
+	data.shiptarget = new workerShipTargets[target_name] (post_message);
+
     var eng = new Engine (data);
     eng.restore_serialized_state (dumpjson);
 

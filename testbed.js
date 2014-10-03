@@ -9,11 +9,12 @@ var worker_url = 'build/browser-worker-webtex.js';
 var debug_trace = false;
 var debug_input_lines = false;
 
-WEBTEX.test_drive (worker_url, 'urlparse', {
+WEBTEX.test_drive (worker_url, 'parse', {
     jobname: 'plain',
     inputurl: inputurl,
     bundleurl: bundleurl,
     dump_bpath: dump_bpath,
+    ship_target_name: 'html-render',
     debug_trace: debug_trace,
     debug_input_lines: debug_input_lines,
 });

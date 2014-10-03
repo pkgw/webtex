@@ -33,6 +33,7 @@ browserprejs = \
   src/emulate-setimmediate.js
 
 browserworkerjs = \
+  src/html-render-target.js \
   src/worker-io.js \
   src/worker-api.js
 

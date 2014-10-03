@@ -895,8 +895,6 @@ var Engine = (function Engine_closure () {
 	if (this._running_output)
 	    return; // T:TP 994.
 
-	return; // XXXXXXXXXXXXX let's just never output
-
 	// Hacky version of \outputpenalty setting -- TeXBook p. 125. We should
 	// preserve the penalty for the next batch of output, but since (I think)
 	// we don't need it for anything, we just pop it off the list.
@@ -1004,11 +1002,6 @@ var Engine = (function Engine_closure () {
 	    this._force_end = true;
 	} else {
 	    this.trace ('... forcing page build');
-
-	    // XXXXXX since we've defused the page builder
-	    this.trace ('... just kidding. Forcing exit.');
-	    this._force_end = true;
-	    return;
 
 	    var hb = new HBox ();
 	    hb.width = this.get_parameter (T_DIMEN, 'hsize');
