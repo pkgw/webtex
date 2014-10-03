@@ -8,8 +8,11 @@ function post_message (kind, data) {
     // have a central dispatcher in case our API gets more elaborate. Also,
     // the type-checking of the "data" argument is important.
 
+    if (typeof kind != 'string')
+	throw new TexInternalError ('illegal message kind ' + kind);
     if (typeof data != 'object')
 	throw new TexInternalError ('illegal message object ' + data);
+
     data._kind = kind;
     postMessage (data);
 }
