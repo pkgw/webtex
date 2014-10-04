@@ -226,7 +226,7 @@ var MacroCommand = (function MacroCommand_closure () {
 	while (tidx < ntmpl) {
 	    var ttok = this.tmpl[tidx];
 
-	    if (!ttok.isparam ()) {
+	    if (!ttok.is_param ()) {
 		// span of nonparameter tokens in template -- eat and make
 		// sure that the actual token stream matches.
 		var atok = engine.next_tok_throw ();
@@ -238,7 +238,7 @@ var MacroCommand = (function MacroCommand_closure () {
 		continue;
 	    }
 
-	    if (tidx == ntmpl - 1 || this.tmpl[tidx+1].isparam ()) {
+	    if (tidx == ntmpl - 1 || this.tmpl[tidx+1].is_param ()) {
 		// Undelimited parameter. Either a single token, or a group.
 		var tok = engine.next_tok_throw ();
 
@@ -264,7 +264,7 @@ var MacroCommand = (function MacroCommand_closure () {
 
 	    var expansion = [], match_start = tidx + 1, match_end = tidx + 2;
 
-	    while (match_end < ntmpl && !this.tmpl[match_end].isparam ())
+	    while (match_end < ntmpl && !this.tmpl[match_end].is_param ())
 		match_end += 1;
 
 	    var n_to_match = match_end - match_start, cur_match_idx = 0, depth = 0;
@@ -344,7 +344,7 @@ var MacroCommand = (function MacroCommand_closure () {
 	for (var i = 0; i < this.repl.length; i++) {
 	    var rtok = this.repl[i];
 
-	    if (!rtok.isparam ()) {
+	    if (!rtok.is_param ()) {
 		fullrepl.push (rtok);
 	    } else {
 		var ptoks = param_vals[rtok.pnum];

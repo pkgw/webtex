@@ -130,7 +130,7 @@ var Token = (function Token_closure () {
     };
 
 
-    proto.isparam = function Token_isparam () {
+    proto.is_param = function Token_is_param () {
 	return this.kind == TK_PARAM;
     };
 
