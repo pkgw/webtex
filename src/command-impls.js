@@ -599,7 +599,7 @@ commands.ifcat = function cmd_ifcat (engine) {
 commands.ifx = function cmd_ifx (engine) {
     var t1 = engine.next_tok_throw (), t2 = engine.next_tok_throw (), result;
     var cmd1 = t1.to_cmd (engine), cmd2 = t2.to_cmd (engine);
-    result = cmd1.samecmd (cmd2);
+    result = cmd1.same_cmd (cmd2);
     engine.trace ('ifx ' + t1 + ' ~ ' + t2 + ' => ' + result);
     engine.handle_if (result);
 };

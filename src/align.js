@@ -51,7 +51,7 @@ var alignlib = (function alignlib_closure () {
 		var cmd = tok.to_cmd (engine);
 		if (cmd.expandable) {
 		    // I guess \noexpand makes no sense here, but who knows?
-		    if (cmd.samecmd (engine.commands['noexpand'])) {
+		    if (cmd.same_cmd (engine.commands['noexpand'])) {
 			tok = engine.next_tok ();
 			engine.trace ('noexpand in align: ' + tok);
 		    } else {

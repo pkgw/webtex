@@ -1316,7 +1316,7 @@ var Engine = (function Engine_closure () {
 	    if (!cmd.expandable)
 		return tok;
 
-	    if (cmd.samecmd (this.commands['noexpand'])) {
+	    if (cmd.same_cmd (this.commands['noexpand'])) {
 		tok = this.next_tok ();
 		this.trace ('noexpand: ' + tok);
 		return tok;
@@ -1377,9 +1377,9 @@ var Engine = (function Engine_closure () {
 	    if (tok.is_cmd (this, 'relax'))
 		continue;
 	    if (tok.to_cmd (this) instanceof BeginGroupCommand)
-		// We can't use is_cmd() here because it calls samecmd(), which
+		// We can't use is_cmd() here because it calls same_cmd(), which
 		// cares about the ordinal associated with the command,
-		// whereas here we don't. samecmd() needs to care about the
+		// whereas here we don't. same_cmd() needs to care about the
 		// ordinal for \ifx to work as desired.
 		return;
 
@@ -2307,8 +2307,8 @@ var Engine = (function Engine_closure () {
 		    break;
 
 		if (cmd instanceof AlignTabCommand ||
-		    cmd.samecmd (this.commands['cr']) ||
-		    cmd.samecmd (this.commands['crcr'])) {
+		    cmd.same_cmd (this.commands['cr']) ||
+		    cmd.same_cmd (this.commands['crcr'])) {
 		    if (col.u_tmpl.length == 0 &&
 			astate.loop_idx == -1 &&
 			cmd instanceof AlignTabCommand) {
@@ -2336,8 +2336,8 @@ var Engine = (function Engine_closure () {
 		var cmd = tok.to_cmd (this);
 
 		if (cmd instanceof AlignTabCommand ||
-		    cmd.samecmd (this.commands['cr']) ||
-		    cmd.samecmd (this.commands['crcr']))
+		    cmd.same_cmd (this.commands['cr']) ||
+		    cmd.same_cmd (this.commands['crcr']))
 		    break;
 
 		if (cmd instanceof MacroParameterCommand)
@@ -2475,7 +2475,7 @@ var Engine = (function Engine_closure () {
 	col = astate.columns[astate.cur_col];
 	astate.cur_col++;
 
-	if (!(astate.col_ender.samecmd (this.commands['span']))) {
+	if (!(astate.col_ender.same_cmd (this.commands['span']))) {
 	    // TTP 796 - package the current cell. XXX: I think TeX futzes
 	    // with the current list being built without actually leaving the
 	    // current mode. I'm doing the same for now, even though it feels

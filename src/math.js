@@ -340,10 +340,10 @@ var mathlib = (function mathlib_closure () {
 	    check_active = true;
 	} else if (cmd instanceof GivenMathcharCommand) {
 	    c = cmd.mathchar;
-	} else if (cmd.samecmd (engine.commands['char'])) {
+	} else if (cmd.same_cmd (engine.commands['char'])) {
 	    c = engine.get_code (CT_MATH, engine.scan_char_code ());
 	    check_active = true;
-	} else if (cmd.samecmd (engine.commands['mathchar'])) {
+	} else if (cmd.same_cmd (engine.commands['mathchar'])) {
 	    c = engine.scan_int_15bit ();
 	}
 	// XXX unimplemented: \delimiter case

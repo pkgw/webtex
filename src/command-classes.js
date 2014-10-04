@@ -41,7 +41,7 @@ var UndefinedCommand = (function UndefinedCommand_closure () {
 	throw new TexRuntimeError ('trying to invoke undefined command \\' + this.csname);
     };
 
-    proto.samecmd = function UndefinedCommand_samecmd (other) {
+    proto.same_cmd = function UndefinedCommand_same_cmd (other) {
 	if (other == null)
 	    return false;
 	return (other instanceof UndefinedCommand);
@@ -78,7 +78,7 @@ var MacroCommand = (function MacroCommand_closure () {
 	return new MacroCommand (origcs, tmpl, repl);
     };
 
-    proto.samecmd = function MacroCommand_samecmd (other) {
+    proto.same_cmd = function MacroCommand_same_cmd (other) {
 	if (other == null)
 	    return false;
 	if (this.name != other.name)
@@ -279,7 +279,7 @@ var CharacterCommand = (function CharacterCommand_closure () {
 	return this.ord;
     };
 
-    proto.samecmd = function CharacterCommand_samecmd (other) {
+    proto.same_cmd = function CharacterCommand_same_cmd (other) {
 	if (other == null)
 	    return false;
 	if (this.name != other.name)
@@ -709,7 +709,7 @@ var GivenCharCommand = (function GivenCharCommand_closure () {
 	engine.accum (engine.get_misc ('cur_font').box_for_ord (this.ord));
     };
 
-    proto.samecmd = function GivenCharCommand_samecmd (other) {
+    proto.same_cmd = function GivenCharCommand_same_cmd (other) {
 	if (other == null)
 	    return false;
 	if (this.name != other.name)
@@ -766,7 +766,7 @@ var GivenMathcharCommand = (function GivenMathcharCommand_closure () {
 	    engine.accum (node);
     }
 
-    proto.samecmd = function GivenMathcharCommand_samecmd (other) {
+    proto.same_cmd = function GivenMathcharCommand_same_cmd (other) {
 	if (other == null)
 	    return false;
 	if (this.name != other.name)
@@ -815,7 +815,7 @@ var GivenRegisterCommand = (function GivenRegisterCommand_closure () {
 	return this.register;
     };
 
-    proto.samecmd = function GivenRegisterCommand_samecmd (other) {
+    proto.same_cmd = function GivenRegisterCommand_same_cmd (other) {
 	if (other == null)
 	    return false;
 	if (this.name != other.name)
@@ -864,7 +864,7 @@ var VariableRegisterCommand = (function VariableRegisterCommand_closure () {
     inherit (VariableRegisterCommand, Command);
     var proto = VariableRegisterCommand.prototype;
 
-    proto.samecmd = function VariableRegisterCommand_samecmd (other) {
+    proto.same_cmd = function VariableRegisterCommand_same_cmd (other) {
 	if (other == null)
 	    return false;
 	if (this.name != other.name)
@@ -906,7 +906,7 @@ var GivenFontCommand = (function GivenFontCommand_closure () {
 	return this.font.get_serialize_ident (state, housekeeping);
     };
 
-    proto.samecmd = function GivenFontCommand_samecmd (other) {
+    proto.same_cmd = function GivenFontCommand_same_cmd (other) {
 	if (other == null)
 	    return false;
 	if (this.name != other.name)
@@ -1033,7 +1033,7 @@ var NamedParamCommand = (function NamedParamCommand_closure () {
     var proto = NamedParamCommand.prototype;
     proto.assign_flag_mode = AFM_CONSUME;
 
-    proto.samecmd = function NamedParamCommand_samecmd (other) {
+    proto.same_cmd = function NamedParamCommand_same_cmd (other) {
 	if (other == null)
 	    return false;
 	if (this.name != other.name)

@@ -27,7 +27,7 @@ var Value = (function Value_closure () {
 
     proto.equals = function Value_equals () {
 	// Returns whether this object has the same value as another. So far
-	// only used to compare fonts in GivenFontCommand.samecmd, so this may
+	// only used to compare fonts in GivenFontCommand.same_cmd, so this may
 	// be very overly generic.
 	throw new TexInternalError ('not implemented Value.equals');
     };
@@ -225,7 +225,7 @@ var Command = (function Command_closure () {
 				    'un-evaluatable command ' + this.name);
     };
 
-    proto.samecmd = function Command_samecmd (other) {
+    proto.same_cmd = function Command_same_cmd (other) {
 	if (other == null)
 	    return false;
 	return this.name == other.name;
