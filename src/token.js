@@ -4,7 +4,7 @@
  * better to have a single class with an internal "kind" rather than
  * subclasses, but maybe that's wrong. */
 
-var Token = WEBTEX.Token = (function Token_closure () {
+var Token = (function Token_closure () {
     var TK_CHAR = 0, TK_CSEQ = 1, TK_PARAM = 2, TK_PURECMD = 3;
     var frozen_cs_names = {cr: 1, endgroup: 1, right: 1, fi: 1, endtemplate: 1,
                            relax: 1, endwrite: 1, 'notexpanded:': 1, nullfont: 1};

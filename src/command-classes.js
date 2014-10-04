@@ -1,6 +1,6 @@
 'use strict';
 
-var Command = WEBTEX.Command = (function Command_closure () {
+var Command = (function Command_closure () {
     function Command () {}
 
     var proto = Command.prototype;

@@ -23,7 +23,7 @@
 
 'use strict';
 
-var ZipReader = WEBTEX.ZipReader = (function ZipReader_closure () {
+var ZipReader = (function ZipReader_closure () {
     var ZIP_EOCDR_MAGIC = 0x06054b50;
     var ZIP_DIREC_MAGIC = 0x02014b50;
     var ZIP_ENTRY_MAGIC = 0x04034b50;
@@ -145,7 +145,7 @@ var ZipReader = WEBTEX.ZipReader = (function ZipReader_closure () {
 
 	var state = {buf: new ArrayBuffer (0), err: null};
 
-	var inflate = WEBTEX.IOBackend.makeInflater (function (err, data) {
+	var inflate = webtexApiObject.IOBackend.makeInflater (function (err, data) {
 	    if (state.err != null)
 		return;
 

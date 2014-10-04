@@ -1,4 +1,4 @@
-var LineBuffer = WEBTEX.LineBuffer = (function LineBuffer_closure () {
+var LineBuffer = (function LineBuffer_closure () {
     function LineBuffer () {
 	this.cachedlines = [];
 	this.remainder = '';
@@ -44,3 +44,5 @@ var LineBuffer = WEBTEX.LineBuffer = (function LineBuffer_closure () {
 
     return LineBuffer;
 })();
+
+webtex_export ('LineBuffer', LineBuffer);

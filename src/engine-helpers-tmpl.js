@@ -8,10 +8,10 @@ function fill_cseq_commands (engine) {
 	    cond = item[3], afm = item[4];
 	var cmd = null;
 
-	if (!WEBTEX.commands.hasOwnProperty (escname))
+	if (!commands.hasOwnProperty (escname))
 	    cmd = new CommandUnimplPrimitive (name);
 	else {
-	    var val = WEBTEX.commands[escname];
+	    var val = commands[escname];
 
 	    if (val.prototype instanceof Command)
 		cmd = new val ();

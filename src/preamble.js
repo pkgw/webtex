@@ -1,6 +1,6 @@
 'use strict';
 
-WEBTEX.IOBackend = {};
+webtexApiObject.IOBackend = {}; // XXX
 
 
 var global_log = (function () {
@@ -81,5 +81,8 @@ var TexInternalError = (function TexInternalErrorClosure () {
 
 /* Dealing with processing restarts */
 
-var NeedMoreData = WEBTEX.NeedMoreData = {toString: function () { return 'NeedMoreData'; }};
-var EOF = WEBTEX.EOF = {toString: function () { return 'EOF'; }};
+var NeedMoreData = {toString: function () { return 'NeedMoreData'; }};
+var EOF = {toString: function () { return 'EOF'; }};
+
+webtex_export ('NeedMoreData', NeedMoreData);
+webtex_export ('EOF', EOF);

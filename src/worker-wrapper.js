@@ -1,8 +1,12 @@
 'use strict';
 
 var globalScope = self;
-self.WEBTEX = {Web: {}}; // XXX temp.
+var webtexApiObject = {};
 var workerApiEndpoints = {};
 var workerShipTargets = {};
+
+function webtex_export (name, value) {
+    // No point.
+}
 
 $insert_files

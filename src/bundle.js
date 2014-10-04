@@ -51,4 +51,4 @@ var Bundle = (function Bundle_closure () {
     return Bundle;
 }) ();
 
-WEBTEX.Bundle = Bundle;
+webtex_export ('Bundle', Bundle);

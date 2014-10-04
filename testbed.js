@@ -9,7 +9,7 @@ var worker_url = 'build/browser-worker-webtex.js';
 var debug_trace = false;
 var debug_input_lines = false;
 
-var dr = new WEBTEX.DOMRenderer (worker_url, targdiv);
+var dr = new Webtex.DOMRenderer (worker_url, targdiv);
 dr.launch_parse ({
     jobname: 'plain',
     inputurl: inputurl,

@@ -125,10 +125,10 @@ var FSIOLayer = (function FSIOLayer_closure () {
     return FSIOLayer;
 }) ();
 
-WEBTEX.Node.FSIOLayer = FSIOLayer;
+webtexApiObject.Node.FSIOLayer = FSIOLayer;
 
 
-WEBTEX.IOBackend.makeInflater = function (callback) {
+webtexApiObject.IOBackend.makeInflater = function (callback) {
     // We used to delegate to node.js's built-in zlib module. However, in the
     // synchronous-I/O paradigm, this doesn't work, because zlib is
     // implemented with streams and return to the main loop is needed for the
@@ -167,4 +167,4 @@ var ConsoleDumpTarget = (function ConsoleDumpTarget_closure () {
     return ConsoleDumpTarget;
 }) ();
 
-WEBTEX.Node.ConsoleDumpTarget = ConsoleDumpTarget;
+webtexApiObject.Node.ConsoleDumpTarget = ConsoleDumpTarget; // XXX

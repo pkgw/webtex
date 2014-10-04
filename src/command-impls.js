@@ -1,6 +1,6 @@
 'use strict;'
 
-var commands = WEBTEX.commands = {};
+var commands = {};
 
 
 // Text layout.

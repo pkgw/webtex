@@ -37,8 +37,6 @@ function escchr (ord) {
     return '\\x' + ('00' + ord.toString (16)).substr (-2);
 }
 
-WEBTEX.escchr = escchr;
-
 function texchr (ord) {
     if (ord < 32)
 	return '^^' + String.fromCharCode (ord + 64);
@@ -48,5 +46,3 @@ function texchr (ord) {
 	return '^^?';
     return '^^' + ord.toString (16);
 }
-
-WEBTEX.texchr = texchr;

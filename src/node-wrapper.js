@@ -1,11 +1,14 @@
-WEBTEX = exports;
-WEBTEX.Node = {};
-
-(function webtexWrapper () {
+(function webtexWrapper (webtexApiObject) {
     'use strict';
     var globalScope = global;
-    var Promise = WEBTEX.Promise = require ('es6-promise').Promise;
+    webtexApiObject.Node = {};
+
+    function webtex_export (name, value) {
+	webtexApiObject[name] = value;
+    }
+
+    var Promise = require ('es6-promise').Promise;
 
 $insert_files
 
-}) ();
+}) (exports);

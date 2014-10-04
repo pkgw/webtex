@@ -39,8 +39,7 @@ browserworkerjs = \
 
 browsermasterjs = \
   src/master-object.js \
-  src/dom-renderer.js \
-  src/master-api.js
+  src/dom-renderer.js
 
 nodejs = \
   src/node-io.js \

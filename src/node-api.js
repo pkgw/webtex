@@ -1,7 +1,7 @@
 // Node-based API endpoints -- we take paths to data files rather than
 // URLs (as used in the browser).
 
-WEBTEX.setup_process_basic = function webtex_node_setup_process_bassic (data) {
+function setup_process_basic (data) {
     // Arguments:
     // - bundlepath
     // - inputpath
@@ -34,10 +34,10 @@ WEBTEX.setup_process_basic = function webtex_node_setup_process_bassic (data) {
 	eng.restore_serialized_state (dumpjson);
 
     return eng;
-};
+}
 
 
-WEBTEX.setup_process_format = function webtex_node_setup_process_format (data) {
+function setup_process_format (data) {
     // Arguments:
     // - bundlepath
     // - initial_linebuf
@@ -54,4 +54,8 @@ WEBTEX.setup_process_format = function webtex_node_setup_process_format (data) {
     data.iostack.push (bundle);
 
     return new Engine (data);
-};
+}
+
+
+webtex_export ('setup_process_basic', setup_process_basic);
+webtex_export ('setup_process_format', setup_process_format);

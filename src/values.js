@@ -130,7 +130,7 @@ var Value = (function Value_closure () {
 }) ();
 
 
-var TexInt = WEBTEX.TexInt = (function TexInt_closure () {
+var TexInt = (function TexInt_closure () {
     var INT_MAX = 2147483647; // 2**31 - 1
 
     // These objects are immutable.
@@ -243,7 +243,7 @@ var TexInt = WEBTEX.TexInt = (function TexInt_closure () {
 }) ();
 
 
-var Scaled = WEBTEX.Scaled = (function Scaled_closure () {
+var Scaled = (function Scaled_closure () {
     var SC_HALF  = 0x8000,     // 2**15 = 32768      = '100000
         SC_UNITY = 0x10000,    // 2**16 = 65536      = '200000
         SC_TWO   = 0x20000,    // 2**17 = 131072     = '400000
@@ -717,7 +717,7 @@ var Glue = (function Glue_closure () {
 }) ();
 
 
-var Toklist = WEBTEX.Toklist = (function Toklist_closure () {
+var Toklist = (function Toklist_closure () {
     function Toklist (toks) {
 	if (toks == null)
 	    this.toks = [];

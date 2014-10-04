@@ -1,6 +1,6 @@
 'use strict';
 
-WEBTEX.IOBackend.makeInflater = function (callback) {
+webtexApiObject.IOBackend.makeInflater = function (callback) {
     return new JSInflater (callback);
 };
 

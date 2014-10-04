@@ -1,11 +1,15 @@
-if (typeof WEBTEX === 'undefined') {
-    (typeof window !== 'undefined' ? window : this).WEBTEX = {Web: {}};
+if (typeof Webtex === 'undefined') {
+    (typeof window !== 'undefined' ? window : this).Webtex = {Web: {}};
 }
 
-(function webtexWrapper () {
+(function webtex_wrapper (webtexApiObject) {
     'use strict';
     var globalScope = (typeof window === 'undefined') ? this : window;
 
+    function webtex_export (name, value) {
+	webtexApiObject[name] = value;
+    }
+
 $insert_files
 
-}).call ((typeof window === 'undefined') ? this : window);
+}).call ((typeof window === 'undefined') ? this : window, Webtex);

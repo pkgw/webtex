@@ -92,4 +92,4 @@ var DOMRenderer = (function DOMRenderer_callback () {
     return DOMRenderer;
 }) ();
 
-WEBTEX.DOMRenderer = DOMRenderer;
+webtex_export ('DOMRenderer', DOMRenderer);

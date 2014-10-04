@@ -2610,4 +2610,4 @@ var Engine = (function Engine_closure () {
     return Engine;
 })();
 
-WEBTEX.Engine = Engine;
+webtex_export ('Engine', Engine);

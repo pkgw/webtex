@@ -5,7 +5,7 @@
 
 'use strict';
 
-var TfmReader = WEBTEX.TfmReader = (function TfmReader_closure () {
+var TfmReader = (function TfmReader_closure () {
     function div (a, b) {
 	return a / b >> 0; // XXX: C&P from values.js
     }

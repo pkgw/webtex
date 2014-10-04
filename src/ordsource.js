@@ -1,6 +1,6 @@
 'use strict';
 
-var OrdSource = WEBTEX.OrdSource = (function OrdSource_closure () {
+var OrdSource = (function OrdSource_closure () {
     var map = Array.prototype.map;
     var lc_hex_ords = (function () {
 	var o = [], i = 0;
