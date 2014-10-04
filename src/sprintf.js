@@ -67,7 +67,7 @@ var sprintf = (function sprintf_wrapper () {
             node_type = get_type (nodes[i]);
 
             if (node_type === 'string') {
-                output[output.length] = nodes[i];
+                output.push (nodes[i]);
             } else if (node_type === 'array') {
                 match = nodes[i]; // convenience purposes only
                 if (match[2]) { // keyword argument
@@ -137,7 +137,7 @@ var sprintf = (function sprintf_wrapper () {
                 pad_character = match[4] ? match[4] === '0' ? '0' : match[4].charAt (1) : ' ';
                 pad_length = match[6] - (sign + arg).length;
                 pad = match[6] ? (pad_length > 0 ? str_repeat (pad_character, pad_length) : '') : '';
-                output[output.length] = match[5] ? sign + arg + pad : (pad_character === '0' ? sign + pad + arg : pad + sign + arg);
+                output.push (match[5] ? sign + arg + pad : (pad_character === '0' ? sign + pad + arg : pad + sign + arg));
             }
         }
 
@@ -154,9 +154,9 @@ var sprintf = (function sprintf_wrapper () {
 
         while (_fmt) {
             if ((match = re.text.exec (_fmt)) !== null)
-                nodes[nodes.length] = match[0];
+                nodes.push (match[0]);
             else if ((match = re.modulo.exec (_fmt)) !== null)
-                nodes[nodes.length] = '%';
+                nodes.push ('%');
             else if ((match = re.placeholder.exec (_fmt)) !== null) {
                 if (match[2]) {
                     arg_names |= 1;
@@ -165,13 +165,13 @@ var sprintf = (function sprintf_wrapper () {
 		    var field_match = [];
 
                     if ((field_match = re.key.exec (replacement_field)) !== null) {
-                        field_list[field_list.length] = field_match[1];
+                        field_list.push (field_match[1]);
 
                         while ((replacement_field = replacement_field.substring (field_match[0].length)) !== '') {
                             if ((field_match = re.key_access.exec (replacement_field)) !== null)
-                                field_list[field_list.length] = field_match[1];
+                                field_list.push (field_match[1]);
                             else if ((field_match = re.index_access.exec (replacement_field)) !== null)
-                                field_list[field_list.length] = field_match[1];
+                                field_list.push (field_match[1]);
                             else
                                 throw new SyntaxError('[sprintf] failed to parse named argument key');
                         }
@@ -186,7 +186,7 @@ var sprintf = (function sprintf_wrapper () {
 		if (arg_names === 3)
                     throw new Error('[sprintf] mixing positional and named placeholders is not (yet) supported');
 
-                nodes[nodes.length] = match;
+                nodes.push (match);
             } else
                 throw new SyntaxError('[sprintf] unexpected placeholder');
 
