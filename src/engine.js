@@ -594,8 +594,6 @@ var Engine = (function Engine_closure () {
     // Driving everything
 
     proto.step = function Engine_step () {
-	var initial_is = this.inputstack.clone ();
-
 	var tok = this.next_x_tok ();
 	if (tok === EOF)
 	    return tok;
@@ -615,8 +613,9 @@ var Engine = (function Engine_closure () {
 	    this.assign_flags = 0;
 
 	// We successfully completed this step, so we can throw away any old
-	// tokens we were holding on to. We also throw away the saved
-	// initial_is since we don't need to go back to it.
+	// tokens we were holding on to. This is a hangover from the days of
+	// the async I/O model; if we eliminated caching of old tokens in the
+	// TokenizerInput, we wouldn't need this call.
 	this.inputstack.checkpoint ();
 	return true;
     };

@@ -1,3 +1,12 @@
+// Managing input to the TeX engine. The input comes from a stack of streams
+// of tokens.
+//
+// The checkpointing infrastructure is a hangover from the days of the
+// asynchronous I/O model, where we would retry engine steps that needed to
+// wait for some I/O to finish. I convinced myself that it'd be an enormous
+// amount of work to make the engine work reliably in that model, so we've
+// switched to synchronous I/O, which simplifies many things.
+
 var ToklistInput = (function ToklistInput_closure () {
     function ToklistInput (toks) {
 	this.toks = toks;
@@ -196,16 +205,6 @@ var InputStack = (function InputStack_closure () {
     }
 
     var proto = InputStack.prototype;
-
-    proto.clone = function InputStack_clone () {
-	var c = new InputStack (null, this.engine, this.misc_args)
-	c.recent_toks = this.recent_toks.slice ();
-	c.next_recent_tok = this.next_recent_tok;
-	c.next_toknums = this.next_toknums.slice ();
-	c.inputs = this.inputs.slice ();
-	c.cleanups = this.cleanups.slice ();
-	return c;
-    };
 
     proto.checkpoint = function InputStack_checkpoint () {
 	for (var i = 0; i < this.inputs.length; i++) {
