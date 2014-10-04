@@ -125,7 +125,7 @@ var Token = (function Token_closure () {
     };
 
 
-    proto.ischar = function Token_ischar () {
+    proto.is_char = function Token_is_char () {
 	return this.kind == TK_CHAR;
     };
 

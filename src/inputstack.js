@@ -132,7 +132,7 @@ var TokenizerInput = (function TokenizerInput_closure () {
 	    return Token.new_cseq (csname);
 	}
 
-	if (cc_ischar[cc]) {
+	if (cc_is_char[cc]) {
 	    this.tokenizer_state = TS_MIDDLE;
 	    return Token.new_char (cc, o);
 	}

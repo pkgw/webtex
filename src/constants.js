@@ -143,7 +143,7 @@ var cc_abbrev = [
     'oth', 'act', 'cmt', 'inv',
 ];
 
-var cc_ischar = [
+var cc_is_char = [
     0, 1, 1, 1,
     1, 0, 1, 1,
     1, 0, 0, 1,

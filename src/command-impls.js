@@ -139,7 +139,7 @@ commands.csname = function cmd_csname (engine) {
 	    throw new TexSyntaxError ('EOF in \\csname');
 	if (tok.iscmd (engine, 'endcsname'))
 	    break;
-	if (!tok.ischar ())
+	if (!tok.is_char ())
 	    throw new TexRuntimeError ('only character tokens should occur ' +
 				       'between \\csname and \\endcsname');
 
@@ -211,7 +211,7 @@ commands.string = function cmd_string (engine) {
     var tok = engine.next_tok_throw ();
     engine.trace ('* \\string ' + tok);
 
-    if (tok.ischar ()) {
+    if (tok.is_char ()) {
 	engine.push_string (String.fromCharCode (tok.ord));
 	return;
     }
@@ -554,7 +554,7 @@ commands._if = function cmd_if (engine) {
     // The comparison rules here are a bit funky.
 
     function key (tok) {
-	if (tok.ischar ())
+	if (tok.is_char ())
 	    return tok.catcode * 1000 + tok.ord;
 	if (tok.iscslike ()) { // active chars will be caught by above
 	    var cmd = tok.to_cmd (engine);
@@ -579,7 +579,7 @@ commands.ifcat = function cmd_ifcat (engine) {
     // The comparison rules here are a bit funky.
 
     function key (tok) {
-	if (tok.ischar ())
+	if (tok.is_char ())
 	    return tok.catcode;
 	if (tok.iscslike ()) { // active chars will be caught by above
 	    var cmd = tok.to_cmd (engine);
@@ -1950,7 +1950,7 @@ function _change_case (engine, isupper) {
     for (var i = 0; i < oldtoks.length; i++) {
 	var tok = oldtoks[i];
 
-	if (tok.ischar ()) {
+	if (tok.is_char ()) {
 	    var neword = engine.get_code (codetype, tok.ord);
 	    if (neword == 0)
 		neword = tok.ord;

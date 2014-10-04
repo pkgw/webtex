@@ -1417,7 +1417,7 @@ var Engine = (function Engine_closure () {
 
 	    if (i == 0 && tok.isspace (this))
 		continue; // my best interpretation of scan_keyword ...
-	    else if (!tok.ischar ())
+	    else if (!tok.is_char ())
 		break;
 
 	    var o = keyword.charCodeAt (i);
@@ -1459,7 +1459,7 @@ var Engine = (function Engine_closure () {
 	    if (tok === NeedMoreData)
 		throw tok;
 
-	    if (tok.ischar ()) {
+	    if (tok.is_char ()) {
 		// Undo align-state shift that we don't want here.
 		if (tok.iscat (C_BGROUP))
 		    this.align_state--;
@@ -1868,7 +1868,7 @@ var Engine = (function Engine_closure () {
 	    if (tok === EOF)
 		break;
 
-	    if (!tok.ischar ()) {
+	    if (!tok.is_char ()) {
 		this.push_back (tok);
 		break;
 	    }
