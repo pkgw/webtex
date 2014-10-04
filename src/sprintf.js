@@ -5,8 +5,13 @@
 //
 // Format specifiers are:
 //
-// %s - string
 // %c - character ordinal to escaped character via escchr()
+// %C - character ordinal to escaped character via texchr()
+// %d - number
+// %j - JSON stringification of object
+// %o - toString() stringification object
+// %s - raw string
+// %x - hexadecimal number (rendered with leading "0x")
 //
 //
 // Original copyright and license:
@@ -66,22 +71,35 @@ var sprintf = (function sprintf_wrapper () {
 
                 switch (node[1]) {
                 case 'c':
-                    arg = String.fromCharCode (arg);
+		    if (typeof arg !== 'number')
+			throw new Error ('sprintf %c expected number but got ' + arg);
+                    arg = escchr (arg);
+                    break;
+                case 'C':
+		    if (typeof arg !== 'number')
+			throw new Error ('sprintf %C expected number but got ' + arg);
+                    arg = texchr (arg);
                     break;
                 case 'd':
-                case 'i':
-                    arg = parseInt (arg, 10);
+		    if (typeof arg !== 'number')
+			throw new Error ('sprintf %d expected number but got ' + arg);
+                    arg = arg.toString (10);
                     break;
-                case 'f':
-                    arg = parseFloat (arg);
+                case 'j':
+                    arg = JSON.stringify (arg);
+                    break;
+                case 'o':
+                    arg = arg.toString ();
                     break;
                 case 's':
-                    break;
-                case 'u':
-                    arg = arg >>> 0;
+		    if (typeof arg !== 'string')
+			throw new Error ('sprintf %s expected string but got ' + arg);
+		    // Nothing to do.
                     break;
                 case 'x':
-                    arg = arg.toString (16);
+		    if (typeof arg !== 'number')
+			throw new Error ('sprintf %x expected number but got ' + arg);
+                    arg = '0x' + arg.toString (16);
                     break;
 		default:
 		    throw new Error ('unhandled sprintf format specifier ' + node[1]);
