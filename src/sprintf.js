@@ -31,35 +31,29 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 var sprintf = (function sprintf_wrapper () {
-    var re = {
-        text: /^[^\x25]+/,
-        modulo: /^\x25{2}/,
-        placeholder: /^\x25(.)/,
-    };
+    var text_re = /^[^\x25]+/;
+    var doublepercent_re = /^\x25{2}/;
+    var placeholder_re = /^\x25(.)/;
 
     function sprintf () {
         var key = arguments[0];
 	var cache = sprintf.cache;
 
-        if (!(cache[key] && cache.hasOwnProperty (key))) {
+        if (!cache.hasOwnProperty (key))
             cache[key] = sprintf.parse (key);
-        }
 
         return sprintf.format.call (null, cache[key], arguments);
     }
 
     sprintf.format = function (nodes, argv) {
         var cursor = 1;
-	var tree_length = nodes.length;
-	var arg, i, k, match, pad, pad_character, pad_length;
+	var arg, match;
 	var output = [];
-	var is_positive = true;
-	var sign = '';
 
-        for (i = 0; i < tree_length; i++) {
-            if (typeof nodes[i] === 'string') {
+        for (var i = 0; i < nodes.length; i++) {
+            if (typeof nodes[i] === 'string')
                 output.push (nodes[i]);
-            } else if (nodes[i] instanceof Array) {
+            else {
                 match = nodes[i]; // convenience purposes only
                 arg = argv[cursor++];
 
@@ -109,18 +103,20 @@ var sprintf = (function sprintf_wrapper () {
     sprintf.cache = {};
 
     sprintf.parse = function (fmt) {
-	var match = [];
 	var nodes = [];
 
         while (fmt) {
-            if ((match = re.text.exec (fmt)) !== null)
+	    var match;
+
+            if ((match = text_re.exec (fmt)) !== null)
                 nodes.push (match[0]);
-            else if ((match = re.modulo.exec (fmt)) !== null)
+            else if ((match = doublepercent_re.exec (fmt)) !== null)
                 nodes.push ('%');
-            else if ((match = re.placeholder.exec (fmt)) !== null)
+            else if ((match = placeholder_re.exec (fmt)) !== null)
                 nodes.push (match);
             else
-                throw new SyntaxError('[sprintf] unexpected placeholder');
+		// I think this only happens with a trailing percent sign, now.
+                throw new SyntaxError ('unexpected sprintf placeholder');
 
             fmt = fmt.substring (match[0].length);
         }
