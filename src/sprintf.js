@@ -1,8 +1,15 @@
 // This is loosely based on sprinf.js from
 // https://github.com/alexei/sprintf.js, copied under the license shown below.
-// This version adds some Webtex-specific features and massages the code to
-// fit into our API structure. It also adds trailing semicolons and uses my
-// spacing / indentation conventions.
+// This version removes a lot of features, adapts the coding style, and adds
+// Webtex-specific functionality.
+//
+// Format specifiers are:
+//
+// %s - string
+// %c - character ordinal to escaped character via escchr()
+//
+//
+// Original copyright and license:
 //
 // Copyright (c) 2007-2013, Alexandru Marasteanu <hello [at) alexei (dot] ro>
 // All rights reserved.
@@ -47,23 +54,17 @@ var sprintf = (function sprintf_wrapper () {
 
     sprintf.format = function (nodes, argv) {
         var cursor = 1;
-	var arg, match;
 	var output = [];
 
         for (var i = 0; i < nodes.length; i++) {
-            if (typeof nodes[i] === 'string')
-                output.push (nodes[i]);
+	    var node = nodes[i];
+
+            if (typeof node === 'string')
+                output.push (node);
             else {
-                match = nodes[i]; // convenience purposes only
-                arg = argv[cursor++];
+                var arg = argv[cursor++];
 
-                if (typeof arg === 'function')
-                    arg = arg ();
-
-                switch (match[1]) {
-                case 'b':
-                    arg = arg.toString (2);
-                    break;
+                switch (node[1]) {
                 case 'c':
                     arg = String.fromCharCode (arg);
                     break;
@@ -71,14 +72,8 @@ var sprintf = (function sprintf_wrapper () {
                 case 'i':
                     arg = parseInt (arg, 10);
                     break;
-                case 'e':
-                    arg = arg.toExponential ();
-                    break;
                 case 'f':
                     arg = parseFloat (arg);
-                    break;
-                case 'o':
-                    arg = arg.toString (8);
                     break;
                 case 's':
                     break;
@@ -88,9 +83,8 @@ var sprintf = (function sprintf_wrapper () {
                 case 'x':
                     arg = arg.toString (16);
                     break;
-                case 'X':
-                    arg = arg.toString (16).toUpperCase ();
-                    break;
+		default:
+		    throw new Error ('unhandled sprintf format specifier ' + node[1]);
                 }
 
                 output.push (arg);
