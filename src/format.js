@@ -95,6 +95,8 @@ var format = (function format_wrapper () {
                 case 'd':
 		    if (typeof arg !== 'number')
 			throw new Error ('format %d expected number but got ' + arg);
+		    if (Math.round (arg) != arg)
+			throw new Error ('format %d expected integer but got ' + arg);
                     arg = arg.toString (10);
                     break;
                 case 'j':
