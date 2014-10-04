@@ -54,9 +54,9 @@ var sprintf = (function sprintf_wrapper () {
         return sprintf.format.call (null, cache[key], arguments);
     }
 
-    sprintf.format = function (parse_tree, argv) {
+    sprintf.format = function (nodes, argv) {
         var cursor = 1;
-	var tree_length = parse_tree.length;
+	var tree_length = nodes.length;
 	var node_type = '';
 	var arg, i, k, match, pad, pad_character, pad_length;
 	var output = [];
@@ -64,12 +64,12 @@ var sprintf = (function sprintf_wrapper () {
 	var sign = '';
 
         for (i = 0; i < tree_length; i++) {
-            node_type = get_type (parse_tree[i]);
+            node_type = get_type (nodes[i]);
 
             if (node_type === 'string') {
-                output[output.length] = parse_tree[i];
+                output[output.length] = nodes[i];
             } else if (node_type === 'array') {
-                match = parse_tree[i]; // convenience purposes only
+                match = nodes[i]; // convenience purposes only
                 if (match[2]) { // keyword argument
                     arg = argv[cursor];
                     for (k = 0; k < match[2].length; k++) {
@@ -149,14 +149,14 @@ var sprintf = (function sprintf_wrapper () {
     sprintf.parse = function (fmt) {
         var _fmt = fmt;
 	var match = [];
-	var parse_tree = [];
+	var nodes = [];
 	var arg_names = 0;
 
         while (_fmt) {
             if ((match = re.text.exec (_fmt)) !== null)
-                parse_tree[parse_tree.length] = match[0];
+                nodes[nodes.length] = match[0];
             else if ((match = re.modulo.exec (_fmt)) !== null)
-                parse_tree[parse_tree.length] = '%';
+                nodes[nodes.length] = '%';
             else if ((match = re.placeholder.exec (_fmt)) !== null) {
                 if (match[2]) {
                     arg_names |= 1;
@@ -186,14 +186,14 @@ var sprintf = (function sprintf_wrapper () {
 		if (arg_names === 3)
                     throw new Error('[sprintf] mixing positional and named placeholders is not (yet) supported');
 
-                parse_tree[parse_tree.length] = match;
+                nodes[nodes.length] = match;
             } else
                 throw new SyntaxError('[sprintf] unexpected placeholder');
 
             _fmt = _fmt.substring (match[0].length);
         }
 
-        return parse_tree;
+        return nodes;
     }
 
     // Helpers.
