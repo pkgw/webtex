@@ -1924,7 +1924,7 @@ var Engine = (function Engine_closure () {
 			depth -= 1;
 		    else
 			break;
-		} else if (tok.isconditional (this)) {
+		} else if (tok.is_conditional (this)) {
 		    depth += 1;
 		}
 	    }
@@ -2013,7 +2013,7 @@ var Engine = (function Engine_closure () {
 		    this.trace ('... skipped conditional ... ' + tok);
 		    return 'or';
 		}
-	    } else if (tok.isconditional (this)) {
+	    } else if (tok.is_conditional (this)) {
 		depth += 1;
 	    }
 	}

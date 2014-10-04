@@ -259,7 +259,7 @@ var Token = (function Token_closure () {
     };
 
 
-    proto.isconditional = function Token_isconditional (engine) {
+    proto.is_conditional = function Token_is_conditional (engine) {
 	return this.to_cmd (engine).conditional;
     };
 
