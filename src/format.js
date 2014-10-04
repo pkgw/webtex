@@ -42,22 +42,22 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-var sprintf = (function sprintf_wrapper () {
+var format = (function format_wrapper () {
     var text_re = /^[^\x25]+/;
     var doublepercent_re = /^\x25{2}/;
     var placeholder_re = /^\x25(.)/;
 
-    function sprintf () {
+    function format () {
         var key = arguments[0];
-	var cache = sprintf.cache;
+	var cache = format.cache;
 
         if (!cache.hasOwnProperty (key))
-            cache[key] = sprintf.parse (key);
+            cache[key] = format.parse (key);
 
-        return sprintf.format.call (null, cache[key], arguments);
+        return format.do_it.call (null, cache[key], arguments);
     }
 
-    sprintf.format = function (nodes, argv) {
+    format.do_it = function format_do_it (nodes, argv) {
         var cursor = 1;
 	var output = [];
 
@@ -72,17 +72,17 @@ var sprintf = (function sprintf_wrapper () {
                 switch (node[1]) {
                 case 'c':
 		    if (typeof arg !== 'number')
-			throw new Error ('sprintf %c expected number but got ' + arg);
+			throw new Error ('format %c expected number but got ' + arg);
                     arg = escchr (arg);
                     break;
                 case 'C':
 		    if (typeof arg !== 'number')
-			throw new Error ('sprintf %C expected number but got ' + arg);
+			throw new Error ('format %C expected number but got ' + arg);
                     arg = texchr (arg);
                     break;
                 case 'd':
 		    if (typeof arg !== 'number')
-			throw new Error ('sprintf %d expected number but got ' + arg);
+			throw new Error ('format %d expected number but got ' + arg);
                     arg = arg.toString (10);
                     break;
                 case 'j':
@@ -93,16 +93,16 @@ var sprintf = (function sprintf_wrapper () {
                     break;
                 case 's':
 		    if (typeof arg !== 'string')
-			throw new Error ('sprintf %s expected string but got ' + arg);
+			throw new Error ('format %s expected string but got ' + arg);
 		    // Nothing to do.
                     break;
                 case 'x':
 		    if (typeof arg !== 'number')
-			throw new Error ('sprintf %x expected number but got ' + arg);
+			throw new Error ('format %x expected number but got ' + arg);
                     arg = '0x' + arg.toString (16);
                     break;
 		default:
-		    throw new Error ('unhandled sprintf format specifier ' + node[1]);
+		    throw new Error ('unhandled format specifier ' + node[1]);
                 }
 
                 output.push (arg);
@@ -112,9 +112,9 @@ var sprintf = (function sprintf_wrapper () {
         return output.join ('');
     }
 
-    sprintf.cache = {};
+    format.cache = {};
 
-    sprintf.parse = function (fmt) {
+    format.parse = function format_parse (fmt) {
 	var nodes = [];
 
         while (fmt) {
@@ -128,7 +128,7 @@ var sprintf = (function sprintf_wrapper () {
                 nodes.push (match);
             else
 		// I think this only happens with a trailing percent sign, now.
-                throw new SyntaxError ('unexpected sprintf placeholder');
+                throw new SyntaxError ('unexpected format placeholder');
 
             fmt = fmt.substring (match[0].length);
         }
@@ -136,7 +136,7 @@ var sprintf = (function sprintf_wrapper () {
         return nodes;
     }
 
-    return sprintf;
+    return format;
 }) ();
 
-webtex_export ('sprintf', sprintf);
+webtex_export ('format', format);
