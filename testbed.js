@@ -1,7 +1,7 @@
 'use strict';
 
 var targdiv = document.getElementById ('webtex');
-var worker_url = 'build/browser-worker-webtex.js';
+var worker_url = 'build/worker-webtex.js';
 var inputurl = '../test/tex/latex-minimal.tex'; // note: relative to *worker's* URL
 
 var dr = new Webtex.DOMRenderer (worker_url, targdiv);

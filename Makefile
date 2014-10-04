@@ -3,10 +3,12 @@ python = python
 minify = java -jar yuicompressor-2.4.8.jar
 texdist = tl2013
 
-preamble = \
-  src/preamble.js
+default: all
+
+# The engine implementations: Web Worker and Node.js backends
 
 sharedjs = \
+  src/preamble.js \
   src/inflate.js \
   src/jsonparse.js \
   src/constants.js \
@@ -29,42 +31,18 @@ sharedjs = \
   src/tfmreader.js \
   src/bundle.js
 
-browserprejs = \
-  src/emulate-setimmediate.js
-
-browserworkerjs = \
+workerjs = \
   src/html-render-target.js \
   src/worker-io.js \
   src/worker-api.js
-
-browsermasterjs = \
-  src/master-object.js \
-  src/dom-renderer.js
 
 nodejs = \
   src/node-io.js \
   src/node-api.js
 
-bundleextras = \
-  $(builddir)/latex.dump.json
 
-standard: \
-  $(builddir)/browser-master-webtex.js \
-  $(builddir)/browser-worker-webtex.js \
-  $(builddir)/node-webtex.js
-
-minified: \
-  $(builddir)/browser-master-webtex.min.js \
-  $(builddir)/browser-worker-webtex.min.js \
-  $(builddir)/node-webtex.min.js
-
-$(builddir)/browser-master-webtex.js: \
-generate.py src/browser-master-wrapper.js $(preamble) $(browserprejs) $(sharedjs) $(browsermasterjs) \
-| $(builddir)
-	$(python) $^ $@
-
-$(builddir)/browser-worker-webtex.js: \
-generate.py src/worker-wrapper.js $(preamble) $(browserprejs) $(sharedjs) $(browserworkerjs) \
+$(builddir)/worker-webtex.js: \
+generate.py src/worker-wrapper.js $(sharedjs) $(workerjs) \
 | $(builddir)
 	$(python) $^ $@
 
@@ -78,8 +56,38 @@ generate.py src/%-helpers-tmpl.js \
 | $(builddir)
 	$(python) $^ $@
 
-# We can't use $^ in the following rule because it converts "./build/..." to
-# "build/...", which breaks Node.js's explicit-module-path system.
+primaries += $(builddir)/worker-webtex.js $(builddir)/node-webtex.js
+
+
+# The browser master, which drives the Web Worker engine and renders the
+# output into the DOM.
+
+masterjs = \
+  src/preamble.js \
+  src/master-object.js \
+  src/dom-renderer.js
+
+
+$(builddir)/browser-master-webtex.js: \
+generate.py src/browser-master-wrapper.js $(masterjs) \
+| $(builddir)
+	$(python) $^ $@
+
+primaries += $(builddir)/browser-master-webtex.js
+
+
+# Generating the "bundle" Zip file.
+#
+# We can't use $^ in the dump-format.js rules because it converts
+# "./build/..." to "build/...", which breaks Node.js's explicit-module-path
+# system.
+#
+# We do not hook up latest.zip to $(primaries) because it's annoying to always
+# be rebuilding it.
+
+bundleextras = \
+  $(builddir)/latex.dump.json
+
 $(builddir)/latex.dump.json: \
 dump-format.js $(builddir)/node-webtex.min.js \
 | $(builddir)
@@ -97,6 +105,23 @@ make-tex-bundle.py packages.txt $(bundleextras) \
 | $(builddir)
 	$(python) $< packages.txt texcache $(builddir) texpatches $(bundleextras)
 
+###primaries += $(builddir)/latest.zip
+
+
+# Testing
+#
+# TODO: this test suite is currently a joke.
+
+test: $(builddir)/node-webtex.min.js
+	@cd test && ./run-all-tests.sh ../$<
+
+fattest: $(builddir)/node-webtex.js # actually debuggable
+	@cd test && ./run-all-tests.sh ../$<
+
+
+# Generic helpers
+
+all: $(primaries)
 
 %.min.js: %.js
 	$(minify) $< >$@.new && mv -f $@.new $@
@@ -107,10 +132,4 @@ $(builddir):
 clean:
 	-rm -rf $(builddir)
 
-test: $(builddir)/node-webtex.min.js
-	@cd test && ./run-all-tests.sh ../$<
-
-fattest: $(builddir)/node-webtex.js # actually debuggable
-	@cd test && ./run-all-tests.sh ../$<
-
-.PHONY: all clean fattest standard minified test
+.PHONY: all clean default fattest test
