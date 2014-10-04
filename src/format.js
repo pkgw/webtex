@@ -47,6 +47,9 @@ var format = (function format_wrapper () {
     var doublepercent_re = /^\x25{2}/;
     var placeholder_re = /^\x25(.)/;
 
+    // Indices into matches for the placeholder_re:
+    var SPECIFIER = 1;
+
     function format () {
         var key = arguments[0];
 	var cache = format.cache;
@@ -69,7 +72,7 @@ var format = (function format_wrapper () {
             else {
                 var arg = argv[cursor++];
 
-                switch (node[1]) {
+                switch (node[SPECIFIER]) {
                 case 'c':
 		    if (typeof arg !== 'number')
 			throw new Error ('format %c expected number but got ' + arg);
@@ -102,7 +105,7 @@ var format = (function format_wrapper () {
                     arg = '0x' + arg.toString (16);
                     break;
 		default:
-		    throw new Error ('unhandled format specifier ' + node[1]);
+		    throw new Error ('unhandled format specifier ' + node[SPECIFIER]);
                 }
 
                 output.push (arg);
