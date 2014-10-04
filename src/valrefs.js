@@ -1,29 +1,5 @@
 // References to values, as many commands are.
 
-var Valref = (function Valref_closure () {
-    function Valref (valtype) {
-	this.valtype = valtype;
-    }
-
-    var proto = Valref.prototype;
-
-    proto.get = function Valref_get (engine) {
-	/* Retrieve the actual value of this reference. Typically involves
-	 * scanning tokens in the engine. May return null if there's no value
-	 * but that situation is expected. */
-	throw new TexInternalError ('not implemented Valref.get');
-    };
-
-    proto.set = function Valref_set (engine, value) {
-	/* Assign a new value to the storage location that this reference
-	 * represents. */
-	throw new TexInternalError ('not implemented Valref.set');
-    };
-
-    return Valref;
-}) ();
-
-
 var RegisterValref = (function RegisterValref_closure () {
     function RegisterValref (valtype, reg) {
 	if (!vt_ok_for_register[valtype])

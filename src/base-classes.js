@@ -1,6 +1,10 @@
 // Base classes for some of the key TeX data types.
 
 var Value = (function Value_closure () {
+    // A Value is some kind of datum that can be stored in the TeX engine.
+    // Various kinds of values are stored in registers, named parameters, and
+    // so on.
+
     function Value () {}
     var proto = Value.prototype;
 
@@ -125,4 +129,31 @@ var Value = (function Value_closure () {
     };
 
     return Value;
+}) ();
+
+
+var Valref = (function Valref_closure () {
+    // A Valref is a reference to a value. It can be retrieved or overwritten,
+    // giving us a generic system for implementing commands such as \advance.
+
+    function Valref (valtype) {
+	this.valtype = valtype;
+    }
+
+    var proto = Valref.prototype;
+
+    proto.get = function Valref_get (engine) {
+	// Retrieve the actual value of this reference. Typically involves
+	// scanning tokens in the engine. May return null if there's no value
+	// but that situation is expected.
+	throw new TexInternalError ('not implemented Valref.get');
+    };
+
+    proto.set = function Valref_set (engine, value) {
+	// Assign a new value to the storage location that this reference
+	// represents.
+	throw new TexInternalError ('not implemented Valref.set');
+    };
+
+    return Valref;
 }) ();
