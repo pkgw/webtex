@@ -1230,9 +1230,9 @@ var Engine = (function Engine_closure () {
 	// un-does changes to align_state that will have just happened.
 	this.inputstack.push_toklist ([tok]);
 
-	if (tok.iscat (C_BGROUP))
+	if (tok.is_cat (C_BGROUP))
 	    this.align_state -= 1;
-	else if (tok.iscat (C_EGROUP))
+	else if (tok.is_cat (C_EGROUP))
 	    this.align_state += 1;
     };
 
@@ -1271,9 +1271,9 @@ var Engine = (function Engine_closure () {
 	if (tok === EOF || tok === NeedMoreData)
 	    return tok;
 
-	if (tok.iscat (C_BGROUP)) {
+	if (tok.is_cat (C_BGROUP)) {
 	    this.align_state += 1;
-	} else if (tok.iscat (C_EGROUP)) {
+	} else if (tok.is_cat (C_EGROUP)) {
 	    this.align_state -= 1;
 	} else if (tok.to_cmd (this) instanceof AlignTabCommand ||
 		   tok.iscmd (this, 'span') ||
@@ -1461,9 +1461,9 @@ var Engine = (function Engine_closure () {
 
 	    if (tok.is_char ()) {
 		// Undo align-state shift that we don't want here.
-		if (tok.iscat (C_BGROUP))
+		if (tok.is_cat (C_BGROUP))
 		    this.align_state--;
-		else if (tok.iscat (C_EGROUP))
+		else if (tok.is_cat (C_EGROUP))
 		    this.align_state++;
 		return new TexInt (negfactor * tok.ord);
 	    }
@@ -1774,7 +1774,7 @@ var Engine = (function Engine_closure () {
 	    return cmd.as_valref (this).get (this);
 
 	// TODO: \tokpar=<toklist register or toklist param>
-	if (!tok.iscat (C_BGROUP))
+	if (!tok.is_cat (C_BGROUP))
 	    throw new TexSyntaxError ('expected { in toklist assignment; got ' + tok);
 
 	return this.scan_tok_group (false);
@@ -1812,7 +1812,7 @@ var Engine = (function Engine_closure () {
 	    tok = this.next_tok ();
 	    if (tok == null)
 		throw new TexRuntimeError ('EOF when expected cseq name');
-	    if (!tok.iscat (C_SPACE))
+	    if (!tok.is_cat (C_SPACE))
 		// note: here we do NOT want tok.isspace()
 		break;
 	}
@@ -1844,9 +1844,9 @@ var Engine = (function Engine_closure () {
 	    if (tok === NeedMoreData || tok === EOF)
 		throw tok;
 
-	    if (tok.iscat (C_BGROUP))
+	    if (tok.is_cat (C_BGROUP))
 		depth += 1;
-	    else if (tok.iscat (C_EGROUP)) {
+	    else if (tok.is_cat (C_EGROUP)) {
 		depth -= 1;
 		if (depth == 0)
 		    break;

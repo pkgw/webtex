@@ -242,9 +242,9 @@ var MacroCommand = (function MacroCommand_closure () {
 		// Undelimited parameter. Either a single token, or a group.
 		var tok = engine.next_tok_throw ();
 
-		if (tok.iscat (C_BGROUP))
+		if (tok.is_cat (C_BGROUP))
 		    param_vals[ttok.pnum] = engine.scan_tok_group (false).toks;
-		else if (tok.iscat (C_SPACE))
+		else if (tok.is_cat (C_SPACE))
 		    // TexBook pg 201: spaces are not used as undelimited args;
 		    // here we intentionally do not use isspace() (T:TP 393).
 		    continue;
@@ -273,9 +273,9 @@ var MacroCommand = (function MacroCommand_closure () {
 		var tok = engine.next_tok_throw ();
 
 		if (depth > 0) {
-		    if (tok.iscat (C_BGROUP))
+		    if (tok.is_cat (C_BGROUP))
 			depth += 1;
-		    else if (tok.iscat (C_EGROUP))
+		    else if (tok.is_cat (C_EGROUP))
 			depth -= 1;
 		    expansion.push (tok);
 		    continue;
@@ -310,16 +310,16 @@ var MacroCommand = (function MacroCommand_closure () {
 		}
 	    }
 
-	    if (expansion.length > 1 && expansion[0].iscat (C_BGROUP) &&
-		expansion[expansion.length - 1].iscat (C_EGROUP)) {
+	    if (expansion.length > 1 && expansion[0].is_cat (C_BGROUP) &&
+		expansion[expansion.length - 1].is_cat (C_EGROUP)) {
 		// Check if we can strip off these braces.
 		var canstrip = true, depth = 1;
 
 		for (var i = 1; i < expansion.length - 1; i++) {
 		    var tok = expansion[i];
-		    if (tok.iscat (C_BGROUP))
+		    if (tok.is_cat (C_BGROUP))
 			depth += 1;
-		    else if (tok.iscat (C_EGROUP)) {
+		    else if (tok.is_cat (C_EGROUP)) {
 			depth -= 1;
 			if (depth == 0) {
 			    canstrip = false;

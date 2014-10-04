@@ -404,7 +404,7 @@ function _cmd_def (engine, cname, expand_replacement) {
 	var tok = engine.next_tok_throw ();
 
 	if (last_was_param) {
-	    if (tok.iscat (C_BGROUP)) {
+	    if (tok.is_cat (C_BGROUP)) {
 		tmpl_toks.push (tok);
 		end_with_lbrace = true;
 		engine.align_state--; // TTP 394 ... I think??
@@ -425,12 +425,12 @@ function _cmd_def (engine, cname, expand_replacement) {
 				      'parameter token');
 	}
 
-	if (tok.iscat (C_PARAM)) {
+	if (tok.is_cat (C_PARAM)) {
 	    last_was_param = true;
 	    continue;
 	}
 
-	if (tok.iscat (C_BGROUP))
+	if (tok.is_cat (C_BGROUP))
 	    break;
 
 	tmpl_toks.push (tok);
@@ -471,13 +471,13 @@ function _cmd_def (engine, cname, expand_replacement) {
 	}
 
 	if (last_was_param) {
-	    if (tok.iscat (C_PARAM)) {
+	    if (tok.is_cat (C_PARAM)) {
 		repl_toks.push (tok);
 		last_was_param = false;
 		continue;
 	    }
 
-	    if (tok.iscat (C_OTHER) && tok.ord > O_ZERO &&
+	    if (tok.is_cat (C_OTHER) && tok.ord > O_ZERO &&
 		tok.ord < O_ZERO + next_pnum) {
 		repl_toks.push (Token.new_param (tok.ord - O_ZERO));
 		last_was_param = false;
@@ -488,14 +488,14 @@ function _cmd_def (engine, cname, expand_replacement) {
 				      'parameter token');
 	}
 
-	if (tok.iscat (C_PARAM)) {
+	if (tok.is_cat (C_PARAM)) {
 	    last_was_param = true;
 	    continue;
 	}
 
-	if (tok.iscat (C_BGROUP))
+	if (tok.is_cat (C_BGROUP))
 	    depth += 1;
-	else if (tok.iscat (C_EGROUP)) {
+	else if (tok.is_cat (C_EGROUP)) {
 	    depth -= 1;
 	    if (depth == 0)
 		break;

@@ -135,7 +135,7 @@ var Token = (function Token_closure () {
     };
 
 
-    proto.iscat = function Token_iscat (catcode) {
+    proto.is_cat = function Token_is_cat (catcode) {
 	if (this.kind != TK_CHAR)
 	    return false;
 	return this.catcode == catcode;
