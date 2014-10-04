@@ -2141,8 +2141,6 @@ commands.openout = function cmd_openout (engine) {
     var outf = engine.iostack.open_for_write (fn);
     if (outf == null)
 	throw new TexRuntimeError ('failed to \\openout ' + fn);
-    if (outf == NeedMoreData)
-	throw outf;
 
     engine.set_outfile (snum, outf);
 };

@@ -600,20 +600,10 @@ var Engine = (function Engine_closure () {
 	if (tok === EOF)
 	    return tok;
 
-	if (tok === NeedMoreData) {
-	    // Reset to where we were at the beginning of the step.
-	    this.inputstack = initial_is;
-	    return tok;
-	}
-
 	try {
 	    var cmd = tok.to_cmd (this);
 	    cmd.invoke (this);
 	} catch (e) {
-	    if (e === NeedMoreData) {
-		this.inputstack = initial_is;
-		return NeedMoreData;
-	    }
 	    if (e === EOF)
 		throw new TexRuntimeError ('unexpected EOF while parsing');
 	    throw e;
@@ -910,8 +900,6 @@ var Engine = (function Engine_closure () {
 
 	while (this._running_output) {
 	    var rv = this.step ();
-	    if (rv === NeedMoreData)
-		throw new TexInternalError ('can\'t fetch more data inside output routine');
 	    if (rv === EOF)
 		throw new TexRuntimeError ('EOF inside output routine??');
 	}
@@ -1240,7 +1228,7 @@ var Engine = (function Engine_closure () {
 	    return EOF;
 
 	var tok = this.inputstack.next_tok ();
-	if (tok === EOF || tok === NeedMoreData)
+	if (tok === EOF)
 	    return tok;
 
 	if (tok.is_cat (C_BGROUP)) {
@@ -1281,7 +1269,7 @@ var Engine = (function Engine_closure () {
     proto.next_x_tok = function Engine_next_x_tok () {
 	while (1) {
 	    var tok = this.next_tok ();
-	    if (tok === NeedMoreData || tok === EOF)
+	    if (tok === EOF)
 		return tok;
 
 	    var cmd = tok.to_cmd (this);
@@ -1301,28 +1289,24 @@ var Engine = (function Engine_closure () {
 
     proto.next_tok_throw = function Engine_next_tok_throw () {
 	var tok = this.next_tok ();
-	if (tok === NeedMoreData || tok === EOF)
+	if (tok === EOF)
 	    throw tok;
 	return tok;
     };
 
     proto.next_x_tok_throw = function Engine_next_x_tok_throw () {
 	var tok = this.next_x_tok ();
-	if (tok === NeedMoreData || tok === EOF)
+	if (tok === EOF)
 	    throw tok;
 	return tok;
     };
 
     // "Scanning" -- this is slightly higher-level than tokenization, and
-    // can usually end up kicking off recursive parsing and evaluation. If
-    // more data are needed, this functions throw exceptions rather than
-    // returning NeedMoreData.
+    // can usually end up kicking off recursive parsing and evaluation.
 
     proto.scan_one_optional_space = function Engine_scan_one_optional_space () {
 	var tok = this.next_tok ();
-	if (tok === NeedMoreData)
-	    throw tok;
-	if (tok == EOF || tok.is_space (this))
+	if (tok === EOF || tok.is_space (this))
 	    return;
 	this.push_back (tok);
     };
@@ -1331,8 +1315,6 @@ var Engine = (function Engine_closure () {
 	// T:TP sec. 406.
 	while (1) {
 	    var tok = this.next_x_tok ();
-	    if (tok === NeedMoreData)
-		throw tok;
 	    if (!tok.is_space (this))
 		return tok;
 	}
@@ -1380,8 +1362,6 @@ var Engine = (function Engine_closure () {
 
 	while (i < n) {
 	    var tok = this.next_x_tok ();
-	    if (tok === NeedMoreData)
-		throw tok;
 	    if (tok === EOF)
 		break;
 
@@ -1428,8 +1408,6 @@ var Engine = (function Engine_closure () {
 
 	if (tok.is_other_char (O_BACKTICK)) {
 	    tok = this.next_tok ();
-	    if (tok === NeedMoreData)
-		throw tok;
 
 	    if (tok.is_char ()) {
 		// Undo align-state shift that we don't want here.
@@ -1459,8 +1437,6 @@ var Engine = (function Engine_closure () {
 	    // Octal.
 	    tok = this.next_x_tok ();
 	    while (true) {
-		if (tok === NeedMoreData)
-		    throw tok;
 		if (tok === EOF)
 		    break;
 		var v = tok.maybe_octal_value ();
@@ -1476,8 +1452,6 @@ var Engine = (function Engine_closure () {
 	    // Hexadecimal
 	    tok = this.next_x_tok ();
 	    while (true) {
-		if (tok === NeedMoreData)
-		    throw tok;
 		if (tok === EOF)
 		    break;
 		var v = tok.maybe_hex_value ();
@@ -1492,8 +1466,6 @@ var Engine = (function Engine_closure () {
 	} else {
 	    // Decimal
 	    while (true) {
-		if (tok === NeedMoreData)
-		    throw tok;
 		if (tok === EOF)
 		    break;
 		var v = tok.maybe_decimal_value ();
@@ -1590,9 +1562,7 @@ var Engine = (function Engine_closure () {
 		tok = this.next_x_tok ();
 	    }
 
-	    if (tok == NeedMoreData) {
-		throw tok;
-	    } else if (tok == EOF) {
+	    if (tok === EOF) {
 		/* nothing */
 	    } else if (!tok.is_other_char (O_PERIOD) && !tok.is_other_char (O_COMMA)) {
 		this.push_back (tok)
@@ -1601,8 +1571,6 @@ var Engine = (function Engine_closure () {
 		var digits = [];
 		while (true) {
 		    tok = this.next_tok ();
-		    if (tok === NeedMoreData)
-			throw tok;
 		    if (tok === EOF)
 			break;
 
@@ -1738,7 +1706,7 @@ var Engine = (function Engine_closure () {
 	this.scan_one_optional_space ();
 
 	var tok = this.next_tok ();
-	if (tok === NeedMoreData || tok === EOF)
+	if (tok === EOF)
 	    throw tok;
 
 	var cmd = tok.to_cmd (this);
@@ -1813,7 +1781,7 @@ var Engine = (function Engine_closure () {
 
 	while (true) {
 	    var tok = getter ();
-	    if (tok === NeedMoreData || tok === EOF)
+	    if (tok === EOF)
 		throw tok;
 
 	    if (tok.is_cat (C_BGROUP))
@@ -1834,9 +1802,7 @@ var Engine = (function Engine_closure () {
 	var name = '';
 	var tok = this.chomp_spaces ();
 
-	while (1) {
-	    if (tok === NeedMoreData)
-		throw tok;
+	while (true) {
 	    if (tok === EOF)
 		break;
 

@@ -29,9 +29,6 @@ var OrdSource = (function OrdSource_closure () {
 	    return true;
 
 	var l = this.linebuffer.get ();
-	if (l === NeedMoreData)
-	    return NeedMoreData;
-
 	if (l === EOF) {
 	    if (this.debug_input_lines)
 		console.log ('<<! EOF');
@@ -89,7 +86,7 @@ var OrdSource = (function OrdSource_closure () {
 	    return this.pushed.pop ();
 
 	var rv = this._ensure_line (endlinechar);
-	if (rv === NeedMoreData || rv === EOF)
+	if (rv === EOF)
 	    return rv;
 
 	var o = this.curords[this.curindex];
@@ -101,7 +98,7 @@ var OrdSource = (function OrdSource_closure () {
 
     proto.next = function OrdSource_next (catcodes, endlinechar) {
 	var o = this._next_lowlevel (endlinechar);
-	if (o === NeedMoreData || o === EOF)
+	if (o === EOF)
 	    return o;
 
 	var cc = catcodes[o];

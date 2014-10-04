@@ -39,7 +39,11 @@ var LineBuffer = (function LineBuffer_closure () {
 	    return ret;
 	}
 
-	return NeedMoreData;
+	// Every LineBuffer is currently completely filled upon creation, so
+	// this is a can't-happen. In a better world we'd fetch data upon
+	// request, in which case that's what'd happen here. Such an operation
+	// must be synchronous in our current I/O model.
+	throw new TexInternalError ('LineBuffer ran out of data');
     }
 
     return LineBuffer;

@@ -803,16 +803,12 @@ var Font = (function Font_closure () {
     proto.get_metrics = function Font_get_metrics () {
 	if (this.metrics_error != null)
 	    throw this.metrics_error;
-	if (this.metrics === NeedMoreData)
-	    throw NeedMoreData;
 	return this.metrics;
     };
 
     proto.get_dimen = function Font_get_dimen (number) {
 	if (this.metrics_error != null)
 	    throw this.metrics_error;
-	if (this.dimens === NeedMoreData)
-	    throw NeedMoreData;
 
 	if (this.dimens == null)
 	    // nullfont case
@@ -827,8 +823,6 @@ var Font = (function Font_closure () {
     proto.set_dimen = function Font_set_dimen (number, value) {
 	if (this.metrics_error != null)
 	    throw this.metrics_error;
-	if (this.dimens === NeedMoreData)
-	    throw NeedMoreData;
 
 	// XXX: we're supposed to only allow the number of parameters to be
 	// extended "just after the font has been loaded". (TeXBook p. 433).
@@ -845,16 +839,12 @@ var Font = (function Font_closure () {
     proto.box_for_ord = function Font_box_for_ord (ord) {
 	if (this.metrics_error != null)
 	    throw this.metrics_error;
-	if (this.metrics === NeedMoreData)
-	    throw NeedMoreData;
 	return this.metrics.box_for_ord (this, ord);
     };
 
     proto.italic_correction = function Font_italic_correction (ord) {
 	if (this.metrics_error != null)
 	    throw this.metrics_error;
-	if (this.metrics === NeedMoreData)
-	    throw NeedMoreData;
 	return this.metrics.italic_correction (ord);
     };
 

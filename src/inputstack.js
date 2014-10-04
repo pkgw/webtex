@@ -52,7 +52,7 @@ var TokenizerInput = (function TokenizerInput_closure () {
 	    throw new TexInternalError ('overlarge toknum ' + toknum);
 
 	var tok = this.tokenize_next ();
-	if (tok !== NeedMoreData && tok !== EOF)
+	if (tok !== EOF)
 	    this.saved_tokens.push (tok);
 	return tok;
     };
@@ -81,9 +81,6 @@ var TokenizerInput = (function TokenizerInput_closure () {
 	var endlinechar = this.engine.get_parameter (T_INT, 'endlinechar').value;
 	var o = this.ordsrc.next (catcodes, endlinechar);
 
-	if (o === NeedMoreData)
-	    return o;
-
 	if (o == EOF) {
 	    this.ordsrc = null;
 	    return o;
@@ -98,7 +95,7 @@ var TokenizerInput = (function TokenizerInput_closure () {
 		return Token.new_cseq ('\r');
 
 	    o = this.ordsrc.next (catcodes, endlinechar);
-	    if (o === EOF || o === NeedMoreData)
+	    if (o === EOF)
 		// We buffer things line-by-line so these conditions should
 		// never happen -- cseq's can't span between lines.
 		throw new TexRuntimeError ('unexpectly ran out of data (1)');
@@ -116,7 +113,7 @@ var TokenizerInput = (function TokenizerInput_closure () {
 
 	    while (1) {
 		o = this.ordsrc.next (catcodes, endlinechar);
-		if (o === EOF || o === NeedMoreData)
+		if (o === EOF)
 		    throw new TexRuntimeError ('unexpectly ran out of data (1)');
 
 		cc = catcodes[o];
@@ -223,9 +220,6 @@ var InputStack = (function InputStack_closure () {
 
 	var tok = this.inputs[i].get_tok (this.next_toknums[i]);
 
-	if (tok === NeedMoreData)
-	    return tok;
-
 	if (tok !== EOF) {
 	    this.next_toknums[i]++;
 	    this.recent_toks[this.next_recent_tok] = tok;
@@ -306,7 +300,7 @@ var InputStack = (function InputStack_closure () {
 
 	while (list.length < 64) {
 	    t = this.next_tok ();
-	    if (t === EOF || t === NeedMoreData)
+	    if (t === EOF)
 		break;
 	    list.push (t);
 	}

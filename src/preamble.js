@@ -123,10 +123,7 @@ var TexInternalError = (function TexInternalErrorClosure () {
 }) ();
 
 
-/* Dealing with processing restarts */
+/* EOF marker */
 
-var NeedMoreData = {toString: function () { return 'NeedMoreData'; }};
 var EOF = {toString: function () { return 'EOF'; }};
-
-webtex_export ('NeedMoreData', NeedMoreData);
 webtex_export ('EOF', EOF);
