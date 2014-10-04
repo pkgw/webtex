@@ -157,3 +157,37 @@ var Valref = (function Valref_closure () {
 
     return Valref;
 }) ();
+
+
+var Listable = (function Listable_closure () {
+    // A Listable is something that can be put in a horizontal, vertical, or
+    // math list.
+
+    function Listable () {
+	this.ltype = null;
+    }
+
+    var proto = Listable.prototype;
+
+    proto._uisummary = function Listable__uisummary () {
+	// Returns a short string summarizing this object; used in toString()
+	// and uitext().
+	return 'Listable without _uisummary??';
+    };
+
+    proto.toString = function Listable_toString () {
+	return '<' + this._uisummary () + '>';
+    };
+
+    proto._uiitems = function Listable__uiitems () {
+	// Returns list of strings describing this item, to be displayed
+	// separated by newlines. Default is good for most:
+	return [this._uisummary ()];
+    };
+
+    proto.uitext = function Listable_uitext () {
+	return this._uiitems ().join ('\n');
+    };
+
+    return Listable;
+}) ();

@@ -7,47 +7,6 @@
 //
 // We separate Whatsits into IO and Specials and add our own items.
 
-'use strict';
-
-var Listable = (function Listable_closure () {
-    // Something that can be put in a box; or more precisely, a horizontal or
-    // vertical list.
-    function Listable () {}
-    var proto = Listable.prototype;
-
-    proto._uisummary = function Listable__uisummary () {
-	// Returns a short string summarizing this object; used in toString()
-	// and uitext().
-	return 'Listable without _uisummary??';
-    };
-
-    proto.toString = function Listable_toString () {
-	return '<' + this._uisummary () + '>';
-    };
-
-    proto._uiitems = function Listable__uiitems () {
-	// Returns list of strings describing this item, to be displayed
-	// separated by newlines. Default is good for most:
-	return [this._uisummary ()];
-    };
-
-    proto.uitext = function Listable_uitext () {
-	return this._uiitems ().join ('\n');
-    };
-
-    Listable.new_box = function Listable_new_box (btype) {
-	if (btype == BT_VOID)
-	    return new VoidBox ();
-	if (btype == BT_HBOX)
-	    return new HBox ();
-	if (btype == BT_VBOX)
-	    return new VBox ();
-	throw new TexInternalError ('unexpected box type ' + btype);
-    };
-
-    return Listable;
-}) ();
-
 
 var Boxlike = (function Boxlike_closure () {
     // A box-like listable has width, height, depth.
@@ -110,6 +69,16 @@ var ListBox = (function ListBox_closure () {
 	Boxlike.prototype._copyto.call (this, other);
 	other.btype = this.btype;
 	other.list = this.list.slice ();
+    };
+
+    ListBox.create = function ListBox_create (btype) {
+	if (btype == BT_VOID)
+	    return new VoidBox ();
+	if (btype == BT_HBOX)
+	    return new HBox ();
+	if (btype == BT_VBOX)
+	    return new VBox ();
+	throw new TexInternalError ('unexpected box type ' + btype);
     };
 
     return ListBox;

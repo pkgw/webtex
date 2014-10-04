@@ -2178,7 +2178,7 @@ var Engine = (function Engine_closure () {
 	function finish_box (engine) {
 	    this.trace ('finish_box is_exact=' + is_exact + ' spec=' + spec);
 	    this.unnest_eqtb ();
-	    var box = Listable.new_box (boxtype);
+	    var box = ListBox.create (boxtype);
 	    box.list = this.leave_mode ();
 	    box.set_glue (this, is_exact, spec);
 	    if (is_vtop)
