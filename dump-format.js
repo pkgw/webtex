@@ -21,7 +21,7 @@ var eng = webtex.setup_process_format ({
     debug_input_lines: false,
 });
 
-eng.iostack.push (new webtex.Node.FSIOLayer ('__wtpatches__/', patchdir));
+eng.iostack.push (new webtex.FSIOLayer ('__wtpatches__/', patchdir));
 
 while (eng.step () === true) {
 }

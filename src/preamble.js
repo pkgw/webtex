@@ -1,7 +1,28 @@
-'use strict';
+// Global preamble included at the top of the wrappers in all Webtex flavors
+// (Node.js, browser master, browser worker).
+//
+// We assume that "globalScope" and "webtexApiObject" have been set. All other
+// setup is up to us.
 
-webtexApiObject.IOBackend = {}; // XXX
+function webtex_export (name, value) {
+    webtexApiObject[name] = value;
+}
 
+
+// Pluggable backends. Depending on the flavor of Webtex we're building, there
+// may be different implementations of common APIs that we want to use.
+
+var backends = {};
+
+function webtex_register_backend (name, value) {
+    if (backends.hasOwnProperty (name))
+	throw new TexInternalError ('registering redundant backend ' + name);
+
+    backeds[name] = value;
+}
+
+
+// Webtex-global helper functions.
 
 var global_log = (function () {
     if ('console' in globalScope && 'log' in globalScope['console']) {

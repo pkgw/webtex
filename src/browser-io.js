@@ -1,9 +1,5 @@
 'use strict';
 
-webtexApiObject.IOBackend.makeInflater = function (callback) {
-    return new JSInflater (callback);
-};
-
 function stream_url_to_linebuffer (url, lb) {
     // XXXXXX Firefox-specific!!!
     var xhr = new XMLHttpRequest ();

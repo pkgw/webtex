@@ -6,10 +6,6 @@ if (typeof Webtex === 'undefined') {
     'use strict';
     var globalScope = (typeof window === 'undefined') ? this : window;
 
-    function webtex_export (name, value) {
-	webtexApiObject[name] = value;
-    }
-
 $insert_files
 
 }).call ((typeof window === 'undefined') ? this : window, Webtex);

@@ -125,17 +125,7 @@ var FSIOLayer = (function FSIOLayer_closure () {
     return FSIOLayer;
 }) ();
 
-webtexApiObject.Node.FSIOLayer = FSIOLayer;
-
-
-webtexApiObject.IOBackend.makeInflater = function (callback) {
-    // We used to delegate to node.js's built-in zlib module. However, in the
-    // synchronous-I/O paradigm, this doesn't work, because zlib is
-    // implemented with streams and return to the main loop is needed for the
-    // necessary events to fire. The pure-JS implementation doesn't have this
-    // "limitation". Ah well.
-    return new JSInflater (callback);
-};
+webtex_export ('FSIOLayer', FSIOLayer);
 
 
 function get_fs_json (path) {
@@ -167,4 +157,4 @@ var ConsoleDumpTarget = (function ConsoleDumpTarget_closure () {
     return ConsoleDumpTarget;
 }) ();
 
-webtexApiObject.Node.ConsoleDumpTarget = ConsoleDumpTarget; // XXX
+webtex_export ('ConsoleDumpTarget', ConsoleDumpTarget);

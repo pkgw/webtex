@@ -3,10 +3,12 @@ python = python
 minify = java -jar yuicompressor-2.4.8.jar
 texdist = tl2013
 
+preamble = \
+  src/preamble.js
+
 sharedjs = \
   src/inflate.js \
   src/jsonparse.js \
-  src/preamble.js \
   src/constants.js \
   src/values.js \
   src/boxes.js \
@@ -59,17 +61,17 @@ minified: \
   $(builddir)/node-webtex.min.js
 
 $(builddir)/browser-master-webtex.js: \
-generate.py src/browser-master-wrapper.js $(browserprejs) $(sharedjs) $(browsermasterjs) \
+generate.py src/browser-master-wrapper.js $(preamble) $(browserprejs) $(sharedjs) $(browsermasterjs) \
 | $(builddir)
 	$(python) $^ $@
 
 $(builddir)/browser-worker-webtex.js: \
-generate.py src/worker-wrapper.js $(browserprejs) $(sharedjs) $(browserworkerjs) \
+generate.py src/worker-wrapper.js $(preamble) $(browserprejs) $(sharedjs) $(browserworkerjs) \
 | $(builddir)
 	$(python) $^ $@
 
 $(builddir)/node-webtex.js: \
-generate.py src/node-wrapper.js $(sharedjs) $(nodejs) \
+generate.py src/node-wrapper.js $(preamble) $(sharedjs) $(nodejs) \
 | $(builddir)
 	$(python) $^ $@
 

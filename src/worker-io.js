@@ -1,9 +1,5 @@
 'use strict';
 
-webtexApiObject.IOBackend.makeInflater = function (callback) {
-    return new JSInflater (callback);
-};
-
 function ab_to_str (arraybuf) {
     // A naive fromCharCode.apply() call can lead to exceptions about too many
     // arguments.

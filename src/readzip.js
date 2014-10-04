@@ -145,7 +145,7 @@ var ZipReader = (function ZipReader_closure () {
 
 	var state = {buf: new ArrayBuffer (0), err: null};
 
-	var inflate = webtexApiObject.IOBackend.makeInflater (function (err, data) {
+	var inflate = new JSInflater (function (err, data) {
 	    if (state.err != null)
 		return;
 
