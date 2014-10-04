@@ -3,7 +3,9 @@
 // This version removes a lot of features, adapts the coding style, and adds
 // Webtex-specific functionality.
 //
-// Format specifiers are:
+//
+// If only one argument is supplied, the argument is returned verbatim.
+// Otherwise, the format specifiers are:
 //
 // %c - character ordinal to escaped character via escchr()
 // %C - character ordinal to escaped character via texchr()
@@ -12,6 +14,9 @@
 // %o - toString() stringification object
 // %s - raw string
 // %x - hexadecimal number (rendered with leading "0x")
+//
+// (The special-case of one argument matters if that argument is an arbitrary
+// string that may contain percent signs.)
 //
 //
 // Original copyright and license:
@@ -53,6 +58,9 @@ var format = (function format_wrapper () {
     function format () {
         var key = arguments[0];
 	var cache = format.cache;
+
+	if (arguments.length == 1)
+	    return key;
 
         if (!cache.hasOwnProperty (key))
             cache[key] = format.parse (key);
