@@ -180,11 +180,11 @@ commands._let = function cmd_let (engine) {
 
     while (true) {
 	var tok = engine.next_tok_throw ();
-	if (tok.isspace (engine))
+	if (tok.is_space (engine))
 	    continue
 	if (tok.is_other_char (O_EQUALS)) {
 	    var equiv = engine.next_tok_throw ();
-	    if (equiv.isspace (engine))
+	    if (equiv.is_space (engine))
 		equiv = engine.next_tok_throw ();
 	    break;
 	}
@@ -613,7 +613,7 @@ commands.ifnum = function cmd_ifnum (engine) {
 	var tok = engine.next_x_tok ();
 	if (tok == null)
 	    throw new TexSyntaxError ('EOF inside \\ifnum');
-	if (!tok.isspace (engine))
+	if (!tok.is_space (engine))
 	    break;
     }
 
@@ -654,7 +654,7 @@ commands.ifdim = function cmd_ifdim (engine) {
 	var tok = engine.next_x_tok ();
 	if (tok == null)
 	    throw new TexSyntaxError ('EOF inside \\ifdim');
-	if (!tok.isspace (engine))
+	if (!tok.is_space (engine))
 	    break;
     }
 

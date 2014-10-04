@@ -165,7 +165,7 @@ var Token = (function Token_closure () {
     };
 
 
-    proto.isspace = function Token_isspace (engine) {
+    proto.is_space = function Token_is_space (engine) {
 	var cmd = null;
 
 	if (this.kind == TK_CHAR) {

@@ -1350,7 +1350,7 @@ var Engine = (function Engine_closure () {
 	var tok = this.next_tok ();
 	if (tok === NeedMoreData)
 	    throw tok;
-	if (tok == EOF || tok.isspace (this))
+	if (tok == EOF || tok.is_space (this))
 	    return;
 	this.push_back (tok);
     };
@@ -1361,7 +1361,7 @@ var Engine = (function Engine_closure () {
 	    var tok = this.next_x_tok ();
 	    if (tok === NeedMoreData)
 		throw tok;
-	    if (!tok.isspace (this))
+	    if (!tok.is_space (this))
 		return tok;
 	}
     };
@@ -1372,7 +1372,7 @@ var Engine = (function Engine_closure () {
 
 	    if (tok == null)
 		throw new TexSyntaxError ('EOF when expected left brace');
-	    if (tok.isspace (this))
+	    if (tok.is_space (this))
 		continue;
 	    if (tok.iscmd (this, 'relax'))
 		continue;
@@ -1391,7 +1391,7 @@ var Engine = (function Engine_closure () {
 	while (1) {
 	    var tok = this.next_x_tok_throw ();
 
-	    if (tok.isspace (this))
+	    if (tok.is_space (this))
 		continue;
 	    if (tok.is_other_char (O_EQUALS))
 		return true;
@@ -1415,7 +1415,7 @@ var Engine = (function Engine_closure () {
 
 	    scanned.push (tok);
 
-	    if (i == 0 && tok.isspace (this))
+	    if (i == 0 && tok.is_space (this))
 		continue; // my best interpretation of scan_keyword ...
 	    else if (!tok.is_char ())
 		break;
@@ -1440,7 +1440,7 @@ var Engine = (function Engine_closure () {
 	while (1) {
 	    var tok = this.next_x_tok_throw ();
 
-	    if (tok.isspace (this)) {
+	    if (tok.is_space (this)) {
 	    } else if (tok.is_other_char (O_PLUS)) {
 	    } else if (tok.is_other_char (O_MINUS)) {
 		negfactor = -negfactor;
@@ -1636,7 +1636,7 @@ var Engine = (function Engine_closure () {
 
 		    var v = tok.maybe_decimal_value ();
 		    if (v < 0) {
-			if (!tok.isspace (this))
+			if (!tok.is_space (this))
 			    this.push_back (tok);
 			break;
 		    }
@@ -1813,7 +1813,7 @@ var Engine = (function Engine_closure () {
 	    if (tok == null)
 		throw new TexRuntimeError ('EOF when expected cseq name');
 	    if (!tok.is_cat (C_SPACE))
-		// note: here we do NOT want tok.isspace()
+		// note: here we do NOT want tok.is_space()
 		break;
 	}
 
@@ -1873,7 +1873,7 @@ var Engine = (function Engine_closure () {
 		break;
 	    }
 
-	    if (tok.isspace (this))
+	    if (tok.is_space (this))
 		break;
 
 	    name += String.fromCharCode (tok.ord);
@@ -2097,7 +2097,7 @@ var Engine = (function Engine_closure () {
 
 	while (true) {
 	    tok = this.next_x_tok_throw ();
-	    if (!tok.isspace (this) && !tok.iscmd (this, 'relax'))
+	    if (!tok.is_space (this) && !tok.iscmd (this, 'relax'))
 		break;
 	}
 
