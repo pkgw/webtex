@@ -254,7 +254,7 @@ var Token = (function Token_closure () {
     };
 
 
-    proto.isexpandable = function Token_isexpandable (engine) {
+    proto.is_expandable = function Token_is_expandable (engine) {
 	return this.to_cmd (engine).expandable;
     };
 
