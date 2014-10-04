@@ -30,8 +30,6 @@ sharedjs = \
   src/bundle.js
 
 browserprejs = \
-  src/promise-0.1.1.js \
-  src/network.js \
   src/emulate-setimmediate.js
 
 browserworkerjs = \
