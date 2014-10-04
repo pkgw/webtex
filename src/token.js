@@ -149,7 +149,7 @@ var Token = (function Token_closure () {
     };
 
 
-    proto.iscslike = function Token_iscslike () {
+    proto.is_cslike = function Token_is_cslike () {
 	if (this.kind == TK_CSEQ)
 	    return true;
 	if (this.kind == TK_CHAR)

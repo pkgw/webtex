@@ -1817,7 +1817,7 @@ var Engine = (function Engine_closure () {
 		break;
 	}
 
-	if (!tok.iscslike ())
+	if (!tok.is_cslike ())
 	    throw new TexRuntimeError ('expected control seq or active char;' +
 				       'got ' + tok);
 

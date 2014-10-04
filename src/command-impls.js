@@ -216,7 +216,7 @@ commands.string = function cmd_string (engine) {
 	return;
     }
 
-    if (tok.iscslike ()) { // active chars were handled above
+    if (tok.is_cslike ()) { // active chars were handled above
 	var expn = tok.name, esc = engine.escapechar ();
 	if (esc >= 0 && esc < 256)
 	    expn = String.fromCharCode (esc) + expn;
@@ -556,7 +556,7 @@ commands._if = function cmd_if (engine) {
     function key (tok) {
 	if (tok.is_char ())
 	    return tok.catcode * 1000 + tok.ord;
-	if (tok.iscslike ()) { // active chars will be caught by above
+	if (tok.is_cslike ()) { // active chars will be caught by above
 	    var cmd = tok.to_cmd (engine);
 	    if (cmd instanceof GivenCharCommand)
 		throw new TexInternalError ('not implemented');
@@ -581,7 +581,7 @@ commands.ifcat = function cmd_ifcat (engine) {
     function key (tok) {
 	if (tok.is_char ())
 	    return tok.catcode;
-	if (tok.iscslike ()) { // active chars will be caught by above
+	if (tok.is_cslike ()) { // active chars will be caught by above
 	    var cmd = tok.to_cmd (engine);
 	    if (cmd instanceof GivenCharCommand)
 		throw new TexInternalError ('not implemented');
