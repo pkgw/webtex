@@ -32,15 +32,9 @@
 
 var sprintf = (function sprintf_wrapper () {
     var re = {
-        not_string: /[^s]/,
-        number: /[dief]/,
         text: /^[^\x25]+/,
         modulo: /^\x25{2}/,
-        placeholder: /^\x25(?:([1-9]\d*)\$|\(([^\)]+)\))?(\+)?(0|'[^$])?(-)?(\d+)?(?:\.(\d+))?([b-fiosuxX])/,
-        key: /^([a-z_][a-z_\d]*)/i,
-        key_access: /^\.([a-z_][a-z_\d]*)/i,
-        index_access: /^\[(\d+)\]/,
-        sign: /^[\+\-]/
+        placeholder: /^\x25(.)/,
     };
 
     function sprintf () {
@@ -67,30 +61,12 @@ var sprintf = (function sprintf_wrapper () {
                 output.push (nodes[i]);
             } else if (nodes[i] instanceof Array) {
                 match = nodes[i]; // convenience purposes only
-                if (match[2]) { // keyword argument
-                    arg = argv[cursor];
-                    for (k = 0; k < match[2].length; k++) {
-                        if (!arg.hasOwnProperty (match[2][k])) {
-                            throw new Error (sprintf ('[sprintf] property "%s" does not exist', match[2][k]));
-                        }
-                        arg = arg[match[2][k]];
-                    }
-                } else if (match[1]) { // positional argument (explicit)
-                    arg = argv[match[1]];
-                } else { // positional argument (implicit)
-                    arg = argv[cursor++];
-                }
+                arg = argv[cursor++];
 
                 if (typeof arg === 'function')
                     arg = arg ();
 
-                if (re.not_string.test (match[8]) && (typeof arg != 'number' && isNaN (arg)))
-                    throw new TypeError (sprintf('[sprintf] expecting number but found %s', typeof arg));
-
-                if (re.number.test (match[8]))
-                    is_positive = arg >= 0;
-
-                switch (match[8]) {
+                switch (match[1]) {
                 case 'b':
                     arg = arg.toString (2);
                     break;
@@ -102,16 +78,15 @@ var sprintf = (function sprintf_wrapper () {
                     arg = parseInt (arg, 10);
                     break;
                 case 'e':
-                    arg = match[7] ? arg.toExponential (match[7]) : arg.toExponential ();
+                    arg = arg.toExponential ();
                     break;
                 case 'f':
-                    arg = match[7] ? parseFloat (arg).toFixed (match[7]) : parseFloat (arg);
+                    arg = parseFloat (arg);
                     break;
                 case 'o':
                     arg = arg.toString (8);
                     break;
                 case 's':
-                    arg = ((arg = String (arg)) && match[7] ? arg.substring (0, match[7]) : arg);
                     break;
                 case 'u':
                     arg = arg >>> 0;
@@ -124,17 +99,7 @@ var sprintf = (function sprintf_wrapper () {
                     break;
                 }
 
-                if (re.number.test (match[8]) && (!is_positive || match[3])) {
-                    sign = is_positive ? '+' : '-';
-                    arg = arg.toString ().replace (re.sign, '');
-                } else {
-                    sign = '';
-                }
-
-                pad_character = match[4] ? match[4] === '0' ? '0' : match[4].charAt (1) : ' ';
-                pad_length = match[6] - (sign + arg).length;
-                pad = match[6] ? (pad_length > 0 ? str_repeat (pad_character, pad_length) : '') : '';
-                output.push (match[5] ? sign + arg + pad : (pad_character === '0' ? sign + pad + arg : pad + sign + arg));
+                output.push (arg);
             }
         }
 
@@ -146,44 +111,15 @@ var sprintf = (function sprintf_wrapper () {
     sprintf.parse = function (fmt) {
 	var match = [];
 	var nodes = [];
-	var arg_names = 0;
 
         while (fmt) {
             if ((match = re.text.exec (fmt)) !== null)
                 nodes.push (match[0]);
             else if ((match = re.modulo.exec (fmt)) !== null)
                 nodes.push ('%');
-            else if ((match = re.placeholder.exec (fmt)) !== null) {
-                if (match[2]) {
-                    arg_names |= 1;
-                    var field_list = [];
-		    var replacement_field = match[2];
-		    var field_match = [];
-
-                    if ((field_match = re.key.exec (replacement_field)) !== null) {
-                        field_list.push (field_match[1]);
-
-                        while ((replacement_field = replacement_field.substring (field_match[0].length)) !== '') {
-                            if ((field_match = re.key_access.exec (replacement_field)) !== null)
-                                field_list.push (field_match[1]);
-                            else if ((field_match = re.index_access.exec (replacement_field)) !== null)
-                                field_list.push (field_match[1]);
-                            else
-                                throw new SyntaxError('[sprintf] failed to parse named argument key');
-                        }
-                    } else
-                        throw new SyntaxError('[sprintf] failed to parse named argument key');
-
-                    match[2] = field_list;
-                } else {
-                    arg_names |= 2;
-                }
-
-		if (arg_names === 3)
-                    throw new Error('[sprintf] mixing positional and named placeholders is not (yet) supported');
-
+            else if ((match = re.placeholder.exec (fmt)) !== null)
                 nodes.push (match);
-            } else
+            else
                 throw new SyntaxError('[sprintf] unexpected placeholder');
 
             fmt = fmt.substring (match[0].length);
@@ -200,3 +136,5 @@ var sprintf = (function sprintf_wrapper () {
 
     return sprintf;
 }) ();
+
+webtex_export ('sprintf', sprintf);
