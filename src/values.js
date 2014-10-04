@@ -740,8 +740,6 @@ var Font = (function Font_closure () {
 	// every font-dimen operation needs an engine as an argument. Easier
 	// just to load automatically.
 
-	this.metrics_error = null;
-
 	if (ident == 'nullfont') {
 	    this.metrics = null; // XXX: special NullMetrics class.
 	    this.dimens = null; // ditto?
@@ -801,15 +799,10 @@ var Font = (function Font_closure () {
     };
 
     proto.get_metrics = function Font_get_metrics () {
-	if (this.metrics_error != null)
-	    throw this.metrics_error;
 	return this.metrics;
     };
 
     proto.get_dimen = function Font_get_dimen (number) {
-	if (this.metrics_error != null)
-	    throw this.metrics_error;
-
 	if (this.dimens == null)
 	    // nullfont case
 	    return new Dimen ();
@@ -821,9 +814,6 @@ var Font = (function Font_closure () {
     };
 
     proto.set_dimen = function Font_set_dimen (number, value) {
-	if (this.metrics_error != null)
-	    throw this.metrics_error;
-
 	// XXX: we're supposed to only allow the number of parameters to be
 	// extended "just after the font has been loaded". (TeXBook p. 433).
 
@@ -837,14 +827,10 @@ var Font = (function Font_closure () {
     };
 
     proto.box_for_ord = function Font_box_for_ord (ord) {
-	if (this.metrics_error != null)
-	    throw this.metrics_error;
 	return this.metrics.box_for_ord (this, ord);
     };
 
     proto.italic_correction = function Font_italic_correction (ord) {
-	if (this.metrics_error != null)
-	    throw this.metrics_error;
 	return this.metrics.italic_correction (ord);
     };
 
