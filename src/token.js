@@ -1,45 +1,57 @@
-'use strict';
-
-/* The representation of tokens is kind of awkward. I think it's
- * better to have a single class with an internal "kind" rather than
- * subclasses, but maybe that's wrong. */
+// An individual token manipulated in the TeX engine. These may be generated
+// directly by parsing an input file, or synthesized for various reasons as
+// the engine runs.
+//
+// The representation of tokens is kind of awkward. I think it's better to
+// have a single class with an internal "kind" rather than subclasses, but
+// maybe that's wrong.
 
 var Token = (function Token_closure () {
     var TK_CHAR = 0, TK_CSEQ = 1, TK_PARAM = 2, TK_PURECMD = 3;
-    var frozen_cs_names = {cr: 1, endgroup: 1, right: 1, fi: 1, endtemplate: 1,
-                           relax: 1, endwrite: 1, 'notexpanded:': 1, nullfont: 1};
+    var frozen_cs_names = { cr: 1,
+			    endgroup: 1,
+			    endtemplate: 1,
+			    endwrite: 1,
+			    fi: 1,
+			    'notexpanded:': 1,
+			    nullfont: 1,
+                            relax: 1,
+			    right: 1 };
+
+    function escape (esc_func, text) {
+	return [].map.call (text, ord).map (esc_func).join ('');
+    }
 
     function Token () {};
 
     var proto = Token.prototype;
 
-    proto._csesc = function Token__csesc (escape) {
-	return [].map.call (this.name, ord).map (escape).join ('');
-    };
-
     proto.toString = function Token_toString () {
 	if (this.kind == TK_CHAR)
 	    return escchr (this.ord) + ':' + cc_abbrev[this.catcode];
 	if (this.kind == TK_CSEQ)
-	    return '<' + this._csesc (escchr) + '>';
+	    return '<' + escape (escchr, this.name) + '>';
 	if (this.kind == TK_PARAM)
 	    return '#' + this.pnum;
 	if (this.kind == TK_PURECMD)
 	    return '!' + this.cmd;
 	throw new TexInternalError ('not reached');
     };
+
 
     proto.uitext = function Token_uitext () {
 	if (this.kind == TK_CHAR)
 	    return escchr (this.ord);
 	if (this.kind == TK_CSEQ)
-	    return '\\' + this._csesc (escchr) + ' ';
+	    return '\\' + escape (escchr, this.name) + ' ';
 	if (this.kind == TK_PARAM)
+
 	    return '#' + this.pnum;
 	if (this.kind == TK_PURECMD)
 	    return '!' + this.cmd;
 	throw new TexInternalError ('not reached');
     };
+
 
     proto.textext = function Token_textext (engine, ismacro) {
 	if (this.kind == TK_CHAR) {
@@ -50,7 +62,7 @@ var Token = (function Token_closure () {
 
 	if (this.kind == TK_CSEQ)
 	    return (texchr (engine.escapechar ()) +
-		    this._csesc (texchr) + ' ');
+		    escape (texchr, this.name) + ' ');
 
 	if (this.kind == TK_PARAM)
 	    return '#' + this.pnum
@@ -60,6 +72,7 @@ var Token = (function Token_closure () {
 
 	throw new TexInternalError ('not reached');
     };
+
 
     proto.equals = function Token_equals (other) {
 	if (other === null)
@@ -81,6 +94,7 @@ var Token = (function Token_closure () {
 
 	throw new TexInternalError ('not reached');
     };
+
 
     proto.tocmd = function Token_tocmd (engine) {
 	var cmd = null, name = '<unexpected token command>';
@@ -110,13 +124,16 @@ var Token = (function Token_closure () {
 	return cmd;
     };
 
+
     proto.ischar = function Token_ischar () {
 	return this.kind == TK_CHAR;
     };
 
+
     proto.isparam = function Token_isparam () {
 	return this.kind == TK_PARAM;
     };
+
 
     proto.iscat = function Token_iscat (catcode) {
 	if (this.kind != TK_CHAR)
@@ -124,11 +141,13 @@ var Token = (function Token_closure () {
 	return this.catcode == catcode;
     };
 
+
     proto.isotherchar = function Token_isotherchar (ord) {
 	if (this.kind != TK_CHAR || this.catcode != C_OTHER)
 	    return false;
 	return this.ord == ord;
     };
+
 
     proto.iscslike = function Token_iscslike () {
 	if (this.kind == TK_CSEQ)
@@ -138,11 +157,13 @@ var Token = (function Token_closure () {
 	return false;
     };
 
+
     proto.is_frozen_cs = function Token_is_frozen_cs () {
 	if (this.kind != TK_CSEQ)
 	    return false;
 	return frozen_cs_names.hasOwnProperty (this.name);
     };
+
 
     proto.isspace = function Token_isspace (engine) {
 	var cmd = null;
@@ -164,6 +185,7 @@ var Token = (function Token_closure () {
 
 	return (cmd instanceof SpacerCommand);
     };
+
 
     proto.maybe_octal_value = function Token_maybe_octal_value () {
 	if (this.kind != TK_CHAR)
@@ -211,9 +233,11 @@ var Token = (function Token_closure () {
 	return v;
     };
 
+
     proto.iscmd = function Token_iscmd (engine, cmdname) {
 	return this.tocmd (engine).samecmd (engine.commands[cmdname]);
     };
+
 
     proto.assign_cmd = function Token_assign_cmd (engine, cmd) {
 	if (this.kind == TK_CSEQ) {
@@ -229,13 +253,16 @@ var Token = (function Token_closure () {
 	throw new TexInternalError ('cannot assign command for token ' + this);
     };
 
+
     proto.isexpandable = function Token_isexpandable (engine) {
 	return this.tocmd (engine).expandable;
     };
 
+
     proto.isconditional = function Token_isconditional (engine) {
 	return this.tocmd (engine).conditional;
     };
+
 
     /* The roundtrippable string format for serializing Engines.
        %[...] -> cseq
@@ -275,6 +302,9 @@ var Token = (function Token_closure () {
 	    return c;
 	}).join ('') + ']';
     };
+
+
+    // Constructors.
 
     Token.new_cseq = function Token_new_cseq (name) {
 	var tok = new Token ();
