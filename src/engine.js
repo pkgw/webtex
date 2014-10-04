@@ -70,7 +70,7 @@ var EquivTable = (function EquivTable_closure () {
 	if (reg < 0 || reg > 255)
 	    throw new TexRuntimeError ('illegal register number ' + reg);
 
-	this._registers[valtype][reg] = Value.coerce (valtype, value);
+	this._registers[valtype][reg] = Value.ensure (valtype, value);
 
 	if (global && this.parent != null)
 	    this.parent.set_register (valtype, reg, value, global);
@@ -93,7 +93,7 @@ var EquivTable = (function EquivTable_closure () {
 	    throw new TexRuntimeError ('illegal value type for parameter: ' +
 				       vt_names[valtype]);
 
-	this._parameters[valtype][name] = Value.coerce (valtype, value);
+	this._parameters[valtype][name] = Value.ensure (valtype, value);
 
 	if (global && this.parent != null)
 	    this.parent.set_parameter (valtype, name, value, global);
@@ -575,7 +575,7 @@ var Engine = (function Engine_closure () {
     };
 
     proto.set_special_value = function Engine_set_special_value (valtype, name, value) {
-	this.special_values[valtype][name] = Value.coerce (valtype, value);
+	this.special_values[valtype][name] = Value.ensure (valtype, value);
     };
 
     proto.get_font = function Engine_get_font (name) {

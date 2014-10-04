@@ -13,6 +13,7 @@ sharedjs = \
   src/jsonparse.js \
   src/constants.js \
   src/str-utils.js \
+  src/base-classes.js \
   src/values.js \
   src/boxes.js \
   src/math.js \

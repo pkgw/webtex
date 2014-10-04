@@ -100,7 +100,7 @@ var SpecialValref = (function SpecialValref_closure () {
 var ConstantValref = (function ConstantValref_closure () {
     function ConstantValref (valtype, value) {
 	Valref.call (this, valtype);
-	this.value = Value.coerce (valtype, value);
+	this.value = Value.ensure (valtype, value);
     }
 
     inherit (ConstantValref, Valref);
