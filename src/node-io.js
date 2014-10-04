@@ -15,29 +15,6 @@ function buffer_to_arraybuffer (buf) {
 }
 
 
-function ab_to_str (arraybuf) {
-    // A naive fromCharCode.apply() call can lead to exceptions about too many
-    // arguments.
-    //
-    // XXX assuming no multi-byte/UTF8-type characters!!
-
-    var s = '';
-    var b = new Uint8Array (arraybuf);
-    var nleft = b.byteLength;
-    var nchunk = 4096;
-    var ofs = 0;
-
-    while (nleft > nchunk) {
-	s += String.fromCharCode.apply (null, b.subarray (ofs, ofs + nchunk));
-	ofs += nchunk;
-	nleft -= nchunk;
-    }
-
-    s += String.fromCharCode.apply (null, b.subarray (ofs, ofs + nleft));
-    return s;
-}
-
-
 function make_fs_linebuffer (path) {
     // XXX UTF-8 assumption of course not wise
     var fs = require ('fs');
@@ -79,7 +56,7 @@ var RandomAccessFile = (function RandomAccessFile_closure () {
     proto.read_range_str = function RandomAccessFile_read_range_str (offset, length) {
 	// TODO: Buffer -> ArrayBuffer -> String is silly. We do this for now
 	// to keep things simple.
-	return ab_to_str (this.read_range_ab (offset, length));
+	return arraybuffer_to_str (this.read_range_ab (offset, length));
     };
 
     proto.size = function RandomAccessFile_size () {

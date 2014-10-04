@@ -56,6 +56,29 @@ function inherit (ctor, superCtor) {
 }
 
 
+function arraybuffer_to_str (arraybuf) {
+    // A naive fromCharCode.apply() call can lead to exceptions about too many
+    // arguments.
+    //
+    // XXX assuming no multi-byte/UTF8-type characters!!
+
+    var s = '';
+    var b = new Uint8Array (arraybuf);
+    var nleft = b.byteLength;
+    var nchunk = 4096;
+    var ofs = 0;
+
+    while (nleft > nchunk) {
+	s += String.fromCharCode.apply (null, b.subarray (ofs, ofs + nchunk));
+	ofs += nchunk;
+	nleft -= nchunk;
+    }
+
+    s += String.fromCharCode.apply (null, b.subarray (ofs, ofs + nleft));
+    return s;
+}
+
+
 /* Errors */
 
 var TexSyntaxError = (function TexSyntaxErrorClosure () {

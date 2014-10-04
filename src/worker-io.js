@@ -1,26 +1,19 @@
-'use strict';
+// I/O for the Worker thread. The whole reason that we use Web Workers is that
+// this needs to be synchronous; I've convinced myself that it's the only way
+// to successfully implement the engine.
 
-function ab_to_str (arraybuf) {
-    // A naive fromCharCode.apply() call can lead to exceptions about too many
-    // arguments.
-    //
-    // XXX assuming no multi-byte/UTF8-type characters!!
+function fetch_url_str (url) {
+    var req = new XMLHttpRequest ();
+    req.open ('GET', url, false);
+    req.send (null);
 
-    var s = '';
-    var b = new Uint8Array (arraybuf);
-    var nleft = b.byteLength;
-    var nchunk = 4096;
-    var ofs = 0;
+    if (req.status !== 200)
+	throw new TexRuntimeError ('cannot fetch URL ' + url +
+				   ': got status ' + req.status);
 
-    while (nleft > nchunk) {
-	s += String.fromCharCode.apply (null, b.subarray (ofs, ofs + nchunk));
-	ofs += nchunk;
-	nleft -= nchunk;
-    }
-
-    s += String.fromCharCode.apply (null, b.subarray (ofs, ofs + nleft));
-    return s;
+    return req.responseText;
 }
+
 
 var RandomAccessURL = (function RandomAccessURL_closure () {
     function RandomAccessURL (url) {
@@ -96,7 +89,7 @@ var RandomAccessURL = (function RandomAccessURL_closure () {
     proto.read_range_str = function RandomAccessURL_read_range_str (offset, length) {
 	// TODO: just get the response as text directly, rather than
 	// double-converting. We do this for now to keep things simple.
-	return ab_to_str (this.read_range_ab (offset, length));
+	return arraybuffer_to_str (this.read_range_ab (offset, length));
     };
 
     proto._get_size = function RandomAccessURL__get_size () {
@@ -119,15 +112,3 @@ var RandomAccessURL = (function RandomAccessURL_closure () {
 
     return RandomAccessURL;
 }) ();
-
-function fetch_url_str (url) {
-    var req = new XMLHttpRequest ();
-    req.open ('GET', url, false);
-    req.send (null);
-
-    if (req.status !== 200)
-	throw new TexRuntimeError ('cannot fetch URL ' + url +
-				   ': got status ' + req.status);
-
-    return req.responseText;
-};

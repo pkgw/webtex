@@ -174,7 +174,7 @@ var ZipReader = (function ZipReader_closure () {
     };
 
     proto.get_entry_str = function ZipReader_get_entry_str (entname) {
-	return ab_to_str (this.get_entry_ab (entname));
+	return arraybuffer_to_str (this.get_entry_ab (entname));
     };
 
     return ZipReader;
