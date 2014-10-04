@@ -3,7 +3,7 @@
 // rendering here since we can't convey object-oriented-y data across the Web
 // Worker message passing system.
 
-workerShipTargets['html-render'] = (function HTMLRenderTarget_closure () {
+worker_ship_targets['html-render'] = (function HTMLRenderTarget_closure () {
     function HTMLRenderTarget (post_message) {
 	this.post_message = post_message;
     }

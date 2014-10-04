@@ -18,12 +18,12 @@ function post_message (kind, data) {
 }
 
 
-workerApiEndpoints.echo = function webtex_worker_echo (data) {
+worker_api_endpoints.echo = function webtex_worker_echo (data) {
     post_message ('echo', data);
 };
 
 
-workerApiEndpoints.parse = function webtex_worker_parse (data) {
+worker_api_endpoints.parse = function webtex_worker_parse (data) {
     var rau = new RandomAccessURL (data.bundleurl);
     var z = new ZipReader (rau.read_range_ab.bind (rau), rau.size ());
     var bundle = new Bundle (z);
@@ -40,7 +40,7 @@ workerApiEndpoints.parse = function webtex_worker_parse (data) {
 
     var target_name = data.ship_target_name || null;
     if (target_name !== null)
-	data.shiptarget = new workerShipTargets[target_name] (post_message);
+	data.shiptarget = new worker_ship_targets[target_name] (post_message);
 
     var eng = new Engine (data);
     eng.restore_serialized_state (dumpjson);
@@ -61,8 +61,8 @@ onmessage = function webtex_worker_onmessage (event) {
     if (typeof data._kind !== 'string')
 	throw new TexInternalError ('worker: don\'t know how to handle event ' + event);
 
-    if (!workerApiEndpoints.hasOwnProperty (data._kind))
+    if (!worker_api_endpoints.hasOwnProperty (data._kind))
 	throw new TexInternalError ('worker: unrecognized API endpoint ' + data._kind);
 
-    workerApiEndpoints[data._kind] (data);
+    worker_api_endpoints[data._kind] (data);
 };
