@@ -142,7 +142,7 @@ var Token = (function Token_closure () {
     };
 
 
-    proto.isotherchar = function Token_isotherchar (ord) {
+    proto.is_other_char = function Token_is_other_char (ord) {
 	if (this.kind != TK_CHAR || this.catcode != C_OTHER)
 	    return false;
 	return this.ord == ord;

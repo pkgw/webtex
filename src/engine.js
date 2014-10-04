@@ -1393,7 +1393,7 @@ var Engine = (function Engine_closure () {
 
 	    if (tok.isspace (this))
 		continue;
-	    if (tok.isotherchar (O_EQUALS))
+	    if (tok.is_other_char (O_EQUALS))
 		return true;
 
 	    // Found a non-space, non-equals.
@@ -1441,8 +1441,8 @@ var Engine = (function Engine_closure () {
 	    var tok = this.next_x_tok_throw ();
 
 	    if (tok.isspace (this)) {
-	    } else if (tok.isotherchar (O_PLUS)) {
-	    } else if (tok.isotherchar (O_MINUS)) {
+	    } else if (tok.is_other_char (O_PLUS)) {
+	    } else if (tok.is_other_char (O_MINUS)) {
 		negfactor = -negfactor;
 	    } else {
 		return [negfactor, tok];
@@ -1454,7 +1454,7 @@ var Engine = (function Engine_closure () {
 	var t = this._scan_signs ();
 	var negfactor = t[0], tok = t[1];
 
-	if (tok.isotherchar (O_BACKTICK)) {
+	if (tok.is_other_char (O_BACKTICK)) {
 	    tok = this.next_tok ();
 	    if (tok === NeedMoreData)
 		throw tok;
@@ -1483,7 +1483,7 @@ var Engine = (function Engine_closure () {
 
 	var val = 0, sawany = false;
 
-	if (tok.isotherchar (O_SQUOTE)) {
+	if (tok.is_other_char (O_SQUOTE)) {
 	    // Octal.
 	    tok = this.next_x_tok ();
 	    while (true) {
@@ -1500,7 +1500,7 @@ var Engine = (function Engine_closure () {
 		val = val * 8 + v;
 		tok = this.next_x_tok ();
 	    }
-	} else if (tok.isotherchar (O_DQUOTE)) {
+	} else if (tok.is_other_char (O_DQUOTE)) {
 	    // Hexadecimal
 	    tok = this.next_x_tok ();
 	    while (true) {
@@ -1606,7 +1606,7 @@ var Engine = (function Engine_closure () {
 
 	if (nonfrac == null) {
 	    // We need to scan a literal number.
-	    if (tok.isotherchar (O_PERIOD) || tok.isotherchar (O_COMMA)) {
+	    if (tok.is_other_char (O_PERIOD) || tok.is_other_char (O_COMMA)) {
 		nonfrac = 0;
 	    } else {
 		this.push_back (tok);
@@ -1622,7 +1622,7 @@ var Engine = (function Engine_closure () {
 		throw tok;
 	    } else if (tok == EOF) {
 		/* nothing */
-	    } else if (!tok.isotherchar (O_PERIOD) && !tok.isotherchar (O_COMMA)) {
+	    } else if (!tok.is_other_char (O_PERIOD) && !tok.is_other_char (O_COMMA)) {
 		this.push_back (tok)
 	    } else {
 		// We have a fractional part to deal with.

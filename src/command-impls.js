@@ -182,7 +182,7 @@ commands._let = function cmd_let (engine) {
 	var tok = engine.next_tok_throw ();
 	if (tok.isspace (engine))
 	    continue
-	if (tok.isotherchar (O_EQUALS)) {
+	if (tok.is_other_char (O_EQUALS)) {
 	    var equiv = engine.next_tok_throw ();
 	    if (equiv.isspace (engine))
 		equiv = engine.next_tok_throw ();
@@ -411,7 +411,7 @@ function _cmd_def (engine, cname, expand_replacement) {
 		break;
 	    }
 
-	    if (tok.isotherchar (O_ZERO + next_pnum)) {
+	    if (tok.is_other_char (O_ZERO + next_pnum)) {
 		if (next_pnum > 9)
 		    throw new TexRuntimeError ('macros may only have 9 parameters');
 
@@ -622,11 +622,11 @@ commands.ifnum = function cmd_ifnum (engine) {
     var val2 = engine.scan_int ().value, result;
     engine.done_parsing_if_condition ();
 
-    if (tok.isotherchar (O_LESS))
+    if (tok.is_other_char (O_LESS))
 	result = (val1 < val2);
-    else if (tok.isotherchar (O_GREATER))
+    else if (tok.is_other_char (O_GREATER))
 	result = (val1 > val2);
-    else if (tok.isotherchar (O_EQUALS))
+    else if (tok.is_other_char (O_EQUALS))
 	result = (val1 == val2);
     else
 	throw new TexSyntaxError ('expected <,=,> in \\ifnum but got ' + tok);
@@ -661,11 +661,11 @@ commands.ifdim = function cmd_ifdim (engine) {
     var val2 = engine.scan_dimen (), result;
     engine.done_parsing_if_condition ();
 
-    if (tok.isotherchar (O_LESS))
+    if (tok.is_other_char (O_LESS))
 	result = (val1.sp.value < val2.sp.value);
-    else if (tok.isotherchar (O_GREATER))
+    else if (tok.is_other_char (O_GREATER))
 	result = (val1.sp.value > val2.sp.value);
-    else if (tok.isotherchar (O_EQUALS))
+    else if (tok.is_other_char (O_EQUALS))
 	result = (val1.sp.value == val2.sp.value);
     else
 	throw new TexSyntaxError ('expected <,=,> in \\ifdim but got ' + tok);
