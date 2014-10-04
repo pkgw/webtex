@@ -191,3 +191,125 @@ var Listable = (function Listable_closure () {
 
     return Listable;
 }) ();
+
+
+var Command = (function Command_closure () {
+    // A Command is a TeX primitive command. Most commands are bound to a
+    // single control sequence in the default engine, but there is not a
+    // one-to-one mapping between commands and cseqs: a cseq may be rebound so
+    // that it points to the same command as another, and operations like
+    // \chardef may create new commands that are not precisely associated with
+    // any single cseq.
+
+    function Command () {}
+
+    var proto = Command.prototype;
+    proto.expandable = false;
+    proto.conditional = false;
+    proto.boxlike = false;
+    proto.multi_instanced = false; // can multiple Command instances with the same name exist?
+    proto.assign_flag_mode = AFM_INVALID;
+    proto.name = '<unset command name>';
+
+    proto.toString = function Command_toString () {
+	return '[' + this.name + ']';
+    };
+
+    proto.texmeaning = function Command_texmeaning (engine) {
+	return texchr (engine.escapechar ()) + this.name;
+    };
+
+
+    proto.invoke = function Command_invoke (engine) {
+	throw new TexInternalError ('tried to evaluate undefined/' +
+				    'un-evaluatable command ' + this.name);
+    };
+
+    proto.samecmd = function Command_samecmd (other) {
+	if (other == null)
+	    return false;
+	return this.name == other.name;
+    };
+
+    // Value conversions
+
+    proto.get_valtype = function Command_get_valtype () {
+	// Return the type of the value that this command yields, or null if
+	// not applicable. Needed so that \the can peek and see whether it's
+	// about to get a token list so that xdef can do the right thing.
+	// Otherwise, some kinds of as_valref() calls will eat tokens that
+	// don't get put back into the parser when \the decides to do nothing
+	// unusual.
+	return null;
+    };
+
+    proto.as_valref = function Command_as_valref (engine) {
+	return null;
+    };
+
+    proto.as_int = function Command_as_int (engine) {
+	var v = this.as_valref (engine);
+	if (v == null)
+	    return null;
+	return v.get (engine).as_int ();
+    };
+
+    proto.as_scaled = function Command_as_scaled (engine) {
+	var v = this.as_valref (engine);
+	if (v == null)
+	    return null;
+	return v.get (engine).as_scaled ();
+    };
+
+    proto.as_dimen = function Command_as_dimen (engine) {
+	var v = this.as_valref (engine);
+	if (v == null)
+	    return null;
+	return v.get (engine).as_dimen ();
+    };
+
+    proto.as_glue = function Command_as_glue (engine) {
+	var v = this.as_valref (engine);
+	if (v == null)
+	    return null;
+	return v.get (engine).as_glue ();
+    };
+
+    // Serialization.
+
+    proto.get_serialize_ident = function Command_get_serialize_ident (state, housekeeping) {
+	if (this._serialize_ident == null) {
+	    if (!this.multi_instanced) {
+		// Builtin unique command, no need to serialize anything. Just
+		// need to remember that it exists.
+		if (housekeeping.commands.hasOwnProperty (this.name))
+		    throw new TexRuntimeError ('multiple commands with name ' + this.name);
+		housekeeping.commands[this.name] = true;
+		this._serialize_ident = this.name;
+	    } else {
+		// Command is not unique. We need to give this particular
+		// instance a special name and save its unique, special
+		// parameters.
+
+		var data = this._serialize_data (state, housekeeping);
+		var cmdlist = null;
+
+		if (!state.commands.hasOwnProperty (this.name))
+		    cmdlist = state.commands[this.name] = [];
+		else
+		    cmdlist = state.commands[this.name];
+
+		this._serialize_ident = this.name + '/' + cmdlist.length;
+		cmdlist.push (data);
+	    }
+	}
+
+	return this._serialize_ident;
+    };
+
+    proto._serialize_data = function Command__serialize_data (state, housekeeping) {
+	throw new TexRuntimeError ('_serialize_data not implemented for command');
+    };
+
+    return Command;
+})();
