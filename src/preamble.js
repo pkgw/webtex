@@ -32,6 +32,9 @@ var global_log = (function () {
     }
 }) ();
 
+function global_logf () {
+    global_log (format.apply (null, arguments));
+}
 
 var global_warn = (function () {
     if ('console' in globalScope && 'warn' in globalScope['console']) {
@@ -40,6 +43,11 @@ var global_warn = (function () {
 	return global_log;
     }
 }) ();
+
+function global_warnf () {
+    global_warn (format.apply (null, arguments));
+}
+
 
 
 function inherit (ctor, superCtor) {

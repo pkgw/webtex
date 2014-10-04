@@ -127,11 +127,11 @@ var ConsoleDumpTarget = (function ConsoleDumpTarget_closure () {
     var proto = ConsoleDumpTarget.prototype;
 
     proto.process = function ConsoleDumpTarget_process (box) {
-	global_log ('==== shipped out: ====');
+	global_logf ('==== shipped out: ====');
 	box.traverse (0, 0, function (x, y, item) {
-	    global_log ('x=' + x + ' y=' + y + ' ' + item);
+	    global_logf ('x=%d y=%d %o', x, y, item);
 	});
-	global_log ('==== (end of shipout) ====');
+	global_logf ('==== (end of shipout) ====');
     };
 
     return ConsoleDumpTarget;

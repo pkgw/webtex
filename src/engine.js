@@ -484,13 +484,22 @@ var Engine = (function Engine_closure () {
 	    this.set_font_family (MS_SCRIPTSCRIPT, i, nf);
 	}
 
-	if (args.debug_trace)
+	if (args.debug_trace) {
 	    this.trace = function (t) { global_log ('{' + t + '}'); };
-	else
+	    this.Ntrace = this._Ntrace;
+	} else {
 	    this.trace = function (t) {};
+	    this.Ntrace = this.trace;
+	}
     }
 
     var proto = Engine.prototype;
+
+    proto._Ntrace = function Engine__Ntrace (/*implicit*/) {
+	// the N is for New.
+	arguments[0] = '{' + arguments[0] + '}';
+	global_log (format.apply (null, arguments));
+    };
 
     // Wrappers for the EquivTable.
 
@@ -588,7 +597,7 @@ var Engine = (function Engine_closure () {
     // Infrastructure.
 
     proto.warn = function Engine_warn (text) {
-	global_warn ('!! ' + text);
+	global_warnf ('!! %s');
     };
 
     // Driving everything
@@ -638,7 +647,7 @@ var Engine = (function Engine_closure () {
     };
 
     proto.enter_mode = function Engine_enter_mode (mode) {
-	this.trace ('<enter ' + mode_abbrev[mode] + ' mode>');
+	this.Ntrace ('<enter %s mode>', mode_abbrev[mode]);
 	this.mode_stack.push (mode);
 	this.build_stack.push ([]);
     };
@@ -646,8 +655,7 @@ var Engine = (function Engine_closure () {
     proto.leave_mode = function Engine_leave_mode () {
 	var oldmode = this.mode_stack.pop ();
 	var list = this.build_stack.pop ();
-	this.trace ('<leave ' + mode_abbrev[oldmode] + ' mode: ' +
-		    list.length + ' items>');
+	this.Ntrace ('<leave %s mode: %d items>', mode_abbrev[oldmode], list.length);
 	return list;
     };
 
