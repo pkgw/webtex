@@ -57,18 +57,15 @@ var sprintf = (function sprintf_wrapper () {
     sprintf.format = function (nodes, argv) {
         var cursor = 1;
 	var tree_length = nodes.length;
-	var node_type = '';
 	var arg, i, k, match, pad, pad_character, pad_length;
 	var output = [];
 	var is_positive = true;
 	var sign = '';
 
         for (i = 0; i < tree_length; i++) {
-            node_type = get_type (nodes[i]);
-
-            if (node_type === 'string') {
+            if (typeof nodes[i] === 'string') {
                 output.push (nodes[i]);
-            } else if (node_type === 'array') {
+            } else if (nodes[i] instanceof Array) {
                 match = nodes[i]; // convenience purposes only
                 if (match[2]) { // keyword argument
                     arg = argv[cursor];
@@ -84,11 +81,11 @@ var sprintf = (function sprintf_wrapper () {
                     arg = argv[cursor++];
                 }
 
-                if (get_type (arg) == 'function')
+                if (typeof arg === 'function')
                     arg = arg ();
 
-                if (re.not_string.test (match[8]) && (get_type (arg) != 'number' && isNaN (arg)))
-                    throw new TypeError (sprintf('[sprintf] expecting number but found %s', get_type (arg)));
+                if (re.not_string.test (match[8]) && (typeof arg != 'number' && isNaN (arg)))
+                    throw new TypeError (sprintf('[sprintf] expecting number but found %s', typeof arg));
 
                 if (re.number.test (match[8]))
                     is_positive = arg >= 0;
@@ -197,10 +194,6 @@ var sprintf = (function sprintf_wrapper () {
     }
 
     // Helpers.
-
-    function get_type (variable) {
-        return Object.prototype.toString.call (variable).slice (8, -1).toLowerCase ();
-    }
 
     function str_repeat (input, multiplier) {
         return Array (multiplier + 1).join (input);
