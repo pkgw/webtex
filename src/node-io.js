@@ -1,4 +1,7 @@
-'use strict';
+// I/O backend for the Node.js version. **Everything is synchronous**, because
+// that's the only way I can figure out how to get the TeX engine to run
+// reliably. Trust me, I'm not happy about it either, but there really seems
+// to be no other way.
 
 function buffer_to_arraybuffer (buf) {
     var ab = new ArrayBuffer (buf.length);
@@ -43,6 +46,17 @@ function make_fs_linebuffer (path) {
 }
 
 
+function get_fs_json (path) {
+    var fs = require ('fs');
+
+    var jp = new JSONStreamParser ();
+    jp.onError = function (err) { throw err; };
+    jp.onValue = function (value) { jp._last_value = value; };
+    jp.write (fs.readFileSync (path, {encoding: 'utf-8'}));
+    return jp._last_value;
+}
+
+
 var RandomAccessFile = (function RandomAccessFile_closure () {
     var fs = require ('fs');
 
@@ -79,11 +93,13 @@ var RandomAccessFile = (function RandomAccessFile_closure () {
     return RandomAccessFile;
 }) ();
 
+webtex_export ('RandomAccessFile', RandomAccessFile);
+
 
 var FSIOLayer = (function FSIOLayer_closure () {
-    // This is needed for dump-format.js to gain access to the LaTeX patch files.
-    // We need them to generate latex.dump.json, and we can't generate the bundle
-    // Zip before we generate that.
+    // This is needed for dump-format.js to gain access to the LaTeX patch
+    // files. We need them to generate latex.dump.json, and we can't generate
+    // the bundle Zip before we generate that.
 
     var fs = require ('fs');
 
@@ -128,30 +144,17 @@ var FSIOLayer = (function FSIOLayer_closure () {
 webtex_export ('FSIOLayer', FSIOLayer);
 
 
-function get_fs_json (path) {
-    var fs = require ('fs');
-
-    var jp = new JSONStreamParser ();
-    jp.onError = function (err) { throw err; };
-    jp.onValue = function (value) { jp._last_value = value; };
-    jp.write (fs.readFileSync (path, {encoding: 'utf-8'}));
-    return jp._last_value;
-}
-
-
 var ConsoleDumpTarget = (function ConsoleDumpTarget_closure () {
-    var console = require ('console');
-
     function ConsoleDumpTarget () {}
 
     var proto = ConsoleDumpTarget.prototype;
 
     proto.process = function ConsoleDumpTarget_process (box) {
-	console.log ('==== shipped out: ====');
+	global_log ('==== shipped out: ====');
 	box.traverse (0, 0, function (x, y, item) {
-	    console.log ('x=' + x + ' y=' + y + ' ' + item);
+	    global_log ('x=' + x + ' y=' + y + ' ' + item);
 	});
-	console.log ('==== (end of shipout) ====');
+	global_log ('==== (end of shipout) ====');
     };
 
     return ConsoleDumpTarget;
