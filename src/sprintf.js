@@ -136,12 +136,6 @@ var sprintf = (function sprintf_wrapper () {
         return nodes;
     }
 
-    // Helpers.
-
-    function str_repeat (input, multiplier) {
-        return Array (multiplier + 1).join (input);
-    }
-
     return sprintf;
 }) ();
 
