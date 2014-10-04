@@ -58,6 +58,9 @@ onmessage = function webtex_worker_onmessage (event) {
     if (!data.hasOwnProperty ('_kind'))
 	throw new TexInternalError ('worker: don\'t know how to handle event ' + event);
 
+    if (typeof data._kind !== 'string')
+	throw new TexInternalError ('worker: don\'t know how to handle event ' + event);
+
     if (!workerApiEndpoints.hasOwnProperty (data._kind))
 	throw new TexInternalError ('worker: unrecognized API endpoint ' + data._kind);
 
