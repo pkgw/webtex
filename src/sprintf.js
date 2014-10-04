@@ -144,17 +144,16 @@ var sprintf = (function sprintf_wrapper () {
     sprintf.cache = {};
 
     sprintf.parse = function (fmt) {
-        var _fmt = fmt;
 	var match = [];
 	var nodes = [];
 	var arg_names = 0;
 
-        while (_fmt) {
-            if ((match = re.text.exec (_fmt)) !== null)
+        while (fmt) {
+            if ((match = re.text.exec (fmt)) !== null)
                 nodes.push (match[0]);
-            else if ((match = re.modulo.exec (_fmt)) !== null)
+            else if ((match = re.modulo.exec (fmt)) !== null)
                 nodes.push ('%');
-            else if ((match = re.placeholder.exec (_fmt)) !== null) {
+            else if ((match = re.placeholder.exec (fmt)) !== null) {
                 if (match[2]) {
                     arg_names |= 1;
                     var field_list = [];
@@ -187,7 +186,7 @@ var sprintf = (function sprintf_wrapper () {
             } else
                 throw new SyntaxError('[sprintf] unexpected placeholder');
 
-            _fmt = _fmt.substring (match[0].length);
+            fmt = fmt.substring (match[0].length);
         }
 
         return nodes;
