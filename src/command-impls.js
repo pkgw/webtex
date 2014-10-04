@@ -106,7 +106,7 @@ commands.expandafter = function cmd_expandafter (engine) {
 
     engine.trace ('*expandafter ' + tok1 + '|' + tok2 + ' ...');
 
-    var cmd2 = tok2.tocmd (engine);
+    var cmd2 = tok2.to_cmd (engine);
     if (cmd2.expandable)
 	cmd2.invoke (engine);
     else
@@ -193,7 +193,7 @@ commands._let = function cmd_let (engine) {
     }
 
     engine.trace ('let ' + cstok + ' = ' + equiv);
-    cstok.assign_cmd (engine, equiv.tocmd (engine));
+    cstok.assign_cmd (engine, equiv.to_cmd (engine));
 };
 
 
@@ -202,7 +202,7 @@ commands.futurelet = function cmd_futurelet (engine) {
     var thenexpand = engine.next_tok_throw ();
     var equiv = engine.next_tok_throw ();
     engine.trace ('futurelet ' + cstok + ' = ' + equiv + '; ' + thenexpand);
-    cstok.assign_cmd (engine, equiv.tocmd (engine));
+    cstok.assign_cmd (engine, equiv.to_cmd (engine));
     engine.push_toks ([thenexpand, equiv]);
 };
 
@@ -258,7 +258,7 @@ commands.toks = new VariableRegisterCommand ('toks', T_TOKLIST);
 
 commands.advance = function cmd_advance (engine) {
     var tok = engine.next_x_tok ();
-    var cmd = tok.tocmd (engine);
+    var cmd = tok.to_cmd (engine);
     var val = cmd.as_valref (engine); // might eat tokens
     engine.scan_keyword ('by');
     var cur = val.get (engine);
@@ -270,7 +270,7 @@ commands.advance = function cmd_advance (engine) {
 
 commands.divide = function cmd_divide (engine) {
     var tok = engine.next_x_tok ();
-    var cmd = tok.tocmd (engine);
+    var cmd = tok.to_cmd (engine);
     var val = cmd.as_valref (engine); // might eat tokens
     engine.scan_keyword ('by');
     var cur = val.get (engine);
@@ -282,7 +282,7 @@ commands.divide = function cmd_divide (engine) {
 
 commands.multiply = function cmd_multiply (engine) {
     var tok = engine.next_x_tok ();
-    var cmd = tok.tocmd (engine);
+    var cmd = tok.to_cmd (engine);
     var val = cmd.as_valref (engine); // might eat tokens
     engine.scan_keyword ('by');
     var cur = val.get (engine);
@@ -454,7 +454,7 @@ function _cmd_def (engine, cname, expand_replacement) {
 	    } else if (tok.isexpandable (engine)) {
 		if (tok.iscmd (engine, 'the')) {
 		    var next = engine.next_tok_throw ();
-		    var ncmd = next.tocmd (engine);
+		    var ncmd = next.to_cmd (engine);
 
 		    if (ncmd.get_valtype () == T_TOKLIST) {
 			var nv = ncmd.as_valref (engine);
@@ -465,7 +465,7 @@ function _cmd_def (engine, cname, expand_replacement) {
 		    }
 		}
 
-		tok.tocmd (engine).invoke (engine);
+		tok.to_cmd (engine).invoke (engine);
 		continue;
 	    }
 	}
@@ -557,7 +557,7 @@ commands._if = function cmd_if (engine) {
 	if (tok.ischar ())
 	    return tok.catcode * 1000 + tok.ord;
 	if (tok.iscslike ()) { // active chars will be caught by above
-	    var cmd = tok.tocmd (engine);
+	    var cmd = tok.to_cmd (engine);
 	    if (cmd instanceof GivenCharCommand)
 		throw new TexInternalError ('not implemented');
 	    return 16 * 1000 + 256;
@@ -582,7 +582,7 @@ commands.ifcat = function cmd_ifcat (engine) {
 	if (tok.ischar ())
 	    return tok.catcode;
 	if (tok.iscslike ()) { // active chars will be caught by above
-	    var cmd = tok.tocmd (engine);
+	    var cmd = tok.to_cmd (engine);
 	    if (cmd instanceof GivenCharCommand)
 		throw new TexInternalError ('not implemented');
 	    return 16;
@@ -598,7 +598,7 @@ commands.ifcat = function cmd_ifcat (engine) {
 
 commands.ifx = function cmd_ifx (engine) {
     var t1 = engine.next_tok_throw (), t2 = engine.next_tok_throw (), result;
-    var cmd1 = t1.tocmd (engine), cmd2 = t2.tocmd (engine);
+    var cmd1 = t1.to_cmd (engine), cmd2 = t2.to_cmd (engine);
     result = cmd1.samecmd (cmd2);
     engine.trace ('ifx ' + t1 + ' ~ ' + t2 + ' => ' + result);
     engine.handle_if (result);
@@ -1641,7 +1641,7 @@ commands.fontdimen = (function FontDimenCommand_closure () {
     proto.invoke = function FontDimenCommand_invoke (engine) {
 	var num = engine.scan_int ().value;
 	var tok = engine.next_tok_throw ();
-	var val = tok.tocmd (engine).as_valref (engine);
+	var val = tok.to_cmd (engine).as_valref (engine);
 
 	if (val.valtype != T_FONT)
 	    throw new TexRuntimeError ('expected \\fontdimen to be followed ' +
@@ -1662,7 +1662,7 @@ commands.fontdimen = (function FontDimenCommand_closure () {
     proto.as_valref = function FontDimenCommand_as_valref (engine) {
 	var num = engine.scan_int ().value;
 	var tok = engine.next_tok_throw ();
-	var font = tok.tocmd (engine).as_valref (engine);
+	var font = tok.to_cmd (engine).as_valref (engine);
 
 	if (font.valtype != T_FONT)
 	    throw new TexRuntimeError ('expected \\fontdimen to be followed ' +
@@ -1680,7 +1680,7 @@ commands.fontdimen = (function FontDimenCommand_closure () {
 
 commands.skewchar = function cmd_skewchar (engine) {
     var tok = engine.next_tok_throw ();
-    var val = tok.tocmd (engine).as_valref (engine);
+    var val = tok.to_cmd (engine).as_valref (engine);
 
     if (val.valtype != T_FONT)
 	throw new TexRuntimeError ('expected \\skewchar to be followed by a font; ' +
@@ -1697,7 +1697,7 @@ commands.skewchar = function cmd_skewchar (engine) {
 
 commands.hyphenchar = function cmd_hyphenchar (engine) {
     var tok = engine.next_tok_throw ();
-    var val = tok.tocmd (engine).as_valref (engine);
+    var val = tok.to_cmd (engine).as_valref (engine);
 
     if (val.valtype != T_FONT)
 	throw new TexRuntimeError ('expected \\hyphenchar to be followed by a font; ' +
@@ -1992,7 +1992,7 @@ commands.the = function cmd_the (engine) {
      */
 
     var tok = engine.next_x_tok_throw ();
-    var val = tok.tocmd (engine).as_valref (engine);
+    var val = tok.to_cmd (engine).as_valref (engine);
     if (val == null)
 	throw new TexRuntimeError ('unable to get internal value (for ' +
 				   '\\the) from ' + tok);
@@ -2018,7 +2018,7 @@ commands.the = function cmd_the (engine) {
 
 commands.meaning = function cmd_meaning (engine) {
     var tok = engine.next_tok_throw ();
-    var expn = tok.tocmd (engine).texmeaning (engine);
+    var expn = tok.to_cmd (engine).texmeaning (engine);
     engine.trace (['meaning', tok, '->', expn].join (' '));
     engine.push_string (expn);
 };

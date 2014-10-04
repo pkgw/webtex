@@ -498,7 +498,7 @@ var MathShiftCommand = (function MathShiftCommand_closure () {
 	    engine.trace ('math shift: enter');
 
 	    var tok = engine.next_tok_throw ();
-	    if (tok.tocmd (engine) instanceof MathShiftCommand &&
+	    if (tok.to_cmd (engine) instanceof MathShiftCommand &&
 		(m == M_VERT || m == M_HORZ || m == M_DMATH)) { // XXX don't understand mode check; see T:TP
 		    engine.end_graf ();
 		engine.enter_math (M_DMATH, true);

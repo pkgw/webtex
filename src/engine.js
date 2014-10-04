@@ -613,7 +613,7 @@ var Engine = (function Engine_closure () {
 	}
 
 	try {
-	    var cmd = tok.tocmd (this);
+	    var cmd = tok.to_cmd (this);
 	    cmd.invoke (this);
 	} catch (e) {
 	    if (e === NeedMoreData) {
@@ -1275,7 +1275,7 @@ var Engine = (function Engine_closure () {
 	    this.align_state += 1;
 	} else if (tok.iscat (C_EGROUP)) {
 	    this.align_state -= 1;
-	} else if (tok.tocmd (this) instanceof AlignTabCommand ||
+	} else if (tok.to_cmd (this) instanceof AlignTabCommand ||
 		   tok.iscmd (this, 'span') ||
 		   tok.iscmd (this, 'cr') ||
 		   tok.iscmd (this, 'crcr')) {
@@ -1298,7 +1298,7 @@ var Engine = (function Engine_closure () {
 		}
 
 		this.align_state = 1000000;
-		astate.col_ender = tok.tocmd (this);
+		astate.col_ender = tok.to_cmd (this);
 		return this.next_tok ();
 	    }
 	}
@@ -1312,7 +1312,7 @@ var Engine = (function Engine_closure () {
 	    if (tok === NeedMoreData || tok === EOF)
 		return tok;
 
-	    var cmd = tok.tocmd (this);
+	    var cmd = tok.to_cmd (this);
 	    if (!cmd.expandable)
 		return tok;
 
@@ -1376,7 +1376,7 @@ var Engine = (function Engine_closure () {
 		continue;
 	    if (tok.iscmd (this, 'relax'))
 		continue;
-	    if (tok.tocmd (this) instanceof BeginGroupCommand)
+	    if (tok.to_cmd (this) instanceof BeginGroupCommand)
 		// We can't use iscmd() here because it calls samecmd(), which
 		// cares about the ordinal associated with the command,
 		// whereas here we don't. samecmd() needs to care about the
@@ -1475,7 +1475,7 @@ var Engine = (function Engine_closure () {
 	    throw new TexSyntaxError ('unhandled alpha number token ' + tok);
 	}
 
-	var v = tok.tocmd (this).as_int (this);
+	var v = tok.to_cmd (this).as_int (this);
 	if (v != null)
 	    return v.intproduct (negfactor);
 
@@ -1584,7 +1584,7 @@ var Engine = (function Engine_closure () {
 	var negfactor = t[0], tok = t[1], inf_order = 0, val = null,
 	    frac = 0, nonfrac = null;
 
-	var v = tok.tocmd (this).as_valref (this);
+	var v = tok.to_cmd (this).as_valref (this);
 	if (v != null) {
 	    v = v.get (this);
 
@@ -1655,7 +1655,7 @@ var Engine = (function Engine_closure () {
 	    throw new TexRuntimeError ('not implemented true-dimens');
 
 	tok = this.chomp_spaces ();
-	var val = tok.tocmd (this).as_scaled (this);
+	var val = tok.to_cmd (this).as_scaled (this);
 	var result = null;
 
 	if (val != null) {
@@ -1739,9 +1739,9 @@ var Engine = (function Engine_closure () {
 	// we get the valref instance, we may eat upcoming tokens that will
 	// then be needed when scan_dimen() also tries to examine the value
 	// type.
-	var cmd = tok.tocmd (this);
+	var cmd = tok.to_cmd (this);
 	if (cmd.get_valtype () == T_GLUE)
-	    return tok.tocmd (this).as_glue (this).intproduct (negfactor);
+	    return tok.to_cmd (this).as_glue (this).intproduct (negfactor);
 
 	var g = new Glue ();
 	this.push_back (tok);
@@ -1769,7 +1769,7 @@ var Engine = (function Engine_closure () {
 	if (tok === NeedMoreData || tok === EOF)
 	    throw tok;
 
-	var cmd = tok.tocmd (this);
+	var cmd = tok.to_cmd (this);
 	if (cmd.get_valtype () == T_TOKLIST)
 	    return cmd.as_valref (this).get (this);
 
@@ -1782,7 +1782,7 @@ var Engine = (function Engine_closure () {
 
     proto.scan_font_value = function Engine_scan_font_value () {
 	var tok = this.next_x_tok_throw ();
-	var val = tok.tocmd (this).as_valref (this);
+	var val = tok.to_cmd (this).as_valref (this);
 	if (val == null || val.valtype != T_FONT)
 	    throw new TexRuntimeError ('expected a font value, but got ' + tok);
 	return val.get (this);
@@ -2104,7 +2104,7 @@ var Engine = (function Engine_closure () {
 	// TODO: deal with leader_flag and hrule stuff; should accept:
 	// \box, \copy, \lastbox, \vsplit, \hbox, \vbox, \vtop
 
-	var cmd = tok.tocmd (this);
+	var cmd = tok.to_cmd (this);
 	if (!cmd.boxlike)
 	    throw new TexRuntimeError ('expected boxlike command but got ' + tok);
 
@@ -2301,7 +2301,7 @@ var Engine = (function Engine_closure () {
 	    while (true) {
 		// T:TP 783
 		tok = alignlib.get_preamble_token (this);
-		var cmd = tok.tocmd (this);
+		var cmd = tok.to_cmd (this);
 
 		if (cmd instanceof MacroParameterCommand)
 		    break;
@@ -2333,7 +2333,7 @@ var Engine = (function Engine_closure () {
 	    while (true) {
 		// T:TP 783
 		tok = alignlib.get_preamble_token (this);
-		var cmd = tok.tocmd (this);
+		var cmd = tok.to_cmd (this);
 
 		if (cmd instanceof AlignTabCommand ||
 		    cmd.samecmd (this.commands['cr']) ||
@@ -2378,7 +2378,7 @@ var Engine = (function Engine_closure () {
 		    // TODO: clear \parshape info, which nests in the EqTb.
 		}
 		return;
-	    } else if (tok.tocmd (this) instanceof EndGroupCommand) {
+	    } else if (tok.to_cmd (this) instanceof EndGroupCommand) {
 		this.finish_align ();
 		return;
 	    } else if (tok.iscmd (this, 'crcr')) {

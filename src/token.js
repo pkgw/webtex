@@ -96,7 +96,7 @@ var Token = (function Token_closure () {
     };
 
 
-    proto.tocmd = function Token_tocmd (engine) {
+    proto.to_cmd = function Token_to_cmd (engine) {
 	var cmd = null, name = '<unexpected token command>';
 
 	if (this.kind == TK_CHAR) {
@@ -235,7 +235,7 @@ var Token = (function Token_closure () {
 
 
     proto.iscmd = function Token_iscmd (engine, cmdname) {
-	return this.tocmd (engine).samecmd (engine.commands[cmdname]);
+	return this.to_cmd (engine).samecmd (engine.commands[cmdname]);
     };
 
 
@@ -255,12 +255,12 @@ var Token = (function Token_closure () {
 
 
     proto.isexpandable = function Token_isexpandable (engine) {
-	return this.tocmd (engine).expandable;
+	return this.to_cmd (engine).expandable;
     };
 
 
     proto.isconditional = function Token_isconditional (engine) {
-	return this.tocmd (engine).conditional;
+	return this.to_cmd (engine).conditional;
     };
 
 

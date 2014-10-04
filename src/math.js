@@ -330,7 +330,7 @@ var mathlib = (function mathlib_closure () {
 		break;
 	}
 
-	var cmd = tok.tocmd (engine);
+	var cmd = tok.to_cmd (engine);
 	var c = null;
 	var check_active = false;
 
@@ -400,7 +400,7 @@ var mathlib = (function mathlib_closure () {
 		    break;
 	    }
 
-	    var cmd = tok.tocmd (engine);
+	    var cmd = tok.to_cmd (engine);
 	    if (cmd instanceof InsertLetterCommand ||
 		cmd instanceof InsertOtherCommand)
 		val = engine.get_code (CT_DELIM, cmd.ord);

@@ -48,7 +48,7 @@ var alignlib = (function alignlib_closure () {
 		// - TeXBook p. 238.
 		tok = engine.next_tok ();
 
-		var cmd = tok.tocmd (engine);
+		var cmd = tok.to_cmd (engine);
 		if (cmd.expandable) {
 		    // I guess \noexpand makes no sense here, but who knows?
 		    if (cmd.samecmd (engine.commands['noexpand'])) {
