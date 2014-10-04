@@ -10,12 +10,12 @@ sharedjs = \
   src/inflate.js \
   src/jsonparse.js \
   src/constants.js \
+  src/str-utils.js \
   src/values.js \
   src/boxes.js \
   src/math.js \
   src/align.js \
   src/valrefs.js \
-  src/util.js \
   src/token.js \
   src/linebuffer.js \
   src/ordsource.js \
