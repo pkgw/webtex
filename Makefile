@@ -9,6 +9,7 @@ default: all
 
 sharedjs = \
   src/preamble.js \
+  src/sprintf.js \
   src/inflate.js \
   src/jsonparse.js \
   src/constants.js \
