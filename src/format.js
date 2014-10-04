@@ -53,6 +53,7 @@ var format = (function format_wrapper () {
     var placeholder_re = /^\x25(.)/;
 
     // Indices into matches for the placeholder_re:
+    var WHOLE_MATCH = 0; // this is true for any regex
     var SPECIFIER = 1;
 
     function format () {
@@ -132,7 +133,7 @@ var format = (function format_wrapper () {
 	    var match;
 
             if ((match = text_re.exec (fmt)) !== null)
-                nodes.push (match[0]);
+                nodes.push (match[WHOLE_MATCH]);
             else if ((match = doublepercent_re.exec (fmt)) !== null)
                 nodes.push ('%');
             else if ((match = placeholder_re.exec (fmt)) !== null)
@@ -141,7 +142,7 @@ var format = (function format_wrapper () {
 		// I think this only happens with a trailing percent sign, now.
                 throw new SyntaxError ('unexpected format placeholder');
 
-            fmt = fmt.substring (match[0].length);
+            fmt = fmt.substring (match[WHOLE_MATCH].length);
         }
 
         return nodes;
