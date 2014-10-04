@@ -137,7 +137,7 @@ commands.csname = function cmd_csname (engine) {
 	var tok = engine.next_x_tok ();
 	if (tok == null)
 	    throw new TexSyntaxError ('EOF in \\csname');
-	if (tok.iscmd (engine, 'endcsname'))
+	if (tok.is_cmd (engine, 'endcsname'))
 	    break;
 	if (!tok.is_char ())
 	    throw new TexRuntimeError ('only character tokens should occur ' +
@@ -449,10 +449,10 @@ function _cmd_def (engine, cname, expand_replacement) {
 	if (expand_replacement) {
 	    // We can't just use next_x_tok because \the{toklist} is
 	    // not supposed to be sub-expanded (TeXBook p. 216). Yargh.
-	    if (tok.iscmd (engine, 'noexpand')) {
+	    if (tok.is_cmd (engine, 'noexpand')) {
 		tok = engine.next_tok_throw ();
 	    } else if (tok.isexpandable (engine)) {
-		if (tok.iscmd (engine, 'the')) {
+		if (tok.is_cmd (engine, 'the')) {
 		    var next = engine.next_tok_throw ();
 		    var ncmd = next.to_cmd (engine);
 

@@ -234,7 +234,7 @@ var Token = (function Token_closure () {
     };
 
 
-    proto.iscmd = function Token_iscmd (engine, cmdname) {
+    proto.is_cmd = function Token_is_cmd (engine, cmdname) {
 	return this.to_cmd (engine).samecmd (engine.commands[cmdname]);
     };
 

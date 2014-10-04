@@ -1276,9 +1276,9 @@ var Engine = (function Engine_closure () {
 	} else if (tok.is_cat (C_EGROUP)) {
 	    this.align_state -= 1;
 	} else if (tok.to_cmd (this) instanceof AlignTabCommand ||
-		   tok.iscmd (this, 'span') ||
-		   tok.iscmd (this, 'cr') ||
-		   tok.iscmd (this, 'crcr')) {
+		   tok.is_cmd (this, 'span') ||
+		   tok.is_cmd (this, 'cr') ||
+		   tok.is_cmd (this, 'crcr')) {
 	    this.trace ('next_tok aligney: ' + tok + ' as=' + this.align_state);
 
 	    if (this.align_state == 0) {
@@ -1374,10 +1374,10 @@ var Engine = (function Engine_closure () {
 		throw new TexSyntaxError ('EOF when expected left brace');
 	    if (tok.is_space (this))
 		continue;
-	    if (tok.iscmd (this, 'relax'))
+	    if (tok.is_cmd (this, 'relax'))
 		continue;
 	    if (tok.to_cmd (this) instanceof BeginGroupCommand)
-		// We can't use iscmd() here because it calls samecmd(), which
+		// We can't use is_cmd() here because it calls samecmd(), which
 		// cares about the ordinal associated with the command,
 		// whereas here we don't. samecmd() needs to care about the
 		// ordinal for \ifx to work as desired.
@@ -1919,7 +1919,7 @@ var Engine = (function Engine_closure () {
 	    while (true) {
 		var tok = this.next_tok_throw ();
 
-		if (tok.iscmd (this, 'fi')) {
+		if (tok.is_cmd (this, 'fi')) {
 		    if (depth > 0)
 			depth -= 1;
 		    else
@@ -1992,21 +1992,21 @@ var Engine = (function Engine_closure () {
 	while (true) {
 	    var tok = this.next_tok_throw ();
 
-	    if (tok.iscmd (this, 'else')) {
+	    if (tok.is_cmd (this, 'else')) {
 		if (depth == 0) {
 		    if (mode == CS_FI)
 			throw new TexSyntaxError ('unexpected \\else');
 		    this.trace ('... skipped conditional ... ' + tok);
 		    return 'else';
 		}
-	    } else if (tok.iscmd (this, 'fi')) {
+	    } else if (tok.is_cmd (this, 'fi')) {
 		if (depth > 0)
 		    depth -= 1;
 		else {
 		    this.trace ('... skipped conditional ... ' + tok);
 		    return 'fi';
 		}
-	    } else if (tok.iscmd (this, 'or')) {
+	    } else if (tok.is_cmd (this, 'or')) {
 		if (depth == 0) {
 		    if (mode != CS_OR_ELSE_FI)
 			throw new TexSyntaxError ('unexpected \\or');
@@ -2097,7 +2097,7 @@ var Engine = (function Engine_closure () {
 
 	while (true) {
 	    tok = this.next_x_tok_throw ();
-	    if (!tok.is_space (this) && !tok.iscmd (this, 'relax'))
+	    if (!tok.is_space (this) && !tok.is_cmd (this, 'relax'))
 		break;
 	}
 
@@ -2293,7 +2293,7 @@ var Engine = (function Engine_closure () {
 	while (true) {
 	    astate.tabskips.push (this.get_parameter (T_GLUE, 'tabskip').clone ());
 
-	    if (tok != null && (tok.iscmd (this, 'cr') || tok.iscmd (this, 'crcr')))
+	    if (tok != null && (tok.is_cmd (this, 'cr') || tok.is_cmd (this, 'crcr')))
 		break;
 
 	    var col = new AlignColumn ();
@@ -2362,7 +2362,7 @@ var Engine = (function Engine_closure () {
 
 	    var tok = this.chomp_spaces ();
 
-	    if (tok.iscmd (this, 'noalign')) {
+	    if (tok.is_cmd (this, 'noalign')) {
 		this.scan_left_brace ();
 		this.enter_group ('noalign', function (eng) {
 		    // TTP 1133
@@ -2381,7 +2381,7 @@ var Engine = (function Engine_closure () {
 	    } else if (tok.to_cmd (this) instanceof EndGroupCommand) {
 		this.finish_align ();
 		return;
-	    } else if (tok.iscmd (this, 'crcr')) {
+	    } else if (tok.is_cmd (this, 'crcr')) {
 		continue; // \crcr after \cr ; -> ignore it
 	    } else {
 		this.align_begin_row ();
@@ -2434,7 +2434,7 @@ var Engine = (function Engine_closure () {
     proto.align_begin_col = function Engine_align_begin_col (tok) {
 	this.trace ('align: begin col');
 
-	if (tok.iscmd (this, 'omit')) {
+	if (tok.is_cmd (this, 'omit')) {
 	    this.align_state = 0;
 	    this.col_is_omit = true;
 	} else {

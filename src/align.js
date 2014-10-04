@@ -42,7 +42,7 @@ var alignlib = (function alignlib_closure () {
 	while (true) {
 	    var tok = engine.next_tok ();
 
-	    while (tok.iscmd (engine, 'span')) {
+	    while (tok.is_cmd (engine, 'span')) {
 		// "When \span appears in a preamble, it causes the next token
 		// to be expanded, i.e., 'ex-span-ded,' before TEX reads on."
 		// - TeXBook p. 238.
@@ -61,9 +61,9 @@ var alignlib = (function alignlib_closure () {
 		}
 	    }
 
-	    // XXX: if iscmd ('endv') complain about interwoven preambles
+	    // XXX: if is_cmd ('endv') complain about interwoven preambles
 
-	    if (!tok.iscmd (engine, 'tabskip'))
+	    if (!tok.is_cmd (engine, 'tabskip'))
 		return tok;
 
 	    engine.scan_optional_equals ();

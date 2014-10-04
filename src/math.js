@@ -326,7 +326,7 @@ var mathlib = (function mathlib_closure () {
 
 	while (true) {
 	    tok = engine.next_x_tok_throw ();
-	    if (!tok.is_space (engine) && !tok.iscmd (engine, 'relax'))
+	    if (!tok.is_space (engine) && !tok.is_cmd (engine, 'relax'))
 		break;
 	}
 
@@ -396,7 +396,7 @@ var mathlib = (function mathlib_closure () {
 
 	    while (true) {
 		tok = this.next_x_tok_throw ();
-		if (!tok.is_space (this) && !tok.iscmd (this, 'relax'))
+		if (!tok.is_space (this) && !tok.is_cmd (this, 'relax'))
 		    break;
 	    }
 
