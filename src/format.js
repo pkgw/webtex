@@ -13,6 +13,7 @@
 // %j - JSON stringification of object
 // %o - toString() stringification object
 // %s - raw string
+// %T - TeX token list; either array or Toklist object
 // %x - hexadecimal number (rendered with leading "0x")
 //
 // (The special-case of one argument matters if that argument is an arbitrary
@@ -110,6 +111,13 @@ var format = (function format_wrapper () {
 			throw new Error ('format %s expected string but got ' + arg);
 		    // Nothing to do.
                     break;
+		case 'T':
+		    if (arg instanceof Array)
+			arg = new Toklist (arg);
+		    if (!(arg instanceof Toklist))
+			throw new Error ('format %T expected Toklist but got ' + arg);
+		    arg = arg.as_serializable ();
+		    break;
                 case 'x':
 		    if (typeof arg !== 'number')
 			throw new Error ('format %x expected number but got ' + arg);
