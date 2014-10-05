@@ -10,16 +10,16 @@ commands.par = function cmd_par (engine) {
 
     if (m == M_VERT || m == M_IVERT) {
 	// T:TP 1070
-	engine.trace ('par: vertical -> reset params');
+	engine.Ntrace ('par: vertical -> reset params');
 	engine.set_parameter (T_INT, 'looseness', 0);
 	engine.set_parameter (T_DIMEN, 'hangindent', new Dimen ());
 	engine.set_parameter (T_INT, 'hangafter', 1);
 	// TODO: clear \parshape info, which nests in the EqTb.
     } else if (m == M_RHORZ) {
-	engine.trace ('par: rhorz -> noop');
+	engine.Ntrace ('par: rhorz -> noop');
     } else if (m == M_HORZ) {
 	// TeXBook p. 286:
-	engine.trace ('par: horz -> endgraf');
+	engine.Ntrace ('par: horz -> endgraf');
 	engine.end_graf ();
     } else {
 	throw new TexRuntimeError ('illegal use of \\par in math mode');
@@ -39,7 +39,7 @@ commands.noindent = function cmd_noindent (engine) {
 commands._space_ = function cmd__space_ (engine) {
     // A control-space command appends glue to the current list, using the
     // same amount that a <space token> inserts when the space factor is 1000.
-    engine.trace ('" " (explicit space) fake dimen');
+    engine.Ntrace ('" " (explicit space) fake dimen');
 
     var ss = engine.get_parameter (T_GLUE, 'spaceskip');
     if (ss.is_nonzero ()) {
@@ -61,12 +61,12 @@ commands._fslash_ = function cmd__fslash_ (engine) {
     case M_VERT: case M_IVERT:
 	throw new TexRuntimeError ('cannot use \\/ in vertical mode');
     case M_MATH: M_DMATH:
-	engine.trace ('italic correction: math');
+	engine.Ntrace ('italic correction: math');
 	engine.push (new Kern (new Dimen ()));
 	break;
     case M_HORZ: M_RHORZ:
 	// XXX: ignoring ligatures
-	engine.trace ('italic correction: text');
+	engine.Ntrace ('italic correction: text');
 	var last = engine.get_last_listable ();
 	if (last instanceof Character) {
 	    var k = new Kern (Dimen.new_scaled (last.font.italic_correction (last.ord)))
@@ -80,20 +80,20 @@ commands._fslash_ = function cmd__fslash_ (engine) {
 
 commands._char = function cmd__char (engine) {
     var ord = engine.scan_char_code ();
-    engine.trace ('char ' + ord);
+    engine.Ntrace ('char %C', ord);
     engine.push (Token.new_cmd (new GivenCharCommand (ord)));
 };
 
 commands.mathchar = function cmd_mathchar (engine) {
     var ord = engine.scan_int_15bit ();
-    engine.trace ('mathchar 0x' + ord.toString (16));
+    engine.Ntrace ('mathchar %x', ord);
     engine.push (Token.new_cmd (new GivenMathcharCommand (ord)));
 };
 
 // Language infrastructure
 
 commands.relax = function cmd_relax (engine) {
-    engine.trace ('relax');
+    engine.Ntrace ('relax');
 };
 
 
@@ -104,7 +104,7 @@ commands.expandafter = function cmd_expandafter (engine) {
     var tok1 = engine.next_tok_throw ();
     var tok2 = engine.next_tok_throw ();
 
-    engine.trace ('*expandafter ' + tok1 + '|' + tok2 + ' ...');
+    engine.Ntrace ('*expandafter %o|%o ...', tok1, tok2);
 
     var cmd2 = tok2.to_cmd (engine);
     if (cmd2.expandable)
@@ -147,7 +147,7 @@ commands.csname = function cmd_csname (engine) {
     }
 
     var tok = Token.new_cseq (csname);
-    engine.trace ('* \\csname...\\endcsname -> ' + tok);
+    engine.Ntrace ('* \\csname...\\endcsname -> %o', tok);
     engine.push (tok);
 
     var cmd = engine.get_cseq (csname);
@@ -157,18 +157,18 @@ commands.csname = function cmd_csname (engine) {
 
 
 commands.global = function cmd_global (engine) {
-    engine.trace ('global');
+    engine.Ntrace ('global');
     engine.set_global_assign_mode ();
 };
 
 
 commands.outer = function cmd_outer (engine) {
-    engine.trace ('outer'); // I think it's OK to make this a noop.
+    engine.Ntrace ('outer'); // I think it's OK to make this a noop.
 };
 
 
 commands._long = function cmd_long (engine) {
-    engine.trace ('long'); // I think it's OK to make this a noop.
+    engine.Ntrace ('long'); // I think it's OK to make this a noop.
 };
 
 
@@ -192,7 +192,7 @@ commands._let = function cmd_let (engine) {
 	break;
     }
 
-    engine.trace ('let ' + cstok + ' = ' + equiv);
+    engine.Ntrace ('let %o = %o', cstok, equiv);
     cstok.assign_cmd (engine, equiv.to_cmd (engine));
 };
 
@@ -201,7 +201,7 @@ commands.futurelet = function cmd_futurelet (engine) {
     var cstok = engine.scan_r_token ();
     var thenexpand = engine.next_tok_throw ();
     var equiv = engine.next_tok_throw ();
-    engine.trace ('futurelet ' + cstok + ' = ' + equiv + '; ' + thenexpand);
+    engine.Ntrace ('futurelet %o = %o; %o', cstok, equiv, thenexpand);
     cstok.assign_cmd (engine, equiv.to_cmd (engine));
     engine.push_toks ([thenexpand, equiv]);
 };
@@ -209,7 +209,7 @@ commands.futurelet = function cmd_futurelet (engine) {
 
 commands.string = function cmd_string (engine) {
     var tok = engine.next_tok_throw ();
-    engine.trace ('* \\string ' + tok);
+    engine.Ntrace ('* \\string %o', tok);
 
     if (tok.is_char ()) {
 	engine.push_string (String.fromCharCode (tok.ord));
@@ -229,7 +229,7 @@ commands.string = function cmd_string (engine) {
 
 commands.number = function cmd_number (engine) {
     var val = engine.scan_int ().value;
-    engine.trace ('* number ' + val);
+    engine.Ntrace ('* number %o', val);
     engine.push_string ('' + val);
 };
 
@@ -237,13 +237,13 @@ commands.number = function cmd_number (engine) {
 commands.afterassignment = function cmd_afterassignment (engine) {
     var tok = engine.next_tok_throw ();
     engine.set_after_assign_token (tok);
-    engine.trace ('afterassignment <- ' + tok);
+    engine.Ntrace ('afterassignment <- %o', tok);
 };
 
 
 commands.aftergroup = function cmd_aftergroup (engine) {
     var tok = engine.next_tok_throw ();
-    engine.trace ('aftergroup <- ' + tok);
+    engine.Ntrace ('aftergroup <- %o', tok);
     engine.handle_aftergroup (tok);
 };
 
@@ -263,7 +263,7 @@ commands.advance = function cmd_advance (engine) {
     engine.scan_keyword ('by');
     var cur = val.get (engine);
     var delta = engine.scan_valtype (val.valtype);
-    engine.trace ('advance ' + cmd + ' = ' + cur + ' + ' + delta);
+    engine.Ntrace ('advance %o = %o + %o', cmd, cur, delta);
     val.set (engine, cur.advance (delta));
 };
 
@@ -275,7 +275,7 @@ commands.divide = function cmd_divide (engine) {
     engine.scan_keyword ('by');
     var cur = val.get (engine);
     var denom = engine.scan_int ();
-    engine.trace ('divide ' + cmd + ' = ' + cur + ' / ' + denom);
+    engine.Ntrace ('divide %o = %o / %o', cmd, cur, denom);
     val.set (engine, cur.intdivide (denom));
 };
 
@@ -287,7 +287,7 @@ commands.multiply = function cmd_multiply (engine) {
     engine.scan_keyword ('by');
     var cur = val.get (engine);
     var factor = engine.scan_int ();
-    engine.trace ('multiply ' + cmd + ' = ' + cur + ' * ' + factor);
+    engine.Ntrace ('multiply %o = %o * %o', cmd, cur, factor);
     val.set (engine, cur.intproduct (factor));
 };
 
@@ -296,7 +296,7 @@ function define_register (name, valtype, engine) {
     var cstok = engine.scan_r_token ();
     engine.scan_optional_equals ();
     var reg = engine.scan_register_num ();
-    engine.trace (name + 'def ' + cstok + ' -> {\\' + name + ' ' + reg + '}');
+    engine.Ntrace ('%sdef %o -> {\\%s%d}', name, cstok, name, reg);
     cstok.assign_cmd (engine, new GivenRegisterCommand (valtype, name, reg));
 };
 
@@ -343,8 +343,7 @@ var CharCodeCommand = (function CharCodeCommand_closure () {
 	    throw new TexRuntimeException ('illegal value ' + code +
 					   ' for ' + ct_names[this.codetype]);
 
-	engine.trace (ct_names[this.codetype] + ' ' + escchr (ord) + '=' +
-		      ord + ' -> ' + code);
+	engine.Ntrace ('%s %C=%x -> %x', ct_names[this.codetype], ord, ord, code);
 	engine.set_code (this.codetype, ord, code);
     };
 
@@ -374,8 +373,7 @@ commands.chardef = function cmd_chardef (engine) {
     var cstok = engine.scan_r_token ();
     engine.scan_optional_equals ();
     var ord = engine.scan_char_code ();
-    engine.trace ('chardef ' + cstok + ' -> {inschar ' + escchr (ord) +
-		  '=' + ord + '}');
+    engine.Ntrace ('chardef %o -> {inschar %C=%x}', cstok, ord, ord);
     cstok.assign_cmd (engine, new GivenCharCommand (ord));
 };
 
@@ -387,7 +385,7 @@ commands.mathchardef = function cmd_mathchardef (engine) {
     if (val < 0 || val > 0x8000)
 	throw new TexRuntimeError ('need mathcode in [0,0x8000] but ' +
 				   'got ' + val);
-    engine.trace ('mathchardef ' + cstok + ' -> {insmathchar ' + val + '}');
+    engine.Ntrace ('mathchardef %o -> {insmathchar %x}', cstok, val);
     cstok.assign_cmd (engine, new GivenMathcharCommand (val));
 };
 
@@ -508,8 +506,7 @@ function _cmd_def (engine, cname, expand_replacement) {
     if (end_with_lbrace)
 	repl_toks.push (tmpl_toks[tmpl_toks.length - 1]);
 
-    engine.trace ([cname, cstok, '~', new Toklist (tmpl_toks),
-		   '->', new Toklist (repl_toks)].join (' '));
+    engine.Ntrace ('%s %o: %T -> %T', cname, cstok, tmpl_toks, repl_toks);
     cstok.assign_cmd (engine, new MacroCommand (cstok, tmpl_toks, repl_toks));
 }
 
@@ -566,7 +563,7 @@ commands._if = function cmd_if (engine) {
     }
 
     var result = (key (t1) == key (t2));
-    engine.trace ('if ' + t1 + ' ~ ' + t2 + ' => ' + result);
+    engine.Ntrace ('if %o ~ %o => %b', t1, t2, result);
     engine.handle_if (result);
 };
 
@@ -591,7 +588,7 @@ commands.ifcat = function cmd_ifcat (engine) {
     }
 
     var result = (key (t1) == key (t2));
-    engine.trace ('ifcat ' + t1 + ' ~ ' + t2 + ' => ' + result);
+    engine.Ntrace ('ifcat %o ~ %o => %b', t1, t2, result);
     engine.handle_if (result);
 };
 
@@ -600,7 +597,7 @@ commands.ifx = function cmd_ifx (engine) {
     var t1 = engine.next_tok_throw (), t2 = engine.next_tok_throw (), result;
     var cmd1 = t1.to_cmd (engine), cmd2 = t2.to_cmd (engine);
     result = cmd1.same_cmd (cmd2);
-    engine.trace ('ifx ' + t1 + ' ~ ' + t2 + ' => ' + result);
+    engine.Ntrace ('ifx %o ~ %o => %b', t1, t2, result);
     engine.handle_if (result);
 };
 
@@ -631,7 +628,7 @@ commands.ifnum = function cmd_ifnum (engine) {
     else
 	throw new TexSyntaxError ('expected <,=,> in \\ifnum but got ' + tok);
 
-    engine.trace (['ifnum', val1, tok, val2, '?', result].join (' '));
+    engine.Ntrace ('ifnum %d %o %d => %b', val1, tok, val2, result);
     engine.handle_if (result);
 };
 
@@ -641,7 +638,7 @@ commands.ifodd = function cmd_ifodd (engine) {
     var val = engine.scan_int ().value;
     engine.done_parsing_if_condition ();
     var result = (val % 2 == 1);
-    engine.trace ('ifodd ' + val + '?');
+    engine.Ntrace ('ifodd %d => %b', val, result);
     engine.handle_if (result);
 };
 
@@ -670,19 +667,19 @@ commands.ifdim = function cmd_ifdim (engine) {
     else
 	throw new TexSyntaxError ('expected <,=,> in \\ifdim but got ' + tok);
 
-    engine.trace (['ifdim', val1, tok, val2, '?'].join (' '));
+    engine.Ntrace ('ifdim %o %o %o => %b', val1, tok, val2, result);
     engine.handle_if (result);
 };
 
 
 commands.iffalse = function cmd_iffalse (engine) {
-    engine.trace ('iffalse');
+    engine.Ntrace ('iffalse');
     engine.handle_if (false);
 };
 
 
 commands.iftrue = function cmd_iftrue (engine) {
-    engine.trace ('iftrue');
+    engine.Ntrace ('iftrue');
     engine.handle_if (true);
 };
 
@@ -691,7 +688,7 @@ commands.ifcase = function cmd_ifcase (engine) {
     engine.start_parsing_if_condition ();
     var val = engine.scan_int ().value;
     engine.done_parsing_if_condition ();
-    engine.trace ('ifcase ' + val);
+    engine.Ntrace ('ifcase %d', val);
     engine.handle_if_case (val);
 };
 
@@ -702,7 +699,7 @@ function _cmd_if_boxtype (engine, wanttype) {
     engine.done_parsing_if_condition ();
     var btype = engine.get_register (T_BOX, reg).btype;
     var result = (btype == wanttype);
-    engine.trace ('if' + bt_names[wanttype] + ' ' + bt_names[btype] + ' ? ' + result);
+    engine.Ntrace ('if%s %s => %b', bt_names[wanttype], bt_names[btype], result);
     engine.handle_if (result);
 };
 
@@ -720,37 +717,37 @@ commands.ifvbox = function cmd_ifvbox (engine) {
 
 
 commands._else = function cmd_else (engine) {
-    engine.trace ('else [non-eaten]');
+    engine.Ntrace ('else [non-eaten]');
     engine.handle_else ();
 };
 
 
 commands.or = function cmd_or (engine) {
-    engine.trace ('or [non-eaten]');
+    engine.Ntrace ('or [non-eaten]');
     engine.handle_or ();
 };
 
 
 commands.fi = function cmd_fi (engine) {
-    engine.trace ('fi [non-eaten]');
+    engine.Ntrace ('fi [non-eaten]');
     engine.handle_fi ();
 };
 
 
 commands.ifhmode = function cmd_ifhmode (engine) {
-    engine.trace ('ifhmode');
+    engine.Ntrace ('ifhmode');
     engine.handle_if (engine.mode () == M_HORZ || engine.mode () == M_RHORZ);
 };
 
 
 commands.ifvmode = function cmd_ifvmode (engine) {
-    engine.trace ('ifvmode');
+    engine.Ntrace ('ifvmode');
     engine.handle_if (engine.mode () == M_VERT || engine.mode () == M_IVERT);
 };
 
 
 commands.ifmmode = function cmd_ifmmode (engine) {
-    engine.trace ('ifmmode');
+    engine.Ntrace ('ifmmode');
     engine.handle_if (engine.mode () == M_MATH || engine.mode () == M_DMATH);
 };
 
@@ -765,7 +762,7 @@ commands.hbox = (function HboxCommand_closure () {
     proto.boxlike = true;
 
     proto.invoke = function HboxCommand_invoke (engine) {
-	engine.trace ('hbox (for accumulation)');
+	engine.Ntrace ('hbox (for accumulation)');
 	engine.scan_box_for_accum (this);
     };
 
@@ -785,7 +782,7 @@ commands.vbox = (function VboxCommand_closure () {
     proto.boxlike = true;
 
     proto.invoke = function VboxCommand_invoke (engine) {
-	engine.trace ('vbox (for accumulation)');
+	engine.Ntrace ('vbox (for accumulation)');
 	engine.scan_box_for_accum (this);
     };
 
@@ -805,7 +802,7 @@ commands.vtop = (function VtopCommand_closure () {
     proto.boxlike = true;
 
     proto.invoke = function VtopCommand_invoke (engine) {
-	engine.trace ('vtop (for accumulation)');
+	engine.Ntrace ('vtop (for accumulation)');
 	engine.scan_box_for_accum (this);
     };
 
@@ -831,7 +828,7 @@ commands.copy = (function CopyCommand_closure () {
     proto.start_box = function CopyCommand_start_box (engine) {
 	var reg = engine.scan_char_code ();
 	var box = engine.get_register (T_BOX, reg);
-	engine.trace ('copy box ' + reg);
+	engine.Ntrace ('copy box %d', reg);
 	engine.handle_finished_box (box.clone ());
     };
 
@@ -853,7 +850,7 @@ commands.box = (function BoxCommand_closure () {
     proto.start_box = function BoxCommand_start_box (engine) {
 	var reg = engine.scan_char_code ();
 	var box = engine.get_register (T_BOX, reg);
-	engine.trace ('fetch box ' + reg);
+	engine.Ntrace ('fetch box %d', reg);
 	engine.set_register (T_BOX, reg, new VoidBox ());
 	engine.handle_finished_box (box);
     };
@@ -881,7 +878,7 @@ commands.vsplit = (function VsplitCommand_closure () {
 	    throw new TexRuntimeError ('expected keyword "to"');
 
 	var depth = engine.scan_dimen (false, false);
-	engine.trace ('vsplit box ' + reg + ' to ' + depth + ' [fake impl]');
+	engine.Ntrace ('vsplit box %d to %o [fake impl]', reg, depth);
 
 	// TODO: use splitmaxdepth, splittopskip, etc. See TeXBook p. 124, T:TP~977.
 
@@ -950,9 +947,9 @@ commands.wd = (function WdCommand_closure () {
 	var box = engine.get_register (T_BOX, reg);
 
 	if (box.btype == BT_VOID) {
-	    engine.trace ('\\wd' + reg + ' = ' + width + ' -- noop on void box');
+	    engine.Ntrace ('\\wd%d = %o -- noop on void box', reg, width);
 	} else {
-	    engine.trace ('\\wd' + reg + ' = ' + width);
+	    engine.Ntrace ('\\wd%d = %o', reg, width);
 	    box.width = width;
 	}
     };
@@ -986,9 +983,9 @@ commands.ht = (function HtCommand_closure () {
 	var box = engine.get_register (T_BOX, reg);
 
 	if (box.btype == BT_VOID) {
-	    engine.trace ('\\ht' + reg + ' = ' + height + ' -- noop on void box');
+	    engine.Ntrace ('\\ht%d = %o -- noop on void box', reg, height);
 	} else {
-	    engine.trace ('\\ht' + reg + ' = ' + height);
+	    engine.Ntrace ('\\ht%d = %o', reg, height);
 	    box.height = height;
 	}
     };
@@ -1022,9 +1019,9 @@ commands.dp = (function DpCommand_closure () {
 	var box = engine.get_register (T_BOX, reg);
 
 	if (box.btype == BT_VOID) {
-	    engine.trace ('\\dp' + reg + ' = ' + depth + ' -- noop on void box');
+	    engine.Ntrace ('\\dp%d = %o -- noop on void box', reg, depth);
 	} else {
-	    engine.trace ('\\dp' + reg + ' = ' + depth);
+	    engine.Ntrace ('\\dp%d = %o', reg, depth);
 	    box.depth = depth;
 	}
     };
@@ -1046,7 +1043,7 @@ commands.dp = (function DpCommand_closure () {
 commands.setbox = function cmd_setbox (engine) {
     var reg = engine.scan_char_code ();
     engine.scan_optional_equals ();
-    engine.trace ('setbox: queue #' + reg + ' = ...');
+    engine.Ntrace ('setbox: queue #%d = ...', reg);
     engine.handle_setbox (reg);
 };
 
@@ -1070,7 +1067,7 @@ commands.hrule = function cmd_hrule (engine) {
 	    break;
     }
 
-    engine.trace ('hrule ' + rule);
+    engine.Ntrace ('hrule %o', rule);
     engine.accum (rule);
 };
 
@@ -1093,7 +1090,7 @@ commands.vrule = function cmd_vrule (engine) {
 	    break;
     }
 
-    engine.trace ('vrule ' + rule);
+    engine.Ntrace ('vrule %o', rule);
     engine.accum (rule);
 };
 
@@ -1106,14 +1103,14 @@ commands.unhbox = function cmd_unhbox (engine) {
     var box = engine.get_register (T_BOX, reg);
 
     if (box.btype == BT_VOID) {
-	engine.trace ('unhbox ' + reg + ' (but void)');
+	engine.Ntrace ('unhbox %d (but void)', reg);
 	return;
     }
 
     if (box.btype != BT_HBOX)
 	throw new TexRuntimeError ('trying to unhbox a non-hbox');
 
-    engine.trace ('unhbox ' + reg + ' (non-void)');
+    engine.Ntrace ('unhbox %d (non-void)', reg);
     engine.set_register (T_BOX, reg, new VoidBox ());
     engine.accum_list (box.list);
 };
@@ -1127,14 +1124,14 @@ commands.unvbox = function cmd_unvbox (engine) {
     var box = engine.get_register (T_BOX, reg);
 
     if (box.btype == BT_VOID) {
-	engine.trace ('unvbox ' + reg + ' (but void)');
+	engine.Ntrace ('unvbox %d (but void)', reg);
 	return;
     }
 
     if (box.btype != BT_VBOX)
 	throw new TexRuntimeError ('trying to unvbox a non-vbox');
 
-    engine.trace ('unvbox ' + reg + ' (non-void)');
+    engine.Ntrace ('unvbox %d (non-void)', reg);
     engine.set_register (T_BOX, reg, new VoidBox ());
     engine.accum_list (box.list);
 };
@@ -1153,7 +1150,7 @@ commands.unhcopy = function cmd_unhcopy (engine) {
     if (box.btype != BT_HBOX)
 	throw new TexRuntimeError ('trying to unhcopy a non-hbox');
 
-    engine.trace ('unhcopy ' + reg);
+    engine.Ntrace ('unhcopy %d', reg);
     engine.accum_list (box.list.slice ());
 };
 
@@ -1171,7 +1168,7 @@ commands.unvcopy = function cmd_unvcopy (engine) {
     if (box.btype != BT_VBOX)
 	throw new TexRuntimeError ('trying to unvcopy a non-vbox');
 
-    engine.trace ('unvcopy ' + reg);
+    engine.Ntrace ('unvcopy %d', reg);
     engine.accum_list (box.list.slice ());
 };
 
@@ -1183,7 +1180,7 @@ commands.hfil = function cmd_hfil (engine) {
     var g = new Glue ();
     g.stretch.set_to (Scaled.new_from_parts (1, 0));
     g.stretch_order = 1;
-    engine.trace ('hfil');
+    engine.Ntrace ('hfil');
     engine.accum (new BoxGlue (g));
 };
 
@@ -1194,7 +1191,7 @@ commands.hfill = function cmd_hfill (engine) {
     var g = new Glue ();
     g.stretch.set_to (Scaled.new_from_parts (1, 0));
     g.stretch_order = 2;
-    engine.trace ('hfill');
+    engine.Ntrace ('hfill');
     engine.accum (new BoxGlue (g));
 };
 
@@ -1207,7 +1204,7 @@ commands.hss = function cmd_hss (engine) {
     g.stretch_order = 1;
     g.shrink.set_to (Scaled.new_from_parts (1, 0));
     g.shrink_order = 1;
-    engine.trace ('hss');
+    engine.Ntrace ('hss');
     engine.accum (new BoxGlue (g));
 };
 
@@ -1218,7 +1215,7 @@ commands.hfilneg = function cmd_hfilneg (engine) {
     var g = new Glue ();
     g.stretch.set_to (Scaled.new_from_parts (-1, 0));
     g.stretch_order = 1;
-    engine.trace ('hfilneg');
+    engine.Ntrace ('hfilneg');
     engine.accum (new BoxGlue (g));
 };
 
@@ -1227,7 +1224,7 @@ commands.hskip = function cmd_hskip (engine) {
 	return; // this command will be reread after new paragraph is started.
 
     var g = engine.scan_glue (false);
-    engine.trace ('hskip of ' + g);
+    engine.Ntrace ('hskip of %o', g);
     engine.accum (new BoxGlue (g));
 };
 
@@ -1239,7 +1236,7 @@ commands.vfil = function cmd_vfil (engine) {
     var g = new Glue ();
     g.stretch.set_to (Scaled.new_from_parts (1, 0));
     g.stretch_order = 1;
-    engine.trace ('vfil');
+    engine.Ntrace ('vfil');
     engine.accum (new BoxGlue (g));
 };
 
@@ -1251,7 +1248,7 @@ commands.vfill = function cmd_vfill (engine) {
     var g = new Glue ();
     g.stretch.set_to (Scaled.new_from_parts (1, 0));
     g.stretch_order = 2;
-    engine.trace ('vfill');
+    engine.Ntrace ('vfill');
     engine.accum (new BoxGlue (g));
 };
 
@@ -1265,7 +1262,7 @@ commands.vss = function cmd_vss (engine) {
     g.stretch_order = 1;
     g.shrink.set_to (Scaled.new_from_parts (1, 0));
     g.shrink_order = 1;
-    engine.trace ('vss');
+    engine.Ntrace ('vss');
     engine.accum (new BoxGlue (g));
 };
 
@@ -1276,7 +1273,7 @@ commands.vfilneg = function cmd_vfilneg (engine) {
     var g = new Glue ();
     g.stretch.set_to (Scaled.new_from_parts (-1, 0));
     g.stretch_order = 1;
-    engine.trace ('vfilneg');
+    engine.Ntrace ('vfilneg');
     engine.accum (new BoxGlue (g));
 };
 
@@ -1285,7 +1282,7 @@ commands.vskip = function cmd_vskip (engine) {
 	return; // command will be reread after this graf is finished.
 
     var g = engine.scan_glue (false);
-    engine.trace ('vskip of ' + g);
+    engine.Ntrace ('vskip of %o', g);
     engine.accum (new BoxGlue (g));
 };
 
@@ -1294,7 +1291,7 @@ commands.mark = function cmd_mark (engine) {
     engine.scan_left_brace ();
     var tlist = engine.scan_tok_group (true);
     var mark = new Mark (tlist.toks);
-    engine.trace ('mark ' + tlist.uitext ());
+    engine.Ntrace ('mark %T', tlist);
     engine.accum (mark);
 };
 
@@ -1303,7 +1300,7 @@ commands.special = function cmd_special (engine) {
     engine.scan_left_brace ();
     var tlist = engine.scan_tok_group (true);
     var special = new Special (tlist.toks);
-    engine.trace ('special ' + tlist.uitext ());
+    engine.Ntrace ('special %T', tlist);
     engine.accum (special);
 };
 
@@ -1311,17 +1308,17 @@ commands.special = function cmd_special (engine) {
 commands.penalty = function cmd_penalty (engine) {
     var amount = engine.scan_int ();
     var penalty = new Penalty (amount);
-    engine.trace ('penalty ' + amount);
+    engine.Ntrace ('penalty %o', amount);
     engine.accum (penalty);
 };
 
 
 function _cmd_box_shift (engine, desc, negate) {
     var amount = engine.scan_dimen ();
-    engine.trace (desc + ' next box by ' + amount + ' ...');
+    engine.Ntrace ('%s next box by %o ...', desc, amount);
 
     function shift_the_box (engine, box) {
-	engine.trace ('... finish ' + desc);
+	engine.Ntrace ('... finish %s', desc);
 	if (negate)
 	    amount = amount.intproduct (-1);
 	box.shift_amount = box.shift_amount.advance (amount);
@@ -1352,23 +1349,23 @@ commands.moveleft = function cmd_moveleft (engine) {
 
 commands.kern = function cmd_kern (engine) {
     var amount = engine.scan_dimen ();
-    engine.trace ('kern ' + amount);
+    engine.Ntrace ('kern %o', amount);
     engine.accum (new Kern (amount));
 };
 
 
 commands.unpenalty = function cmd_unpenalty (engine) {
-    engine.trace ('unpenalty');
+    engine.Ntrace ('unpenalty');
     engine.handle_un_listify (LT_PENALTY);
 };
 
 commands.unkern = function cmd_unkern (engine) {
-    engine.trace ('unkern');
+    engine.Ntrace ('unkern');
     engine.handle_un_listify (LT_KERN);
 };
 
 commands.unskip = function cmd_unskip (engine) {
-    engine.trace ('unskip');
+    engine.Ntrace ('unskip');
     engine.handle_un_listify (LT_GLUE);
 };
 
@@ -1380,7 +1377,7 @@ commands.shipout = function cmd_shipout (engine) {
 	engine.ship_it (box);
     };
 
-    engine.trace ('shipout');
+    engine.Ntrace ('shipout');
     engine.scan_box (ship_it_good, false);
 };
 
@@ -1391,7 +1388,7 @@ commands.insert = function cmd_insert (engine) {
 	throw new TexRuntimeError ('\\insert255 is forbidden');
 
     // T:TP 1099: "begin_insert_or_adjust"
-    engine.trace ('insert ' + num);
+    engine.Ntrace ('insert %d', num);
     engine.scan_left_brace ();
 
     // T:TP 1070: "normal_paragraph"
@@ -1540,23 +1537,23 @@ commands.lastkern = (function LastkernCommand_closure () {
 // Mark insertion
 
 commands.botmark = function cmd_botmark (engine) {
-    engine.trace ('botmark [bad noop]');
+    engine.Ntrace ('botmark [bad noop]');
 };
 
 commands.firstmark = function cmd_firstmark (engine) {
-    engine.trace ('firstmark [bad noop]');
+    engine.Ntrace ('firstmark [bad noop]');
 };
 
 commands.splitbotmark = function cmd_splitbotmark (engine) {
-    engine.trace ('splitbotmark [bad noop]');
+    engine.Ntrace ('splitbotmark [bad noop]');
 };
 
 commands.splitfirstmark = function cmd_splitfirstmark (engine) {
-    engine.trace ('splitfirstmark [bad noop]');
+    engine.Ntrace ('splitfirstmark [bad noop]');
 };
 
 commands.topmark = function cmd_topmark (engine) {
-    engine.trace ('topmark [bad noop]');
+    engine.Ntrace ('topmark [bad noop]');
 };
 
 
@@ -1587,7 +1584,7 @@ commands.font = (function FontCommand_closure () {
 
 	var font = new Font (engine, fn, s);
 	var cmd = new GivenFontCommand (font);
-	engine.trace ('font ' + cstok + ' = ' + font);
+	engine.Ntrace ('font %o = %o', cstok, font);
 	cstok.assign_cmd (engine, cmd);
     };
 
@@ -1611,7 +1608,7 @@ commands.nullfont = (function NullFontCommand_closure () {
     proto.name = 'nullfont';
 
     proto.invoke = function NullFontCommand_invoke (engine) {
-	engine.trace ('activate null font');
+	engine.Ntrace ('activate null font');
 	engine.set_misc ('cur_font', engine.get_font ('<null>'));
     };
 
@@ -1650,7 +1647,7 @@ commands.fontdimen = (function FontDimenCommand_closure () {
 	var font = val.get (engine);
 	engine.scan_optional_equals ();
 	var val = engine.scan_dimen ();
-	engine.trace (['fontdimen', font, num, '=', val].join (' '));
+	engine.Ntrace ('fontdimen %o %d = %o', font, num, val);
 	font.set_dimen (num, val);
 	engine.maybe_insert_after_assign_token ();
     };
@@ -1669,7 +1666,7 @@ commands.fontdimen = (function FontDimenCommand_closure () {
 				       'by a font; got ' + tok);
 
 	var val = font.get (engine).get_dimen (num);
-	engine.trace ('got: ' + val);
+	engine.Ntrace ('got: %o', val);
 	// FIXME: should be settable.
 	return new ConstantValref (T_DIMEN, val);
     };
@@ -1689,7 +1686,7 @@ commands.skewchar = function cmd_skewchar (engine) {
     var font = val.get (engine);
     engine.scan_optional_equals ();
     var ord = engine.scan_char_code ();
-    engine.trace (['skewchar', font, '=', escchr (ord)].join (' '));
+    engine.Ntrace ('skewchar %o = %C', font, ord);
     font.skewchar = ord;
     engine.maybe_insert_after_assign_token ();
 };
@@ -1706,7 +1703,7 @@ commands.hyphenchar = function cmd_hyphenchar (engine) {
     var font = val.get (engine);
     engine.scan_optional_equals ();
     var ord = engine.scan_char_code ();
-    engine.trace (['hyphenchar', font, '=', escchr (ord)].join (' '));
+    engine.Ntrace ('hyphenchar %o = %C', font, ord);
     font.hyphenchar = ord;
     engine.maybe_insert_after_assign_token ();
 };
@@ -1737,7 +1734,7 @@ commands.overline = new MathComponentCommand ('overline', MT_OVER);
 
 commands.radical = function cmd_radical (engine) {
     // T:TP 1162-1163
-    engine.trace ('radical');
+    engine.Ntrace ('radical');
 
     if (engine.mode () != M_MATH && engine.mode () != M_DMATH)
 	throw new TexRuntimeError ('\\radical may only be used in math mode');
@@ -1747,14 +1744,14 @@ commands.radical = function cmd_radical (engine) {
 
     n.left_delim = mathlib.scan_delimiter (engine, true);
     mathlib.scan_math (engine, function (eng, subitem) {
-	engine.trace ('... radical got: ' + subitem);
+	engine.Ntrace ('... radical got: %o', subitem);
 	n.nuc = subitem;
     });
 };
 
 commands.mathchoice = function cmd_mathchoice (engine) {
     // T:TP 1171-1174
-    engine.trace ('mathchoice');
+    engine.Ntrace ('mathchoice');
 
     if (engine.mode () != M_MATH && engine.mode () != M_DMATH)
 	throw new TexRuntimeError ('\\mathchoice may only be used in math mode');
@@ -1781,7 +1778,7 @@ commands.mathchoice = function cmd_mathchoice (engine) {
 	if (mc._cur < 4)
 	    scan_one ();
 	else
-	    engine.trace ('... finished mathchoice: ' + mc);
+	    engine.Ntrace ('... finished mathchoice: %o', mc);
     }
 
     function scan_one () {
@@ -1798,7 +1795,7 @@ commands.mathchoice = function cmd_mathchoice (engine) {
 
 function _cmd_limit_switch (engine, desc, value) {
     // T:TP 1158, 1159
-    engine.trace (desc);
+    engine.Ntrace (desc);
     var last = engine.get_last_listable ();
 
     if (last == null ||
@@ -1824,7 +1821,7 @@ commands.mkern = function cmd_mkern (engine) {
 
 
 commands.vcenter = function cmd_vcenter (engine) {
-    engine.trace ('vcenter');
+    engine.Ntrace ('vcenter');
 
     if (engine.mode () != M_MATH && engine.mode () != M_DMATH)
 	throw new TexRuntimeError ('\\vcenter may only be used in math mode');
@@ -1911,12 +1908,12 @@ commands._endv_ = (function EndvCommand_closure () {
 })();
 
 commands.halign = function cmd_halign (engine) {
-    engine.trace ('halign');
+    engine.Ntrace ('halign');
     engine.init_align (false);
 };
 
 commands.valign = function cmd_valign (engine) {
-    engine.trace ('valign');
+    engine.Ntrace ('valign');
     engine.init_align (true);
 };
 
@@ -1925,14 +1922,14 @@ commands.valign = function cmd_valign (engine) {
 commands.patterns = function cmd_patterns (engine) {
     engine.scan_left_brace ();
     engine.scan_tok_group (false);
-    engine.trace ('patterns [noop/ignored]');
+    engine.Ntrace ('patterns [noop/ignored]');
 };
 
 
 commands.hyphenation = function cmd_hyphenation (engine) {
     engine.scan_left_brace ();
     engine.scan_tok_group (false);
-    engine.trace ('hyphenation [noop/ignored]');
+    engine.Ntrace ('hyphenation [noop/ignored]');
 };
 
 
@@ -1959,8 +1956,7 @@ function _change_case (engine, isupper) {
 	    newtoks.push (tok);
     }
 
-    engine.trace ([cmdname, '~' + new Toklist (oldtoks), '->',
-		   '~' + new Toklist (newtoks)].join (' '));
+    engine.Ntrace ('%s %T -> %T', cmdname, oldtoks, newtoks);
     engine.push_toks (newtoks);
 }
 
@@ -1999,7 +1995,7 @@ commands.the = function cmd_the (engine) {
 
     if (val.valtype == T_TOKLIST) {
 	var toks = val.get (engine);
-	engine.trace ('the (toks) ' + tok + ' -> ' + toks);
+	engine.Ntrace ('the (toks) %o -> %T', tok, toks);
 	engine.push_toks (toks);
 	return;
     }
@@ -2011,7 +2007,7 @@ commands.the = function cmd_the (engine) {
     }
 
     var expn = val.get (engine).to_texstr ();
-    engine.trace ('the ' + tok + ' -> ' + expn);
+    engine.Ntrace ('the %o -> %s', tok, expn);
     engine.push_string (expn);
 };
 
@@ -2019,13 +2015,13 @@ commands.the = function cmd_the (engine) {
 commands.meaning = function cmd_meaning (engine) {
     var tok = engine.next_tok_throw ();
     var expn = tok.to_cmd (engine).texmeaning (engine);
-    engine.trace (['meaning', tok, '->', expn].join (' '));
+    engine.Ntrace ('meaning %o -> %s', tok, expn);
     engine.push_string (expn);
 };
 
 
 commands.jobname = function cmd_jobname (engine) {
-    engine.trace ('jobname -> ' + engine.jobname);
+    engine.Ntrace ('jobname -> %s', engine.jobname);
     engine.push_string (engine.jobname);
 };
 
@@ -2066,7 +2062,7 @@ commands.romannumeral = function cmd_romannumeral (engine) {
 	}
     }
 
-    engine.trace ('romannumeral ' + n_orig + ' -> ' + result);
+    engine.Ntrace ('romannumeral %d -> %s', n_orig, result);
     engine.push_string (result);
 };
 
@@ -2076,14 +2072,14 @@ commands.romannumeral = function cmd_romannumeral (engine) {
 commands.message = function cmd_message (engine) {
     engine.scan_left_brace ();
     var toks = engine.scan_tok_group (true);
-    engine.trace ('message ' + toks.uitext ());
+    engine.Ntrace ('message %U', toks);
 };
 
 
 commands.errmessage = function cmd_errmessage (engine) {
     engine.scan_left_brace ();
     var toks = engine.scan_tok_group (true);
-    engine.trace ('errmessage ~' + toks.uitext ());
+    engine.Ntrace ('errmessage %U', toks);
     throw new TexRuntimeError ('TeX-triggered error: ' + toks.uitext ());
 };
 
@@ -2092,7 +2088,7 @@ commands.immediate = function cmd_immediate (engine) {
     /* This causes a following \openout, \write, or \closeout to take effect
      * immediately, rather than waiting until page shipout. I suspect that I'll
      * need to distinguish these eventually, but for now, this is a noop. */
-    engine.trace ('immediate');
+    engine.Ntrace ('immediate');
 };
 
 
@@ -2104,16 +2100,16 @@ commands.write = function cmd_write (engine) {
 
     if (streamnum == 16) {
 	// 16 -> the log
-	engine.trace ('write:' + streamnum + '(->log) ' + tt);
+	engine.Ntrace ('write:%d(->log) %s', streamnum, tt);
 	return;
     }
 
     // If the specified file hasn't been opened, TeX writes to the console.
     var outf = engine.outfile (streamnum);
     if (outf == null)
-	engine.trace ('write:' + streamnum + '(->console) ' + tt);
+	engine.Ntrace ('write:%d(->console) %s', streamnum, tt);
     else {
-	engine.trace ('write:' + streamnum + ' ' + tt);
+	engine.Ntrace ('write:%d %s', streamnum, tt);
 	outf.write_string (tt + '\n');
     }
 };
@@ -2121,13 +2117,13 @@ commands.write = function cmd_write (engine) {
 
 commands.input = function cmd_input (engine) {
     var fn = engine.scan_file_name ();
-    engine.trace ('input ' + fn);
+    engine.Ntrace ('input %s', fn);
     engine.handle_input (fn);
 };
 
 
 commands.endinput = function cmd_endinput (engine) {
-    engine.trace ('endinput');
+    engine.Ntrace ('endinput');
     engine.handle_endinput ();
 };
 
@@ -2137,7 +2133,7 @@ commands.openout = function cmd_openout (engine) {
     engine.scan_optional_equals ();
     var fn = engine.scan_file_name ();
 
-    engine.trace ('openout ' + snum + ' = ' + fn);
+    engine.Ntrace ('openout %d = %s', snum, fn);
     var outf = engine.iostack.open_for_write (fn);
     if (outf == null)
 	throw new TexRuntimeError ('failed to \\openout ' + fn);
@@ -2148,7 +2144,7 @@ commands.openout = function cmd_openout (engine) {
 
 commands.closeout = function cmd_closeout (engine) {
     var snum = engine.scan_streamnum ();
-    engine.trace ('closeout ' + snum + ' [noop]');
+    engine.Ntrace ('closeout %d [noop]', snum);
     engine.set_outfile (snum, null);
 };
 
@@ -2163,7 +2159,7 @@ commands.openin = function cmd_openin (engine) {
 
     engine.set_infile (snum, null);
 
-    engine.trace ('openin ' + snum + ' = ' + fn);
+    engine.Ntrace ('openin %d = %s', snum, fn);
     var lb = engine.iostack.try_open_linebuffer (fn);
     if (lb == null)
 	// File existence is tested by \openin..\ifeof, so this should
@@ -2192,7 +2188,7 @@ commands.ifeof = function cmd_ifeof (engine) {
     else
 	result = (engine.infile (snum) == null);
 
-    engine.trace ('ifeof ' + snum + ' -> ' + result);
+    engine.Ntrace ('ifeof %d -> %b', snum, result);
     engine.handle_if (result);
 };
 
@@ -2200,37 +2196,37 @@ commands.ifeof = function cmd_ifeof (engine) {
 // High-level miscellany
 
 commands.end = function cmd_end (engine) {
-    engine.trace ('end');
+    engine.Ntrace ('end');
     engine.handle_end ();
 };
 
 commands.dump = function cmd_dump (engine) {
-    engine.trace ('dump');
+    engine.Ntrace ('dump');
 };
 
 commands.batchmode = function cmd_batchmode (engine) {
-    engine.trace ('batchmode');
+    engine.Ntrace ('batchmode');
 };
 
 commands.errorstopmode = function cmd_errorstopmode (engine) {
-    engine.trace ('errorstopmode');
+    engine.Ntrace ('errorstopmode');
 };
 
 commands.nonstopmode = function cmd_nonstopmode (engine) {
-    engine.trace ('nonstopmode');
+    engine.Ntrace ('nonstopmode');
 };
 
 commands.scrollmode = function cmd_scrollmode (engine) {
-    engine.trace ('scrollmode');
+    engine.Ntrace ('scrollmode');
 };
 
 commands.show = function cmd_show (engine) {
     var tok = engine.next_tok ();
-    engine.trace ('show: noop for ' + tok);
+    engine.Ntrace ('show: noop for %o', tok);
 };
 
 commands.showbox = function cmd_showbox (engine) {
     var reg = engine.scan_register_num ();
     var box = engine.get_register (T_BOX, reg);
-    engine.trace ('showbox ' + reg + ' = ' + box.uitext ());
+    engine.Ntrace ('showbox %d = %U', reg, box);
 };
