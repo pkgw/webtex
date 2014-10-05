@@ -7,13 +7,15 @@
 // If only one argument is supplied, the argument is returned verbatim.
 // Otherwise, the format specifiers are:
 //
+// %b - boolean to T or F
 // %c - character ordinal to escaped character via escchr()
 // %C - character ordinal to escaped character via texchr()
 // %d - number
 // %j - JSON stringification of object
-// %o - toString() stringification object
+// %o - toString() stringification of object
 // %s - raw string
 // %T - TeX token list; either array or Toklist object
+// %U - uitext() stringification of object
 // %x - hexadecimal number (rendered with leading "0x")
 //
 // (The special-case of one argument matters if that argument is an arbitrary
@@ -83,6 +85,14 @@ var format = (function format_wrapper () {
                 var arg = argv[cursor++];
 
                 switch (node[SPECIFIER]) {
+		case 'b':
+		    if (arg === true)
+			arg = 'T';
+		    else if (arg === false)
+			arg = 'F';
+		    else
+			throw new Error ('format %b expected boolean but got ' + arg);
+		    break;
                 case 'c':
 		    if (typeof arg !== 'number')
 			throw new Error ('format %c expected number but got ' + arg);
@@ -117,6 +127,12 @@ var format = (function format_wrapper () {
 		    if (!(arg instanceof Toklist))
 			throw new Error ('format %T expected Toklist but got ' + arg);
 		    arg = arg.as_serializable ();
+		    break;
+		case 'U':
+		    if (typeof arg.uitext !== 'function')
+			throw new Error ('format %U expected object with ' +
+					 'uitext() method but got ' + arg);
+		    arg = arg.uitext ();
 		    break;
                 case 'x':
 		    if (typeof arg !== 'number')
