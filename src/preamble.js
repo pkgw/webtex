@@ -94,7 +94,7 @@ var TexSyntaxError = (function TexSyntaxErrorClosure () {
 	// Subclassing Errors is unusual. Error.call(this) happens
 	// to not behave as most other constructor-type functions.
 	// The pattern we use here Does What We Want.
-	var tmp = Error.apply (this, arguments);
+	var tmp = Error.call (this, format.apply (null, arguments));
 	tmp.name = this.name = 'TexSyntaxError';
 	this.message = tmp.message;
 	this.stack = tmp.stack;

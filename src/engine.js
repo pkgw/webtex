@@ -1344,7 +1344,7 @@ var Engine = (function Engine_closure () {
 		// ordinal for \ifx to work as desired.
 		return;
 
-	    throw new TexSyntaxError ('expected left brace but found ' + tok);
+	    throw new TexSyntaxError ('expected left brace but found %o', tok);
 	}
     };
 
@@ -1429,7 +1429,7 @@ var Engine = (function Engine_closure () {
 	    if (csname.length == 1)
 		return new TexInt (negfactor * csname.charCodeAt (0));
 
-	    throw new TexSyntaxError ('unhandled alpha number token ' + tok);
+	    throw new TexSyntaxError ('unhandled alpha number token %o', tok);
 	}
 
 	var v = tok.to_cmd (this).as_int (this);
@@ -1488,7 +1488,7 @@ var Engine = (function Engine_closure () {
 
 	if (!sawany)
 	    throw new TexSyntaxError ('expected to see integer expression but ' +
-				      'got the token ' + tok);
+				      'got the token %o', tok);
 
 	if (val > 0x7FFFFFFF) {
 	    this.warn ('found integer ' + val + ' greater than 2^32-1; ' +
@@ -1662,7 +1662,7 @@ var Engine = (function Engine_closure () {
 		    denom = 1157;
                 } else {
                     throw new TexSyntaxError ('expected a dimen unit but ' +
-					      'didn\'t find it; next is ' + tok);
+					      'didn\'t find it; next is %o', tok);
 		}
 
 		result = Scaled.new_parts_product (num, denom, nonfrac, frac);
@@ -1722,7 +1722,7 @@ var Engine = (function Engine_closure () {
 
 	// TODO: \tokpar=<toklist register or toklist param>
 	if (!tok.is_cat (C_BGROUP))
-	    throw new TexSyntaxError ('expected { in toklist assignment; got ' + tok);
+	    throw new TexSyntaxError ('expected { in toklist assignment; got %o', tok);
 
 	return this.scan_tok_group (false);
     };

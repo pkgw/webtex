@@ -419,8 +419,8 @@ function _cmd_def (engine, cname, expand_replacement) {
 		continue;
 	    }
 
-	    throw new TexSyntaxError ('unexpected token ' + tok + ' following ' +
-				      'parameter token');
+	    throw new TexSyntaxError ('unexpected token %o following ' +
+				      'parameter token', tok);
 	}
 
 	if (tok.is_cat (C_PARAM)) {
@@ -482,8 +482,8 @@ function _cmd_def (engine, cname, expand_replacement) {
 		continue;
 	    }
 
-	    throw new TexSyntaxError ('unexpected token ' + tok + ' following ' +
-				      'parameter token');
+	    throw new TexSyntaxError ('unexpected token %o following ' +
+				      'parameter token', tok);
 	}
 
 	if (tok.is_cat (C_PARAM)) {
@@ -626,7 +626,7 @@ commands.ifnum = function cmd_ifnum (engine) {
     else if (tok.is_other_char (O_EQUALS))
 	result = (val1 == val2);
     else
-	throw new TexSyntaxError ('expected <,=,> in \\ifnum but got ' + tok);
+	throw new TexSyntaxError ('expected <,=,> in \\ifnum but got %o', tok);
 
     engine.Ntrace ('ifnum %d %o %d => %b', val1, tok, val2, result);
     engine.handle_if (result);
@@ -665,7 +665,7 @@ commands.ifdim = function cmd_ifdim (engine) {
     else if (tok.is_other_char (O_EQUALS))
 	result = (val1.sp.value == val2.sp.value);
     else
-	throw new TexSyntaxError ('expected <,=,> in \\ifdim but got ' + tok);
+	throw new TexSyntaxError ('expected <,=,> in \\ifdim but got %o', tok);
 
     engine.Ntrace ('ifdim %o %o %o => %b', val1, tok, val2, result);
     engine.handle_if (result);
