@@ -104,8 +104,8 @@ var TexInt = (function TexInt_closure () {
 	if (this.value >= min && this.value <= max)
 	    return this;
 
-	engine.warn ('expected integer in [' + min + ', ' + max + ']; got ' +
-		     this.value + '; using 0');
+	engine.warn ('expected integer in [%d,%d]; got %d; using 0',
+		     min, max, this.value);
 	return TexInt (0);
     };
 

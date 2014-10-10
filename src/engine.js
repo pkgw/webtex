@@ -496,6 +496,12 @@ var Engine = (function Engine_closure () {
 	global_log (format.apply (null, arguments));
     };
 
+    proto.warn = function Engine_warn (text) {
+	arguments[0] = '!! ' + arguments[0];
+	global_warn (format.apply (null, arguments));
+    };
+
+
     // Wrappers for the EquivTable.
 
     proto._global_flag = function Engine__global_flag () {
@@ -589,12 +595,6 @@ var Engine = (function Engine_closure () {
 	this._fonts[name] = value;
     };
 
-    // Infrastructure.
-
-    proto.warn = function Engine_warn (text) {
-	global_warnf ('!! %s');
-    };
-
     // Driving everything
 
     proto.step = function Engine_step () {
@@ -612,7 +612,7 @@ var Engine = (function Engine_closure () {
 	}
 
 	if (cmd.assign_flag_mode == AFM_INVALID && this.assign_flags)
-	    this.warn ('assignment flags applied to inapplicable command ' + cmd);
+	    this.warn ('assignment flags applied to inapplicable command %o', cmd);
 	else if (cmd.assign_flag_mode != AFM_CONTINUE)
 	    this.assign_flags = 0;
 
@@ -1488,8 +1488,8 @@ var Engine = (function Engine_closure () {
 				      'got the token %o', tok);
 
 	if (val > 0x7FFFFFFF) {
-	    this.warn ('found integer ' + val + ' greater than 2^32-1; ' +
-		       'replace with that value');
+	    this.warn ('found integer %d greater than 2^32-1; ' +
+		       'replace with that value', val);
 	    val = 0x7FFFFFFF;
 	}
 

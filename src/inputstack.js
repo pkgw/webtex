@@ -172,7 +172,7 @@ var TokenizerInput = (function TokenizerInput_closure () {
 	}
 
 	if (cc == C_INVALID) {
-	    this.engine.warn ('read invalid character ' + escchr (o));
+	    this.engine.warn ('read invalid character %c', o);
 	    return this.tokenize_next ();
 	}
 

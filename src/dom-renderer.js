@@ -60,7 +60,7 @@ var DOMRenderer = (function DOMRenderer_callback () {
 			// Character.
 			var f = this.fontmap[q.font];
 			if (f == null) {
-			    console.warn ('unmapped font ident ' + q.font);
+			    global_warnf ('unmapped font ident %o', q.font);
 			    f = '28px LMMathItalic10';
 			}
 
@@ -70,11 +70,11 @@ var DOMRenderer = (function DOMRenderer_callback () {
 			// Rule.
 			ctx.fillRect (x, y, scale * q.w, scale * q.h);
 		    } else {
-			console.warn ('unhandled CanvasBox graphic ' + q);
+			global_warnf ('unhandled CanvasBox graphic %j', q);
 		    }
 		}
 	    } else {
-		console.warn ('unhandled rendered-HTML item '  + JSON.stringify (item));
+		global_warnf ('unhandled rendered-HTML item %j', item));
 	    }
 	}
     };

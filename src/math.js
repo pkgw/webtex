@@ -1155,7 +1155,8 @@ var mathlib = (function mathlib_closure () {
 		    var f = state.font (q.nuc.fam);
 		    var m = f.get_metrics ();
 		    if (!m.has_ord (q.nuc.ord)) {
-			engine.warn ('missing character fam=' + q.nuc.fam + ' ord=' + q.nuc.ord);
+			engine.warn ('missing character fam=%o ord=%c',
+				     q.nuc.fam, q.nuc.ord);
 			p = null;
 		    } else {
 			delta = m.italic_correction (q.nuc.ord);

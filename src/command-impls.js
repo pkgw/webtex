@@ -1211,7 +1211,7 @@ register_command ('insert', function cmd_insert (engine) {
 	var list = engine.leave_mode ();
 	engine.unnest_eqtb ();
 	// T:TP 1100 should go here.
-	engine.warn ('ignoring finished insert #' + num);
+	engine.warn ('ignoring finished insert #%d', num);
     });
 });
 
@@ -1972,7 +1972,7 @@ register_command ('openin', function cmd_openin (engine) {
     if (lb == null)
 	// File existence is tested by \openin..\ifeof, so this should
 	// be a warning only.
-	engine.warn ('failed to \\openin ' + fn);
+	engine.warn ('failed to \\openin %s', fn);
 
     engine.set_infile (snum, lb);
 });
