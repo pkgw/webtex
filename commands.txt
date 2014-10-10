@@ -23,8 +23,8 @@
 
 #escname		expand	cond	afm
 
-_dash_			n	n	inval	# -> "discretionary"
-_fslash_		n	n	inval	# "ital_corr" command in TeX
+-			n	n	inval	# -> "discretionary"
+/			n	n	inval	# "ital_corr" command in TeX
 _space_			n	n	inval	# "ex_space" command
 above			n	n	inval
 abovewithdelims		n	n	inval	# -> "above"
@@ -40,7 +40,7 @@ begingroup		n	n	inval
 botmark			n	n	inval	# -> "top_bot_mark"
 box			n	n	inval	# -> "make_box"
 catcode			n	n	consume # -> "def_code"
-_char			n	n	inval	# "char_num" command
+char			n	n	inval	# "char_num" command
 chardef			n	n	consume	# -> "shorthand_def"
 cleaders		n	n	inval # -> "leader_ship"
 closein			n	n	inval # -> "in_stream"
@@ -64,7 +64,7 @@ divide			n	n	consume
 dp			n	n	consume	# -> "set_box_dimen"
 dump			n	n	inval # -> "stop"
 edef			n	n	consume # -> "def"
-_else			yes	n	inval # -> "fi_or_else"
+else			yes	n	inval # -> "fi_or_else"
 end			n	n	inval # -> "stop"
 endcsname		n	n	inval
 endgroup		n	n	inval
@@ -93,7 +93,7 @@ hss			n	n	inval	# -> "hskip"
 ht			n	n	consume	# -> "set_box_dimen"
 hyphenation		n	n	consume # -> "hyph_data"
 hyphenchar		n	n	consume # -> "assign_font_int"
-_if			yes	yes	inval
+if			yes	yes	inval
 ifcase			yes	yes	inval	# -> "if"
 ifcat			yes	yes	inval	# -> "if"
 ifdim			yes	yes	inval	# -> "if"
@@ -127,9 +127,9 @@ lccode			n	n	consume # -> "def_code"
 leaders			n	n	inval # -> "leader_ship"
 left			n	n	inval	# -> "left_right"
 leqno			n	n	inval	# -> "eqno"
-_let			n	n	consume
+let			n	n	consume
 limits			n	n	inval # -> "limit_switch"
-_long			n	n	cont	# -> "prefix"
+long			n	n	cont	# -> "prefix"
 lower			n	n	inval	# -> "vmove"
 lowercase		n	n	inval	# -> "caseshift"
 mark			n	n	inval

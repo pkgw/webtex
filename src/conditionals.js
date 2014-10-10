@@ -111,7 +111,7 @@
          * the \fi. Nothing else to do. */
     });
 
-    register_command ('_else', function cmd_else (engine) {
+    register_command ('else', function cmd_else (engine) {
 	engine.Ntrace ('else [non-eaten]');
 
 	if (!engine.conditional_stack.length)
@@ -224,7 +224,7 @@
     // Now we can get to the basic conditional commands. These all
     // delegate to engine.handle_if().
 
-    register_command ('_if', function cmd_if (engine) {
+    register_command ('if', function cmd_if (engine) {
 	engine.start_parsing_condition ();
 	var t1 = engine.next_x_tok (), t2 = engine.next_x_tok ();
 	engine.done_parsing_condition ();

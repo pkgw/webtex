@@ -51,7 +51,7 @@ register_command ('_space_', function cmd__space_ (engine) {
 });
 
 
-register_command ('_fslash_', function cmd__fslash_ (engine) {
+register_command ('/', function cmd__fslash_ (engine) {
     // Italic correction. T:TP 1111, 1112, 1113.
 
     switch (engine.mode ()) {
@@ -75,7 +75,7 @@ register_command ('_fslash_', function cmd__fslash_ (engine) {
 });
 
 
-register_command ('_char', function cmd__char (engine) {
+register_command ('char', function cmd__char (engine) {
     var ord = engine.scan_char_code ();
     engine.Ntrace ('char %C', ord);
     engine.push (Token.new_cmd (new GivenCharCommand (ord)));
@@ -164,12 +164,12 @@ register_command ('outer', function cmd_outer (engine) {
 });
 
 
-register_command ('_long', function cmd_long (engine) {
+register_command ('long', function cmd_long (engine) {
     engine.Ntrace ('long'); // I think it's OK to make this a noop.
 });
 
 
-register_command ('_let', function cmd_let (engine) {
+register_command ('let', function cmd_let (engine) {
     var cstok = engine.scan_r_token ();
 
     // Note that we don't use scan_optional_equals here since it
