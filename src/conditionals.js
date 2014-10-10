@@ -50,12 +50,47 @@
 	}
     });
 
+    function if_skip_until (engine, mode) {
+	var depth = 0;
+
+	while (true) {
+	    var tok = engine.next_tok_throw ();
+
+	    if (tok.is_cmd (engine, 'else')) {
+		if (depth == 0) {
+		    if (mode == CS_FI)
+			throw new TexSyntaxError ('unexpected \\else');
+		    engine.Ntrace ('... skipped conditional ... %o', tok);
+		    return 'else';
+		}
+	    } else if (tok.is_cmd (engine, 'fi')) {
+		if (depth > 0)
+		    depth -= 1;
+		else {
+		    engine.Ntrace ('... skipped conditional ... %o', tok);
+		    return 'fi';
+		}
+	    } else if (tok.is_cmd (engine, 'or')) {
+		if (depth == 0) {
+		    if (mode != CS_OR_ELSE_FI)
+			throw new TexSyntaxError ('unexpected \\or');
+		    engine.Ntrace ('... skipped conditional ... %o', tok);
+		    return 'or';
+		}
+	    } else if (tok.is_conditional (engine)) {
+		depth += 1;
+	    }
+	}
+
+	throw new TexInternalError ('not reached');
+    }
+
     engine_proto.register_method (function Engine_handle_if (result) {
-	// Assumes that an \if has just been read in and the result of the
-        // test is `result`. We now prepare to handle the outcome. We'll have
-        // to evaluate one branch and skip the other, taking care to pay
-        // attention to nesting in the latter. We'll also have to swallow
-        // \else and \fi tokens as appropriate.
+	// Assumes that some kind of conditional has just been read in and the
+        // result of the test is `result`. We now prepare to handle the
+        // outcome. We'll have to evaluate one branch and skip the other,
+        // taking care to pay attention to nesting in the latter. We'll also
+        // have to swallow \else and \fi tokens as appropriate.
 
 	if (result) {
 	    /* All we need to do now is mark that we're an expecting an \else
@@ -65,7 +100,7 @@
 	    return;
 	}
 
-	if (this._if_skip_until (CS_ELSE_FI) == 'else') {
+	if (if_skip_until (this, CS_ELSE_FI) == 'else') {
 	    /* Encountered the else-block. We evaluate this part, and expect
              * to eat a \fi. */
 	    this.conditional_stack.push (CS_FI);
@@ -76,13 +111,62 @@
          * the \fi. Nothing else to do. */
     });
 
-    engine_proto.register_method (function Engine_handle_if_case (value) {
-	/* \ifcase<num> has just been read in and evaluated to `value`. We
-         * want to evaluate the value'th case, or an \else, or nothing. */
+    register_command ('_else', function cmd_else (engine) {
+	engine.Ntrace ('else [non-eaten]');
+
+	if (!engine.conditional_stack.length)
+	    throw new TexSyntaxError ('stray \\else');
+
+	var mode = engine.conditional_stack.pop ();
+	if (mode == CS_INCONDITION) {
+	    // See comment in handle_or.
+	    engine.push_toks ([Token.new_cmd (engine.commands['relax']),
+			       Token.new_cmd (engine.commands['else'])]);
+	    engine.conditional_stack.push (mode);
+	    return;
+	}
+
+	if (mode == CS_FI)
+	    throw new TexSyntaxError ('unexpected (duplicate?) \\else');
+
+	if_skip_until (engine, CS_FI);
+    });
+
+    register_command ('fi', function cmd_fi (engine) {
+	engine.Ntrace ('fi [non-eaten]');
+
+	if (!engine.conditional_stack.length)
+	    throw new TexSyntaxError ('stray \\fi');
+
+	var mode = engine.conditional_stack.pop ();
+	if (mode == CS_INCONDITION) {
+	    // See comment in handle_or.
+	    engine.push_toks ([Token.new_cmd (engine.commands['relax']),
+			       Token.new_cmd (engine.commands['fi'])]);
+	    engine.conditional_stack.push (mode);
+	    return;
+	}
+
+	// Otherwise, we don't care and there's nothing more to do.
+    });
+
+
+    // \ifcase commands -- a related, but different branching structure.
+
+    register_command ('ifcase', function cmd_ifcase (engine) {
+	// \ifcase<num> can be interpreted as saying that we need to skip
+	// <num> \or clauses. We want to evaluate the <num>'th case, or an
+	// \else, or nothing.
+
+	engine.start_parsing_condition ();
+	var ntoskip = engine.scan_int ().value;
+	engine.done_parsing_condition ();
+	engine.Ntrace ('ifcase %d', ntoskip);
+
 	var ntoskip = value;
 
 	while (ntoskip > 0) {
-	    var found = this._if_skip_until (CS_OR_ELSE_FI);
+	    var found = if_skip_until (engine, CS_OR_ELSE_FI);
 	    if (found == 'fi')
 		// Nothing left and no \else. Nothing to do.
 		return;
@@ -90,7 +174,7 @@
 	    if (found == 'else') {
 		// We hit the else without finding our target case. We
 		// want to evaluate it and then eat a \fi.
-		this.conditional_stack.push (CS_FI);
+		engine.conditional_stack.push (CS_FI);
 		return;
 	    }
 
@@ -100,60 +184,27 @@
 
 	// If we're here, we must have hit our desired case! We'll have to
 	// skip the rest of the cases later.
-	this.conditional_stack.push (CS_OR_ELSE_FI);
+	engine.conditional_stack.push (CS_OR_ELSE_FI);
     });
 
-    engine_proto.register_method (function Engine__if_skip_until (mode) {
-	var depth = 0;
+    register_command ('or', function cmd_or (engine) {
+	engine.Ntrace ('or [non-eaten]');
 
-	while (true) {
-	    var tok = this.next_tok_throw ();
-
-	    if (tok.is_cmd (this, 'else')) {
-		if (depth == 0) {
-		    if (mode == CS_FI)
-			throw new TexSyntaxError ('unexpected \\else');
-		    this.Ntrace ('... skipped conditional ... %o', tok);
-		    return 'else';
-		}
-	    } else if (tok.is_cmd (this, 'fi')) {
-		if (depth > 0)
-		    depth -= 1;
-		else {
-		    this.Ntrace ('... skipped conditional ... %o', tok);
-		    return 'fi';
-		}
-	    } else if (tok.is_cmd (this, 'or')) {
-		if (depth == 0) {
-		    if (mode != CS_OR_ELSE_FI)
-			throw new TexSyntaxError ('unexpected \\or');
-		    this.Ntrace ('... skipped conditional ... %o', tok);
-		    return 'or';
-		}
-	    } else if (tok.is_conditional (this)) {
-		depth += 1;
-	    }
-	}
-
-	throw new TexInternalError ('not reached');
-    });
-
-    engine_proto.register_method (function Engine_handle_or () {
 	// We should only get here if we executed an \ifcase case and we need
 	// to eat up alternate branches until the end.
 
-	if (!this.conditional_stack.length)
+	if (!engine.conditional_stack.length)
 	    throw new TexSyntaxError ('stray \\or');
 
-	var mode = this.conditional_stack.pop (), skipmode = CS_OR_ELSE_FI;
+	var mode = engine.conditional_stack.pop (), skipmode = CS_OR_ELSE_FI;
 	if (mode == CS_INCONDITION) {
 	    // We were parsing the condition of the \ifcase and it involved
 	    // some kind of open-ended expanding parsing that made it out to
-	    // this \or. TeX inserts a \relax in this case to stop the
+	    // engine \or. TeX inserts a \relax in engine case to stop the
 	    // expansion. T:TP 495.
-	    this.push_toks ([Token.new_cmd (this.commands['relax']),
-			     Token.new_cmd (this.commands['or'])]);
-	    this.conditional_stack.push (mode);
+	    engine.push_toks ([Token.new_cmd (engine.commands['relax']),
+			       Token.new_cmd (engine.commands['or'])]);
+	    engine.conditional_stack.push (mode);
 	    return;
 	}
 
@@ -161,7 +212,7 @@
 	    throw new TexSyntaxError ('unexpected \\or');
 
 	while (true) {
-	    var found = this._if_skip_until (skipmode)
+	    var found = if_skip_until (engine, skipmode)
 	    if (found == 'fi')
 		break;
 	    if (found == 'else')
@@ -169,40 +220,9 @@
 	}
     });
 
-    engine_proto.register_method (function Engine_handle_else () {
-	if (!this.conditional_stack.length)
-	    throw new TexSyntaxError ('stray \\else');
 
-	var mode = this.conditional_stack.pop ();
-	if (mode == CS_INCONDITION) {
-	    // See comment in handle_or.
-	    this.push_toks ([Token.new_cmd (this.commands['relax']),
-			     Token.new_cmd (this.commands['else'])]);
-	    this.conditional_stack.push (mode);
-	    return;
-	}
-
-	if (mode == CS_FI)
-	    throw new TexSyntaxError ('unexpected (duplicate?) \\else');
-
-	this._if_skip_until (CS_FI);
-    });
-
-    engine_proto.register_method (function Engine_handle_fi () {
-	if (!this.conditional_stack.length)
-	    throw new TexSyntaxError ('stray \\fi');
-
-	var mode = this.conditional_stack.pop ();
-	if (mode == CS_INCONDITION) {
-	    // See comment in handle_or.
-	    this.push_toks ([Token.new_cmd (this.commands['relax']),
-			     Token.new_cmd (this.commands['fi'])]);
-	    this.conditional_stack.push (mode);
-	    return;
-	}
-
-	// Otherwise, we don't care and there's nothing more to do.
-    });
+    // Now we can get to the basic conditional commands. These all
+    // delegate to engine.handle_if().
 
     register_command ('_if', function cmd_if (engine) {
 	engine.start_parsing_condition ();
@@ -342,32 +362,6 @@
     register_command ('iftrue', function cmd_iftrue (engine) {
 	engine.Ntrace ('iftrue');
 	engine.handle_if (true);
-    });
-
-
-    register_command ('ifcase', function cmd_ifcase (engine) {
-	engine.start_parsing_condition ();
-	var val = engine.scan_int ().value;
-	engine.done_parsing_condition ();
-	engine.Ntrace ('ifcase %d', val);
-	engine.handle_if_case (val);
-    });
-
-    register_command ('_else', function cmd_else (engine) {
-	engine.Ntrace ('else [non-eaten]');
-	engine.handle_else ();
-    });
-
-
-    register_command ('or', function cmd_or (engine) {
-	engine.Ntrace ('or [non-eaten]');
-	engine.handle_or ();
-    });
-
-
-    register_command ('fi', function cmd_fi (engine) {
-	engine.Ntrace ('fi [non-eaten]');
-	engine.handle_fi ();
     });
 
 
