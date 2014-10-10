@@ -60,21 +60,21 @@
 		if (depth == 0) {
 		    if (mode == CS_FI)
 			throw new TexSyntaxError ('unexpected \\else');
-		    engine.Ntrace ('... skipped conditional ... %o', tok);
+		    engine.trace ('... skipped conditional ... %o', tok);
 		    return 'else';
 		}
 	    } else if (tok.is_cmd (engine, 'fi')) {
 		if (depth > 0)
 		    depth -= 1;
 		else {
-		    engine.Ntrace ('... skipped conditional ... %o', tok);
+		    engine.trace ('... skipped conditional ... %o', tok);
 		    return 'fi';
 		}
 	    } else if (tok.is_cmd (engine, 'or')) {
 		if (depth == 0) {
 		    if (mode != CS_OR_ELSE_FI)
 			throw new TexSyntaxError ('unexpected \\or');
-		    engine.Ntrace ('... skipped conditional ... %o', tok);
+		    engine.trace ('... skipped conditional ... %o', tok);
 		    return 'or';
 		}
 	    } else if (tok.is_conditional (engine)) {
@@ -112,7 +112,7 @@
     });
 
     register_command ('else', function cmd_else (engine) {
-	engine.Ntrace ('else [non-eaten]');
+	engine.trace ('else [non-eaten]');
 
 	if (!engine.conditional_stack.length)
 	    throw new TexSyntaxError ('stray \\else');
@@ -133,7 +133,7 @@
     });
 
     register_command ('fi', function cmd_fi (engine) {
-	engine.Ntrace ('fi [non-eaten]');
+	engine.trace ('fi [non-eaten]');
 
 	if (!engine.conditional_stack.length)
 	    throw new TexSyntaxError ('stray \\fi');
@@ -161,7 +161,7 @@
 	engine.start_parsing_condition ();
 	var ntoskip = engine.scan_int ().value;
 	engine.done_parsing_condition ();
-	engine.Ntrace ('ifcase %d', ntoskip);
+	engine.trace ('ifcase %d', ntoskip);
 
 	var ntoskip = value;
 
@@ -188,7 +188,7 @@
     });
 
     register_command ('or', function cmd_or (engine) {
-	engine.Ntrace ('or [non-eaten]');
+	engine.trace ('or [non-eaten]');
 
 	// We should only get here if we executed an \ifcase case and we need
 	// to eat up alternate branches until the end.
@@ -244,7 +244,7 @@
 	}
 
 	var result = (key (t1) == key (t2));
-	engine.Ntrace ('if %o ~ %o => %b', t1, t2, result);
+	engine.trace ('if %o ~ %o => %b', t1, t2, result);
 	engine.handle_if (result);
     });
 
@@ -269,7 +269,7 @@
 	}
 
 	var result = (key (t1) == key (t2));
-	engine.Ntrace ('ifcat %o ~ %o => %b', t1, t2, result);
+	engine.trace ('ifcat %o ~ %o => %b', t1, t2, result);
 	engine.handle_if (result);
     });
 
@@ -278,7 +278,7 @@
 	var t1 = engine.next_tok_throw (), t2 = engine.next_tok_throw (), result;
 	var cmd1 = t1.to_cmd (engine), cmd2 = t2.to_cmd (engine);
 	result = cmd1.same_cmd (cmd2);
-	engine.Ntrace ('ifx %o ~ %o => %b', t1, t2, result);
+	engine.trace ('ifx %o ~ %o => %b', t1, t2, result);
 	engine.handle_if (result);
     });
 
@@ -309,7 +309,7 @@
 	else
 	    throw new TexSyntaxError ('expected <,=,> in \\ifnum but got %o', tok);
 
-	engine.Ntrace ('ifnum %d %o %d => %b', val1, tok, val2, result);
+	engine.trace ('ifnum %d %o %d => %b', val1, tok, val2, result);
 	engine.handle_if (result);
     });
 
@@ -319,7 +319,7 @@
 	var val = engine.scan_int ().value;
 	engine.done_parsing_condition ();
 	var result = (val % 2 == 1);
-	engine.Ntrace ('ifodd %d => %b', val, result);
+	engine.trace ('ifodd %d => %b', val, result);
 	engine.handle_if (result);
     });
 
@@ -348,37 +348,37 @@
 	else
 	    throw new TexSyntaxError ('expected <,=,> in \\ifdim but got %o', tok);
 
-	engine.Ntrace ('ifdim %o %o %o => %b', val1, tok, val2, result);
+	engine.trace ('ifdim %o %o %o => %b', val1, tok, val2, result);
 	engine.handle_if (result);
     });
 
 
     register_command ('iffalse', function cmd_iffalse (engine) {
-	engine.Ntrace ('iffalse');
+	engine.trace ('iffalse');
 	engine.handle_if (false);
     });
 
 
     register_command ('iftrue', function cmd_iftrue (engine) {
-	engine.Ntrace ('iftrue');
+	engine.trace ('iftrue');
 	engine.handle_if (true);
     });
 
 
     register_command ('ifhmode', function cmd_ifhmode (engine) {
-	engine.Ntrace ('ifhmode');
+	engine.trace ('ifhmode');
 	engine.handle_if (engine.mode () == M_HORZ || engine.mode () == M_RHORZ);
     });
 
 
     register_command ('ifvmode', function cmd_ifvmode (engine) {
-	engine.Ntrace ('ifvmode');
+	engine.trace ('ifvmode');
 	engine.handle_if (engine.mode () == M_VERT || engine.mode () == M_IVERT);
     });
 
 
     register_command ('ifmmode', function cmd_ifmmode (engine) {
-	engine.Ntrace ('ifmmode');
+	engine.trace ('ifmmode');
 	engine.handle_if (engine.mode () == M_MATH || engine.mode () == M_DMATH);
     });
 

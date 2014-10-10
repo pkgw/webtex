@@ -53,7 +53,7 @@ var alignlib = (function alignlib_closure () {
 		    // I guess \noexpand makes no sense here, but who knows?
 		    if (cmd.same_cmd (engine.commands['noexpand'])) {
 			tok = engine.next_tok ();
-			engine.Ntrace ('noexpand in align: %o', tok);
+			engine.trace ('noexpand in align: %o', tok);
 		    } else {
 			cmd.invoke (engine);
 			tok = engine.next_tok ();

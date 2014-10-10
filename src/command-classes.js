@@ -102,7 +102,7 @@ var MacroCommand = (function MacroCommand_closure () {
 
     proto.invoke = function MacroCommand_invoke (engine) {
 	if (!this.tmpl.length) {
-	    engine.Ntrace ('*macro %o -> %T', this.origcs, this.repl);
+	    engine.trace ('*macro %o -> %T', this.origcs, this.repl);
 	    engine.push_toks (this.repl);
 	    return;
 	}
@@ -240,11 +240,11 @@ var MacroCommand = (function MacroCommand_closure () {
 	    }
 	}
 
-	engine.Ntrace ('*macro %o ...', this.origcs);
+	engine.trace ('*macro %o ...', this.origcs);
 	for (var i = 1; i < 10; i++)
 	    if (param_vals.hasOwnProperty (i))
-		engine.Ntrace ('   #%d = %T', i, param_vals[i]);
-	engine.Ntrace (' -> %T', fullrepl);
+		engine.trace ('   #%d = %T', i, param_vals[i]);
+	engine.trace (' -> %T', fullrepl);
 	engine.push_toks (fullrepl);
     };
 
@@ -307,7 +307,7 @@ var BeginGroupCommand = (function BeginGroupCommand_closure () {
     proto.desc = 'begin-group character';
 
     proto.invoke = function BeginGroupCommand_invoke (engine) {
-	engine.Ntrace ('explicit bgroup');
+	engine.trace ('explicit bgroup');
 	engine.handle_bgroup ();
     };
 
@@ -331,7 +331,7 @@ var EndGroupCommand = (function EndGroupCommand_closure () {
     proto.desc = 'end-group character';
 
     proto.invoke = function EndGroupCommand_invoke (engine) {
-	engine.Ntrace ('explicit egroup');
+	engine.trace ('explicit egroup');
 	engine.handle_egroup ();
     };
 
@@ -363,7 +363,7 @@ var MathShiftCommand = (function MathShiftCommand_closure () {
 
 	if (m == M_DMATH || m == M_MATH) {
 	    // T:TP 1194 -- after_math(). XXX: this code is a poor approximation so far.
-	    engine.Ntrace ('math shift: exit');
+	    engine.trace ('math shift: exit');
 	    var mlist = engine.leave_mode ();
 	    var mstyle = MS_DISPLAY;
 	    if (m == M_MATH)
@@ -381,7 +381,7 @@ var MathShiftCommand = (function MathShiftCommand_closure () {
 	    engine.accum (new MathDelim (ms, true));
 	    engine.unnest_eqtb ();
 	} else {
-	    engine.Ntrace ('math shift: enter');
+	    engine.trace ('math shift: enter');
 
 	    var tok = engine.next_tok_throw ();
 	    if (tok.to_cmd (engine) instanceof MathShiftCommand &&
@@ -458,7 +458,7 @@ var SuperCommand = (function SuperCommand_closure () {
 	    throw new TexRuntimeError ('superscript not allowed outside of math mode');
 
 	// T:TP 1176
-	engine.Ntrace ('superscript ...');
+	engine.trace ('superscript ...');
 	var prev = engine.get_last_listable ();
 	if (prev != null) {
 	    if (!(prev instanceof AtomNode))
@@ -473,7 +473,7 @@ var SuperCommand = (function SuperCommand_closure () {
 	}
 
 	mathlib.scan_math (engine, function (eng, subitem) {
-	    engine.Ntrace ('... superscript got %o', subitem);
+	    engine.trace ('... superscript got %o', subitem);
 	    prev.sup = subitem;
 	});
     };
@@ -503,7 +503,7 @@ var SubCommand = (function SubCommand_closure () {
 	    throw new TexRuntimeError ('subscript not allowed outside of math mode');
 
 	// T:TP 1176
-	engine.Ntrace ('subscript ...');
+	engine.trace ('subscript ...');
 	var prev = engine.get_last_listable ();
 	if (prev != null) {
 	    if (!(prev instanceof AtomNode))
@@ -518,7 +518,7 @@ var SubCommand = (function SubCommand_closure () {
 	}
 
 	mathlib.scan_math (engine, function (eng, subitem) {
-	    engine.Ntrace ('... subscript got %o', subitem);
+	    engine.trace ('... subscript got %o', subitem);
 	    prev.sub = subitem;
 	});
     };
@@ -546,17 +546,17 @@ var SpacerCommand = (function SpacerCommand_closure () {
     proto.invoke = function Spacer_invoke (engine) {
 	// T:TP 1041-1044.
 	if (engine.mode () == M_VERT || engine.mode () == M_IVERT) {
-	    engine.Ntrace ('spacer: ignored, vertical mode');
+	    engine.trace ('spacer: ignored, vertical mode');
 	    return;
 	}
 
 	if (engine.mode () == M_MATH || engine.mode () == M_DMATH) {
-	    engine.Ntrace ('spacer: ignored, math mode');
+	    engine.trace ('spacer: ignored, math mode');
 	    return;
 	}
 
 	if (engine.mode () == M_HORZ || engine.mode () == M_RHORZ) {
-	    engine.Ntrace ('spacer: h mode, accumed.');
+	    engine.trace ('spacer: h mode, accumed.');
 	    var sf = engine.get_special_value (T_INT, 'spacefactor').value;
 	    var xs = engine.get_parameter (T_GLUE, 'xspaceskip');
 	    var ss = engine.get_parameter (T_GLUE, 'spaceskip');
@@ -606,7 +606,7 @@ var InsertLetterCommand = (function InsertLetterCommand_closure () {
 	if (engine.mode () == M_MATH || engine.mode () == M_DMATH) {
 	    // XXX copy-pasted in letter and GivenChar
 	    var mc = engine.get_code (CT_MATH, this.ord);
-	    engine.Ntrace ('math-accum letter %C -> %x', this.ord, mc);
+	    engine.trace ('math-accum letter %C -> %x', this.ord, mc);
 	    var fam = engine.get_parameter (T_INT, 'fam');
 	    var node = mathlib.set_math_char (engine, this.ord, mc, fam);
 	    if (node != null) // may get null if character is active.
@@ -616,7 +616,7 @@ var InsertLetterCommand = (function InsertLetterCommand_closure () {
 
 	if (engine.ensure_horizontal (this))
 	    return; // this command will be reread after new paragraph is started.
-	engine.Ntrace ('accum letter %C', this.ord);
+	engine.trace ('accum letter %C', this.ord);
 	engine.accum (engine.get_misc ('cur_font').box_for_ord (this.ord));
     };
 
@@ -639,7 +639,7 @@ var InsertOtherCommand = (function InsertOtherCommand_closure () {
 	if (engine.mode () == M_MATH || engine.mode () == M_DMATH) {
 	    // XXX copy-pasted in letter and GivenChar
 	    var mc = engine.get_code (CT_MATH, this.ord);
-	    engine.Ntrace ('math-accum other %C -> %x', this.ord, mc);
+	    engine.trace ('math-accum other %C -> %x', this.ord, mc);
 	    var fam = engine.get_parameter (T_INT, 'fam');
 	    var node = mathlib.set_math_char (engine, this.ord, mc, fam);
 	    if (node != null) // may get null if character is active.
@@ -649,7 +649,7 @@ var InsertOtherCommand = (function InsertOtherCommand_closure () {
 
 	if (engine.ensure_horizontal (this))
 	    return; // this command will be reread after new paragraph is started.
-	engine.Ntrace ('accum other %C', this.ord);
+	engine.trace ('accum other %C', this.ord);
 	engine.accum (engine.get_misc ('cur_font').box_for_ord (this.ord));
     };
 
@@ -692,7 +692,7 @@ var GivenCharCommand = (function GivenCharCommand_closure () {
 	if (engine.mode () == M_MATH || engine.mode () == M_DMATH) {
 	    // XXX copy-pasted in letter and GivenChar
 	    var mc = engine.get_code (CT_MATH, this.ord);
-	    engine.Ntrace ('math-accum given-char %C -> %x', this.ord, mc);
+	    engine.trace ('math-accum given-char %C -> %x', this.ord, mc);
 	    var fam = engine.get_parameter (T_INT, 'fam');
 	    var node = mathlib.set_math_char (engine, this.ord, mc, fam);
 	    if (node != null) // may get null if character is active.
@@ -702,7 +702,7 @@ var GivenCharCommand = (function GivenCharCommand_closure () {
 
 	if (engine.ensure_horizontal (this))
 	    return; // this command will be reread after new paragraph is started.
-	engine.Ntrace ('accum given-char %C', this.ord);
+	engine.trace ('accum given-char %C', this.ord);
 	engine.accum (engine.get_misc ('cur_font').box_for_ord (this.ord));
     };
 
@@ -756,7 +756,7 @@ var GivenMathcharCommand = (function GivenMathcharCommand_closure () {
 	if (engine.mode () != M_MATH && engine.mode () != M_DMATH)
 	    throw new TexRuntimeError ('cannot insert math character in non-math context');
 
-	engine.Ntrace ('given-math %x', this.mathchar);
+	engine.trace ('given-math %x', this.mathchar);
 	var fam = engine.get_parameter (T_INT, 'fam');
 	var node = mathlib.set_math_char (engine, this.mathchar & 0xFF, this.mathchar, fam);
 	if (node != null) // may get null if character is active.
@@ -833,7 +833,7 @@ var GivenRegisterCommand = (function GivenRegisterCommand_closure () {
     proto.invoke = function GivenRegisterCommand_invoke (engine) {
 	engine.scan_optional_equals ();
 	var newval = engine.scan_valtype (this.valtype);
-	engine.Ntrace ('%s #%d = %o', this.desc, this.register, newval);
+	engine.trace ('%s #%d = %o', this.desc, this.register, newval);
 	this.as_valref (engine).set (engine, newval);
     };
 
@@ -911,7 +911,7 @@ var GivenFontCommand = (function GivenFontCommand_closure () {
     };
 
     proto.invoke = function GivenFontCommand_invoke (engine) {
-	engine.Ntrace ('activate font %o', this.font);
+	engine.trace ('activate font %o', this.font);
 	engine.set_misc ('cur_font', this.font);
     };
 
@@ -947,7 +947,7 @@ var FontFamilyCommand = (function FontFamilyCommand_closure () {
 	var index = engine.scan_int_4bit ();
 	engine.scan_optional_equals ();
 	var newval = engine.scan_valtype (T_FONT);
-	engine.Ntrace ('%s #%d = %o', this.name, index, newval);
+	engine.trace ('%s #%d = %o', this.name, index, newval);
 	(new FontFamilyValref (this.style, index)).set (engine, newval);
     };
 
@@ -978,7 +978,7 @@ var MathComponentCommand = (function MathComponentCommand_closure () {
 	if (engine.mode () != M_MATH && engine.mode () != M_DMATH)
 	    throw new TexRuntimeError ('\\%s illegal outside of math mode', this.name);
 
-	engine.Ntrace (this.name);
+	engine.trace (this.name);
 	var node = new AtomNode (this.mathtype);
 
 	mathlib.scan_math (engine, function (engine, subitem) {
@@ -1004,7 +1004,7 @@ var MathStyleCommand = (function MathStyleCommand_closure () {
     proto.invoke = function MathStyleCommand_invoke (engine) {
 	if (engine.mode () != M_MATH && engine.mode () != M_DMATH)
 	    throw new TexRuntimeError ('\\%s illegal outside of math mode', this.name);
-	engine.Ntrace (this.name);
+	engine.trace (this.name);
 	engine.accum (new MathStyleNode (this.mathstyle, false));
     };
 
@@ -1048,7 +1048,7 @@ var NamedParamCommand = (function NamedParamCommand_closure () {
     proto.invoke = function NamedParamCommand_invoke (engine) {
 	engine.scan_optional_equals ();
 	var newval = engine.scan_valtype (this.valtype);
-	engine.Ntrace ('%s = %o', this.name, newval);
+	engine.trace ('%s = %o', this.name, newval);
 	this.as_valref (engine).set (engine, newval);
     };
 
@@ -1077,7 +1077,7 @@ var SpecialValueCommand = (function SpecialValueCommand_closure () {
     proto.invoke = function SpecialValueCommand_invoke (engine) {
 	engine.scan_optional_equals ();
 	var newval = engine.scan_valtype (this.valtype);
-	engine.Ntrace ('%s = %o', this.name, newval);
+	engine.trace ('%s = %o', this.name, newval);
 	this.as_valref (engine).set (engine, newval);
     };
 

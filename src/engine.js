@@ -483,19 +483,15 @@ var Engine = (function Engine_closure () {
 	    this.set_font_family (MS_SCRIPTSCRIPT, i, nf);
 	}
 
-	if (args.debug_trace) {
-	    this.trace = function (t) { global_log ('{' + t + '}'); };
-	    this.Ntrace = this._Ntrace;
-	} else {
+	if (args.debug_trace)
+	    this.trace = this._trace;
+	else
 	    this.trace = function (t) {};
-	    this.Ntrace = this.trace;
-	}
     }
 
     var proto = Engine.prototype;
 
-    proto._Ntrace = function Engine__Ntrace (/*implicit*/) {
-	// the N is for New.
+    proto._trace = function Engine__trace (/*implicit*/) {
 	arguments[0] = '{' + arguments[0] + '}';
 	global_log (format.apply (null, arguments));
     };
@@ -646,7 +642,7 @@ var Engine = (function Engine_closure () {
     };
 
     proto.enter_mode = function Engine_enter_mode (mode) {
-	this.Ntrace ('<enter %s mode>', mode_abbrev[mode]);
+	this.trace ('<enter %s mode>', mode_abbrev[mode]);
 	this.mode_stack.push (mode);
 	this.build_stack.push ([]);
     };
@@ -654,7 +650,7 @@ var Engine = (function Engine_closure () {
     proto.leave_mode = function Engine_leave_mode () {
 	var oldmode = this.mode_stack.pop ();
 	var list = this.build_stack.pop ();
-	this.Ntrace ('<leave %s mode: %d items>', mode_abbrev[oldmode], list.length);
+	this.trace ('<leave %s mode: %d items>', mode_abbrev[oldmode], list.length);
 	return list;
     };
 
@@ -692,7 +688,7 @@ var Engine = (function Engine_closure () {
     };
 
     proto.enter_group = function Engine_enter_group (groupname, callback) {
-	this.Ntrace ('< ---> %d %s>', this.group_exit_stack.length, groupname);
+	this.trace ('< ---> %d %s>', this.group_exit_stack.length, groupname);
 	this.group_exit_stack.push ([groupname, callback, []]);
     };
 
@@ -708,7 +704,7 @@ var Engine = (function Engine_closure () {
 	    throw new TexRuntimeError ('ending a group that wasn\'t started');
 
 	var info = this.group_exit_stack.pop (); // [name, callback, aftergroup-toklist]
-	this.Ntrace ('< <--- %d %s>', this.group_exit_stack.length, info[0]);
+	this.trace ('< <--- %d %s>', this.group_exit_stack.length, info[0]);
 	info[1] (this);
 	this.push_toks (info[2]);
     };
@@ -734,7 +730,7 @@ var Engine = (function Engine_closure () {
 				       'gotten other group-ender; depth=%d cb=%0',
 				       this.group_exit_stack.length, info[1]);
 
-	this.Ntrace ('< <--- %d %s>', this.group_exit_stack.length, info[0]);
+	this.trace ('< <--- %d %s>', this.group_exit_stack.length, info[0]);
 	this.unnest_eqtb ();
 	this.push_toks (info[2]);
     };
@@ -751,7 +747,7 @@ var Engine = (function Engine_closure () {
 	// T:TP 1091. Due to our different page-builder approach,
 	// we run it unconditionally at the top of the function,
 	// before doing the stuff to start the next paragraph.
-	this.Ntrace ('@ new paragraph - maybe run page builder');
+	this.trace ('@ new paragraph - maybe run page builder');
 	if (this.mode () == M_VERT)
 	    this.run_page_builder ();
 
@@ -894,8 +890,8 @@ var Engine = (function Engine_closure () {
 	};
 
 	var outtl = this.get_parameter (T_TOKLIST, 'output');
-	this.Ntrace ('*output -> %T', outtl);
-	this.Ntrace ('*box255 = %U', vbox);
+	this.trace ('*output -> %T', outtl);
+	this.trace ('*box255 = %U', vbox);
 	this.nest_eqtb ();
 	this.enter_group ('output routine', finish_output.bind (this));
 	this.push (Token.new_cmd (this.commands['<end-group>']));
@@ -912,7 +908,7 @@ var Engine = (function Engine_closure () {
     };
 
     proto.ship_it = function Engine_ship_it (box) {
-	this.Ntrace ('shipping out');
+	this.trace ('shipping out');
 	this.shiptarget.process (box);
     };
 
@@ -946,7 +942,7 @@ var Engine = (function Engine_closure () {
 	    var p ='__wtpatches__/' + texfn + '.post';
 	    var lb = this.iostack.try_open_linebuffer (p);
 	    if (lb != null) {
-		this.Ntrace ('@ auto-inputting patch file %s', p);
+		this.trace ('@ auto-inputting patch file %s', p);
 		this.inputstack.push_linebuf (lb, null);
 	    }
 	}.bind (this));
@@ -964,10 +960,10 @@ var Engine = (function Engine_closure () {
 
 	if (this.build_stack[0].length == 0 &&
 	    this.get_special_value (T_INT, 'deadcycles').value == 0) {
-	    this.Ntrace ('... completely done');
+	    this.trace ('... completely done');
 	    this._force_end = true;
 	} else {
-	    this.Ntrace ('... forcing page build');
+	    this.trace ('... forcing page build');
 
 	    var hb = new HBox ();
 	    hb.width = this.get_parameter (T_DIMEN, 'hsize');
@@ -1215,9 +1211,9 @@ var Engine = (function Engine_closure () {
     proto.maybe_push_toklist = function Engine_maybe_push_toklist (name) {
 	var tl = this.get_parameter (T_TOKLIST, name);
 	if (!tl.toks.length)
-	    this.Ntrace ('@ %s: empty', name);
+	    this.trace ('@ %s: empty', name);
 	else {
-	    this.Ntrace ('@ %s: %T', name, tl);
+	    this.trace ('@ %s: %T', name, tl);
 	    this.push_toks (tl.toks);
 	}
     };
@@ -1247,7 +1243,7 @@ var Engine = (function Engine_closure () {
 		   tok.is_cmd (this, 'span') ||
 		   tok.is_cmd (this, 'cr') ||
 		   tok.is_cmd (this, 'crcr')) {
-	    this.Ntrace ('next_tok aligney: %o as=%d', tok, this.align_state);
+	    this.trace ('next_tok aligney: %o as=%d', tok, this.align_state);
 
 	    if (this.align_state == 0) {
 		// T:TP 789 -- insert "v" part of align statement
@@ -1286,7 +1282,7 @@ var Engine = (function Engine_closure () {
 
 	    if (cmd.same_cmd (this.commands['noexpand'])) {
 		tok = this.next_tok ();
-		this.Ntrace ('noexpand: %o', tok);
+		this.trace ('noexpand: %o', tok);
 		return tok;
 	    }
 
@@ -1863,12 +1859,12 @@ var Engine = (function Engine_closure () {
     proto.scan_box_for_accum = function Engine_scan_box_for_accum (cmd) {
 	function accum_box (engine, box) {
 	    if (engine.mode () == M_MATH || engine.mode () == M_DMATH) {
-		engine.Ntrace ('... accumulate the finished box (math)');
+		engine.trace ('... accumulate the finished box (math)');
 		var ord = new AtomNode (MT_ORD);
 		ord.nuc = box;
 		engine.accum (ord);
 	    } else {
-		engine.Ntrace ('... accumulate the finished box (non-math)');
+		engine.trace ('... accumulate the finished box (non-math)');
 		engine.accum (box);
 	    }
 	}
@@ -1884,7 +1880,7 @@ var Engine = (function Engine_closure () {
         // setbox operation.
 
         function set_the_box (engine, box) {
-            engine.Ntrace ('... finish setbox: #%d = %U', reg, box);
+            engine.trace ('... finish setbox: #%d = %U', reg, box);
             engine.set_register (T_BOX, reg, box);
 	}
 
@@ -1902,7 +1898,7 @@ var Engine = (function Engine_closure () {
 	    throw new TexRuntimeError ('afterassignment for boxes');
 	}
 
-	this.Ntrace ('finished: %U', box);
+	this.trace ('finished: %U', box);
 
 	if (box.btype == BT_VBOX)
 	    this.end_graf (); // in case we were in the middle of one. Noop if not.
@@ -1924,7 +1920,7 @@ var Engine = (function Engine_closure () {
 	}
 
 	function finish_box (engine) {
-	    this.Ntrace ('finish_box is_exact=%b spec=%o', is_exact, spec);
+	    this.trace ('finish_box is_exact=%b spec=%o', is_exact, spec);
 	    this.unnest_eqtb ();
 	    var box = ListBox.create (boxtype);
 	    box.list = this.leave_mode ();
@@ -1976,7 +1972,7 @@ var Engine = (function Engine_closure () {
 
     proto.enter_math = function Engine_enter_math (mode, is_outer) {
 	this.enter_mode (mode);
-	this.Ntrace ('<is_outer=%b>', is_outer);
+	this.trace ('<is_outer=%b>', is_outer);
 	this.nest_eqtb ();
 
 	if (is_outer)
@@ -2076,7 +2072,7 @@ var Engine = (function Engine_closure () {
 		col.u_tmpl.push (tok);
 	    }
 
-	    this.Ntrace ('align: u = %T', col.u_tmpl);
+	    this.trace ('align: u = %T', col.u_tmpl);
 
 	    while (true) {
 		// T:TP 783
@@ -2094,7 +2090,7 @@ var Engine = (function Engine_closure () {
 		col.v_tmpl.push (tok);
 	    }
 
-	    this.Ntrace ('align: v = %T', col.v_tmpl);
+	    this.trace ('align: v = %T', col.v_tmpl);
 	    astate.columns.push (col);
 	}
 
@@ -2140,7 +2136,7 @@ var Engine = (function Engine_closure () {
     };
 
     proto.align_begin_row = function Engine_align_begin_row () {
-	this.Ntrace ('align: begin row');
+	this.trace ('align: begin row');
 	this.nest_eqtb ();
 
 	switch (this.mode ()) {
@@ -2161,7 +2157,7 @@ var Engine = (function Engine_closure () {
     };
 
     proto.align_begin_span = function Engine_align_begin_span () {
-	this.Ntrace ('align: begin span');
+	this.trace ('align: begin span');
 	this.nest_eqtb ();
 
 	if (this.mode () == M_RHORZ)
@@ -2180,7 +2176,7 @@ var Engine = (function Engine_closure () {
     };
 
     proto.align_begin_col = function Engine_align_begin_col (tok) {
-	this.Ntrace ('align: begin col');
+	this.trace ('align: begin col');
 
 	if (tok.is_cmd (this, 'omit')) {
 	    this.align_state = 0;
@@ -2199,7 +2195,7 @@ var Engine = (function Engine_closure () {
 
     proto.align_end_col = function Engine_align_end_col () {
 	// returns true if current row was also finished
-	this.Ntrace ('align: end col');
+	this.trace ('align: end col');
 
 	var l = this.align_stack.length;
 	if (l == 0)
@@ -2275,7 +2271,7 @@ var Engine = (function Engine_closure () {
 
     proto.align_end_row = function Engine_align_end_row () {
 	//TTP 799
-	this.Ntrace ('align: end row');
+	this.trace ('align: end row');
 
 	var l = this.align_stack.length;
 	if (l == 0)
@@ -2295,7 +2291,7 @@ var Engine = (function Engine_closure () {
 
     proto.finish_align = function Engine_finish_align () {
 	// TTP 800
-	this.Ntrace ('align: finish whole thing');
+	this.trace ('align: finish whole thing');
 
 	var info = this.group_exit_stack.pop (); // [name, callback, aftergroup-toklist]
 	if (info[1].is_align !== true)
