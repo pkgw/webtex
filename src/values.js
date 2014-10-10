@@ -8,9 +8,9 @@ var TexInt = (function TexInt_closure () {
 	if (value instanceof TexInt) {
 	    this.value = value;
 	} else if (typeof value != 'number') {
-	    throw new TexInternalError ('non-numeric TexInt value ' + value);
+	    throw new TexInternalError ('non-numeric TexInt value %o', value);
 	} else if (value % 1 != 0) {
-	    throw new TexInternalError ('non-integer TexInt value ' + value);
+	    throw new TexInternalError ('non-integer TexInt value %o', value);
 	} else {
 	    this.value = value | 0;
 	}
@@ -34,9 +34,9 @@ var TexInt = (function TexInt_closure () {
 	    return value.value;
 
 	if (typeof value != 'number')
-	    throw new TexInternalError ('non-numeric tex-int value ' + value);
+	    throw new TexInternalError ('non-numeric tex-int value %o', value);
 	if (value % 1 != 0)
-	    throw new TexInternalError ('non-integer tex-int value ' + value);
+	    throw new TexInternalError ('non-integer tex-int value %o', value);
 
 	value = value | 0; // magic coercion to trustworthy int representation.
 
@@ -199,7 +199,7 @@ var Scaled = (function Scaled_closure () {
 
 	n = TexInt.xcheck (n);
 	if (!(y instanceof Scaled))
-	    throw new TexInternalError ('nx+y called with non-Scaled y: ' + y);
+	    throw new TexInternalError ('nx+y called with non-Scaled y: %o', y);
 	return mult_and_add (n, this, y, SC_MAX - 1);
     };
 
@@ -347,7 +347,7 @@ var Dimen = (function Dimen_closure () {
 
     Dimen.new_scaled = function Dimen_new_scaled (sp) {
 	if (!(sp instanceof Scaled))
-	    throw new TexInternalError ('expected Scaled value, got ' + sp);
+	    throw new TexInternalError ('expected Scaled value, got %o', sp);
 
 	var d = new Dimen ();
 	d.sp = sp;
@@ -359,7 +359,7 @@ var Dimen = (function Dimen_closure () {
 	// x: Scaled
 	k = TexInt.xcheck (k);
 	if (!(x instanceof Scaled))
-	    throw new TexInternalError ('expected Scaled value, got ' + x);
+	    throw new TexInternalError ('expected Scaled value, got %o', x);
 
 	var d = new Dimen ();
 	d.sp = x.times_n_plus_y (k, new Scaled (0));
@@ -401,7 +401,7 @@ var Dimen = (function Dimen_closure () {
 	else if (val instanceof Dimen)
 	    this.sp = val.sp;
 	else
-	    throw new TexInternalError ('expected Scaled or Dimen value, got ' + val);
+	    throw new TexInternalError ('expected Scaled or Dimen value, got %o', val);
 	return this;
     };
 
@@ -595,9 +595,9 @@ var Toklist = (function Toklist_closure () {
 	    this.toks = toks.slice ();
 	    for (var i = 0; i < toks.length; i++)
 		if (!(toks[i] instanceof Token))
-		    throw new TexInternalError ('non-token in toklist: ' + toks[i]);
+		    throw new TexInternalError ('non-token in toklist: %o', toks[i]);
 	} else
-	    throw new TexInternalError ('unexpected Toklist() argument: ' + toks);
+	    throw new TexInternalError ('unexpected Toklist() argument: %o', toks);
     }
 
     inherit (Toklist, Value);
@@ -768,7 +768,7 @@ var Font = (function Font_closure () {
 	if (other == null)
 	    return false;
 	if (!(other instanceof Font))
-	    throw new TexInternalError ('comparing Font to ' + other);
+	    throw new TexInternalError ('comparing Font to %o', other);
 	return (this.ident == other.ident) && (this.scale == other.scale);
     };
 

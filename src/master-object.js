@@ -25,16 +25,17 @@ var Master = (function Master_closure () {
 	var data = msgevent.data;
 
 	if (typeof data != 'object')
-	    throw new TexInternalError ('illegal message object ' + data);
+	    throw new TexInternalError ('illegal message object %o', data);
 
 	if (!data.hasOwnProperty ('_kind') || typeof data._kind != 'string')
-	    throw new TexInternalError ('master: don\'t know how to handle message ' +
-					JSON.stringify (data));
+	    throw new TexInternalError ('master: don\'t know how to handle message %J',
+					data);
 
 	var handler = this['handle_' + data._kind];
 
 	if (typeof handler != 'function')
-	    throw new TexInternalError ('master: no handler for event kind ' + data._kind);
+	    throw new TexInternalError ('master: no handler for event kind %o',
+					data._kind);
 
 	handler.bind (this) (data);
     };
@@ -53,10 +54,10 @@ var Master = (function Master_closure () {
 	    this.launch ();
 
 	if (typeof kind != 'string')
-	    throw new TexInternalError ('illegal message kind ' + kind);
+	    throw new TexInternalError ('illegal message kind %o', kind);
 
 	if (typeof data != 'object')
-	    throw new TexInternalError ('illegal message object ' + data);
+	    throw new TexInternalError ('illegal message object %o', data);
 
 	data._kind = kind;
 	this.worker.postMessage (data);

@@ -49,7 +49,8 @@ var TfmReader = (function TfmReader_closure () {
     function TfmReader (contents, scale_factor) {
 	// scale_factor is funky; see below.
 	if (!(contents instanceof ArrayBuffer))
-	    throw new TexInternalError ('TfmReader expected ArrayBuffer; got ' + contents);
+	    throw new TexInternalError ('TfmReader expected ArrayBuffer; got %o',
+					contents);
 	this.contents = contents;
 	var dv = this.dv = new DataView (contents);
 
@@ -255,7 +256,7 @@ var TfmReader = (function TfmReader_closure () {
 
     proto.extensible_recipe = function TfmReader_extensible_recipe (ord) {
 	if (!this.is_extensible (ord))
-	    throw new TexInternalError ('no extensible recipe for ' + ord);
+	    throw new TexInternalError ('no extensible recipe for %o', ord);
 	return this.extensible[this.ord_rembytes[ord]];
     };
 

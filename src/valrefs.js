@@ -3,10 +3,10 @@
 var RegisterValref = (function RegisterValref_closure () {
     function RegisterValref (valtype, reg) {
 	if (!vt_ok_for_register[valtype])
-	    throw new TexInternalError ('illegal valtype for register: ' +
+	    throw new TexInternalError ('illegal valtype for register: %s',
 					vt_names[valtype]);
 	if (reg < 0 || reg > 255)
-	    throw new TexInternalError ('illegal register ' + reg);
+	    throw new TexInternalError ('illegal register %d', reg);
 
 	Valref.call (this, valtype);
 	this.reg = reg;
@@ -30,7 +30,7 @@ var RegisterValref = (function RegisterValref_closure () {
 var ParamValref = (function ParamValref_closure () {
     function ParamValref (valtype, name) {
 	if (!vt_ok_for_parameter[valtype])
-	    throw new TexInternalError ('illegal valtype for parameter: ' +
+	    throw new TexInternalError ('illegal valtype for parameter: %s',
 					vt_names[valtype]);
 
 	Valref.call (this, valtype);

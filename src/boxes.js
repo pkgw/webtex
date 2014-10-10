@@ -38,7 +38,7 @@ var Boxlike = (function Boxlike_closure () {
 var ListBox = (function ListBox_closure () {
     function ListBox (btype) {
 	if (btype < BT_VOID || btype > BT_CBOX)
-	    throw new TexInternalError ('ListBox needs boxtype; got ' + btype);
+	    throw new TexInternalError ('ListBox needs boxtype; got %o', btype);
 
 	Boxlike.call (this);
 	this.ltype = LT_BOX;
@@ -78,7 +78,7 @@ var ListBox = (function ListBox_closure () {
 	    return new HBox ();
 	if (btype == BT_VBOX)
 	    return new VBox ();
-	throw new TexInternalError ('unexpected box type ' + btype);
+	throw new TexInternalError ('unexpected box type %o', btype);
     };
 
     return ListBox;
@@ -229,7 +229,7 @@ var HBox = (function HBox_closure () {
 	if (this.list.length == 0)
 	    return; // ignore unglued error in this case.
 	if (this.glue_state == 0)
-	    throw new TexInternalError ('cannot traverse unglued box ' + this);
+	    throw new TexInternalError ('cannot traverse unglued box %o', this);
 
 	var gs = this.glue_state;
 	var gr = this.glue_set; // the glue set ratio
@@ -401,7 +401,7 @@ var VBox = (function VBox_closure () {
 	if (this.list.length == 0)
 	    return; // ignore unglued error in this case.
 	if (this.glue_state == 0)
-	    throw new TexInternalError ('cannot traverse unglued box' + this);
+	    throw new TexInternalError ('cannot traverse unglued box %o', this);
 
 	var gs = this.glue_state;
 	var gr = this.glue_set; // the glue set ratio
@@ -453,7 +453,8 @@ var CanvasBox = (function CanvasBox_closure () {
 
     function CanvasBox (srcbox) {
 	if (!(srcbox instanceof HBox || srcbox instanceof VBox))
-	    throw new TexInternalError ('CanvasBox source should be HBox or VBox; got ' + srcbox);
+	    throw new TexInternalError ('CanvasBox source should be HBox or ' +
+					'VBox; got %o', srcbox);
 
 	ListBox.call (this, BT_CBOX);
 	this.graphics = [];
@@ -543,7 +544,7 @@ var CanvasBox = (function CanvasBox_closure () {
 			  w: subitem.width.sp.value,
 			  h: subitem.height.sp.value + subitem.depth.sp.value});
 	    } else {
-		throw new TexInternalError ('unhandled CanvasBox graphic ' + subitem);
+		throw new TexInternalError ('unhandled CanvasBox graphic %o', subitem);
 	    }
 	}
 
@@ -575,9 +576,9 @@ var Rule = (function Rule_closure () {
 var Character = (function Character_closure () {
     function Character (font, ord) {
 	if (!(font instanceof Font))
-	    throw new TexInternalError ('Character needs font; got ' + font);
+	    throw new TexInternalError ('Character needs font; got %o', font);
 	if (!(ord >= 0 && ord < 256))
-	    throw new TexInternalError ('Character needs ord; got ' + ord);
+	    throw new TexInternalError ('Character needs ord; got %o', ord);
 
 	Boxlike.call (this);
 	this.ltype = LT_CHARACTER;
@@ -600,7 +601,7 @@ var Character = (function Character_closure () {
 var MathDelim = (function MathDelim_closure () {
     function MathDelim (width, is_after) {
 	if (!(width instanceof Dimen))
-	    throw new TexInternalError ('MathDelim needs dimen; got ' + width);
+	    throw new TexInternalError ('MathDelim needs dimen; got %o', width);
 
 	Boxlike.call (this);
 	this.ltype = LT_MATH;
@@ -622,7 +623,7 @@ var MathDelim = (function MathDelim_closure () {
 var Mark = (function Mark_closure () {
     function Mark (toks) {
 	if (!(toks instanceof Array))
-	    throw new TexInternalError ('Mark needs Token array; got ' + toks);
+	    throw new TexInternalError ('Mark needs Token array; got %o', toks);
 
 	this.ltype = LT_MARK;
 	this.toks = toks;
@@ -642,7 +643,7 @@ var Mark = (function Mark_closure () {
 var Kern = (function Kern_closure () {
     function Kern (amount) {
 	if (!(amount instanceof Dimen))
-	    throw new TexInternalError ('Kern needs Dimen; got ' + amount);
+	    throw new TexInternalError ('Kern needs Dimen; got %o', amount);
 
 	this.ltype = LT_KERN;
 	this.amount = amount;
@@ -662,7 +663,7 @@ var Kern = (function Kern_closure () {
 var Special = (function Special_closure () {
     function Special (toks) {
 	if (!(toks instanceof Array))
-	    throw new TexInternalError ('Special needs Token array; got ' + toks);
+	    throw new TexInternalError ('Special needs Token array; got %o', toks);
 
 	this.ltype = LT_SPECIAL;
 	this.toks = toks;
@@ -699,7 +700,7 @@ var Penalty = (function Penalty_closure () {
 var BoxGlue = (function BoxGlue_closure () {
     function BoxGlue (amount) {
 	if (!(amount instanceof Glue))
-	    throw new TexInternalError ('BoxGlue needs glue; got ' + amount);
+	    throw new TexInternalError ('BoxGlue needs glue; got %o', amount);
 
 	this.ltype = LT_GLUE;
 	this.amount = amount;
@@ -719,7 +720,7 @@ var BoxGlue = (function BoxGlue_closure () {
 var StartTag = (function StartTag_closure () {
     function StartTag (name, attrs) {
 	if (typeof (name) != 'string')
-	    throw new TexInternalError ('StartTag needs string; got ' + name);
+	    throw new TexInternalError ('StartTag needs string; got %o', name);
 
 	this.ltype = LT_STARTTAG;
 	this.name = name;
@@ -740,7 +741,7 @@ var StartTag = (function StartTag_closure () {
 var EndTag = (function EndTag_closure () {
     function EndTag (name) {
 	if (typeof (name) != 'string')
-	    throw new TexInternalError ('StartTag needs string; got ' + name);
+	    throw new TexInternalError ('StartTag needs string; got %o', name);
 
 	this.ltype = LT_ENDTAG;
 	this.name = name;

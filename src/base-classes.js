@@ -97,35 +97,35 @@ var Value = (function Value_closure () {
 
 	if (valtype == T_DIMEN) {
 	    if (!(value instanceof Dimen))
-		throw new TexInternalError ('value is not dimen: ' + value);
+		throw new TexInternalError ('value is not dimen: %o', value);
 	    return value;
 	}
 
 	if (valtype == T_GLUE || valtype == T_MUGLUE) {
 	    if (!(value instanceof Glue))
-		throw new TexInternalError ('value is not (mu)glue: ' + value);
+		throw new TexInternalError ('value is not (mu)glue: %o', value);
 	    return value;
 	}
 
 	if (valtype == T_TOKLIST) {
 	    if (!(value instanceof Toklist))
-		throw new TexInternalError ('value is not toklist: ' + value);
+		throw new TexInternalError ('value is not toklist: %o', value);
 	    return value;
 	}
 
 	if (valtype == T_BOX) {
 	    if (!(value instanceof ListBox))
-		throw new TexInternalError ('value is not box: ' + value);
+		throw new TexInternalError ('value is not box: %o', value);
 	    return value;
 	}
 
 	if (valtype == T_FONT) {
 	    if (!(value instanceof Font))
-		throw new TexInternalError ('value is not font: ' + value);
+		throw new TexInternalError ('value is not font: %o', value);
 	    return value;
 	}
 
-	throw new TexInternalError ('unrecognized valtype ' + valtype);
+	throw new TexInternalError ('unrecognized valtype %o', valtype);
     };
 
     return Value;
@@ -222,7 +222,7 @@ var Command = (function Command_closure () {
 
     proto.invoke = function Command_invoke (engine) {
 	throw new TexInternalError ('tried to evaluate undefined/' +
-				    'un-evaluatable command ' + this.name);
+				    'un-evaluatable command %s', this.name);
     };
 
     proto.same_cmd = function Command_same_cmd (other) {

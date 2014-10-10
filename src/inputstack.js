@@ -16,9 +16,9 @@ var ToklistInput = (function ToklistInput_closure () {
 
     proto.get_tok = function ToklistInput_get_tok (toknum) {
 	if (toknum < 0)
-	    throw new TexInternalError ('negative toknum ' + toknum);
+	    throw new TexInternalError ('negative toknum %o', toknum);
 	if (toknum > this.toks.length)
-	    throw new TexInternalError ('overlarge toknum ' + toknum);
+	    throw new TexInternalError ('overlarge toknum %o', toknum);
 
 	if (toknum == this.toks.length)
 	    return EOF;
@@ -47,10 +47,9 @@ var TokenizerInput = (function TokenizerInput_closure () {
 
     proto.get_tok = function TokenizerInput_get_tok (toknum) {
 	if (toknum < this.first_saved_toknum)
-	    throw new TexInternalError ('trying to rewind too far; want ' +
-					'toknum ' + toknum + ', but I ' +
-					'only remember as early as ' +
-					this.first_saved_toknum);
+	    throw new TexInternalError ('trying to rewind too far; want toknum %d, ' +
+					'but I only remember as early as %d',
+					toknum, this.first_saved_toknum);
 
 	var delta = toknum - this.first_saved_toknum;
 
@@ -58,7 +57,7 @@ var TokenizerInput = (function TokenizerInput_closure () {
 	    return this.saved_tokens[delta];
 
 	if (delta > this.saved_tokens.length)
-	    throw new TexInternalError ('overlarge toknum ' + toknum);
+	    throw new TexInternalError ('overlarge toknum %o', toknum);
 
 	var tok = this.tokenize_next ();
 	if (tok !== EOF)
@@ -73,9 +72,8 @@ var TokenizerInput = (function TokenizerInput_closure () {
 	var delta = toknum - this.first_saved_toknum;
 
 	if (delta > this.saved_tokens.length)
-	    throw new TexInternalError ('overlarge toknum ' + toknum +
-					'; delta ' + delta + '; stl ' +
-					this.saved_tokens.length);
+	    throw new TexInternalError ('overlarge toknum %d; delta=%d stl=%d',
+					toknum, delta, this.saved_tokens.length);
 
 	this.saved_tokens = this.saved_tokens.slice (delta);
 	this.first_saved_toknum = toknum;

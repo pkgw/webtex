@@ -59,7 +59,7 @@ var AtomNode = (function AtomNode_closure () {
 
     function AtomNode (ltype) {
 	if (ltype < MT_ORD || ltype > MT_VCENTER)
-	    throw new TexInternalError ('illegal Atom type ' + ltype);
+	    throw new TexInternalError ('illegal Atom type %d', ltype);
 
 	MathNode.call (this, ltype);
 	this.nuc = null;
@@ -1111,7 +1111,7 @@ var mathlib = (function mathlib_closure () {
 	    case MT_INNER:
 	    case MT_UNDER:
 	    case MT_ACCENT:
-		throw new TexInternalError ('unimplemented math ' + q);
+		throw new TexInternalError ('unimplemented math %o', q);
 	    case MT_SCHOICE:
 		if (state.style == MS_DISPLAY)
 		    p = q.in_display;
@@ -1145,9 +1145,9 @@ var mathlib = (function mathlib_closure () {
 		break;
 	    case LT_RULE:
 	    case LT_GLUE:
-		throw new TexInternalError ('unimplemented not-quite-math ' + q);
+		throw new TexInternalError ('unimplemented not-quite-math %o', q);
 	    default:
-		throw new TexInternalError ('unrecognized math ' + q);
+		throw new TexInternalError ('unrecognized math %o', q);
 	    }
 
 	    if (process_atom) {
@@ -1176,7 +1176,7 @@ var mathlib = (function mathlib_closure () {
 						  state.cramped, false);
 		    p = [hpack_natural (sublist)];
 		} else {
-		    throw new TexInternalError ('unrecognized nucleus value ' + q.nuc);
+		    throw new TexInternalError ('unrecognized nucleus value %o', q.nuc);
 		}
 
 		q.new_hlist = p;
@@ -1267,7 +1267,7 @@ var mathlib = (function mathlib_closure () {
 		do_usual = false;
 		break;
 	    default:
-		throw new TexInternalError ('unexpected math node ' + q);
+		throw new TexInternalError ('unexpected math node %o', q);
 	    }
 
 	    if (do_usual) {

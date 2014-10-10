@@ -1206,7 +1206,7 @@ var Engine = (function Engine_closure () {
 	if (toks instanceof Toklist)
 	    toks = toks.toks; // convenience.
 	if (!(toks instanceof Array))
-	    throw new TexInternalError ('illegal push_toks argument: ' + toks);
+	    throw new TexInternalError ('illegal push_toks argument: %o', toks);
 	this.inputstack.push_toklist (toks, callback);
     };
 
@@ -1748,7 +1748,7 @@ var Engine = (function Engine_closure () {
 	    return this.scan_toks_value ();
 	if (valtype == T_FONT)
 	    return this.scan_font_value ();
-	throw new TexInternalError ('can\'t generically scan value type ' + valtype);
+	throw new TexInternalError ('can\'t generically scan value type %o', valtype);
     };
 
     proto.scan_r_token = function Engine_scan_r_token () {

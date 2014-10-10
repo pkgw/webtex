@@ -105,8 +105,7 @@ var Token = (function Token_closure () {
 	    else {
 		var cmdclass = Command.catcode_commands[this.catcode];
 		if (cmdclass === null)
-		    throw new TexInternalError ('cannot commandify ' +
-						'token ' + this);
+		    throw new TexInternalError ('cannot commandify token %o', this);
 		cmd = new cmdclass (this.ord);
 		name = '[char ' + String.fromCharCode (this.ord) + ']';
 	    }
@@ -116,7 +115,7 @@ var Token = (function Token_closure () {
 	} else if (this.kind == TK_PURECMD) {
 	    return this.cmd;
 	} else {
-	    throw new TexInternalError ('cannot commandify token ' + this);
+	    throw new TexInternalError ('cannot commandify token %o', this);
 	}
 
 	if (cmd === null)
@@ -250,7 +249,7 @@ var Token = (function Token_closure () {
 	    return;
 	}
 
-	throw new TexInternalError ('cannot assign command for token ' + this);
+	throw new TexInternalError ('cannot assign command for token %o', this);
     };
 
 
@@ -315,9 +314,9 @@ var Token = (function Token_closure () {
 
     Token.new_char = function Token_new_char (catcode, ord) {
 	if (catcode < 0 || catcode > 15)
-	    throw new TexInternalError ('illegal token catcode ' + catcode);
+	    throw new TexInternalError ('illegal token catcode %d', catcode);
 	if (ord < 0 || ord > 255)
-	    throw new TexInternalError ('illegal token ord ' + ord);
+	    throw new TexInternalError ('illegal token ord %d', ord);
 
 	var tok = new Token ();
 	tok.kind = TK_CHAR;
@@ -328,7 +327,7 @@ var Token = (function Token_closure () {
 
     Token.new_param = function Token_new_param (pnum) {
 	if (pnum < 1 || pnum > 9)
-	    throw new TexInternalError ('illegal param num ' + pnum);
+	    throw new TexInternalError ('illegal param num %d', pnum);
 
 	var tok = new Token ();
 	tok.kind = TK_PARAM;

@@ -671,7 +671,7 @@ var GivenCharCommand = (function GivenCharCommand_closure () {
     function GivenCharCommand (ord) {
 	Command.call (this);
 	if (ord < 0 || ord > 255)
-	    throw new TexInternalError ('illegal character ordinal ' + ord);
+	    throw new TexInternalError ('illegal character ordinal %d', ord);
 	this.ord = ord;
     }
 
@@ -735,7 +735,7 @@ var GivenMathcharCommand = (function GivenMathcharCommand_closure () {
     function GivenMathcharCommand (mathchar) {
 	Command.call (this);
 	if (mathchar < 0 || mathchar > 0x8000)
-	    throw new TexInternalError ('illegal math character numder ' + mathchar);
+	    throw new TexInternalError ('illegal math character number %d', mathchar);
 	this.mathchar = mathchar;
     }
 
@@ -792,10 +792,10 @@ var GivenRegisterCommand = (function GivenRegisterCommand_closure () {
     function GivenRegisterCommand (valtype, desc, register) {
 	Command.call (this);
 	if (!vt_ok_for_register[valtype])
-	    throw new TexInternalError ('illegal valtype for register: ' +
+	    throw new TexInternalError ('illegal valtype for register: %s',
 					vt_names[valtype]);
 	if (register < 0 || register > 255)
-	    throw new TexInternalError ('illegal register number ' + register);
+	    throw new TexInternalError ('illegal register number %d', register);
 
 	this.valtype = valtype;
 	this.desc = desc;
@@ -849,7 +849,7 @@ var GivenRegisterCommand = (function GivenRegisterCommand_closure () {
 var VariableRegisterCommand = (function VariableRegisterCommand_closure () {
     function VariableRegisterCommand (name, valtype) {
 	if (!vt_ok_for_register[valtype])
-	    throw new TexInternalError ('illegal valtype for register: ' +
+	    throw new TexInternalError ('illegal valtype for register: %s',
 					vt_names[valtype]);
 
 	Command.call (this);
@@ -1017,7 +1017,7 @@ var MathStyleCommand = (function MathStyleCommand_closure () {
 var NamedParamCommand = (function NamedParamCommand_closure () {
     function NamedParamCommand (name, valtype) {
 	if (!vt_ok_for_parameter[valtype])
-	    throw new TexInternalError ('illegal valtype for parameter: ' +
+	    throw new TexInternalError ('illegal valtype for parameter: %s',
 					vt_names[valtype]);
 
 	Command.call (this);

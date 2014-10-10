@@ -9,9 +9,9 @@ function post_message (kind, data) {
     // the type-checking of the "data" argument is important.
 
     if (typeof kind != 'string')
-	throw new TexInternalError ('illegal message kind ' + kind);
+	throw new TexInternalError ('illegal message kind %o', kind);
     if (typeof data != 'object')
-	throw new TexInternalError ('illegal message object ' + data);
+	throw new TexInternalError ('illegal message object %o', data);
 
     data._kind = kind;
     postMessage (data);
@@ -56,13 +56,13 @@ onmessage = function webtex_worker_onmessage (event) {
     var data = event.data;
 
     if (!data.hasOwnProperty ('_kind'))
-	throw new TexInternalError ('worker: don\'t know how to handle event ' + event);
+	throw new TexInternalError ('worker: don\'t know how to handle event %o', event);
 
     if (typeof data._kind !== 'string')
-	throw new TexInternalError ('worker: don\'t know how to handle event ' + event);
+	throw new TexInternalError ('worker: don\'t know how to handle event %o', event);
 
     if (!worker_api_endpoints.hasOwnProperty (data._kind))
-	throw new TexInternalError ('worker: unrecognized API endpoint ' + data._kind);
+	throw new TexInternalError ('worker: unrecognized API endpoint %o', data._kind);
 
     worker_api_endpoints[data._kind] (data);
 };

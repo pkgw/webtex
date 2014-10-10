@@ -120,7 +120,7 @@ var TexRuntimeError = (function TexRuntimeErrorClosure () {
 
 var TexInternalError = (function TexInternalErrorClosure () {
     function TexInternalError () {
-	var tmp = Error.apply (this, arguments);
+	var tmp = Error.call (this, format.apply (null, arguments));
 	tmp.name = this.name = 'TexInternalError';
 	this.message = tmp.message;
 	this.stack = tmp.stack;
