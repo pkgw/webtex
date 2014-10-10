@@ -3,15 +3,17 @@ var command_info = [
 ];
 
 function fill_cseq_commands (engine) {
+    var registry = register_command._registry;
+
     command_info.forEach (function (item) {
 	var name = item[0], escname = item[1], expand = item[2],
 	    cond = item[3], afm = item[4];
 	var cmd = null;
 
-	if (!commands.hasOwnProperty (escname))
+	if (!registry.hasOwnProperty (escname))
 	    cmd = new CommandUnimplPrimitive (name);
 	else {
-	    var val = commands[escname];
+	    var val = registry[escname];
 
 	    if (val.prototype instanceof Command)
 		cmd = new val ();

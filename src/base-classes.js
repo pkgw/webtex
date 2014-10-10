@@ -314,3 +314,21 @@ var Command = (function Command_closure () {
 
     return Command;
 })();
+
+
+// Registry of command specifications.
+
+var register_command = (function register_command_wrapper () {
+    var commands = {};
+
+    function register_command (name, value) {
+	if (commands[name] != null)
+	    throw new TexInternalError ('duplicate registration of command "%s"', name);
+
+	commands[name] = value;
+    }
+
+    register_command._registry = commands;
+
+    return register_command;
+}) ();
