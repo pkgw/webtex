@@ -9,19 +9,6 @@ function webtex_export (name, value) {
 }
 
 
-// Pluggable backends. Depending on the flavor of Webtex we're building, there
-// may be different implementations of common APIs that we want to use.
-
-var backends = {};
-
-function webtex_register_backend (name, value) {
-    if (backends.hasOwnProperty (name))
-	throw new TexInternalError ('registering redundant backend ' + name);
-
-    backeds[name] = value;
-}
-
-
 // Webtex-global helper functions.
 
 var global_log = (function () {
