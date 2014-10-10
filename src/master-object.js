@@ -28,7 +28,7 @@ var Master = (function Master_closure () {
 	    throw new TexInternalError ('illegal message object %o', data);
 
 	if (!data.hasOwnProperty ('_kind') || typeof data._kind != 'string')
-	    throw new TexInternalError ('master: don\'t know how to handle message %J',
+	    throw new TexInternalError ('master: don\'t know how to handle message %j',
 					data);
 
 	var handler = this['handle_' + data._kind];

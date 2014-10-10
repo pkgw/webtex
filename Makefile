@@ -16,6 +16,7 @@ sharedjs = \
   src/str-utils.js \
   src/base-classes.js \
   src/values.js \
+  src/conditionals.js \
   src/boxes.js \
   src/math.js \
   src/align.js \

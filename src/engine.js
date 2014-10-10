@@ -390,7 +390,6 @@ var EquivTable = (function EquivTable_closure () {
 
 var Engine = (function Engine_closure () {
     var AF_GLOBAL = 1 << 0;
-    var CS_FI = 0, CS_ELSE_FI = 1, CS_OR_ELSE_FI = 2, CS_INCONDITION = 3;
     var BO_SETBOX = 0;
 
     function Engine (args) {
@@ -437,7 +436,6 @@ var Engine = (function Engine_closure () {
 	this.build_stack = [[]];
 	this.group_exit_stack = [];
 	this.boxop_stack = [];
-	this.conditional_stack = [];
 
 	this.align_stack = [];
 	this.align_state = 1000000;
@@ -451,6 +449,8 @@ var Engine = (function Engine_closure () {
 	    this.infiles[i] = null;
 	    this.outfiles[i] = null;
 	}
+
+	engine_proto._apply_inits (this);
 
 	this.commands = {};
 	fill_cseq_commands (this);
@@ -1033,11 +1033,13 @@ var Engine = (function Engine_closure () {
 	if (this.after_assign_token != null)
 	    throw new TexRuntimeError ('cannot serialize Engine with active ' +
 				       'after_assign_token');
-	if (this.conditional_stack.length > 0)
-	    throw new TexRuntimeError ('can only serialize Engine without open conditionals');
+
 	for (var i = 0; i < 16; i++)
 	    if (this.infiles[i] != null)
 		throw new TexRuntimeError ('cannot serialize Engine with open input files');
+	if (!engine_proto._is_clean (this))
+	    // XXX terrible message.
+	    throw new TexRuntimeError ('cannot serialize Engine with unclean state');
     };
 
     proto.serialize = function Engine_serialize () {
@@ -1836,204 +1838,6 @@ var Engine = (function Engine_closure () {
     };
 
 
-    // Conditionals
-
-    proto.start_parsing_if_condition = function Engine_start_parsing_if_condition () {
-	this.conditional_stack.push (CS_INCONDITION);
-    };
-
-    proto.done_parsing_if_condition = function Engine_done_parsing_if_condition () {
-	while (this.conditional_stack.length) {
-	    var mode = this.conditional_stack.pop ();
-	    if (mode == CS_INCONDITION)
-		return;
-
-	    // This can legally happen if there was an \if inside the
-	    // condition that hasn't wrapped up, e.g.:
-	    //    \ifcase \iftrue1 \else blah \fi \else ... \fi
-	    // parse_int will stop before the \fi, so that a CS_ELSE_FI will
-	    // still be on conditional_stack.
-	    //
-	    // We need to just eat up any \ifs that are above us on the stack.
-	    // I'm a little scared by this but it seems to be what we're supposed
-	    // to do: T:TP 500.
-
-	    var depth = 0;
-
-	    while (true) {
-		var tok = this.next_tok_throw ();
-
-		if (tok.is_cmd (this, 'fi')) {
-		    if (depth > 0)
-			depth -= 1;
-		    else
-			break;
-		} else if (tok.is_conditional (this)) {
-		    depth += 1;
-		}
-	    }
-	}
-    };
-
-    proto.handle_if = function Engine_handle_if (result) {
-	/* Assumes that an \if has just been read in and the result of the
-         * test is `result`. We now prepare to handle the outcome. We'll have
-         * to evaluate one branch and skip the other, taking care to pay
-         * attention to nesting in the latter. We'll also have to swallow
-         * \else and \fi tokens as appropriate. */
-
-	if (result) {
-	    /* All we need to do now is mark that we're an expecting an \else
-             * or \fi, and that the else-block should be skipped if
-             * encountered. */
-	    this.conditional_stack.push (CS_ELSE_FI);
-	    return;
-	}
-
-	if (this._if_skip_until (CS_ELSE_FI) == 'else') {
-	    /* Encountered the else-block. We evaluate this part, and expect
-             * to eat a \fi. */
-	    this.conditional_stack.push (CS_FI);
-	    return;
-	}
-
-	/* The \if was false and there's no else. We've skipped and just eaten
-         * the \fi. Nothing else to do. */
-    }
-
-
-    proto.handle_if_case = function Engine_handle_if_case (value) {
-	/* \ifcase<num> has just been read in and evaluated to `value`. We
-         * want to evaluate the value'th case, or an \else, or nothing. */
-	var ntoskip = value;
-
-	while (ntoskip > 0) {
-	    var found = this._if_skip_until (CS_OR_ELSE_FI);
-	    if (found == 'fi')
-		// Nothing left and no \else. Nothing to do.
-		return;
-
-	    if (found == 'else') {
-		// We hit the else without finding our target case. We
-		// want to evaluate it and then eat a \fi.
-		this.conditional_stack.push (CS_FI);
-		return;
-	    }
-
-	    // Hit an \or. Another case down the tubes.
-	    ntoskip -= 1;
-	}
-
-	// If we're here, we must have hit our desired case! We'll have to
-	// skip the rest of the cases later.
-	this.conditional_stack.push (CS_OR_ELSE_FI);
-    };
-
-
-    proto._if_skip_until = function Engine__if_skip_until (mode) {
-	var depth = 0;
-
-	while (true) {
-	    var tok = this.next_tok_throw ();
-
-	    if (tok.is_cmd (this, 'else')) {
-		if (depth == 0) {
-		    if (mode == CS_FI)
-			throw new TexSyntaxError ('unexpected \\else');
-		    this.Ntrace ('... skipped conditional ... %o', tok);
-		    return 'else';
-		}
-	    } else if (tok.is_cmd (this, 'fi')) {
-		if (depth > 0)
-		    depth -= 1;
-		else {
-		    this.Ntrace ('... skipped conditional ... %o', tok);
-		    return 'fi';
-		}
-	    } else if (tok.is_cmd (this, 'or')) {
-		if (depth == 0) {
-		    if (mode != CS_OR_ELSE_FI)
-			throw new TexSyntaxError ('unexpected \\or');
-		    this.Ntrace ('... skipped conditional ... %o', tok);
-		    return 'or';
-		}
-	    } else if (tok.is_conditional (this)) {
-		depth += 1;
-	    }
-	}
-
-	throw new TexInternalError ('not reached');
-    };
-
-
-    proto.handle_or = function Engine_handle_or () {
-	// We should only get here if we executed an \ifcase case and we need
-	// to eat up alternate branches until the end.
-
-	if (!this.conditional_stack.length)
-	    throw new TexSyntaxError ('stray \\or');
-
-	var mode = this.conditional_stack.pop (), skipmode = CS_OR_ELSE_FI;
-	if (mode == CS_INCONDITION) {
-	    // We were parsing the condition of the \ifcase and it involved
-	    // some kind of open-ended expanding parsing that made it out to
-	    // this \or. TeX inserts a \relax in this case to stop the
-	    // expansion. T:TP 495.
-	    this.push_toks ([Token.new_cmd (this.commands['relax']),
-			     Token.new_cmd (this.commands['or'])]);
-	    this.conditional_stack.push (mode);
-	    return;
-	}
-
-	if (mode != CS_OR_ELSE_FI)
-	    throw new TexSyntaxError ('unexpected \\or');
-
-	while (true) {
-	    var found = this._if_skip_until (skipmode)
-	    if (found == 'fi')
-		break;
-	    if (found == 'else')
-		skipmode = CS_FI;
-	}
-    };
-
-
-    proto.handle_else = function Engine_handle_else () {
-	if (!this.conditional_stack.length)
-	    throw new TexSyntaxError ('stray \\else');
-
-	var mode = this.conditional_stack.pop ();
-	if (mode == CS_INCONDITION) {
-	    // See comment in handle_or.
-	    this.push_toks ([Token.new_cmd (this.commands['relax']),
-			     Token.new_cmd (this.commands['else'])]);
-	    this.conditional_stack.push (mode);
-	    return;
-	}
-
-	if (mode == CS_FI)
-	    throw new TexSyntaxError ('unexpected (duplicate?) \\else');
-
-	this._if_skip_until (CS_FI);
-    };
-
-    proto.handle_fi = function Engine_handle_fi () {
-	if (!this.conditional_stack.length)
-	    throw new TexSyntaxError ('stray \\fi');
-
-	var mode = this.conditional_stack.pop ();
-	if (mode == CS_INCONDITION) {
-	    // See comment in handle_or.
-	    this.push_toks ([Token.new_cmd (this.commands['relax']),
-			     Token.new_cmd (this.commands['fi'])]);
-	    this.conditional_stack.push (mode);
-	    return;
-	}
-
-	// Otherwise, we don't care and there's nothing more to do.
-    };
-
-
     // Text box construction
 
     proto.scan_box = function Engine_scan_box (callback, is_assignment) {
@@ -2550,6 +2354,9 @@ var Engine = (function Engine_closure () {
     proto.escapechar = function Engine_escapechar () {
 	return this.get_parameter (T_INT, 'escapechar').value;
     };
+
+    // Apply all of extensions registered by the various subsystems.
+    engine_proto._apply_methods (proto);
 
     return Engine;
 })();

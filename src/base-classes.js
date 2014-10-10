@@ -332,3 +332,77 @@ var register_command = (function register_command_wrapper () {
 
     return register_command;
 }) ();
+
+
+// We don't actually define the Engine class here, but we define hooks for
+// extending it in various ways. This lets us have the convenience of being
+// able to call methods on the Engine without having to have a giant file that
+// defines everything all at once.
+
+var engine_proto = (function engine_proto_wrapper () {
+    function EnginePrototype () {
+	this.methods = {};
+	this.state_items = [];
+    }
+
+    var proto = EnginePrototype.prototype;
+
+    proto.register_method = function EnginePrototype_register_method (func) {
+	if (typeof func !== 'function')
+	    throw new TexInternalError ('unexpected register_method() arg %o', func);
+
+	if (func.name.substr (0, 7) != 'Engine_')
+	    throw new TexInternalError ('register_method() function must have ' +
+					'name starting with "Engine_"');
+
+	var stem = func.name.substr (7);
+	if (this.methods.hasOwnProperty (stem))
+	    throw new TexInternalError ('reregistring Engine method "%s"', stem);
+
+	this.methods[stem] = func;
+	return func; // convenience
+    };
+
+    proto._apply_methods = function EnginePrototype__apply_methods (engproto) {
+	for (var stem in this.methods) {
+	    if (!this.methods.hasOwnProperty (stem))
+		continue;
+
+	    engproto[stem] = this.methods[stem];
+	}
+    };
+
+
+    proto.register_state = function EnginePrototype_register_state (info) {
+	if (typeof info !== 'object')
+	    throw new TexInternalError ('unexpected register_state() arg %o', info);
+
+	if (typeof info.init !== 'function')
+	    throw new TexInternalError ('register_state() data %j must have ' +
+					'"init" function', info);
+
+	if (typeof info.is_clean !== 'function')
+	    throw new TexInternalError ('register_state() data %j must have ' +
+					'"is_clean" function', info);
+
+	this.state_items.push (info);
+    };
+
+    proto._apply_inits = function EnginePrototype__apply_inits (engine) {
+	for (var i = 0; i < this.state_items.length; i++)
+	    this.state_items[i].init (engine);
+    };
+
+    proto._is_clean = function EnginePrototype__is_clean (engine) {
+	for (var i = 0; i < this.state_items.length; i++) {
+	    var r = this.state_items[i].is_clean (engine);
+	    if (!r)
+		return false;
+	}
+
+	return true;
+    };
+
+    // Note that we return a singleton object, and not the class.
+    return new EnginePrototype ();
+}) ();
