@@ -1,4 +1,4 @@
-// This is loosely based on sprinf.js from
+// This is loosely based on sprintf.js from
 // https://github.com/alexei/sprintf.js, copied under the license shown below.
 // This version removes a lot of features, adapts the coding style, and adds
 // Webtex-specific functionality.
