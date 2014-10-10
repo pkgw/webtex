@@ -13,11 +13,13 @@
 	}
     });
 
-    engine_proto.register_method (function Engine_start_parsing_condition () {
+    engine_proto.register_method ('start_parsing_condition',
+				  function Engine_start_parsing_condition () {
 	this.conditional_stack.push (CS_INCONDITION);
     });
 
-    engine_proto.register_method (function Engine_done_parsing_condition () {
+    engine_proto.register_method ('done_parsing_condition',
+				  function Engine_done_parsing_condition () {
 	while (this.conditional_stack.length) {
 	    var mode = this.conditional_stack.pop ();
 	    if (mode == CS_INCONDITION)
@@ -85,7 +87,8 @@
 	throw new TexInternalError ('not reached');
     }
 
-    engine_proto.register_method (function Engine_handle_if (result) {
+    engine_proto.register_method ('handle_if',
+				  function Engine_handle_if (result) {
 	// Assumes that some kind of conditional has just been read in and the
         // result of the test is `result`. We now prepare to handle the
         // outcome. We'll have to evaluate one branch and skip the other,
@@ -162,8 +165,6 @@
 	var ntoskip = engine.scan_int ().value;
 	engine.done_parsing_condition ();
 	engine.trace ('ifcase %d', ntoskip);
-
-	var ntoskip = value;
 
 	while (ntoskip > 0) {
 	    var found = if_skip_until (engine, CS_OR_ELSE_FI);

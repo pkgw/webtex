@@ -347,19 +347,14 @@ var engine_proto = (function engine_proto_wrapper () {
 
     var proto = EnginePrototype.prototype;
 
-    proto.register_method = function EnginePrototype_register_method (func) {
+    proto.register_method = function EnginePrototype_register_method (name, func) {
 	if (typeof func !== 'function')
 	    throw new TexInternalError ('unexpected register_method() arg %o', func);
 
-	if (func.name.substr (0, 7) != 'Engine_')
-	    throw new TexInternalError ('register_method() function must have ' +
-					'name starting with "Engine_"');
+	if (this.methods.hasOwnProperty (name))
+	    throw new TexInternalError ('reregistring Engine method "%s"', name);
 
-	var stem = func.name.substr (7);
-	if (this.methods.hasOwnProperty (stem))
-	    throw new TexInternalError ('reregistring Engine method "%s"', stem);
-
-	this.methods[stem] = func;
+	this.methods[name] = func;
 	return func; // convenience
     };
 
