@@ -221,7 +221,7 @@ commands.string = function cmd_string (engine) {
 	if (esc >= 0 && esc < 256)
 	    expn = String.fromCharCode (esc) + expn;
     } else
-	throw new TexRuntimeError ('don\'t know how to \\string-ize ' + tok);
+	throw new TexRuntimeError ('don\'t know how to \\string-ize %o', tok);
 
     engine.push_string (expn);
 };
@@ -340,8 +340,8 @@ var CharCodeCommand = (function CharCodeCommand_closure () {
 	var code = engine.scan_int ().value;
 
 	if (code < 0 || code > ct_maxvals[this.codetype])
-	    throw new TexRuntimeException ('illegal value ' + code +
-					   ' for ' + ct_names[this.codetype]);
+	    throw new TexRuntimeException ('illegal value %d for %s', code,
+					   ct_names[this.codetype]);
 
 	engine.Ntrace ('%s %C=%x -> %x', ct_names[this.codetype], ord, ord, code);
 	engine.set_code (this.codetype, ord, code);
@@ -383,8 +383,7 @@ commands.mathchardef = function cmd_mathchardef (engine) {
     engine.scan_optional_equals ();
     var val = engine.scan_int ().value;
     if (val < 0 || val > 0x8000)
-	throw new TexRuntimeError ('need mathcode in [0,0x8000] but ' +
-				   'got ' + val);
+	throw new TexRuntimeError ('need mathcode in [0,0x8000] but got %d', val);
     engine.Ntrace ('mathchardef %o -> {insmathchar %x}', cstok, val);
     cstok.assign_cmd (engine, new GivenMathcharCommand (val));
 };
@@ -559,7 +558,7 @@ commands._if = function cmd_if (engine) {
 		throw new TexInternalError ('not implemented');
 	    return 16 * 1000 + 256;
 	}
-	throw new TexRuntimeError ('illegal comparison subject ' + tok);
+	throw new TexRuntimeError ('illegal comparison subject %o', tok);
     }
 
     var result = (key (t1) == key (t2));
@@ -584,7 +583,7 @@ commands.ifcat = function cmd_ifcat (engine) {
 		throw new TexInternalError ('not implemented');
 	    return 16;
 	}
-	throw new TexRuntimeError ('illegal comparison subject ' + tok);
+	throw new TexRuntimeError ('illegal comparison subject %o', tok);
     }
 
     var result = (key (t1) == key (t2));
@@ -1574,12 +1573,12 @@ commands.font = (function FontCommand_closure () {
 	if (engine.scan_keyword ('at')) {
 	    s = engine.scan_dimen ()
 	    if (s.sp.value <= 0) // FIXME: || s > SC_MAX
-		throw new TexRuntimeError ('illegal font size ' + s);
+		throw new TexRuntimeError ('illegal font size %o', s);
 	    s = s.sp.value;
 	} else if (engine.scan_keyword ('scaled')) {
 	    s = -engine.scan_int ().value;
 	    if (s >= 0 || s < -32768)
-		throw new TexRuntimeError ('illegal font magnification factor ' + (-s));
+		throw new TexRuntimeError ('illegal font magnification factor %d', -s);
 	}
 
 	var font = new Font (engine, fn, s);
@@ -1642,7 +1641,7 @@ commands.fontdimen = (function FontDimenCommand_closure () {
 
 	if (val.valtype != T_FONT)
 	    throw new TexRuntimeError ('expected \\fontdimen to be followed ' +
-				       'by a font; got ' + tok);
+				       'by a font; got %o', tok);
 
 	var font = val.get (engine);
 	engine.scan_optional_equals ();
@@ -1663,7 +1662,7 @@ commands.fontdimen = (function FontDimenCommand_closure () {
 
 	if (font.valtype != T_FONT)
 	    throw new TexRuntimeError ('expected \\fontdimen to be followed ' +
-				       'by a font; got ' + tok);
+				       'by a font; got %o', tok);
 
 	var val = font.get (engine).get_dimen (num);
 	engine.Ntrace ('got: %o', val);
@@ -1681,7 +1680,7 @@ commands.skewchar = function cmd_skewchar (engine) {
 
     if (val.valtype != T_FONT)
 	throw new TexRuntimeError ('expected \\skewchar to be followed by a font; ' +
-				   'got ' + tok);
+				   'got %o', tok);
 
     var font = val.get (engine);
     engine.scan_optional_equals ();
@@ -1698,7 +1697,7 @@ commands.hyphenchar = function cmd_hyphenchar (engine) {
 
     if (val.valtype != T_FONT)
 	throw new TexRuntimeError ('expected \\hyphenchar to be followed by a font; ' +
-				   'got ' + tok);
+				   'got %o', tok);
 
     var font = val.get (engine);
     engine.scan_optional_equals ();
@@ -1801,7 +1800,7 @@ function _cmd_limit_switch (engine, desc, value) {
     if (last == null ||
 	!(last instanceof AtomNode) ||
 	last.ltype != MT_OP)
-	throw new TexRuntimeError ('\\' + desc + ' must follow an operator');
+	throw new TexRuntimeError ('\\%s must follow an operator', desc);
 
     last.limtype = value;
 };
@@ -1991,7 +1990,7 @@ commands.the = function cmd_the (engine) {
     var val = tok.to_cmd (engine).as_valref (engine);
     if (val == null)
 	throw new TexRuntimeError ('unable to get internal value (for ' +
-				   '\\the) from ' + tok);
+				   '\\the) from %o', tok);
 
     if (val.valtype == T_TOKLIST) {
 	var toks = val.get (engine);
@@ -2080,7 +2079,7 @@ commands.errmessage = function cmd_errmessage (engine) {
     engine.scan_left_brace ();
     var toks = engine.scan_tok_group (true);
     engine.Ntrace ('errmessage %U', toks);
-    throw new TexRuntimeError ('TeX-triggered error: ' + toks.uitext ());
+    throw new TexRuntimeError ('TeX-triggered error: %U', toks);
 };
 
 
@@ -2136,7 +2135,7 @@ commands.openout = function cmd_openout (engine) {
     engine.Ntrace ('openout %d = %s', snum, fn);
     var outf = engine.iostack.open_for_write (fn);
     if (outf == null)
-	throw new TexRuntimeError ('failed to \\openout ' + fn);
+	throw new TexRuntimeError ('failed to \\openout %s', fn);
 
     engine.set_outfile (snum, outf);
 };

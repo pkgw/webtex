@@ -50,7 +50,7 @@ var OrdSource = (function OrdSource_closure () {
 
     proto.push_ord = function OrdSource_push_ord (o) {
 	if (o < 0 || o > 255)
-	    throw new TexRuntimeError ('out of bounds ordinal: ' + o);
+	    throw new TexRuntimeError ('out of bounds ordinal %d', o);
 	this.pushed.push (o);
     };
 

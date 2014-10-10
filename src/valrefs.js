@@ -97,9 +97,9 @@ var ConstantValref = (function ConstantValref_closure () {
 var FontFamilyValref = (function FontFamilyValref_closure () {
     function FontFamilyValref (style, index) {
 	if (style < MS_TEXT || style > MS_SCRIPTSCRIPT)
-	    throw new TexRuntimeError ('illegal font family style ' + style);
+	    throw new TexRuntimeError ('illegal font family style %d', style);
 	if (index < 0 || index > 15)
-	    throw new TexRuntimeError ('illegal font family number ' + index);
+	    throw new TexRuntimeError ('illegal font family number %d', index);
 
 	Valref.call (this, T_FONT);
 	this.style = style;

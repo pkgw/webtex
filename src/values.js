@@ -16,7 +16,7 @@ var TexInt = (function TexInt_closure () {
 	}
 
 	if (Math.abs (this.value) > INT_MAX)
-	    throw new TexRuntimeError ('out-of-range TexInt value ' + value);
+	    throw new TexRuntimeError ('out-of-range TexInt value %d', value);
     }
 
     inherit (TexInt, Value);
@@ -41,7 +41,7 @@ var TexInt = (function TexInt_closure () {
 	value = value | 0; // magic coercion to trustworthy int representation.
 
 	if (Math.abs (value) > INT_MAX)
-	    throw new TexRuntimeError ('out-of-range tex-int value ' + value);
+	    throw new TexRuntimeError ('out-of-range tex-int value %d', value);
 
 	return value;
     };
@@ -364,7 +364,7 @@ var Dimen = (function Dimen_closure () {
 	var d = new Dimen ();
 	d.sp = x.times_n_plus_y (k, new Scaled (0));
 	if (Math.abs (d.sp.value) > MAX_SCALED)
-	    throw new TexRuntimeError ('dimension out of range: ' + d);
+	    throw new TexRuntimeError ('dimension out of range: %o', d);
 	return d;
     };
 
@@ -656,7 +656,7 @@ var Toklist = (function Toklist_closure () {
 
 	    i++;
 	    if (i >= n)
-		throw new TexRuntimeError ('malformed serialized toklist: ' + text);
+		throw new TexRuntimeError ('malformed serialized toklist: %s', text);
 
 	    o = ord (text[i]);
 
@@ -664,7 +664,7 @@ var Toklist = (function Toklist_closure () {
 		// Macro parameter token.
 		i++;
 		if (i >= n)
-		    throw new TexRuntimeError ('malformed serialized toklist: ' + text);
+		    throw new TexRuntimeError ('malformed serialized toklist: %s', text);
 
 		o = ord (text[i]);
 		list.push (Token.new_param (o - O_ZERO));
@@ -676,7 +676,7 @@ var Toklist = (function Toklist_closure () {
 		(o >= O_UC_A && o < O_UC_A + 6)) {
 		// Escaped character.
 		if (i + 2 >= n)
-		    throw new TexRuntimeError ('malformed serialized toklist: ' + text);
+		    throw new TexRuntimeError ('malformed serialized toklist: %s', text);
 		o = parseInt (text.substr (i, 2), 16);
 		var cc = cc_idchar_unmap[text[i+2]];
 		list.push (Token.new_char (cc, o));
@@ -685,12 +685,12 @@ var Toklist = (function Toklist_closure () {
 	    }
 
 	    if (o != O_LEFT_BRACKET)
-		throw new TexRuntimeError ('malformed serialized toklist: ' + text);
+		throw new TexRuntimeError ('malformed serialized toklist: %s', text);
 
 	    // We must be a cseq.
 	    i++;
 	    if (i >= n)
-		throw new TexRuntimeError ('malformed serialized toklist: ' + text);
+		throw new TexRuntimeError ('malformed serialized toklist: %s', text);
 
 	    var name = '';
 
@@ -708,7 +708,7 @@ var Toklist = (function Toklist_closure () {
 
 		// We must be an escaped character. No catcodes here.
 		if (i + 2 >= n) // recall that we need at least the close bracket.
-		    throw new TexRuntimeError ('malformed serialized toklist: ' + text);
+		    throw new TexRuntimeError ('malformed serialized toklist: %s', text);
 		o = parseInt (text.substr (i + 1, 2), 16);
 		name += String.fromCharCode (o);
 		i += 3;
@@ -716,7 +716,7 @@ var Toklist = (function Toklist_closure () {
 
 	    if (i >= n)
 		// We ran off the end of the string!
-		throw new TexRuntimeError ('malformed serialized toklist: ' + text);
+		throw new TexRuntimeError ('malformed serialized toklist: %s', text);
 
 	    // Finished the cseq successfully. For loop will eat the ].
 	    list.push (Token.new_cseq (name));
@@ -809,7 +809,7 @@ var Font = (function Font_closure () {
 
 	// TeX font dimens are 1-based; we offset.
 	if (number > this.dimens.length)
-	    throw new TexRuntimeError ('undefined fontdimen #' + number + ' for ' + this);
+	    throw new TexRuntimeError ('undefined fontdimen #%d for %o', number, this);
 	return this.dimens[number - 1];
     };
 

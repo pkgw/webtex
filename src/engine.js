@@ -50,25 +50,25 @@ var EquivTable = (function EquivTable_closure () {
 
     proto.get_register = function EquivTable_get_register (valtype, reg) {
 	if (!vt_ok_for_register[valtype])
-	    throw new TexRuntimeError ('illegal value type for register: ' +
+	    throw new TexRuntimeError ('illegal value type for register: %s',
 				       vt_names[valtype]);
 	if (reg < 0 || reg > 255)
-	    throw new TexRuntimeError ('illegal register number ' + reg);
+	    throw new TexRuntimeError ('illegal register number %d', reg);
 
 	if (this._registers[valtype].hasOwnProperty (reg))
 	    return this._registers[valtype][reg];
 	if (this.parent == null)
-	    throw new TexRuntimeError ('unset register; type=' + valtype +
-				       ', number=' + reg);
+	    throw new TexRuntimeError ('unset register; type=%s number=%d',
+				       vt_names[valtype], reg);
 	return this.parent.get_register (valtype, reg);
     };
 
     proto.set_register = function EquivTable_set_register (valtype, reg, value, global) {
 	if (!vt_ok_for_register[valtype])
-	    throw new TexRuntimeError ('illegal value type for register: ' +
+	    throw new TexRuntimeError ('illegal value type for register: %s',
 				       vt_names[valtype]);
 	if (reg < 0 || reg > 255)
-	    throw new TexRuntimeError ('illegal register number ' + reg);
+	    throw new TexRuntimeError ('illegal register number %d', reg);
 
 	this._registers[valtype][reg] = Value.ensure (valtype, value);
 
@@ -78,19 +78,19 @@ var EquivTable = (function EquivTable_closure () {
 
     proto.get_parameter = function EquivTable_get_parameter (valtype, name) {
 	if (!vt_ok_for_parameter[valtype])
-	    throw new TexRuntimeError ('illegal value type for parameter: ' +
+	    throw new TexRuntimeError ('illegal value type for parameter: %s',
 				       vt_names[valtype]);
 
 	if (this._parameters[valtype].hasOwnProperty (name))
 	    return this._parameters[valtype][name];
 	if (this.parent == null)
-	    throw new TexRuntimeError ('undefined named parameter ' + name);
+	    throw new TexRuntimeError ('undefined named parameter %s', name);
 	return this.parent.get_parameter (valtype, name);
     };
 
     proto.set_parameter = function EquivTable_set_parameter (valtype, name, value, global) {
 	if (!vt_ok_for_parameter[valtype])
-	    throw new TexRuntimeError ('illegal value type for parameter: ' +
+	    throw new TexRuntimeError ('illegal value type for parameter: %s',
 				       vt_names[valtype]);
 
 	this._parameters[valtype][name] = Value.ensure (valtype, value);
@@ -101,7 +101,7 @@ var EquivTable = (function EquivTable_closure () {
 
     proto.get_code = function EquivTable_get_code (codetype, ord) {
 	if (ord < 0 || ord > 255)
-	    throw new TexRuntimeError ('illegal ordinal number ' + ord);
+	    throw new TexRuntimeError ('illegal ordinal number %d', ord);
 
 	if (codetype == CT_CATEGORY)
 	    return this._catcodes[ord];
@@ -113,10 +113,9 @@ var EquivTable = (function EquivTable_closure () {
 
     proto.set_code = function EquivTable_set_code (codetype, ord, value, global) {
 	if (ord < 0 || ord > 255)
-	    throw new TexRuntimeError ('illegal ordinal number ' + ord);
+	    throw new TexRuntimeError ('illegal ordinal number %d', ord);
 	if ((value < 0 && codetype != CT_DELIM) || value > ct_maxvals[codetype])
-	    throw new TexRuntimeError ('illegal ' + ct_names[codetype] +
-				       ' value ' + value);
+	    throw new TexRuntimeError ('illegal %s value %o', ct_names[codetype], value);
 
 	if (codetype == CT_CATEGORY)
 	    this._catcodes[ord] = value;
@@ -129,7 +128,7 @@ var EquivTable = (function EquivTable_closure () {
 
     proto.get_active = function EquivTable_get_active (ord) {
 	if (ord < 0 || ord > 255)
-	    throw new TexRuntimeError ('illegal ordinal number ' + ord);
+	    throw new TexRuntimeError ('illegal ordinal number %d', ord);
 
 	if (this._actives.hasOwnProperty (ord))
 	    return this._actives[ord];
@@ -140,7 +139,7 @@ var EquivTable = (function EquivTable_closure () {
 
     proto.set_active = function EquivTable_set_active (ord, value, global) {
 	if (ord < 0 || ord > 255)
-	    throw new TexRuntimeError ('illegal ordinal number ' + ord);
+	    throw new TexRuntimeError ('illegal ordinal number %d', ord);
 
 	this._actives[ord] = value;
 
@@ -165,9 +164,9 @@ var EquivTable = (function EquivTable_closure () {
 
     proto.get_font_family = function EquivTable_get_font_family (style, index) {
 	if (style < MS_TEXT || style > MS_SCRIPTSCRIPT)
-	    throw new TexRuntimeError ('illegal font family style ' + style);
+	    throw new TexRuntimeError ('illegal font family style %d', style);
 	if (index < 0 || index > 15)
-	    throw new TexRuntimeError ('illegal font family number ' + index);
+	    throw new TexRuntimeError ('illegal font family number %d', index);
 
 	if (this._font_families[style].hasOwnProperty (index))
 	    return this._font_families[style][index];
@@ -178,9 +177,9 @@ var EquivTable = (function EquivTable_closure () {
 
     proto.set_font_family = function EquivTable_set_font_family (style, index, value, global) {
 	if (style < MS_TEXT || style > MS_SCRIPTSCRIPT)
-	    throw new TexRuntimeError ('illegal font family style ' + style);
+	    throw new TexRuntimeError ('illegal font family style %d', style);
 	if (index < 0 || index > 15)
-	    throw new TexRuntimeError ('illegal font family number ' + index);
+	    throw new TexRuntimeError ('illegal font family number %d', index);
 
 	this._font_families[style][index] = value;
 
@@ -732,8 +731,8 @@ var Engine = (function Engine_closure () {
 	var info = this.group_exit_stack.pop (); // [name, callback, aftergroup-toklist]
 	if (info[1].is_semisimple !== true)
 	    throw new TexRuntimeError ('got \\endgroup when should have ' +
-				       'gotten other group-ender; depth=' +
-				       this.group_exit_stack.length + ' cb=' + info[1]);
+				       'gotten other group-ender; depth=%d cb=%0',
+				       this.group_exit_stack.length, info[1]);
 
 	this.Ntrace ('< <--- %d %s>', this.group_exit_stack.length, info[0]);
 	this.unnest_eqtb ();
@@ -940,8 +939,8 @@ var Engine = (function Engine_closure () {
     proto.handle_input = function Engine_handle_input (texfn) {
 	var lb = this.iostack.try_open_linebuffer (texfn);
 	if (lb == null)
-	    throw new TexRuntimeError ('can\'t find any matching files for "' +
-				       texfn + '"');
+	    throw new TexRuntimeError ('can\'t find any matching files for "%s"',
+				       texfn);
 
 	this.inputstack.push_linebuf (lb, function patchit () {
 	    var p ='__wtpatches__/' + texfn + '.post';
@@ -988,25 +987,25 @@ var Engine = (function Engine_closure () {
 
     proto.infile = function Engine_infile (num) {
 	if (num < 0 || num > 15)
-	    throw new TexRuntimeError ('illegal input file number ' + num);
+	    throw new TexRuntimeError ('illegal input file number %d', num);
 	return this.infiles[num];
     };
 
     proto.set_infile = function Engine_set_infile (num, value) {
 	if (num < 0 || num > 15)
-	    throw new TexRuntimeError ('illegal input file number ' + num);
+	    throw new TexRuntimeError ('illegal input file number %d', num);
 	this.infiles[num] = value;
     };
 
     proto.outfile = function Engine_outfile (num) {
 	if (num < 0 || num > 15)
-	    throw new TexRuntimeError ('illegal output file number ' + num);
+	    throw new TexRuntimeError ('illegal output file number %d', num);
 	return this.outfiles[num];
     };
 
     proto.set_outfile = function Engine_set_outfile (num, value) {
 	if (num < 0 || num > 15)
-	    throw new TexRuntimeError ('illegal output file number ' + num);
+	    throw new TexRuntimeError ('illegal output file number %d', num);
 	this.outfiles[num] = value;
     };
 
@@ -1105,7 +1104,7 @@ var Engine = (function Engine_closure () {
 	    var ctor = command_ctors[kind];
 
 	    if (ctor == null)
-		throw new TexRuntimeError ('unhandled stored command kind ' + kind);
+		throw new TexRuntimeError ('unhandled stored command kind %o', kind);
 
 	    for (i = 0; i < n; i++)
 		cmdids[kind + '/' + i] = ctor (list[i], housekeeping);
@@ -1116,7 +1115,7 @@ var Engine = (function Engine_closure () {
 	    if (c == null)
 		c = cmdids[s];
 	    if (c == null)
-		throw new TexRuntimeError ('unresolvable command name ' + s);
+		throw new TexRuntimeError ('unresolvable command name %s', s);
 	    return c;
 	}.bind (this);
 
@@ -1509,7 +1508,7 @@ var Engine = (function Engine_closure () {
 	// note: returns JS integer, not TexInt.
 	var v = this.scan_int ().value;
 	if (v < 0 || v > 255)
-	    throw new TexRuntimeError ('illegal register number ' + v);
+	    throw new TexRuntimeError ('illegal register number %d', v);
 	return v;
     };
 
@@ -1731,7 +1730,7 @@ var Engine = (function Engine_closure () {
 	var tok = this.next_x_tok_throw ();
 	var val = tok.to_cmd (this).as_valref (this);
 	if (val == null || val.valtype != T_FONT)
-	    throw new TexRuntimeError ('expected a font value, but got ' + tok);
+	    throw new TexRuntimeError ('expected a font value, but got %o', tok);
 	return val.get (this);
     };
 
@@ -1766,10 +1765,10 @@ var Engine = (function Engine_closure () {
 
 	if (!tok.is_cslike ())
 	    throw new TexRuntimeError ('expected control seq or active char;' +
-				       'got ' + tok);
+				       'got %o', tok);
 
 	if (tok.is_frozen_cs ())
-	    throw new TexRuntimeError ('cannot redefined control seq ' + tok);
+	    throw new TexRuntimeError ('cannot redefined control seq %o', tok);
 
 	return tok;
     };
@@ -2051,7 +2050,7 @@ var Engine = (function Engine_closure () {
 
 	var cmd = tok.to_cmd (this);
 	if (!cmd.boxlike)
-	    throw new TexRuntimeError ('expected boxlike command but got ' + tok);
+	    throw new TexRuntimeError ('expected boxlike command but got %o', tok);
 
         this.boxop_stack.push ([callback, is_assignment]);
 	cmd.start_box (this);
@@ -2497,8 +2496,8 @@ var Engine = (function Engine_closure () {
 	var info = this.group_exit_stack.pop (); // [name, callback, aftergroup-toklist]
 	if (info[1].is_align !== true)
 	    throw new TexRuntimeError ('ended alignment when should have ' +
-				       'gotten other group-ender; depth=' +
-				       this.group_exit_stack.length + ' cb=' + info[1]);
+				       'gotten other group-ender; depth=%d cb=%0',
+				       this.group_exit_stack.length, info[1]);
 
 	var list = this.leave_mode ();
 

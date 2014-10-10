@@ -8,8 +8,8 @@ function fetch_url_str (url) {
     req.send (null);
 
     if (req.status !== 200)
-	throw new TexRuntimeError ('cannot fetch URL ' + url +
-				   ': got status ' + req.status);
+	throw new TexRuntimeError ('cannot fetch URL %s: got status %o',
+				   url, req.status);
 
     return req.responseText;
 }
@@ -68,19 +68,18 @@ var RandomAccessURL = (function RandomAccessURL_closure () {
             resp_ofs = parseInt (matches[1], 10);
 	    data = req_data_as_arraybuffer (req);
 	} else {
-	    throw new TexRuntimeError ('cannot fetch URL ' + this.url + ' ofs='
-				       + offset + ' len=' + length +
-				       ': got status ' + req.status);
+	    throw new TexRuntimeError ('cannot fetch URL %s (ofs=%d len=%d): ' +
+				       'got status %o', offset, length, req.status);
 	}
 
 	if (resp_ofs > offset)
 	    throw new TexRuntimeError ('URL read_range failed: returned offset ' +
-				       resp_ofs + ' > desired offset ' + offset);
+				       '%d > desired offset %d', resp_ofs, offset);
 
 	if (resp_ofs + data.byteLength < offset + length)
 	    throw new TexRuntimeError ('URL read_range failed: returned end-byte ' +
-				       (resp_ofs + data.byteLength) +
-				       ' < desired end-byte ' + (offset + length));
+				       '%d < desired end-byte %d',
+				       resp_ofs + data.byteLength, offset + length);
 
 	var j = offset - resp_ofs;
 	return data.slice (j, j + length);
@@ -98,8 +97,8 @@ var RandomAccessURL = (function RandomAccessURL_closure () {
 	req.send (null);
 
 	if (req.status !== 200)
-	    throw new TexRuntimeError ('cannot fetch URL ' + this.url +
-				       ': got status ' + req.status);
+	    throw new TexRuntimeError ('cannot fetch URL %s: got status %o',
+				       this.url, req.status);
 
 	this._size = req.getResponseHeader ('Content-Length');
     };

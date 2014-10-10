@@ -30,8 +30,8 @@ var ZipReader = (function ZipReader_closure () {
 
     function ZipReader (readfunc, zipsize) {
 	if (zipsize < 22)
-	    throw new TexRuntimeError ('ill-formed Zip stream: only ' +
-				       zipsize + ' bytes');
+	    throw new TexRuntimeError ('ill-formed Zip stream: only %d bytes',
+				       zipsize);
 
 	this.readfunc = readfunc;
 	this.zipsize = zipsize;
@@ -111,7 +111,7 @@ var ZipReader = (function ZipReader_closure () {
 
     proto.get_entry_ab = function ZipReader_get_entry_ab (entname) {
 	if (!this.dirinfo.hasOwnProperty (entname))
-	    throw new TexRuntimeError ('no such Zip entry ' + entname);
+	    throw new TexRuntimeError ('no such Zip entry %o', entname);
 
 	var info = this.dirinfo[entname];
 

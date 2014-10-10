@@ -283,7 +283,8 @@ var Command = (function Command_closure () {
 		// Builtin unique command, no need to serialize anything. Just
 		// need to remember that it exists.
 		if (housekeeping.commands.hasOwnProperty (this.name))
-		    throw new TexRuntimeError ('multiple commands with name ' + this.name);
+		    throw new TexRuntimeError ('multiple commands with name %s',
+					       this.name);
 		housekeeping.commands[this.name] = true;
 		this._serialize_ident = this.name;
 	    } else {

@@ -11,7 +11,7 @@ var CommandUnimplPrimitive = (function CommandUnimplPrimitive_closure () {
     var proto = CommandUnimplPrimitive.prototype;
 
     proto.invoke = function CommandUnimplPrimitive_invoke (engine) {
-	throw new TexRuntimeError ('unimplemented primitive \\' + this.name);
+	throw new TexRuntimeError ('unimplemented primitive \\%s', this.name);
     };
 
     return CommandUnimplPrimitive;
@@ -38,7 +38,8 @@ var UndefinedCommand = (function UndefinedCommand_closure () {
     };
 
     proto.invoke = function UndefinedCommand_invoke (engine) {
-	throw new TexRuntimeError ('trying to invoke undefined command \\' + this.csname);
+	throw new TexRuntimeError ('trying to invoke undefined command \\%s',
+				   this.csname);
     };
 
     proto.same_cmd = function UndefinedCommand_same_cmd (other) {
@@ -117,8 +118,8 @@ var MacroCommand = (function MacroCommand_closure () {
 		var atok = engine.next_tok_throw ();
 		if (!atok.equals (ttok))
 		    throw new TexRuntimeError ('macro invocation doesn\'t match ' +
-					       'template: expected ' + ttok + ', ' +
-					       'got ' + atok);
+					       'template: expected %o, got %o',
+					       ttok, atok);
 		tidx += 1;
 		continue;
 	    }
@@ -975,7 +976,7 @@ var MathComponentCommand = (function MathComponentCommand_closure () {
 
     proto.invoke = function MathComponentCommand_invoke (engine) {
 	if (engine.mode () != M_MATH && engine.mode () != M_DMATH)
-	    throw new TexRuntimeError ('\\' + this.name + ' illegal outside of math mode');
+	    throw new TexRuntimeError ('\\%s illegal outside of math mode', this.name);
 
 	engine.Ntrace (this.name);
 	var node = new AtomNode (this.mathtype);
@@ -1002,7 +1003,7 @@ var MathStyleCommand = (function MathStyleCommand_closure () {
 
     proto.invoke = function MathStyleCommand_invoke (engine) {
 	if (engine.mode () != M_MATH && engine.mode () != M_DMATH)
-	    throw new TexRuntimeError ('\\' + this.name + ' illegal outside of math mode');
+	    throw new TexRuntimeError ('\\%s illegal outside of math mode', this.name);
 	engine.Ntrace (this.name);
 	engine.accum (new MathStyleNode (this.mathstyle, false));
     };

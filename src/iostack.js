@@ -97,8 +97,8 @@ var IOStack = (function IOStack_closure () {
 
 	for (var i = 0; i < paths.length; i++) {
 	    if (this.written_paths.hasOwnProperty (paths[i]))
-		throw new TexRuntimeError ('system file ' + texfn +
-					   ' shadowed by locally-written version');
+		throw new TexRuntimeError ('system file %s shadowed by ' +
+					   'locally-written version', texfn);
 	}
 
 	for (var i = this.layers.length - 1; i >= 0; i--) {

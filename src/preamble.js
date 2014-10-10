@@ -107,7 +107,7 @@ var TexSyntaxError = (function TexSyntaxErrorClosure () {
 
 var TexRuntimeError = (function TexRuntimeErrorClosure () {
     function TexRuntimeError () {
-	var tmp = Error.apply (this, arguments);
+	var tmp = Error.call (this, format.apply (null, arguments));
 	tmp.name = this.name = 'TexRuntimeError';
 	this.message = tmp.message;
 	this.stack = tmp.stack;

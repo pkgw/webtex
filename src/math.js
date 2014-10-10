@@ -299,8 +299,8 @@ var mathlib = (function mathlib_closure () {
 	    // Treat as active character. Right semantics here?
 	    var cmd = engine.get_active (ord);
 	    if (cmd == null)
-		throw new TexRuntimeError ('mathcode ' + mathcode + 'implies active ' +
-					   'character but it isn\'t');
+		throw new TexRuntimeError ('mathcode %d implies active ' +
+					   'character but it isn\'t', mathcode);
 	    engine.push (Token.new_cmd (cmd));
 	    return null;
 	}
@@ -352,8 +352,8 @@ var mathlib = (function mathlib_closure () {
 	    // Treat as active character. Right semantics here?
 	    cmd = engine.get_active (ord);
 	    if (cmd == null)
-		throw new TexRuntimeError ('mathcode ' + mathcode + 'implies active ' +
-					       'character but it isn\'t');
+		throw new TexRuntimeError ('mathcode %d implies active ' +
+					   'character but it isn\'t', mathcode);
 	    engine.push (Token.new_cmd (cmd));
 	    ml.scan_math (engine, callback);
 	    return;
@@ -406,7 +406,7 @@ var mathlib = (function mathlib_closure () {
 		val = engine.get_code (CT_DELIM, cmd.ord);
 	    else
 		// XXX: not handling \delimiter
-		throw new TexRuntimeError ('expected math delimiter; got ' + tok);
+		throw new TexRuntimeError ('expected math delimiter; got %o', tok);
 	}
 
 	var d = new Delimiter ();
@@ -481,7 +481,8 @@ var mathlib = (function mathlib_closure () {
 	proto.font = function MathState_font (fam) {
 	    var f = this.engine.get_font_family (this.size, fam);
 	    if (f == null)
-		throw new TexRuntimeError ('need math family ' + fam + ' but no font defined');
+		throw new TexRuntimeError ('need math family %o but no font defined',
+					   fam);
 	    return f;
 	};
 
