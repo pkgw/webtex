@@ -17,6 +17,7 @@ sharedjs = \
   src/base-classes.js \
   src/values.js \
   src/conditionals.js \
+  src/fonts.js \
   src/boxes.js \
   src/math.js \
   src/align.js \
@@ -31,7 +32,6 @@ sharedjs = \
   $(builddir)/engine-helpers.js \
   src/engine.js \
   src/readzip.js \
-  src/tfmreader.js \
   src/bundle.js
 
 workerjs = \

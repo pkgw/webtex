@@ -92,30 +92,3 @@ var ConstantValref = (function ConstantValref_closure () {
 
     return ConstantValref;
 }) ();
-
-
-var FontFamilyValref = (function FontFamilyValref_closure () {
-    function FontFamilyValref (style, index) {
-	if (style < MS_TEXT || style > MS_SCRIPTSCRIPT)
-	    throw new TexRuntimeError ('illegal font family style %d', style);
-	if (index < 0 || index > 15)
-	    throw new TexRuntimeError ('illegal font family number %d', index);
-
-	Valref.call (this, T_FONT);
-	this.style = style;
-	this.index = index;
-    }
-
-    inherit (FontFamilyValref, Valref);
-    var proto = FontFamilyValref.prototype;
-
-    proto.get = function FontFamilyValref_get (engine) {
-	return engine.get_font_family (this.style, this.index);
-    };
-
-    proto.set = function FontFamilyValref_set (engine, value) {
-	engine.set_font_family (this.style, this.index, value);
-    };
-
-    return FontFamilyValref;
-}) ();
