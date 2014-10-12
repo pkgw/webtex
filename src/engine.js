@@ -1534,7 +1534,7 @@ var Engine = (function Engine_closure () {
 
 	var vt = tok.to_cmd (this).get_valtype ();
 
-	if (vt == T_DIMEN || vt == T_GLUE || vt == T_MUGLUE) {
+	if (vt == T_DIMEN || vt == T_GLUE) {
 	    var v = tok.to_cmd (this).as_scaled (this);
 
 	    if (mumode) {
@@ -1547,6 +1547,8 @@ var Engine = (function Engine_closure () {
 	    }
 	} else if (vt == T_INT) {
 	    nonfrac = tok.to_cmd (this).as_int (this);
+	} else if (vt != null) {
+	    throw new TexRuntimeError ('expected dimen value; got %o (valtype=%d)', tok, vt);
 	}
 
 	if (nonfrac == null) {
