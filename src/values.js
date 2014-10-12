@@ -70,10 +70,6 @@ var TexInt = (function TexInt_closure () {
 	return null;
     };
 
-    proto.as_dimen = function TexInt_as_dimen () {
-	return null;
-    };
-
     proto.as_glue = function TexInt_as_glue () {
 	return null;
     };
@@ -296,10 +292,6 @@ var Scaled = (function Scaled_closure () {
 	return this; // NOTE: ok since Scaleds are immutable.
     };
 
-    proto.as_dimen = function Scaled_as_dimen () {
-	return null;
-    };
-
     proto.as_glue = function Scaled_as_glue () {
 	return null;
     };
@@ -411,10 +403,6 @@ var Dimen = (function Dimen_closure () {
 
     proto.as_scaled = function Dimen_as_scaled () {
 	return this.sp; // NOTE: ok since Scaleds are immutable.
-    };
-
-    proto.as_dimen = function Dimen_as_dimen () {
-	return this.clone ();
     };
 
     proto.as_glue = function Dimen_as_glue () {
@@ -529,10 +517,6 @@ var Glue = (function Glue_closure () {
 
     proto.as_scaled = function Glue_as_scaled () {
 	return this.width.as_scaled ();
-    };
-
-    proto.as_dimen = function Glue_as_dimen () {
-	return this.width.clone ();
     };
 
     proto.as_glue = function Glue_as_glue () {

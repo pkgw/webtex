@@ -52,12 +52,6 @@ var Value = (function Value_closure () {
 	throw new TexInternalError ('not implemented Value.as_scaled');
     };
 
-    proto.as_dimen = function Value_as_dimen () {
-	// Returns a Dimen that this value is equivalent to, or null if such a
-	// conversion is not allowed. This is used in Engine.scan_dimen.
-	throw new TexInternalError ('not implemented Value.as_dimen');
-    };
-
     proto.as_glue = function Value_as_glue () {
 	// Returns a Glue that this value is equivalent to, or null if such a
 	// conversion is not allowed. This is used in Engine.scan_glue.
@@ -259,13 +253,6 @@ var Command = (function Command_closure () {
 	if (v == null)
 	    return null;
 	return v.get (engine).as_scaled ();
-    };
-
-    proto.as_dimen = function Command_as_dimen (engine) {
-	var v = this.as_valref (engine);
-	if (v == null)
-	    return null;
-	return v.get (engine).as_dimen ();
     };
 
     proto.as_glue = function Command_as_glue (engine) {
