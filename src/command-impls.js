@@ -1281,6 +1281,10 @@ register_command ('lastpenalty', (function LastpenaltyCommand_closure () {
 	throw new TexRuntimeError ('bare \\lastpenalty not allowed');
     };
 
+    proto.get_valtype = function LastSkipCommand_get_valtype  () {
+	return T_INT;
+    };
+
     proto.as_valref = function LastpenaltyCommand_as_valref (engine) {
 	var val = 0;
 	var item = engine.get_last_listable ();
@@ -1302,6 +1306,10 @@ register_command ('lastskip', (function LastskipCommand_closure () {
 
     proto.invoke = function LastskipCommand_invoke (engine) {
 	throw new TexRuntimeError ('bare \\lastskip not allowed');
+    };
+
+    proto.get_valtype = function LastSkipCommand_get_valtype  () {
+	return T_GLUE;
     };
 
     proto.as_valref = function LastskipCommand_as_valref (engine) {
@@ -1328,6 +1336,10 @@ register_command ('lastkern', (function LastkernCommand_closure () {
 
     proto.invoke = function LastkernCommand_invoke (engine) {
 	throw new TexRuntimeError ('bare \\lastkern not allowed');
+    };
+
+    proto.get_valtype = function LastkernCommand_get_valtype () {
+	return T_DIMEN;
     };
 
     proto.as_valref = function LastkernCommand_as_valref (engine) {

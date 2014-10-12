@@ -1532,24 +1532,21 @@ var Engine = (function Engine_closure () {
 	var negfactor = t[0], tok = t[1], inf_order = 0, val = null,
 	    frac = 0, nonfrac = null;
 
-	var v = tok.to_cmd (this).as_valref (this);
-	if (v != null) {
-	    v = v.get (this);
+	var vt = tok.to_cmd (this).get_valtype ();
 
-	    if (mumode)
+	if (vt == T_DIMEN || vt == T_GLUE || vt == T_MUGLUE) {
+	    var v = tok.to_cmd (this).as_scaled (this);
+
+	    if (mumode) {
 		throw new TexRuntimeError ('not implemented');
-	    else {
-		var u = v.as_dimen ();
-		if (u != null) {
-		    // We got a full-on dimen value; return it
-		    var d = Dimen.new_product (negfactor, u.as_scaled ());
-		    if (infmode)
-			return [d, 0];
-		    return d;
-		}
-		// We got an int.
-		nonfrac = v.as_int ();
+	    } else {
+		var d = Dimen.new_product (negfactor, v);
+		if (infmode)
+		    return [d, 0];
+		return d;
 	    }
+	} else if (vt == T_INT) {
+	    nonfrac = tok.to_cmd (this).as_int (this);
 	}
 
 	if (nonfrac == null) {
