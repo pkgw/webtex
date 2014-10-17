@@ -74,7 +74,7 @@ var DOMRenderer = (function DOMRenderer_callback () {
 		    }
 		}
 	    } else {
-		global_warnf ('unhandled rendered-HTML item %j', item));
+		global_warnf ('unhandled rendered-HTML item %j', item);
 	    }
 	}
     };
