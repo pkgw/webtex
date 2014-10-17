@@ -445,7 +445,7 @@ var Dimen = (function Dimen_closure () {
 
 var Glue = (function Glue_closure () {
     function Glue () {
-	this.width = new Dimen ();
+	this.amount = new Dimen ();
 	this.stretch = new Dimen ();
 	this.stretch_order = 0;
 	this.shrink = new Dimen ();
@@ -456,13 +456,13 @@ var Glue = (function Glue_closure () {
     var proto = Glue.prototype;
 
     proto.toString = function Glue_toString () {
-	return '<Glue ' + this.width + ' st=' + this.stretch + '|' +
+	return '<Glue ' + this.amount + ' st=' + this.stretch + '|' +
 	    this.stretch_order + ' sh=' + this.shrink + '|' +
 	    this.shrink_order + '>';
     };
 
     proto.to_texstr = function Glue_to_texstr () {
-	var t = this.width.to_texstr ();
+	var t = this.amount.to_texstr ();
 
 	if (this.stretch.is_nonzero ()) {
 	    t += ' plus ';
@@ -495,7 +495,7 @@ var Glue = (function Glue_closure () {
 
     proto.clone = function Glue_clone () {
 	var g = new Glue ();
-	g.width = this.width.clone ();
+	g.amount = this.amount.clone ();
 	g.stretch = this.stretch.clone ();
 	g.stretch_order = this.stretch_order;
 	g.shrink = this.shrink.clone ();
@@ -504,7 +504,7 @@ var Glue = (function Glue_closure () {
     };
 
     proto.is_nonzero = function Glue_is_nonzero () {
-	return (this.width.is_nonzero () ||
+	return (this.amount.is_nonzero () ||
 		this.stretch.is_nonzero () ||
 		this.stretch_order != 0 ||
 		this.shrink.is_nonzero () ||
@@ -512,11 +512,11 @@ var Glue = (function Glue_closure () {
     };
 
     proto.as_int = function Glue_as_int () {
-	return this.width.as_int ();
+	return this.amount.as_int ();
     };
 
     proto.as_scaled = function Glue_as_scaled () {
-	return this.width.as_scaled ();
+	return this.amount.as_scaled ();
     };
 
     proto.as_glue = function Glue_as_glue () {
@@ -524,7 +524,7 @@ var Glue = (function Glue_closure () {
     };
 
     proto.as_serializable = function Glue_as_serializable () {
-	return [this.width.as_serializable (),
+	return [this.amount.as_serializable (),
 		this.stretch.as_serializable (),
 		this.stretch_order,
 		this.shrink.as_serializable (),
@@ -533,7 +533,7 @@ var Glue = (function Glue_closure () {
 
     Glue.deserialize = function Glue_deserialize (data) {
 	var g = new Glue ();
-	g.width = Dimen.deserialize (data[0]);
+	g.amount = Dimen.deserialize (data[0]);
 	g.stretch = Dimen.deserialize (data[1]);
 	g.stretch_order = parseInt (data[2], 10);
 	g.shrink = Dimen.deserialize (data[3]);
@@ -543,7 +543,7 @@ var Glue = (function Glue_closure () {
 
     proto.advance = function Glue_advance (other) {
 	var g = this.clone ();
-	g.width = this.width.advance (other.width);
+	g.amount = this.amount.advance (other.amount);
 	g.stretch = this.stretch.advance (other.stretch);
 	g.shrink = this.shrink.advance (other.shrink);
 	return g;
@@ -552,7 +552,7 @@ var Glue = (function Glue_closure () {
     proto.intproduct = function Glue_intproduct (k) {
 	k = TexInt.xcheck (k);
 	var g = this.clone ();
-	g.width = this.width.intproduct (k);
+	g.amount = this.amount.intproduct (k);
 	g.stretch = this.stretch.intproduct (k);
 	g.shrink = this.shrink.intproduct (k);
 	return g;
@@ -561,7 +561,7 @@ var Glue = (function Glue_closure () {
     proto.intdivide = function Glue_intdivide (k) {
 	k = TexInt.xcheck (k);
 	var g = this.clone ();
-	g.width = this.width.intdivide (k);
+	g.amount = this.amount.intdivide (k);
 	g.stretch = this.stretch.intdivide (k);
 	g.shrink = this.shrink.intdivide (k);
 	return g;

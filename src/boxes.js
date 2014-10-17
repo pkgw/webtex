@@ -156,7 +156,7 @@ var HBox = (function HBox_closure () {
 		nat_width += item.amount.sp.value;
 	    } else if (item instanceof BoxGlue) {
 		var g = item.amount;
-		nat_width += g.width.sp.value;
+		nat_width += g.amount.sp.value;
 		stretches[g.stretch_order] += g.stretch.sp.value;
 		shrinks[g.shrink_order] += g.shrink.sp.value;
 	    }
@@ -248,7 +248,7 @@ var HBox = (function HBox_closure () {
 		x += item.amount.sp.value;
 	    } else if (item instanceof BoxGlue) {
 		var g = item.amount;
-		var dx = g.width.sp.value;
+		var dx = g.amount.sp.value;
 
 		if (gs > 0) {
 		    if (g.stretch_order == gs - 1)
@@ -306,7 +306,7 @@ var VBox = (function VBox_closure () {
 		prev_depth = 0;
 	    } else if (item instanceof BoxGlue) {
 		var g = item.amount;
-		nat_height += g.width.sp.value + prev_depth;
+		nat_height += g.amount.sp.value + prev_depth;
 		stretches[g.stretch_order] += g.stretch.sp.value;
 		shrinks[g.shrink_order] += g.shrink.sp.value;
 		prev_depth = 0;
@@ -422,7 +422,7 @@ var VBox = (function VBox_closure () {
 		y += item.amount.sp.value;
 	    } else if (item instanceof BoxGlue) {
 		var g = item.amount;
-		var dy = g.width.sp.value;
+		var dy = g.amount.sp.value;
 
 		if (gs > 0) {
 		    if (g.stretch_order == gs - 1)

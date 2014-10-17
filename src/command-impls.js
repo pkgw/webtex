@@ -46,7 +46,7 @@ register_command ('_space_', function cmd__space_ (engine) {
 
     // TODO: real font glue dimensions. T:TP 1041,1042.
     var g = new Glue ();
-    g.width.set_to (Scaled.new_from_parts (12, 0));
+    g.amount.set_to (Scaled.new_from_parts (12, 0));
     engine.accum (new BoxGlue (g));
 });
 

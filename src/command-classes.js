@@ -570,9 +570,9 @@ var SpacerCommand = (function SpacerCommand_closure () {
 		var g = new Glue ();
 		var f = engine.get_misc ('cur_font');
 		if (sf >= 2000)
-		    g.width.set_to (f.get_dimen (7));
+		    g.amount.set_to (f.get_dimen (7));
 		else
-		    g.width.set_to (f.get_dimen (2));
+		    g.amount.set_to (f.get_dimen (2));
 		g.stretch.set_to (f.get_dimen (3));
 		g.shrink.set_to (f.get_dimen (4));
 		g.stretch.set_to (g.stretch.sp.times_n_over_d (sf, 1000)[0]);

@@ -1688,7 +1688,7 @@ var Engine = (function Engine_closure () {
 
 	var g = new Glue ();
 	this.push_back (tok);
-	g.width = this.scan_dimen (mumode, false).intproduct (negfactor);
+	g.amount = this.scan_dimen (mumode, false).intproduct (negfactor);
 
 	if (this.scan_keyword ('plus')) {
 	    t = this.scan_dimen (mumode, true);
