@@ -149,16 +149,16 @@ var HBox = (function HBox_closure () {
 	    var item = this.list[i];
 
 	    if (item instanceof Boxlike) {
-		nat_width += item.width.sp.value;
-		height = Math.max (height, item.height.sp.value - item.shift_amount.sp.value);
-		depth = Math.max (depth, item.depth.sp.value + item.shift_amount.sp.value);
+		nat_width += item.width.sp.value_S;
+		height = Math.max (height, item.height.sp.value_S - item.shift_amount.sp.value_S);
+		depth = Math.max (depth, item.depth.sp.value_S + item.shift_amount.sp.value_S);
 	    } else if (item instanceof Kern) {
-		nat_width += item.amount.sp.value;
+		nat_width += item.amount.sp.value_S;
 	    } else if (item instanceof BoxGlue) {
 		var g = item.amount;
-		nat_width += g.amount.sp.value;
-		stretches[g.stretch_order] += g.stretch.sp.value;
-		shrinks[g.shrink_order] += g.shrink.sp.value;
+		nat_width += g.amount.sp.value_S;
+		stretches[g.stretch_order] += g.stretch.sp.value_S;
+		shrinks[g.shrink_order] += g.shrink.sp.value_S;
 	    }
 	}
 
@@ -167,32 +167,32 @@ var HBox = (function HBox_closure () {
 
 	if (is_exact) {
 	    // We're setting the box to an exact width.
-	    if (spec.sp.value > nat_width) {
+	    if (spec.sp.value_S > nat_width) {
 		settype = 1;
-		setdelta = spec.sp.value - nat_width;
-	    } else if (spec.sp.value < nat_width) {
+		setdelta = spec.sp.value_S - nat_width;
+	    } else if (spec.sp.value_S < nat_width) {
 		settype = 2;
-		setdelta = nat_width - spec.sp.value;
+		setdelta = nat_width - spec.sp.value_S;
 	    }
 	} else {
 	    // We're adjusting the box's width from its natural value.
-	    if (spec.sp.value > 0) {
+	    if (spec.sp.value_S > 0) {
 		settype = 1;
-		setdelta = spec.sp.value;
-	    } else if (spec.sp.value < 0) {
+		setdelta = spec.sp.value_S;
+	    } else if (spec.sp.value_S < 0) {
 		settype = 2;
-		setdelta = -spec.sp.value;
+		setdelta = -spec.sp.value_S;
 	    }
 	}
 
 	if (settype == 0) {
 	    // Natural width.
-	    this.width.sp.value = nat_width;
+	    this.width.sp.value_S = nat_width;
 	    this.glue_state = 1; // ordinary (zeroth-order infinite) stretch
 	    this.glue_set = 0.; // ... but no actual stretching.
 	} else if (settype == 1) {
 	    // We're stretching the box.
-	    this.width.sp.value = nat_width + setdelta;
+	    this.width.sp.value_S = nat_width + setdelta;
 
 	    if (stretches[3] != 0)
 		this.glue_state = 4;
@@ -207,7 +207,7 @@ var HBox = (function HBox_closure () {
 	    this.glue_set = (1.0 * stretches[this.glue_state - 1]) / setdelta;
 	} else {
 	    // We're shrinking it.
-	    this.width.sp.value = nat_width - setdelta;
+	    this.width.sp.value_S = nat_width - setdelta;
 
 	    if (shrinks[3] != 0)
 		this.glue_state = -4;
@@ -221,8 +221,8 @@ var HBox = (function HBox_closure () {
 	    this.glue_set = (1.0 * shrinks[-this.glue_state - 1]) / setdelta;
 	}
 
-	this.height.sp.value = height;
-	this.depth.sp.value = depth;
+	this.height.sp.value_S = height;
+	this.depth.sp.value_S = depth;
     };
 
     proto.traverse = function HBox_traverse (x0, y0, callback) {
@@ -239,23 +239,23 @@ var HBox = (function HBox_closure () {
 	    var item = this.list[i];
 
 	    if (item instanceof ListBox) {
-		item.traverse (x, y0 + item.shift_amount.sp.value, callback);
-		x += item.width.sp.value;
+		item.traverse (x, y0 + item.shift_amount.sp.value_S, callback);
+		x += item.width.sp.value_S;
 	    } else if (item instanceof Boxlike) {
-		callback (x, y0 + item.shift_amount.sp.value, item);
-		x += item.width.sp.value;
+		callback (x, y0 + item.shift_amount.sp.value_S, item);
+		x += item.width.sp.value_S;
 	    } else if (item instanceof Kern) {
-		x += item.amount.sp.value;
+		x += item.amount.sp.value_S;
 	    } else if (item instanceof BoxGlue) {
 		var g = item.amount;
-		var dx = g.amount.sp.value;
+		var dx = g.amount.sp.value_S;
 
 		if (gs > 0) {
 		    if (g.stretch_order == gs - 1)
-			dx += gr * g.stretch.sp.value;
+			dx += gr * g.stretch.sp.value_S;
 		} else {
 		    if (g.shrink_order == -gs - 1)
-			dx += gr * g.shrink.sp.value;
+			dx += gr * g.shrink.sp.value_S;
 		}
 
 		x += dx;
@@ -298,17 +298,17 @@ var VBox = (function VBox_closure () {
 	    var item = this.list[i];
 
 	    if (item instanceof Boxlike) {
-		nat_height += item.width.sp.value + prev_depth;
-		prev_depth = item.depth.sp.value;
-		width = Math.max (width, item.width.sp.value + item.shift_amount.sp.value);
+		nat_height += item.width.sp.value_S + prev_depth;
+		prev_depth = item.depth.sp.value_S;
+		width = Math.max (width, item.width.sp.value_S + item.shift_amount.sp.value_S);
 	    } else if (item instanceof Kern) {
-		nat_height += item.amount.sp.value + prev_depth;
+		nat_height += item.amount.sp.value_S + prev_depth;
 		prev_depth = 0;
 	    } else if (item instanceof BoxGlue) {
 		var g = item.amount;
-		nat_height += g.amount.sp.value + prev_depth;
-		stretches[g.stretch_order] += g.stretch.sp.value;
-		shrinks[g.shrink_order] += g.shrink.sp.value;
+		nat_height += g.amount.sp.value_S + prev_depth;
+		stretches[g.stretch_order] += g.stretch.sp.value_S;
+		shrinks[g.shrink_order] += g.shrink.sp.value_S;
 		prev_depth = 0;
 	    }
 	}
@@ -318,32 +318,32 @@ var VBox = (function VBox_closure () {
 
 	if (is_exact) {
 	    // We're setting the box to an exact height.
-	    if (spec.sp.value > nat_height) {
+	    if (spec.sp.value_S > nat_height) {
 		settype = 1;
-		setdelta = spec.sp.value - nat_height;
-	    } else if (spec.sp.value < nat_height) {
+		setdelta = spec.sp.value_S - nat_height;
+	    } else if (spec.sp.value_S < nat_height) {
 		settype = 2;
-		setdelta = nat_height - spec.sp.value;
+		setdelta = nat_height - spec.sp.value_S;
 	    }
 	} else {
 	    // We're adjusting the box's height from its natural value.
-	    if (spec.sp.value > 0) {
+	    if (spec.sp.value_S > 0) {
 		settype = 1;
-		setdelta = spec.sp.value;
-	    } else if (spec.sp.value < 0) {
+		setdelta = spec.sp.value_S;
+	    } else if (spec.sp.value_S < 0) {
 		settype = 2;
-		setdelta = -spec.sp.value;
+		setdelta = -spec.sp.value_S;
 	    }
 	}
 
 	if (settype == 0) {
 	    // Natural height.
-	    this.height.sp.value = nat_height;
+	    this.height.sp.value_S = nat_height;
 	    this.glue_state = 1; // ordinary (zeroth-order infinite) stretch
 	    this.glue_set = 0.; // ... but no actual stretching.
 	} else if (settype == 1) {
 	    // We're stretching the box.
-	    this.height.sp.value = nat_height + setdelta;
+	    this.height.sp.value_S = nat_height + setdelta;
 
 	    if (stretches[3] != 0)
 		this.glue_state = 4;
@@ -357,7 +357,7 @@ var VBox = (function VBox_closure () {
 	    this.glue_set = (1.0 * stretches[this.glue_state - 1]) / setdelta;
 	} else {
 	    // We're shrinking it.
-	    this.height.sp.value = nat_height - setdelta;
+	    this.height.sp.value_S = nat_height - setdelta;
 
 	    if (shrinks[3] != 0)
 		this.glue_state = -4;
@@ -371,30 +371,30 @@ var VBox = (function VBox_closure () {
 	    this.glue_set = (1.0 * shrinks[-this.glue_state - 1]) / setdelta;
 	}
 
-	this.width.sp.value = width;
+	this.width.sp.value_S = width;
 
 	// Depth is prev_depth, unless \boxmaxdepth makes us shift the
 	// reference point.
-	var bmd = engine.get_parameter (T_DIMEN, 'boxmaxdepth').sp.value;
+	var bmd = engine.get_parameter (T_DIMEN, 'boxmaxdepth').sp.value_S;
 
 	if (prev_depth <= bmd) {
-	    this.depth.sp.value = prev_depth;
+	    this.depth.sp.value_S = prev_depth;
 	} else {
-	    var tot_height = prev_depth + this.height.sp.value;
-	    this.depth.sp.value = bmd;
-	    this.height.sp.value = tot_height - bmd;
+	    var tot_height = prev_depth + this.height.sp.value_S;
+	    this.depth.sp.value_S = bmd;
+	    this.height.sp.value_S = tot_height - bmd;
 	}
     };
 
     proto.adjust_as_vtop = function VBox_adjust_as_vtop () {
-	var tot_height = this.height.sp.value + this.depth.sp.value;
+	var tot_height = this.height.sp.value_S + this.depth.sp.value_S;
 	var height = 0;
 
 	if (this.list[0] instanceof Boxlike)
-	    height = this.list[0].height.sp.value;
+	    height = this.list[0].height.sp.value_S;
 
-	this.height.sp.value = height;
-	this.depth.sp.value = tot_height - height;
+	this.height.sp.value_S = height;
+	this.depth.sp.value_S = tot_height - height;
     };
 
     proto.traverse = function VBox_traverse (x0, y0, callback) {
@@ -405,31 +405,31 @@ var VBox = (function VBox_closure () {
 
 	var gs = this.glue_state;
 	var gr = this.glue_set; // the glue set ratio
-	var y = y0 - this.height.sp.value;
+	var y = y0 - this.height.sp.value_S;
 
 	for (var i = 0; i < this.list.length; i++) {
 	    var item = this.list[i];
 
 	    if (item instanceof ListBox) {
-		y += item.height.sp.value;
-		item.traverse (x0 + item.shift_amount.sp.value, y, callback);
-		y += item.depth.sp.value;
+		y += item.height.sp.value_S;
+		item.traverse (x0 + item.shift_amount.sp.value_S, y, callback);
+		y += item.depth.sp.value_S;
 	    } else if (item instanceof Boxlike) {
-		y += item.height.sp.value;
-		callback (x0 + item.shift_amount.sp.value, y, item);
-		y += item.depth.sp.value;
+		y += item.height.sp.value_S;
+		callback (x0 + item.shift_amount.sp.value_S, y, item);
+		y += item.depth.sp.value_S;
 	    } else if (item instanceof Kern) {
-		y += item.amount.sp.value;
+		y += item.amount.sp.value_S;
 	    } else if (item instanceof BoxGlue) {
 		var g = item.amount;
-		var dy = g.amount.sp.value;
+		var dy = g.amount.sp.value_S;
 
 		if (gs > 0) {
 		    if (g.stretch_order == gs - 1)
-			dy += gr * g.stretch.sp.value;
+			dy += gr * g.stretch.sp.value_S;
 		} else {
 		    if (g.shrink_order == -gs - 1)
-			dy += gr * g.shrink.sp.value;
+			dy += gr * g.shrink.sp.value_S;
 		}
 
 		y += dy
@@ -521,15 +521,15 @@ var CanvasBox = (function CanvasBox_closure () {
     };
 
     proto.to_render_data = function CanvasBox_to_render_data () {
-	var data = {w: this.width.sp.value,
-		    h: this.height.sp.value,
-		    d: this.depth.sp.value};
+	var data = {w: this.width.sp.value_S,
+		    h: this.height.sp.value_S,
+		    d: this.depth.sp.value_S};
 	var gl = []; // "graphics list"
 
 	for (var i = 0; i < this.graphics.length; i++) {
 	    var q = this.graphics[i];
 	    var x = q[0];
-	    var y = this.height.sp.value + q[1];
+	    var y = this.height.sp.value_S + q[1];
 	    var subitem = q[2];
 
 	    if (subitem instanceof Character) {
@@ -538,11 +538,11 @@ var CanvasBox = (function CanvasBox_closure () {
 			  font: subitem.font.ident,
 			  ord: subitem.ord});
 	    } else if (subitem instanceof Rule) {
-		y -= subitem.height.sp.value;
+		y -= subitem.height.sp.value_S;
 		gl.push ({x: x,
 			  y: y,
-			  w: subitem.width.sp.value,
-			  h: subitem.height.sp.value + subitem.depth.sp.value});
+			  w: subitem.width.sp.value_S,
+			  h: subitem.height.sp.value_S + subitem.depth.sp.value_S});
 	    } else {
 		throw new TexInternalError ('unhandled CanvasBox graphic %o', subitem);
 	    }

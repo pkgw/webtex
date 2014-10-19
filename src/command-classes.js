@@ -557,7 +557,7 @@ var SpacerCommand = (function SpacerCommand_closure () {
 
 	if (engine.mode () == M_HORZ || engine.mode () == M_RHORZ) {
 	    engine.trace ('spacer: h mode, accumed.');
-	    var sf = engine.get_special_value (T_INT, 'spacefactor').value;
+	    var sf = engine.get_special_value (T_INT, 'spacefactor').value_I;
 	    var xs = engine.get_parameter (T_GLUE, 'xspaceskip');
 	    var ss = engine.get_parameter (T_GLUE, 'spaceskip');
 	    var g = null;

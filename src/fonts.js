@@ -146,7 +146,7 @@ var TfmMetrics = (function TfmMetrics_closure () {
 		design_size = scale_factor;
 	    else {
 		var tmp = new Scaled (design_size);
-		design_size = tmp.times_n_over_d (-scale_factor, 1000)[0].value;
+		design_size = tmp.times_n_over_d (-scale_factor, 1000)[0].value_S;
 	    }
 	}
 
@@ -509,9 +509,9 @@ register_command ('font', (function FontCommand_closure () {
 
 	if (engine.scan_keyword ('at')) {
 	    s = engine.scan_dimen ()
-	    if (s.sp.value <= 0) // FIXME: || s > SC_MAX
+	    if (s.sp.value_S <= 0) // FIXME: || s > SC_MAX
 		throw new TexRuntimeError ('illegal font size %o', s);
-	    s = s.sp.value;
+	    s = s.sp.value_S;
 	} else if (engine.scan_keyword ('scaled')) {
 	    s = -engine.scan_int ().value;
 	    if (s >= 0 || s < -32768)
@@ -572,7 +572,7 @@ register_command ('fontdimen', (function FontDimenCommand_closure () {
     proto.name = 'fontdimen';
 
     proto.invoke = function FontDimenCommand_invoke (engine) {
-	var num = engine.scan_int ().value;
+	var num = engine.scan_int ().value_I;
 	var tok = engine.next_tok_throw ();
 	var val = tok.to_cmd (engine).as_valref (engine);
 
@@ -593,7 +593,7 @@ register_command ('fontdimen', (function FontDimenCommand_closure () {
     };
 
     proto.as_valref = function FontDimenCommand_as_valref (engine) {
-	var num = engine.scan_int ().value;
+	var num = engine.scan_int ().value_I;
 	var tok = engine.next_tok_throw ();
 	var font = tok.to_cmd (engine).as_valref (engine);
 

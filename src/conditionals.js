@@ -162,7 +162,7 @@
 	// \else, or nothing.
 
 	engine.start_parsing_condition ();
-	var ntoskip = engine.scan_int ().value;
+	var ntoskip = engine.scan_int ().value_I;
 	engine.done_parsing_condition ();
 	engine.trace ('ifcase %d', ntoskip);
 
@@ -286,7 +286,7 @@
 
     register_command ('ifnum', function cmd_ifnum (engine) {
 	engine.start_parsing_condition ();
-	var val1 = engine.scan_int ().value;
+	var val1 = engine.scan_int ().value_I;
 
 	while (true) {
 	    var tok = engine.next_x_tok ();
@@ -298,7 +298,7 @@
 
 	// It's a little futzy to not check the validity of tok before
 	// reading val2.
-	var val2 = engine.scan_int ().value, result;
+	var val2 = engine.scan_int ().value_I, result;
 	engine.done_parsing_condition ();
 
 	if (tok.is_other_char (O_LESS))
@@ -317,7 +317,7 @@
 
     register_command ('ifodd', function cmd_ifodd (engine) {
 	engine.start_parsing_condition ();
-	var val = engine.scan_int ().value;
+	var val = engine.scan_int ().value_I;
 	engine.done_parsing_condition ();
 	var result = (val % 2 == 1);
 	engine.trace ('ifodd %d => %b', val, result);
@@ -341,11 +341,11 @@
 	engine.done_parsing_condition ();
 
 	if (tok.is_other_char (O_LESS))
-	    result = (val1.sp.value < val2.sp.value);
+	    result = (val1.sp.value_S < val2.sp.value_S);
 	else if (tok.is_other_char (O_GREATER))
-	    result = (val1.sp.value > val2.sp.value);
+	    result = (val1.sp.value_S > val2.sp.value_S);
 	else if (tok.is_other_char (O_EQUALS))
-	    result = (val1.sp.value == val2.sp.value);
+	    result = (val1.sp.value_S == val2.sp.value_S);
 	else
 	    throw new TexSyntaxError ('expected <,=,> in \\ifdim but got %o', tok);
 

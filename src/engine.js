@@ -506,7 +506,7 @@ var Engine = (function Engine_closure () {
 
     proto._global_flag = function Engine__global_flag () {
 	// TeXBook p. 275
-	var gd = this.get_parameter (T_INT, 'globaldefs').value;
+	var gd = this.get_parameter (T_INT, 'globaldefs').value_I;
 	if (gd > 0)
 	    return true;
 	if (gd < 0)
@@ -959,7 +959,7 @@ var Engine = (function Engine_closure () {
 	// \end. \line{} is \hbox to\hsize{}.
 
 	if (this.build_stack[0].length == 0 &&
-	    this.get_special_value (T_INT, 'deadcycles').value == 0) {
+	    this.get_special_value (T_INT, 'deadcycles').value_I == 0) {
 	    this.trace ('... completely done');
 	    this._force_end = true;
 	} else {
@@ -1499,12 +1499,12 @@ var Engine = (function Engine_closure () {
 
     proto.scan_char_code = function Engine_scan_char_code () {
 	// note: returns JS integer, not TexInt.
-	return this.scan_int ().rangecheck (this, 0, 255).value;
+	return this.scan_int ().rangecheck (this, 0, 255).value_I;
     };
 
     proto.scan_register_num = function Engine_scan_register () {
 	// note: returns JS integer, not TexInt.
-	var v = this.scan_int ().value;
+	var v = this.scan_int ().value_I;
 	if (v < 0 || v > 255)
 	    throw new TexRuntimeError ('illegal register number %d', v);
 	return v;
@@ -1512,17 +1512,17 @@ var Engine = (function Engine_closure () {
 
     proto.scan_int_4bit = function Engine_scan_int_4bit () {
 	// note: returns JS integer, not TexInt.
-	return this.scan_int ().rangecheck (this, 0, 15).value;
+	return this.scan_int ().rangecheck (this, 0, 15).value_I;
     };
 
     proto.scan_int_15bit = function Engine_scan_int_15bit () {
 	// note: returns JS integer, not TexInt.
-	return this.scan_int ().rangecheck (this, 0, 32767).value;
+	return this.scan_int ().rangecheck (this, 0, 32767).value_I;
     };
 
     proto.scan_int_27bit = function Engine_scan_int_27bit () {
 	// note: returns JS integer, not TexInt.
-	return this.scan_int ().rangecheck (this, 0, 0x7FFFFFF).value;
+	return this.scan_int ().rangecheck (this, 0, 0x7FFFFFF).value_I;
     };
 
     proto.scan_dimen = function Engine_scan_dimen (mumode, infmode) {
@@ -1557,7 +1557,7 @@ var Engine = (function Engine_closure () {
 		nonfrac = 0;
 	    } else {
 		this.push_back (tok);
-		nonfrac = this.scan_int ().value;
+		nonfrac = this.scan_int ().value_I;
 		if (nonfrac < 0) {
 		    negfactor = -negfactor;
 		    nonfrac = -nonfrac;
@@ -1826,7 +1826,7 @@ var Engine = (function Engine_closure () {
 
 
     proto.scan_streamnum = function Engine_scan_streamnum () {
-	var snum = this.scan_int ().value;
+	var snum = this.scan_int ().value_I;
 	if (snum < 0 || snum > 15)
 	    return 16; // NOTE: our little convention
 	return snum;
@@ -2231,13 +2231,13 @@ var Engine = (function Engine_closure () {
 		b.list = this.build_stack.pop ();
 		this.build_stack.push ([]);
 		b.set_glue (this, false, new Dimen ());
-		w = b.width.sp.value;
+		w = b.width.sp.value_S;
 	    } else {
 		b = new VBox ();
 		b.list = this.build_stack.pop ();
 		this.build_stack.push ([]);
 		b.set_glue (this, false, new Dimen ());
-		w = b.height.sp.value;
+		w = b.height.sp.value_S;
 	    }
 
 	    var n = astate.cur_col - astate.cur_span_col + 1;
@@ -2302,7 +2302,7 @@ var Engine = (function Engine_closure () {
 
 	var o = 0;
 	if (this.mode () == M_DMATH)
-	    o = this.get_parameter (T_DIMEN, 'displayindent').sp.value;
+	    o = this.get_parameter (T_DIMEN, 'displayindent').sp.value_S;
 
 	// TTP 801
 	// TTP 804
@@ -2347,7 +2347,7 @@ var Engine = (function Engine_closure () {
 	};
 
     proto.escapechar = function Engine_escapechar () {
-	return this.get_parameter (T_INT, 'escapechar').value;
+	return this.get_parameter (T_INT, 'escapechar').value_I;
     };
 
     // Apply all of extensions registered by the various subsystems.

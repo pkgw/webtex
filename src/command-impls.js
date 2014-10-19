@@ -225,7 +225,7 @@ register_command ('string', function cmd_string (engine) {
 
 
 register_command ('number', function cmd_number (engine) {
-    var val = engine.scan_int ().value;
+    var val = engine.scan_int ().value_I;
     engine.trace ('* number %o', val);
     engine.push_string ('' + val);
 });
@@ -334,7 +334,7 @@ var CharCodeCommand = (function CharCodeCommand_closure () {
     proto.invoke = function CharCodeCommand_invoke (engine) {
 	var ord = engine.scan_char_code ();
 	engine.scan_optional_equals ();
-	var code = engine.scan_int ().value;
+	var code = engine.scan_int ().value_I;
 
 	if (code < 0 || code > ct_maxvals[this.codetype])
 	    throw new TexRuntimeException ('illegal value %d for %s', code,
@@ -378,7 +378,7 @@ register_command ('chardef', function cmd_chardef (engine) {
 register_command ('mathchardef', function cmd_mathchardef (engine) {
     var cstok = engine.scan_r_token ();
     engine.scan_optional_equals ();
-    var val = engine.scan_int ().value;
+    var val = engine.scan_int ().value_I;
     if (val < 0 || val > 0x8000)
 	throw new TexRuntimeError ('need mathcode in [0,0x8000] but got %d', val);
     engine.trace ('mathchardef %o -> {insmathchar %x}', cstok, val);
@@ -861,8 +861,8 @@ register_command ('hrule', function cmd_hrule (engine) {
 	throw new TexRuntimeError ('can only create \\hrule in vertical mode');
 
     var rule = new Rule ();
-    rule.height.sp.value = 26214; // default rule = 0.4pt; T:TP sec 463
-    rule.depth.sp.value = 0;
+    rule.height.sp.value_S = 26214; // default rule = 0.4pt; T:TP sec 463
+    rule.depth.sp.value_S = 0;
 
     while (true) {
 	if (engine.scan_keyword ('width'))
@@ -885,7 +885,7 @@ register_command ('vrule', function cmd_vrule (engine) {
 	throw new TexRuntimeError ('can only create \\vrule in horizontal mode');
 
     var rule = new Rule ();
-    rule.width.sp.value = 26214; // default rule = 0.4pt; T:TP sec 463
+    rule.width.sp.value_S = 26214; // default rule = 0.4pt; T:TP sec 463
 
     while (true) {
 	if (engine.scan_keyword ('width'))
@@ -1695,7 +1695,7 @@ register_command ('romannumeral', function cmd_romannumeral (engine) {
     // another puzzle: "GFY, DEK."
     var table = ['m', 2, 'd', 5, 'c', 2, 1, 5, 'x', 2, 'v', 5, 'i'];
     var v = 1000;
-    var n = engine.scan_int ().value;
+    var n = engine.scan_int ().value_I;
     var n_orig = n;
     var k = 0, j = 0, u = 0;
     var result = '';

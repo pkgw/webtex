@@ -6,16 +6,16 @@ var TexInt = (function TexInt_closure () {
     // These objects are immutable.
     function TexInt (value) {
 	if (value instanceof TexInt) {
-	    this.value = value;
+	    this.value_I = value;
 	} else if (typeof value != 'number') {
 	    throw new TexInternalError ('non-numeric TexInt value %o', value);
 	} else if (value % 1 != 0) {
 	    throw new TexInternalError ('non-integer TexInt value %o', value);
 	} else {
-	    this.value = value | 0;
+	    this.value_I = value | 0;
 	}
 
-	if (Math.abs (this.value) > INT_MAX)
+	if (Math.abs (this.value_I) > INT_MAX)
 	    throw new TexRuntimeError ('out-of-range TexInt value %d', value);
     }
 
@@ -31,7 +31,7 @@ var TexInt = (function TexInt_closure () {
 	 * TexInts for temporary manipulations. */
 
 	if (value instanceof TexInt)
-	    return value.value;
+	    return value.value_I;
 
 	if (typeof value != 'number')
 	    throw new TexInternalError ('non-numeric tex-int value %o', value);
@@ -47,19 +47,19 @@ var TexInt = (function TexInt_closure () {
     };
 
     proto.toString = function TexInt_toString () {
-	return '<' + this.value + '|i>';
+	return '<' + this.value_I + '|i>';
     };
 
     proto.to_texstr = function TexInt_to_texstr () {
-	return '' + this.value;
+	return '' + this.value_I;
     };
 
     proto.clone = function TexInt_clone () {
-	return new TexInt (this.value);
+	return new TexInt (this.value_I);
     };
 
     proto.is_nonzero = function TexInt_is_nonzero () {
-	return (this.value != 0);
+	return (this.value_I != 0);
     };
 
     proto.as_int = function TexInt_as_int () {
@@ -75,7 +75,7 @@ var TexInt = (function TexInt_closure () {
     };
 
     proto.as_serializable = function TexInt_as_serializable () {
-	return this.value;
+	return this.value_I;
     };
 
     TexInt.deserialize = function TexInt_deserialize (data) {
@@ -83,25 +83,25 @@ var TexInt = (function TexInt_closure () {
     };
 
     proto.advance = function TexInt_advance (other) {
-	return new TexInt (this.value + other.value);
+	return new TexInt (this.value_I + other.value_I);
     };
 
     proto.intproduct = function TexInt_intproduct (k) {
 	k = TexInt.xcheck (k);
-	return new TexInt (this.value * k);
+	return new TexInt (this.value_I * k);
     };
 
     proto.intdivide = function TexInt_intdivide (k) {
 	k = TexInt.xcheck (k);
-	return new TexInt (this.value / k >> 0);
+	return new TexInt (this.value_I / k >> 0);
     };
 
     proto.rangecheck = function TexInt_rangecheck (engine, min, max) {
-	if (this.value >= min && this.value <= max)
+	if (this.value_I >= min && this.value_I <= max)
 	    return this;
 
 	engine.warn ('expected integer in [%d,%d]; got %d; using 0',
-		     min, max, this.value);
+		     min, max, this.value_I);
 	return TexInt (0);
     };
 
@@ -120,9 +120,9 @@ var Scaled = (function Scaled_closure () {
     // These objects are immutable.
     function Scaled (value) {
 	if (value instanceof Scaled)
-	    this.value = value.value;
+	    this.value_S = value.value_S;
 	else
-	    this.value = TexInt.xcheck (value);
+	    this.value_S = TexInt.xcheck (value);
     }
 
     inherit (Scaled, Value);
@@ -140,16 +140,16 @@ var Scaled = (function Scaled_closure () {
 	// maxanswer: js int
 
 	if (n < 0) {
-	    var xv = -x.value;
+	    var xv = -x.value_S;
 	    n = -n;
 	} else {
-	    var xv = x.value;
+	    var xv = x.value_S;
 	}
 
 	if (n == 0)
 	    return y;
 
-	var yv = y.value;
+	var yv = y.value_S;
 
 	if (xv <= div (maxanswer - yv, n) && -xv <= div (maxanswer + yv, n))
 	    return new Scaled (n * xv + yv);
@@ -174,7 +174,7 @@ var Scaled = (function Scaled_closure () {
 	    var s = new Scaled (nonfrac);
 	    var t = s.times_n_over_d (num, denom); // -> [result, remainder]
 	    frac = div ((num * frac + SC_UNITY * t[1]), denom);
-	    nonfrac = t[0].value + div (frac, SC_UNITY);
+	    nonfrac = t[0].value_S + div (frac, SC_UNITY);
 	    frac = frac % SC_UNITY;
 	    return Scaled.new_from_parts (nonfrac, frac);
 	};
@@ -210,11 +210,11 @@ var Scaled = (function Scaled_closure () {
 	n = TexInt.xcheck (n);
 	d = TexInt.xcheck (d);
 
-	var positive = (this.value >= 0);
+	var positive = (this.value_S >= 0);
 	if (positive)
-	    var xv = this.value
+	    var xv = this.value_S;
 	else
-	    var xv = -this.value;
+	    var xv = -this.value_S;
 
 	var t = (xv % SC_HALF) * n;
 	var u = div (xv, SC_HALF) * n + div (t, SC_HALF);
@@ -238,17 +238,17 @@ var Scaled = (function Scaled_closure () {
 	//   of (this/n) must be rounded off.
 
 	n = TexInt.xcheck (n);
-	if (n.value == 0)
+	if (n.value_I == 0)
 	    throw new TexRuntimeError ('really, dividing by 0?');
 
 	var negative = false;
 
 	if (n < 0) {
-	    var xv = -this.value;
+	    var xv = -this.value_S;
 	    n = -n;
 	    negative = true;
 	} else {
-	    var xv = this.value;
+	    var xv = this.value_S;
 	}
 
 	if (xv >= 0) {
@@ -277,15 +277,15 @@ var Scaled = (function Scaled_closure () {
     };
 
     proto.clone = function Scaled_clone () {
-	return new Scaled (this.value);
+	return new Scaled (this.value_S);
     };
 
     proto.is_nonzero = function Scaled_is_nonzero () {
-	return (this.value != 0);
+	return (this.value_S != 0);
     };
 
     proto.as_int = function Scaled_as_int () {
-	return new TexInt (this.value);
+	return new TexInt (this.value_S);
     };
 
     proto.as_scaled = function Scaled_as_scaled () {
@@ -297,7 +297,7 @@ var Scaled = (function Scaled_closure () {
     };
 
     proto.as_serializable = function Scaled_as_serializable () {
-	return this.value;
+	return this.value_S;
     };
 
     Scaled.deserialize = function Scaled_deserialize (data) {
@@ -305,7 +305,7 @@ var Scaled = (function Scaled_closure () {
     };
 
     proto.advance = function Scaled_advance (other) {
-	return new Scaled (this.value + other.value);
+	return new Scaled (this.value_S + other.value_S);
     };
 
     proto.intproduct = function Scaled_intproduct (k) {
@@ -319,7 +319,7 @@ var Scaled = (function Scaled_closure () {
     };
 
     proto.asfloat = function Scaled_asfloat () {
-	return this.value * UNSCALE;
+	return this.value_S * UNSCALE;
     };
 
     return Scaled;
@@ -355,7 +355,7 @@ var Dimen = (function Dimen_closure () {
 
 	var d = new Dimen ();
 	d.sp = x.times_n_plus_y (k, new Scaled (0));
-	if (Math.abs (d.sp.value) > MAX_SCALED)
+	if (Math.abs (d.sp.value_S) > MAX_SCALED)
 	    throw new TexRuntimeError ('dimension out of range: %o', d);
 	return d;
     };

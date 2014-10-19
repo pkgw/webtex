@@ -523,7 +523,7 @@ var mathlib = (function mathlib_closure () {
 
 
     function height_plus_depth (metrics, ord) {
-	return metrics.height (ord).value + metrics.depth (ord).value;
+	return metrics.height (ord).value_S + metrics.depth (ord).value_S;
     }
 
     function math_kern (state, p) {
@@ -746,7 +746,7 @@ var mathlib = (function mathlib_closure () {
 			break;
 		    }
 
-		    var u = m.height (y).value + m.depth (y).value;
+		    var u = m.height (y).value_S + m.depth (y).value_S;
 		    if (u > w) {
 			f = g;
 			c = y;
@@ -829,11 +829,11 @@ var mathlib = (function mathlib_closure () {
 	    if (top != 0)
 		stack_into_box (b, f, top);
 
-	    b.depth.sp.value = w - b.height.sp.value;
+	    b.depth.sp.value_S = w - b.height.sp.value_S;
 	}
 
-	b.shift_amount.sp.value = half (b.height.sp.value - b.depth.sp.value)
-	    - state.sym_dimen (state.size, SymDimens.AxisHeight).sp.value;
+	b.shift_amount.sp.value_S = half (b.height.sp.value_S - b.depth.sp.value_S)
+	    - state.sym_dimen (state.size, SymDimens.AxisHeight).sp.value_S;
 	return b;
     }
 
@@ -853,10 +853,10 @@ var mathlib = (function mathlib_closure () {
 	    var x = clean_box (state, q.nuc);
 
 	    if (q.sub != null && q.limtype != LIMTYPE_LIMITS)
-		x.width.sp.value -= delta // remove italic correction
+		x.width.sp.value_S -= delta // remove italic correction
 
-	    x.shift_amount.sp.value = half ((x.height.sp.value - x.depth.sp.value)
-					    - state.sym_dimen (state.size, SymDimens.AxisHeight).sp.value);
+	    x.shift_amount.sp.value_S = half ((x.height.sp.value_S - x.depth.sp.value_S)
+					    - state.sym_dimen (state.size, SymDimens.AxisHeight).sp.value_S);
 	    q.nuc = x;
 	}
 
@@ -867,40 +867,40 @@ var mathlib = (function mathlib_closure () {
 	var y = clean_box (state, q.nuc);
 	var z = clean_box (state.subscript (), q.sub);
 	var v = new VBox ();
-	v.width.sp.value = Math.max (x.width.sp.value, y.width.sp.value, z.width.sp.value);
+	v.width.sp.value_S = Math.max (x.width.sp.value_S, y.width.sp.value_S, z.width.sp.value_S);
 
-	x = rebox (x, v.width.sp.value);
-	y = rebox (y, v.width.sp.value);
-	z = rebox (z, v.width.sp.value);
-	x.shift_amount.sp.value = half (delta);
-	z.shift_amount.sp.value = -x.shift_amount.sp.value;
+	x = rebox (x, v.width.sp.value_S);
+	y = rebox (y, v.width.sp.value_S);
+	z = rebox (z, v.width.sp.value_S);
+	x.shift_amount.sp.value_S = half (delta);
+	z.shift_amount.sp.value_S = -x.shift_amount.sp.value_S;
 	v.height = y.height.clone ();
 	v.depth = y.height.clone ();
 
 	if (q.sup == null) {
 	    v.list = [y];
 	} else {
-	    var shift_up = state.ext_dimen (ExtDimens.BigOpSpacing3).sp.value - x.depth.sp.value;
-	    shift_up = Math.max (shift_up, state.ext_dimen (ExtDimens.BigOpSpacing1).sp.value);
+	    var shift_up = state.ext_dimen (ExtDimens.BigOpSpacing3).sp.value_S - x.depth.sp.value_S;
+	    shift_up = Math.max (shift_up, state.ext_dimen (ExtDimens.BigOpSpacing1).sp.value_S);
 	    var k1 = new Kern (Dimen.new_scaled (shift_up));
 	    var k2 = new Kern (state.ext_dimen (ExtDimens.BigOpSpacing5));
 	    v.list = [k2, x, k1, y];
 	    v.height.advance (state.ext_dimen (ExtDimens.BigOpSpacing5));
 	    v.height.advance (x.height);
 	    v.height.advance (x.depth);
-	    v.height.sp.value += shift_up;
+	    v.height.sp.value_S += shift_up;
 	}
 
 	if (q.sub != null) {
-	    var shift_down = state.ext_dimen (ExtDimens.BigOpSpacing4).sp.value - z.height.sp.value;
-	    shift_down = Math.max (shift_down, state.ext_dimen (ExtDimens.BigOpSpacing2).sp.value);
+	    var shift_down = state.ext_dimen (ExtDimens.BigOpSpacing4).sp.value_S - z.height.sp.value_S;
+	    shift_down = Math.max (shift_down, state.ext_dimen (ExtDimens.BigOpSpacing2).sp.value_S);
 	    var k1 = new Kern (Dimen.new_scaled (shift_down));
 	    var k2 = new Kern (state.ext_dimen (ExtDimens.BigOpSpacing5));
 	    v.list = v.list.concat ([k1, z, k2]);
 	    v.height.advance (state.ext_dimen (ExtDimens.BigOpSpacing5));
 	    v.height.advance (z.height);
 	    v.height.advance (z.depth);
-	    v.height.sp.value += shift_down;
+	    v.height.sp.value_S += shift_down;
 	}
 
 	q.new_hlist = v;
@@ -908,8 +908,8 @@ var mathlib = (function mathlib_closure () {
     }
 
     function make_radical (state, q) {
-	var drt = state.ext_dimen (ExtDimens.DefaultRuleThickness).sp.value;
-	var mxh = state.sym_dimen (state.size, SymDimens.MathXHeight).sp.value;
+	var drt = state.ext_dimen (ExtDimens.DefaultRuleThickness).sp.value_S;
+	var mxh = state.sym_dimen (state.size, SymDimens.MathXHeight).sp.value_S;
 
 	// T:TP 737
 	var x = clean_box (state.to_cramped (), q.nuc);
@@ -923,13 +923,13 @@ var mathlib = (function mathlib_closure () {
 	}
 
 	var y = var_delimiter (state, q.left_delim,
-			       x.height.sp.value + x.depth.sp.value + clr + drt);
-	var delta = y.depth.sp.value - (x.height.sp.value + x.depth.sp.value + clr);
+			       x.height.sp.value_S + x.depth.sp.value_S + clr + drt);
+	var delta = y.depth.sp.value_S - (x.height.sp.value_S + x.depth.sp.value_S + clr);
 	if (delta > 0)
 	    clr += half (delta);
 
-	y.shift_amount.sp.value = -(x.height.sp.value + clr);
-	q.nuc = hpack_natural (state.engine, [y, overbar (x, clr, y.height.sp.value)]);
+	y.shift_amount.sp.value_S = -(x.height.sp.value_S + clr);
+	q.nuc = hpack_natural (state.engine, [y, overbar (x, clr, y.height.sp.value_S)]);
     }
 
     function make_vcenter (state, q) {
@@ -937,13 +937,13 @@ var mathlib = (function mathlib_closure () {
 	    throw new TexInternalError ('vcenter needs VBox');
 
 	var v = q.nuc;
-	var delta = v.height.sp.value + v.depth.sp.value;
-	v.height.sp.value = state.sym_dimen (state.size, SymDimens.AxisHeight).sp.value + half (delta);
-	v.depth.sp.value = delta - v.height.sp.value;
+	var delta = v.height.sp.value_S + v.depth.sp.value_S;
+	v.height.sp.value_S = state.sym_dimen (state.size, SymDimens.AxisHeight).sp.value_S + half (delta);
+	v.depth.sp.value_S = delta - v.height.sp.value_S;
     }
 
     function make_over (state, q) {
-	var drt = state.ext_dimen (ExtDimens.DefaultRuleThickness).sp.value;
+	var drt = state.ext_dimen (ExtDimens.DefaultRuleThickness).sp.value_S;
 	q.nuc = overbar (clean_box (state.to_cramped (), q.nuc),
 			 3 * drt,
 			 drt);
@@ -956,7 +956,7 @@ var mathlib = (function mathlib_closure () {
 	var shift_down = 0;
 	var t = 0;
 	var clr = 0;
-	var mxh = state.sym_dimen (state.size, SymDimens.MathXHeight).sp.value;
+	var mxh = state.sym_dimen (state.size, SymDimens.MathXHeight).sp.value_S;
 
 	if (p == null || !(p[0] instanceof Character)) {
 	    var z = hpack_natural (engine, p);
@@ -965,8 +965,8 @@ var mathlib = (function mathlib_closure () {
 	    else
 		t = MS_SCRIPTSCRIPT;
 
-	    shift_up = z.height.sp.value - state.sym_dimen (t, SymDimens.SupDrop).sp.value;
-	    shift_down = z.depth.sp.value + state.sym_dimen (t, SymDimens.SubDrop).sp.value;
+	    shift_up = z.height.sp.value_S - state.sym_dimen (t, SymDimens.SupDrop).sp.value_S;
+	    shift_down = z.depth.sp.value_S + state.sym_dimen (t, SymDimens.SubDrop).sp.value_S;
 	}
 
 	if (q.sup == null) {
@@ -974,49 +974,49 @@ var mathlib = (function mathlib_closure () {
 	    var x = clean_box (state.subscript (), q.sub);
 	    x.width.advance (engine.get_parameter (T_DIMEN, 'scriptspace'));
 
-	    clr = x.height.sp.value - Math.abs (mxh * 4) / 5;
-	    var sub1 = state.sym_dimen (state.size, SymDimens.Sub1).sp.value;
-	    x.shift_amount.sp.value = Math.max (shift_down, clr, sub1);
+	    clr = x.height.sp.value_S - Math.abs (mxh * 4) / 5;
+	    var sub1 = state.sym_dimen (state.size, SymDimens.Sub1).sp.value_S;
+	    x.shift_amount.sp.value_S = Math.max (shift_down, clr, sub1);
 	} else {
 	    var x = clean_box (state.superscript (), q.sup);
 	    x.width.advance (engine.get_parameter (T_DIMEN, 'scriptspace'));
 
 	    if (state.cramped)
-		clr = state.sym_dimen (state.size, SymDimens.Sup3).sp.value;
+		clr = state.sym_dimen (state.size, SymDimens.Sup3).sp.value_S;
 	    else if (state.style == MS_DISPLAY)
-		clr = state.sym_dimen (state.size, SymDimens.Sup1).sp.value;
+		clr = state.sym_dimen (state.size, SymDimens.Sup1).sp.value_S;
 	    else
-		clr = state.sym_dimen (state.size, SymDimens.Sup2).sp.value;
+		clr = state.sym_dimen (state.size, SymDimens.Sup2).sp.value_S;
 
 	    shift_up = Math.max (shift_up, clr);
-	    clr = x.depth.sp.value + Math.abs (mxh) / 4
+	    clr = x.depth.sp.value_S + Math.abs (mxh) / 4
 	    shift_up = Math.max (shift_up, clr);
 
 	    if (q.sub == null)
-		x.shift_amount.sp.value = -shift_up
+		x.shift_amount.sp.value_S = -shift_up
 	    else {
 		var y = clean_box (state.subscript (), q.sub);
 		y.width.advance (engine.get_parameter (T_DIMEN, 'scriptspace'));
 
 		shift_down = max (shift_down,
-				  state.sym_dimen (state.size, SymDimens.Sub2).sp.value);
+				  state.sym_dimen (state.size, SymDimens.Sub2).sp.value_S);
 
-		clr = 4 * state.ext_dimen (ExtDimens.DefaultRuleThickness).sp.value;
-		clr -= (shift_up - x.depth.sp.value) - (y.height.sp.value - shift_down);
+		clr = 4 * state.ext_dimen (ExtDimens.DefaultRuleThickness).sp.value_S;
+		clr -= (shift_up - x.depth.sp.value_S) - (y.height.sp.value_S - shift_down);
 		if (clr > 0) {
 		    shift_down += clr;
-		    clr = Math.abs (mxh * 4) / 5 - (shift_up - x.depth.sp.value);
+		    clr = Math.abs (mxh * 4) / 5 - (shift_up - x.depth.sp.value_S);
 		    if (clr > 0) {
 			shift_up += clr;
 			shift_down -= clr;
 		    }
 		}
 
-		x.shift_amount.sp.value = delta;
-		var k = new Kern (Dimen.new_scaled ((shift_up - x.depth.sp.value) -
-						    (y.height.sp.value - shift_down)));
+		x.shift_amount.sp.value_S = delta;
+		var k = new Kern (Dimen.new_scaled ((shift_up - x.depth.sp.value_S) -
+						    (y.height.sp.value_S - shift_down)));
 		x = vpack_natural ([x, k, y]);
-		x.shift_amount.sp.value = shift_down;
+		x.shift_amount.sp.value_S = shift_down;
 	    }
 	}
 
