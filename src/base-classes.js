@@ -85,7 +85,7 @@ var Value = (function Value_closure () {
 
     // Static functions.
 
-    Value.ensure = function Value_ensure (valtype, value) {
+    Value.ensure_boxed = function Value_ensure_boxed (valtype, value) {
 	if (valtype == T_INT)
 	    return new TexInt (TexInt.xcheck (value));
 
@@ -120,6 +120,13 @@ var Value = (function Value_closure () {
 	}
 
 	throw new TexInternalError ('unrecognized valtype %o', valtype);
+    };
+
+    Value.ensure_unboxed = function Value_ensure_unboxed (valtype, value) {
+	if (valtype == T_INT)
+	    return nlib.checkint__N_I (value);
+
+	return Value.ensure_boxed (valtype, value);
     };
 
     return Value;

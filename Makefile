@@ -14,6 +14,7 @@ sharedjs = \
   src/jsonparse.js \
   src/constants.js \
   src/str-utils.js \
+  src/numerics.js \
   src/base-classes.js \
   src/values.js \
   src/conditionals.js \
