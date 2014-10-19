@@ -271,7 +271,7 @@ var TfmMetrics = (function TfmMetrics_closure () {
 
 	var rv = new Character (font, ord);
 	rv.width.set_to (this.ord_widths[ord]);
-	rv.height.set_to (this.ord_heights[ord]);
+	rv.height_S = this.ord_heights[ord].value_S;
 	rv.depth_S = this.ord_depths[ord].value_S;
 	return rv;
     };

@@ -787,14 +787,14 @@ register_command ('ht', (function HtCommand_closure () {
 	// Valref is not so important.
 	var reg = engine.scan_char_code__I ();
 	engine.scan_optional_equals ();
-	var height = engine.scan_dimen ();
+	var height_S = engine.scan_dimen ().sp.value_S;
 	var box = engine.get_register (T_BOX, reg);
 
 	if (box.btype == BT_VOID) {
-	    engine.trace ('\\ht%d = %o -- noop on void box', reg, height);
+	    engine.trace ('\\ht%d = %S -- noop on void box', reg, height_S);
 	} else {
-	    engine.trace ('\\ht%d = %o', reg, height);
-	    box.height = height;
+	    engine.trace ('\\ht%d = %S', reg, height_S);
+	    box.height_S = height_S;
 	}
     };
 
@@ -805,7 +805,7 @@ register_command ('ht', (function HtCommand_closure () {
     proto.as_valref = function HtCommand_as_valref (engine) {
 	var reg = engine.scan_char_code__I ();
 	var box = engine.get_register (T_BOX, reg);
-	return new ConstantValref (T_DIMEN, box.height);
+	return new ConstantValref (T_DIMEN, box.height_S);
     };
 
     return HtCommand;
@@ -861,14 +861,14 @@ register_command ('hrule', function cmd_hrule (engine) {
 	throw new TexRuntimeError ('can only create \\hrule in vertical mode');
 
     var rule = new Rule ();
-    rule.height.sp.value_S = 26214; // default rule = 0.4pt; T:TP sec 463
+    rule.height_S = 26214; // default rule = 0.4pt; T:TP sec 463
     rule.depth_S = nlib.Zero_S;
 
     while (true) {
 	if (engine.scan_keyword ('width'))
 	    rule.width = engine.scan_dimen ();
 	else if (engine.scan_keyword ('height'))
-	    rule.height = engine.scan_dimen ();
+	    rule.height_S = engine.scan_dimen ().sp.value_S;
 	else if (engine.scan_keyword ('depth'))
 	    rule.depth_S = engine.scan_dimen ().sp.value_S;
 	else
@@ -891,7 +891,7 @@ register_command ('vrule', function cmd_vrule (engine) {
 	if (engine.scan_keyword ('width'))
 	    rule.width = engine.scan_dimen ();
 	else if (engine.scan_keyword ('height'))
-	    rule.height = engine.scan_dimen ();
+	    rule.height_S = engine.scan_dimen ().sp.value_S;
 	else if (engine.scan_keyword ('depth'))
 	    rule.depth_S = engine.scan_dimen ().sp.value_S;
 	else

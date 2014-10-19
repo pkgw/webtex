@@ -2254,7 +2254,7 @@ var Engine = (function Engine_closure () {
 		b.list = this.build_stack.pop ();
 		this.build_stack.push ([]);
 		b.set_glue (this, false, new Dimen ());
-		w = b.height.sp.value_S;
+		w = b.height_S;
 	    }
 
 	    var n = astate.cur_col - astate.cur_span_col + 1;

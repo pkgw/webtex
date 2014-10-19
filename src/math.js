@@ -685,9 +685,9 @@ var mathlib = (function mathlib_closure () {
 	return x;
     }
 
-    function fraction_rule (t) {
+    function fraction_rule (t_S) {
 	var r = new Rule ();
-	r.height.set_to (t);
+	r.height_S = t_S;
 	return r;
     }
 
@@ -695,7 +695,7 @@ var mathlib = (function mathlib_closure () {
 	t = new Scaled (t);
 	k = new Scaled (k);
 	return vpack_natural ([new Kern (Dimen.new_scaled (t)),
-			       fraction_rule (Dimen.new_scaled (t)),
+			       fraction_rule (t.value_S),
 			       new Kern (Dimen.new_scaled (k)),
 			       b]);
     }
@@ -829,10 +829,10 @@ var mathlib = (function mathlib_closure () {
 	    if (top != 0)
 		stack_into_box (b, f, top);
 
-	    b.depth_S = w - b.height.sp.value_S;
+	    b.depth_S = w - b.height_S;
 	}
 
-	b.shift_amount_S = half (b.height.sp.value_S - b.depth_S)
+	b.shift_amount_S = half (b.height_S - b.depth_S)
 	    - state.sym_dimen (state.size, SymDimens.AxisHeight).sp.value_S;
 	return b;
     }
@@ -855,7 +855,7 @@ var mathlib = (function mathlib_closure () {
 	    if (q.sub != null && q.limtype != LIMTYPE_LIMITS)
 		x.width.sp.value_S -= delta // remove italic correction
 
-	    x.shift_amount_S = half ((x.height.sp.value_S - x.depth_S)
+	    x.shift_amount_S = half ((x.height_S - x.depth_S)
 				     - state.sym_dimen (state.size, SymDimens.AxisHeight).sp.value_S);
 	    q.nuc = x;
 	}
@@ -874,8 +874,8 @@ var mathlib = (function mathlib_closure () {
 	z = rebox (z, v.width.sp.value_S);
 	x.shift_amount_S = half (delta);
 	z.shift_amount_S = -x.shift_amount_S;
-	v.height = y.height.clone ();
-	v.depth_S = y.height.sp.value_S;
+	v.height_S = y.height_S;
+	v.depth_S = y.height_S;
 
 	if (q.sup == null) {
 	    v.list = [y];
@@ -885,22 +885,22 @@ var mathlib = (function mathlib_closure () {
 	    var k1 = new Kern (Dimen.new_scaled (shift_up));
 	    var k2 = new Kern (state.ext_dimen (ExtDimens.BigOpSpacing5));
 	    v.list = [k2, x, k1, y];
-	    v.height.advance (state.ext_dimen (ExtDimens.BigOpSpacing5));
-	    v.height.advance (x.height);
-	    v.height.sp.value_S += x.depth_S;
-	    v.height.sp.value_S += shift_up;
+	    v.height_S += state.ext_dimen (ExtDimens.BigOpSpacing5).sp.value_S;
+	    v.height_S += x.height_S;
+	    v.height_S += x.depth_S;
+	    v.height_S += shift_up;
 	}
 
 	if (q.sub != null) {
-	    var shift_down = state.ext_dimen (ExtDimens.BigOpSpacing4).sp.value_S - z.height.sp.value_S;
+	    var shift_down = state.ext_dimen (ExtDimens.BigOpSpacing4).sp.value_S - z.height_S;
 	    shift_down = Math.max (shift_down, state.ext_dimen (ExtDimens.BigOpSpacing2).sp.value_S);
 	    var k1 = new Kern (Dimen.new_scaled (shift_down));
 	    var k2 = new Kern (state.ext_dimen (ExtDimens.BigOpSpacing5));
 	    v.list = v.list.concat ([k1, z, k2]);
-	    v.height.advance (state.ext_dimen (ExtDimens.BigOpSpacing5));
-	    v.height.advance (z.height);
-	    v.height.sp.value_S = z.depth_S;
-	    v.height.sp.value_S += shift_down;
+	    v.height_S += state.ext_dimen (ExtDimens.BigOpSpacing5).sp.value_S;
+	    v.height_S += z.height_S;
+	    v.height_S += z.depth_S;
+	    v.height_S += shift_down;
 	}
 
 	q.new_hlist = v;
@@ -923,13 +923,13 @@ var mathlib = (function mathlib_closure () {
 	}
 
 	var y = var_delimiter (state, q.left_delim,
-			       x.height.sp.value_S + x.depth_S + clr + drt);
-	var delta = y.depth_S - (x.height.sp.value_S + x.depth_S + clr);
+			       x.height_S + x.depth_S + clr + drt);
+	var delta = y.depth_S - (x.height_S + x.depth_S + clr);
 	if (delta > 0)
 	    clr += half (delta);
 
-	y.shift_amount_S = -(x.height.sp.value_S + clr);
-	q.nuc = hpack_natural (state.engine, [y, overbar (x, clr, y.height.sp.value_S)]);
+	y.shift_amount_S = -(x.height_S + clr);
+	q.nuc = hpack_natural (state.engine, [y, overbar (x, clr, y.height_S)]);
     }
 
     function make_vcenter (state, q) {
@@ -937,9 +937,9 @@ var mathlib = (function mathlib_closure () {
 	    throw new TexInternalError ('vcenter needs VBox');
 
 	var v = q.nuc;
-	var delta = v.height.sp.value_S + v.depth_S;
-	v.height.sp.value_S = state.sym_dimen (state.size, SymDimens.AxisHeight).sp.value_S + half (delta);
-	v.depth_S = delta - v.height.sp.value_S;
+	var delta = v.height_S + v.depth_S;
+	v.height_S = state.sym_dimen (state.size, SymDimens.AxisHeight).sp.value_S + half (delta);
+	v.depth_S = delta - v.height_S;
     }
 
     function make_over (state, q) {
@@ -965,7 +965,7 @@ var mathlib = (function mathlib_closure () {
 	    else
 		t = MS_SCRIPTSCRIPT;
 
-	    shift_up = z.height.sp.value_S - state.sym_dimen (t, SymDimens.SupDrop).sp.value_S;
+	    shift_up = z.height_S - state.sym_dimen (t, SymDimens.SupDrop).sp.value_S;
 	    shift_down = z.depth_S + state.sym_dimen (t, SymDimens.SubDrop).sp.value_S;
 	}
 
@@ -974,7 +974,7 @@ var mathlib = (function mathlib_closure () {
 	    var x = clean_box (state.subscript (), q.sub);
 	    x.width.advance (engine.get_parameter (T_DIMEN, 'scriptspace'));
 
-	    clr = x.height.sp.value_S - Math.abs (mxh * 4) / 5;
+	    clr = x.height_S - Math.abs (mxh * 4) / 5;
 	    var sub1 = state.sym_dimen (state.size, SymDimens.Sub1).sp.value_S;
 	    x.shift_amount_S = Math.max (shift_down, clr, sub1);
 	} else {
@@ -1002,7 +1002,7 @@ var mathlib = (function mathlib_closure () {
 				  state.sym_dimen (state.size, SymDimens.Sub2).sp.value_S);
 
 		clr = 4 * state.ext_dimen (ExtDimens.DefaultRuleThickness).sp.value_S;
-		clr -= (shift_up - x.depth_S) - (y.height.sp.value_S - shift_down);
+		clr -= (shift_up - x.depth_S) - (y.height_S - shift_down);
 		if (clr > 0) {
 		    shift_down += clr;
 		    clr = Math.abs (mxh * 4) / 5 - (shift_up - x.depth_S);
@@ -1014,7 +1014,7 @@ var mathlib = (function mathlib_closure () {
 
 		x.shift_amount_S = delta;
 		var k = new Kern (Dimen.new_scaled ((shift_up - x.depth_S) -
-						    (y.height.sp.value_S - shift_down)));
+						    (y.height_S - shift_down)));
 		x = vpack_natural ([x, k, y]);
 		x.shift_amount_S = shift_down;
 	    }
@@ -1188,7 +1188,7 @@ var mathlib = (function mathlib_closure () {
 
 	    if (check_dimensions) {
 		var z = hpack_natural (q.new_hlist);
-		max_h = Math.max (max_h, z.height);
+		max_h = Math.max (max_h, z.height_S);
 		max_d = Math.max (max_d, z.depth_S);
 	    }
 

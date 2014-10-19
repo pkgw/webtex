@@ -12,7 +12,7 @@ var Boxlike = (function Boxlike_closure () {
     // A box-like listable has width, height, depth.
     function Boxlike () {
 	this.width = new Dimen ();
-	this.height = new Dimen ();
+	this.height_S = nlib.Zero_S;
 	this.depth_S = nlib.Zero_S;
 	this.shift_amount_S = nlib.Zero_S; // positive is down (right) in H (V) box
     }
@@ -21,12 +21,12 @@ var Boxlike = (function Boxlike_closure () {
     var proto = Boxlike.prototype;
 
     proto._uishape = function Boxlike__uishape () {
-	return format ('w=%o h=%o d=%S', this.width, this.height, this.depth_S);
+	return format ('w=%o h=%S d=%S', this.width, this.height_S, this.depth_S);
     };
 
     proto._copyto = function Boxlike__copyto (other) {
 	other.width = this.width.clone ();
-	other.height = this.height.clone ();
+	other.height_S = this.height_S;
 	other.depth_S = this.depth_S;
 	other.shift_amount_S = this.shift_amount_S;
     };
@@ -142,7 +142,7 @@ var HBox = (function HBox_closure () {
 	var nat_width = 0;
 	var stretches = [0, 0, 0, 0];
 	var shrinks = [0, 0, 0, 0];
-	var height = 0;
+	var height_S = nlib.Zero_S;
 	var depth_S = nlib.Zero_S;
 
 	for (var i = 0; i < this.list.length; i++) {
@@ -150,7 +150,7 @@ var HBox = (function HBox_closure () {
 
 	    if (item instanceof Boxlike) {
 		nat_width += item.width.sp.value_S;
-		height = Math.max (height, item.height.sp.value_S - item.shift_amount_S);
+		height_S = Math.max (height_S, item.height_S - item.shift_amount_S);
 		depth_S = Math.max (depth_S, item.depth_S + item.shift_amount_S);
 	    } else if (item instanceof Kern) {
 		nat_width += item.amount.sp.value_S;
@@ -221,7 +221,7 @@ var HBox = (function HBox_closure () {
 	    this.glue_set = (1.0 * shrinks[-this.glue_state - 1]) / setdelta;
 	}
 
-	this.height.sp.value_S = height;
+	this.height_S = height_S;
 	this.depth_S = depth_S;
     };
 
@@ -288,7 +288,7 @@ var VBox = (function VBox_closure () {
     };
 
     proto.set_glue = function VBox_set_glue (engine, is_exact, spec) {
-	var nat_height = 0;
+	var nat_height_S = 0;
 	var stretches = [0, 0, 0, 0];
 	var shrinks = [0, 0, 0, 0];
 	var width = 0;
@@ -298,15 +298,15 @@ var VBox = (function VBox_closure () {
 	    var item = this.list[i];
 
 	    if (item instanceof Boxlike) {
-		nat_height += item.width.sp.value_S + prev_depth_S;
+		nat_height_S += item.width.sp.value_S + prev_depth_S;
 		prev_depth_S = item.depth_S;
 		width = Math.max (width, item.width.sp.value_S + item.shift_amount_S);
 	    } else if (item instanceof Kern) {
-		nat_height += item.amount.sp.value_S + prev_depth_S;
+		nat_height_S += item.amount.sp.value_S + prev_depth_S;
 		prev_depth_S = nlib.Zero_S;
 	    } else if (item instanceof BoxGlue) {
 		var g = item.amount;
-		nat_height += g.amount.sp.value_S + prev_depth_S;
+		nat_height_S += g.amount.sp.value_S + prev_depth_S;
 		stretches[g.stretch_order] += g.stretch.sp.value_S;
 		shrinks[g.shrink_order] += g.shrink.sp.value_S;
 		prev_depth_S = nlib.Zero_S;
@@ -318,12 +318,12 @@ var VBox = (function VBox_closure () {
 
 	if (is_exact) {
 	    // We're setting the box to an exact height.
-	    if (spec.sp.value_S > nat_height) {
+	    if (spec.sp.value_S > nat_height_S) {
 		settype = 1;
-		setdelta = spec.sp.value_S - nat_height;
-	    } else if (spec.sp.value_S < nat_height) {
+		setdelta = spec.sp.value_S - nat_height_S;
+	    } else if (spec.sp.value_S < nat_height_S) {
 		settype = 2;
-		setdelta = nat_height - spec.sp.value_S;
+		setdelta = nat_height_S - spec.sp.value_S;
 	    }
 	} else {
 	    // We're adjusting the box's height from its natural value.
@@ -338,12 +338,12 @@ var VBox = (function VBox_closure () {
 
 	if (settype == 0) {
 	    // Natural height.
-	    this.height.sp.value_S = nat_height;
+	    this.height_S = nat_height_S;
 	    this.glue_state = 1; // ordinary (zeroth-order infinite) stretch
 	    this.glue_set = 0.; // ... but no actual stretching.
 	} else if (settype == 1) {
 	    // We're stretching the box.
-	    this.height.sp.value_S = nat_height + setdelta;
+	    this.height_S = nat_height_S + setdelta;
 
 	    if (stretches[3] != 0)
 		this.glue_state = 4;
@@ -357,7 +357,7 @@ var VBox = (function VBox_closure () {
 	    this.glue_set = (1.0 * stretches[this.glue_state - 1]) / setdelta;
 	} else {
 	    // We're shrinking it.
-	    this.height.sp.value_S = nat_height - setdelta;
+	    this.height_S = nat_height_S - setdelta;
 
 	    if (shrinks[3] != 0)
 		this.glue_state = -4;
@@ -380,21 +380,21 @@ var VBox = (function VBox_closure () {
 	if (prev_depth_S <= bmd_S) {
 	    this.depth_S = prev_depth_S;
 	} else {
-	    var tot_height = prev_depth_S + this.height.sp.value_S;
+	    var tot_height_S = prev_depth_S + this.height_S;
 	    this.depth_S = bmd_S;
-	    this.height.sp.value_S = tot_height - bmd_S;
+	    this.height_S = tot_height_S - bmd_S;
 	}
     };
 
     proto.adjust_as_vtop = function VBox_adjust_as_vtop () {
-	var tot_height_S = this.height.sp.value_S + this.depth_S;
-	var height = 0;
+	var tot_height_S = this.height_S + this.depth_S;
+	var height_S = 0;
 
 	if (this.list[0] instanceof Boxlike)
-	    height = this.list[0].height.sp.value_S;
+	    height_S = this.list[0].height_S;
 
-	this.height.sp.value_S = height;
-	this.depth_S = tot_height_S - height;
+	this.height_S = height_S;
+	this.depth_S = tot_height_S - height_S;
     };
 
     proto.traverse = function VBox_traverse (x0, y0, callback) {
@@ -405,17 +405,17 @@ var VBox = (function VBox_closure () {
 
 	var gs = this.glue_state;
 	var gr = this.glue_set; // the glue set ratio
-	var y = y0 - this.height.sp.value_S;
+	var y = y0 - this.height_S;
 
 	for (var i = 0; i < this.list.length; i++) {
 	    var item = this.list[i];
 
 	    if (item instanceof ListBox) {
-		y += item.height.sp.value_S;
+		y += item.height_S;
 		item.traverse (x0 + item.shift_amount_S, y, callback);
 		y += item.depth_S;
 	    } else if (item instanceof Boxlike) {
-		y += item.height.sp.value_S;
+		y += item.height_S;
 		callback (x0 + item.shift_amount_S, y, item);
 		y += item.depth_S;
 	    } else if (item instanceof Kern) {
@@ -460,7 +460,7 @@ var CanvasBox = (function CanvasBox_closure () {
 	this.graphics = [];
 
 	this.width = srcbox.width.clone ();
-	this.height = srcbox.height.clone ();
+	this.height_S = srcbox.height_S;
 	this.depth_S = srcbox.depth_S;
 	this.shift_amount_S = srcbox.shift_amount_S;
 
@@ -522,14 +522,14 @@ var CanvasBox = (function CanvasBox_closure () {
 
     proto.to_render_data = function CanvasBox_to_render_data () {
 	var data = {w: this.width.sp.value_S,
-		    h: this.height.sp.value_S,
+		    h: this.height_S,
 		    d: this.depth_S};
 	var gl = []; // "graphics list"
 
 	for (var i = 0; i < this.graphics.length; i++) {
 	    var q = this.graphics[i];
 	    var x = q[0];
-	    var y = this.height.sp.value_S + q[1];
+	    var y = this.height_S + q[1];
 	    var subitem = q[2];
 
 	    if (subitem instanceof Character) {
@@ -538,11 +538,11 @@ var CanvasBox = (function CanvasBox_closure () {
 			  font: subitem.font.ident,
 			  ord: subitem.ord});
 	    } else if (subitem instanceof Rule) {
-		y -= subitem.height.sp.value_S;
+		y -= subitem.height_S;
 		gl.push ({x: x,
 			  y: y,
 			  w: subitem.width.sp.value_S,
-			  h: subitem.height.sp.value_S + subitem.depth_S});
+			  h: subitem.height_S + subitem.depth_S});
 	    } else {
 		throw new TexInternalError ('unhandled CanvasBox graphic %o', subitem);
 	    }
