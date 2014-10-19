@@ -207,7 +207,7 @@ var EquivTable = (function EquivTable_closure () {
 	    this._codes[CT_DELIM][i] = -1;
 	    this._codes[CT_LOWERCASE][i] = 0;
 	    this._codes[CT_UPPERCASE][i] = 0;
-	    this._registers[T_INT][i] = new TexInt (0);
+	    this._registers[T_INT][i] = 0;
 	    this._registers[T_DIMEN][i] = new Dimen ();
 	    this._registers[T_GLUE][i] = new Glue ();
 	    this._registers[T_MUGLUE][i] = new Glue ();
@@ -797,7 +797,7 @@ var Engine = (function Engine_closure () {
 	if (!list.length)
 	    return;
 
-	list.push (new Penalty (new TexInt (10000)));
+	list.push (new Penalty (10000));
 	list.push (new BoxGlue (this.get_parameter (T_GLUE, 'parfillskip')));
 	// We don't run the linebreaking algorithm. Instead we think of this
 	// "paragraph" as one giant wide line. That makes it appropriate to
