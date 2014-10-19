@@ -79,7 +79,7 @@ var TexInt = (function TexInt_closure () {
     };
 
     TexInt.deserialize = function TexInt_deserialize (data) {
-	return new TexInt (parseInt (data, 10));
+	return new TexInt (nlib.parse__O_I (data));
     };
 
     proto.advance = function TexInt_advance (other) {
@@ -292,7 +292,7 @@ var Scaled = (function Scaled_closure () {
     };
 
     Scaled.deserialize = function Scaled_deserialize (data) {
-	return new Scaled (parseInt (data, 10));
+	return new Scaled (nlib.parse__O_I (data));
     };
 
     proto.advance = function Scaled_advance (other) {
@@ -526,9 +526,9 @@ var Glue = (function Glue_closure () {
 	var g = new Glue ();
 	g.amount = Dimen.deserialize (data[0]);
 	g.stretch = Dimen.deserialize (data[1]);
-	g.stretch_order = parseInt (data[2], 10);
+	g.stretch_order = nlib.parse__O_I (data[2]);
 	g.shrink = Dimen.deserialize (data[3]);
-	g.shrink_order = parseInt (data[4], 10);
+	g.shrink_order = nlib.parse__O_I (data[4]);
 	return g;
     };
 

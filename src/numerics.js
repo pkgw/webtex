@@ -56,6 +56,11 @@ var nlib = (function nlib_closure () {
     }
     nlib.checkint__N_I = checkint__N_I;
 
+    function parse__O_I (text) {
+	return checkint__N_I (parseInt (text, 10));
+    }
+    nlib.parse__O_I = parse__O_I;
+
 
     function scale__I_S (value_I) {
 	return value_I * SC_UNITY;

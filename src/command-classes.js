@@ -312,7 +312,7 @@ var BeginGroupCommand = (function BeginGroupCommand_closure () {
     };
 
     BeginGroupCommand.deserialize = function BeginGroupCommand_deserialize (data, hk) {
-	return new BeginGroupCommand (parseInt (data, 10));
+	return new BeginGroupCommand (nlib.parse__O_I (data));
     };
 
     return BeginGroupCommand;
@@ -336,7 +336,7 @@ var EndGroupCommand = (function EndGroupCommand_closure () {
     };
 
     EndGroupCommand.deserialize = function EndGroupCommand_deserialize (data, hk) {
-	return new EndGroupCommand (parseInt (data, 10));
+	return new EndGroupCommand (nlib.parse__O_I (data));
     };
 
     return EndGroupCommand;
@@ -479,7 +479,7 @@ var SuperCommand = (function SuperCommand_closure () {
     };
 
     SuperCommand.deserialize = function SuperCommand_deserialize (data, hk) {
-	return new SuperCommand (parseInt (data, 10));
+	return new SuperCommand (nlib.parse__O_I (data));
     };
 
     return SuperCommand;
@@ -524,7 +524,7 @@ var SubCommand = (function SubCommand_closure () {
     };
 
     SubCommand.deserialize = function SubCommand_deserialize (data, hk) {
-	return new SubCommand (parseInt (data, 10));
+	return new SubCommand (nlib.parse__O_I (data));
     };
 
     return SubCommand;
@@ -584,7 +584,7 @@ var SpacerCommand = (function SpacerCommand_closure () {
     };
 
     SpacerCommand.deserialize = function SpacerCommand_deserialize (data, hk) {
-	return new SpacerCommand (parseInt (ord, 10));
+	return new SpacerCommand (nlib.parse__O_I (data));
     };
 
     return SpacerCommand;
@@ -685,7 +685,7 @@ var GivenCharCommand = (function GivenCharCommand_closure () {
     };
 
     GivenCharCommand.deserialize = function GivenCharCommand_deserialize (data, hk) {
-	return new GivenCharCommand (parseInt (data, 10));
+	return new GivenCharCommand (nlib.parse__O_I (data));
     };
 
     proto.invoke = function GivenCharCommand_invoke (engine) {
@@ -749,7 +749,7 @@ var GivenMathcharCommand = (function GivenMathcharCommand_closure () {
     };
 
     GivenMathcharCommand.deserialize = function GivenMathcharCommand_deserialize (data, hk) {
-	return new GivenMathcharCommand (parseInt (data, 10));
+	return new GivenMathcharCommand (nlib.parse__O_I (data));
     };
 
     proto.invoke = function GivenMathcharCommand_invoke (engine) {

@@ -1066,19 +1066,19 @@ var Engine = (function Engine_closure () {
 	'<end-group>': EndGroupCommand.deserialize,
 	'<given-char>': GivenCharCommand.deserialize,
 	'<given-count>': function deserialize_count (data, hk) {
-	    return new GivenRegisterCommand (T_INT, 'count', parseInt (data, 10));
+	    return new GivenRegisterCommand (T_INT, 'count', nlib.parse__O_I (data));
 	},
 	'<given-dimen>': function deserialize_dimen (data, hk) {
-	    return new GivenRegisterCommand (T_DIMEN, 'dimen', parseInt (data, 10));
+	    return new GivenRegisterCommand (T_DIMEN, 'dimen', nlib.parse__O_I (data));
 	},
 	'<given-font>': function deserialize_font (data, hk) {
 	    return new GivenFontCommand (hk.fonts[data]);
 	},
 	'<given-skip>': function deserialize_skip (data, hk) {
-	    return new GivenRegisterCommand (T_GLUE, 'skip', parseInt (data, 10));
+	    return new GivenRegisterCommand (T_GLUE, 'skip', nlib.parse__O_I (data));
 	},
 	'<given-toks>': function deserialize_skip (data, hk) {
-	    return new GivenRegisterCommand (T_TOKLIST, 'toks', parseInt (data, 10));
+	    return new GivenRegisterCommand (T_TOKLIST, 'toks', nlib.parse__O_I (data));
 	},
 	'<given-mathchar>': GivenMathcharCommand.deserialize,
 	'<macro>': MacroCommand.deserialize,
@@ -1141,30 +1141,30 @@ var Engine = (function Engine_closure () {
 	}
 
 	for (var reg in json.registers.ints)
-	    this.set_register (T_INT, parseInt (reg, 10),
+	    this.set_register (T_INT, nlib.parse__O_I (reg),
 			       TexInt.deserialize (json.registers.ints[reg]));
 
 	for (var reg in json.registers.dimens)
-	    this.set_register (T_DIMEN, parseInt (reg, 10),
+	    this.set_register (T_DIMEN, nlib.parse__O_I (reg),
 			       Dimen.deserialize (json.registers.dimens[reg]));
 
 	for (var reg in json.registers.glues)
-	    this.set_register (T_GLUE, parseInt (reg, 10),
+	    this.set_register (T_GLUE, nlib.parse__O_I (reg),
 			       Glue.deserialize (json.registers.glues[reg]));
 
 	for (var reg in json.registers.muglues)
-	    this.set_register (T_MUGLUE, parseInt (reg, 10),
+	    this.set_register (T_MUGLUE, nlib.parse__O_I (reg),
 			       Glue.deserialize (json.registers.muglues[reg]));
 
 	for (var reg in json.registers.toklists)
-	    this.set_register (T_TOKLIST, parseInt (reg, 10),
+	    this.set_register (T_TOKLIST, nlib.parse__O_I (reg),
 			       Toklist.deserialize (json.registers.toklists[reg]));
 
 	for (var ord in json.actives)
-	    this.set_active (parseInt (ord, 10), getcmd (json.actives[ord]));
+	    this.set_active (nlib.parse__O_I (ord), getcmd (json.actives[ord]));
 
 	for (var name in json.parameters.ints)
-	    this.set_parameter (T_INT, name, parseInt (json.parameters.ints[name], 10));
+	    this.set_parameter (T_INT, name, nlib.parse__O_I (json.parameters.ints[name]));
 
 	for (var name in json.parameters.dimens)
 	    this.set_parameter (T_DIMEN, name, Dimen.deserialize (json.parameters.dimens[name]));
