@@ -66,7 +66,7 @@ register_command ('/', function cmd__fslash_ (engine) {
 	engine.trace ('italic correction: text');
 	var last = engine.get_last_listable ();
 	if (last instanceof Character) {
-	    var k = new Kern (last.font.italic_correction (last.ord).value_S);
+	    var k = new Kern (last.font.italic_correction__O_S (last.ord));
 	    // XXX: kern.subtype = Explicit.
 	    engine.accum (k);
 	}

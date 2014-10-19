@@ -18,8 +18,12 @@ var FontMetrics = (function FontMetrics_closure () {
 	return new Character (font, ord);
     };
 
-    proto.italic_correction = function FontMetrics_italic_correction (ord) {
-	return new Scaled (0);
+    proto.height_plus_depth__O_S = function FontMetrics_height_plus_depth__O_S (ord) {
+	return nlib.Zero_S;
+    };
+
+    proto.italic_correction__O_S = function FontMetrics_italic_correction__O_S (ord) {
+	return nlib.Zero_S;
     };
 
     return FontMetrics;
@@ -247,20 +251,12 @@ var TfmMetrics = (function TfmMetrics_closure () {
 	return this.ord_rembytes[ord];
     };
 
-    proto.width = function TfmMetrics_width (ord) {
-	return this.ord_widths[ord];
+    proto.height_plus_depth__O_S = function TfmMetrics_height_plus_depth__O_S (ord) {
+	return this.ord_heights[ord].value_S + this.ord_depths[ord].value_S;
     };
 
-    proto.height = function TfmMetrics_height (ord) {
-	return this.ord_heights[ord];
-    };
-
-    proto.depth = function TfmMetrics_depth (ord) {
-	return this.ord_depths[ord];
-    };
-
-    proto.italic_correction = function TfmMetrics_italic_correction (ord) {
-	return this.ord_ics[ord];
+    proto.italic_correction__O_S = function TfmMetrics_italic_correction__O_S (ord) {
+	return this.ord_ics[ord].value_S;
     };
 
     proto.box_for_ord = function TfmMetrics_box_for_ord (font, ord) {
@@ -383,8 +379,8 @@ var Font = (function Font_closure () {
 	return this.metrics.box_for_ord (this, ord);
     };
 
-    proto.italic_correction = function Font_italic_correction (ord) {
-	return this.metrics.italic_correction (ord);
+    proto.italic_correction__O_S = function Font_italic_correction__O_S (ord) {
+	return this.metrics.italic_correction__O_S (ord);
     };
 
     return Font;

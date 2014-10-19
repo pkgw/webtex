@@ -522,10 +522,6 @@ var mathlib = (function mathlib_closure () {
     }) ();
 
 
-    function height_plus_depth (metrics, ord) {
-	return metrics.height (ord).value_S + metrics.depth (ord).value_S;
-    }
-
     function math_kern (state, p) {
 	// XXX TODO: if this is a special \mkern kern, we need to scale its
 	// size by the current math unit (stored in 'state'). See T:TP 717.
@@ -789,18 +785,18 @@ var mathlib = (function mathlib_closure () {
 	    var top = (r >> 24) & 0xFF;
 
 	    c = rep;
-	    var u = height_plus_depth (m, c);
+	    var u = m.height_plus_depth__O_S (c);
 	    w = 0;
-	    b.width_S = m.width (c).value_S + m.italic_correction (c).value_S;
+	    b.width_S = m.width (c).value_S + m.italic_correction__O_S (c);
 
 	    if (bot != 0)
-		w += height_plus_depth (m, bot);
+		w += m.height_plus_depth__O_S (bot);
 
 	    if (mid != 0)
-		w += height_plus_depth (m, mid);
+		w += m.height_plus_depth__O_S (mid);
 
 	    if (top != 0)
-		w += height_plus_depth (m, top);
+		w += m.height_plus_depth__O_S (top);
 
 	    // how many pieces?
 	    var n = 0;
@@ -848,7 +844,7 @@ var mathlib = (function mathlib_closure () {
 	    // XXX skipping list-tag char stuff
 	    var f = state.font (q.nuc.fam);
 	    var m = f.get_metrics ();
-	    delta = m.italic_correction (q.nuc.ord).value_S;
+	    delta = m.italic_correction__O_S (q.nuc.ord);
 	    var x = clean_box (state, q.nuc);
 
 	    if (q.sub != null && q.limtype != LIMTYPE_LIMITS)
@@ -1158,7 +1154,7 @@ var mathlib = (function mathlib_closure () {
 				     q.nuc.fam, q.nuc.ord);
 			p = null;
 		    } else {
-			delta = m.italic_correction (q.nuc.ord).value_S;
+			delta = m.italic_correction__O_S (q.nuc.ord);
 			p = [f.box_for_ord (q.nuc.ord)];
 			if (q.nuc instanceof MathTextChar && f.get_dimen (2).is_nonzero ())
 			    delta = 0;
