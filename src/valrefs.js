@@ -16,10 +16,12 @@ var RegisterValref = (function RegisterValref_closure () {
     var proto = RegisterValref.prototype;
 
     proto.get = function RegisterValref_get (engine) {
-	return engine.get_register (this.valtype, this.reg);
+	var rv = engine.get_register (this.valtype, this.reg);
+	return Value.ensure_boxed (this.valtype, rv);
     };
 
     proto.set = function RegisterValref_set (engine, value) {
+	value = Value.ensure_unboxed (this.valtype, value);
 	engine.set_register (this.valtype, this.reg, value);
     };
 

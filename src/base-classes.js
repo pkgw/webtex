@@ -123,8 +123,11 @@ var Value = (function Value_closure () {
     };
 
     Value.ensure_unboxed = function Value_ensure_unboxed (valtype, value) {
-	if (valtype == T_INT)
+	if (valtype == T_INT) {
+	    if (value instanceof TexInt)
+		value = value.value_I;
 	    return nlib.checkint__N_I (value);
+	}
 
 	return Value.ensure_boxed (valtype, value);
     };

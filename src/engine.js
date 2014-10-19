@@ -70,7 +70,7 @@ var EquivTable = (function EquivTable_closure () {
 	if (reg < 0 || reg > 255)
 	    throw new TexRuntimeError ('illegal register number %d', reg);
 
-	this._registers[valtype][reg] = Value.ensure_boxed (valtype, value);
+	this._registers[valtype][reg] = Value.ensure_unboxed (valtype, value);
 
 	if (global && this.parent != null)
 	    this.parent.set_register (valtype, reg, value, global);
