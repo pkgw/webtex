@@ -674,7 +674,7 @@ var mathlib = (function mathlib_closure () {
 
 	if (q.length == 0 || q[0] instanceof Character)
 	    x = hpack_natural (state.engine, q);
-	else if (q.length == 1 && q[0] instanceof ListBox && !q[0].shift_amount.is_nonzero ())
+	else if (q.length == 1 && q[0] instanceof ListBox && q[0].shift_amount_S == 0)
 	    x = q[0];
 	else {
 	    x = hpack_natural (state.engine, q);
@@ -832,7 +832,7 @@ var mathlib = (function mathlib_closure () {
 	    b.depth.sp.value_S = w - b.height.sp.value_S;
 	}
 
-	b.shift_amount.sp.value_S = half (b.height.sp.value_S - b.depth.sp.value_S)
+	b.shift_amount_S = half (b.height.sp.value_S - b.depth.sp.value_S)
 	    - state.sym_dimen (state.size, SymDimens.AxisHeight).sp.value_S;
 	return b;
     }
@@ -855,8 +855,8 @@ var mathlib = (function mathlib_closure () {
 	    if (q.sub != null && q.limtype != LIMTYPE_LIMITS)
 		x.width.sp.value_S -= delta // remove italic correction
 
-	    x.shift_amount.sp.value_S = half ((x.height.sp.value_S - x.depth.sp.value_S)
-					    - state.sym_dimen (state.size, SymDimens.AxisHeight).sp.value_S);
+	    x.shift_amount_S = half ((x.height.sp.value_S - x.depth.sp.value_S)
+				     - state.sym_dimen (state.size, SymDimens.AxisHeight).sp.value_S);
 	    q.nuc = x;
 	}
 
@@ -872,8 +872,8 @@ var mathlib = (function mathlib_closure () {
 	x = rebox (x, v.width.sp.value_S);
 	y = rebox (y, v.width.sp.value_S);
 	z = rebox (z, v.width.sp.value_S);
-	x.shift_amount.sp.value_S = half (delta);
-	z.shift_amount.sp.value_S = -x.shift_amount.sp.value_S;
+	x.shift_amount_S = half (delta);
+	z.shift_amount_S = -x.shift_amount_S;
 	v.height = y.height.clone ();
 	v.depth = y.height.clone ();
 
@@ -928,7 +928,7 @@ var mathlib = (function mathlib_closure () {
 	if (delta > 0)
 	    clr += half (delta);
 
-	y.shift_amount.sp.value_S = -(x.height.sp.value_S + clr);
+	y.shift_amount_S = -(x.height.sp.value_S + clr);
 	q.nuc = hpack_natural (state.engine, [y, overbar (x, clr, y.height.sp.value_S)]);
     }
 
@@ -976,7 +976,7 @@ var mathlib = (function mathlib_closure () {
 
 	    clr = x.height.sp.value_S - Math.abs (mxh * 4) / 5;
 	    var sub1 = state.sym_dimen (state.size, SymDimens.Sub1).sp.value_S;
-	    x.shift_amount.sp.value_S = Math.max (shift_down, clr, sub1);
+	    x.shift_amount_S = Math.max (shift_down, clr, sub1);
 	} else {
 	    var x = clean_box (state.superscript (), q.sup);
 	    x.width.advance (engine.get_parameter (T_DIMEN, 'scriptspace'));
@@ -993,7 +993,7 @@ var mathlib = (function mathlib_closure () {
 	    shift_up = Math.max (shift_up, clr);
 
 	    if (q.sub == null)
-		x.shift_amount.sp.value_S = -shift_up
+		x.shift_amount_S = -shift_up;
 	    else {
 		var y = clean_box (state.subscript (), q.sub);
 		y.width.advance (engine.get_parameter (T_DIMEN, 'scriptspace'));
@@ -1012,11 +1012,11 @@ var mathlib = (function mathlib_closure () {
 		    }
 		}
 
-		x.shift_amount.sp.value_S = delta;
+		x.shift_amount_S = delta;
 		var k = new Kern (Dimen.new_scaled ((shift_up - x.depth.sp.value_S) -
 						    (y.height.sp.value_S - shift_down)));
 		x = vpack_natural ([x, k, y]);
-		x.shift_amount.sp.value_S = shift_down;
+		x.shift_amount_S = shift_down;
 	    }
 	}
 

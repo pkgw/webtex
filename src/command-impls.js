@@ -1122,14 +1122,14 @@ register_command ('penalty', function cmd_penalty (engine) {
 
 
 function _cmd_box_shift (engine, desc, negate) {
-    var amount = engine.scan_dimen ();
-    engine.trace ('%s next box by %o ...', desc, amount);
+    var amount_S = engine.scan_dimen ().sp.value_S;
+    engine.trace ('%s next box by %S ...', desc, amount_S);
 
     function shift_the_box (engine, box) {
 	engine.trace ('... finish %s', desc);
 	if (negate)
-	    amount = amount.product__I_O (-1);
-	box.shift_amount = box.shift_amount.advance (amount);
+	    amount_S *= -1;
+	box.shift_amount_S = box.shift_amount_S + amount_S;
 	engine.accum (box);
     }
 

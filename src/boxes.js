@@ -14,7 +14,7 @@ var Boxlike = (function Boxlike_closure () {
 	this.width = new Dimen ();
 	this.height = new Dimen ();
 	this.depth = new Dimen ();
-	this.shift_amount = new Dimen (); // positive is down (right) in H (V) box
+	this.shift_amount_S = nlib.Zero_S; // positive is down (right) in H (V) box
     }
 
     inherit (Boxlike, Listable);
@@ -28,7 +28,7 @@ var Boxlike = (function Boxlike_closure () {
 	other.width = this.width.clone ();
 	other.height = this.height.clone ();
 	other.depth = this.depth.clone ();
-	other.shift_amount = this.shift_amount.clone ();
+	other.shift_amount_S = this.shift_amount_S;
     };
 
     return Boxlike;
@@ -150,8 +150,8 @@ var HBox = (function HBox_closure () {
 
 	    if (item instanceof Boxlike) {
 		nat_width += item.width.sp.value_S;
-		height = Math.max (height, item.height.sp.value_S - item.shift_amount.sp.value_S);
-		depth = Math.max (depth, item.depth.sp.value_S + item.shift_amount.sp.value_S);
+		height = Math.max (height, item.height.sp.value_S - item.shift_amount_S);
+		depth = Math.max (depth, item.depth.sp.value_S + item.shift_amount_S);
 	    } else if (item instanceof Kern) {
 		nat_width += item.amount.sp.value_S;
 	    } else if (item instanceof BoxGlue) {
@@ -239,10 +239,10 @@ var HBox = (function HBox_closure () {
 	    var item = this.list[i];
 
 	    if (item instanceof ListBox) {
-		item.traverse (x, y0 + item.shift_amount.sp.value_S, callback);
+		item.traverse (x, y0 + item.shift_amount_S, callback);
 		x += item.width.sp.value_S;
 	    } else if (item instanceof Boxlike) {
-		callback (x, y0 + item.shift_amount.sp.value_S, item);
+		callback (x, y0 + item.shift_amount_S, item);
 		x += item.width.sp.value_S;
 	    } else if (item instanceof Kern) {
 		x += item.amount.sp.value_S;
@@ -300,7 +300,7 @@ var VBox = (function VBox_closure () {
 	    if (item instanceof Boxlike) {
 		nat_height += item.width.sp.value_S + prev_depth;
 		prev_depth = item.depth.sp.value_S;
-		width = Math.max (width, item.width.sp.value_S + item.shift_amount.sp.value_S);
+		width = Math.max (width, item.width.sp.value_S + item.shift_amount_S);
 	    } else if (item instanceof Kern) {
 		nat_height += item.amount.sp.value_S + prev_depth;
 		prev_depth = 0;
@@ -412,11 +412,11 @@ var VBox = (function VBox_closure () {
 
 	    if (item instanceof ListBox) {
 		y += item.height.sp.value_S;
-		item.traverse (x0 + item.shift_amount.sp.value_S, y, callback);
+		item.traverse (x0 + item.shift_amount_S, y, callback);
 		y += item.depth.sp.value_S;
 	    } else if (item instanceof Boxlike) {
 		y += item.height.sp.value_S;
-		callback (x0 + item.shift_amount.sp.value_S, y, item);
+		callback (x0 + item.shift_amount_S, y, item);
 		y += item.depth.sp.value_S;
 	    } else if (item instanceof Kern) {
 		y += item.amount.sp.value_S;
@@ -462,7 +462,7 @@ var CanvasBox = (function CanvasBox_closure () {
 	this.width = srcbox.width.clone ();
 	this.height = srcbox.height.clone ();
 	this.depth = srcbox.depth.clone ();
-	this.shift_amount = srcbox.shift_amount.clone ();
+	this.shift_amount_S = srcbox.shift_amount_S;
 
 	// TODO, I think: record true width/height/depth of subcomponents.
 

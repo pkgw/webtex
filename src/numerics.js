@@ -41,6 +41,8 @@ var nlib = (function nlib_closure () {
 
     var nlib = {};
 
+    nlib.Zero_S = 0; // just for naming convention clarity.
+
     function checkint__N_I (value) {
 	if (typeof value != 'number')
 	    throw new TexInternalError ('non-numeric tex-int value %o', value);
@@ -206,6 +208,19 @@ var nlib = (function nlib_closure () {
     }
 
 
+    function toString__S_O (value_S) {
+	// Tex always shows at least 1 decimal place, and more if needed.
+	var text = unscale__S_N (value_S).toFixed (7);
+
+	while (text[text.length - 1] == '0') {
+	    if (text[text.length - 2] == '.')
+		break;
+	    text = text.slice (0, -1);
+	}
+
+	return text + 'pt';
+    }
+    nlib.toString__S_O = toString__S_O;
 
     return nlib;
 }) ();

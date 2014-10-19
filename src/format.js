@@ -14,6 +14,7 @@
 // %j - JSON stringification of object
 // %o - toString() stringification of object
 // %s - raw string
+// %S - JS integer represented as a TeX "scaled" fixed-point value
 // %T - TeX token list; either array or Toklist object
 // %U - uitext() stringification of object
 // %x - hexadecimal number (rendered with leading "0x")
@@ -120,6 +121,11 @@ var format = (function format_wrapper () {
 		    if (typeof arg !== 'string')
 			throw new Error ('format %s expected string but got ' + arg);
 		    // Nothing to do.
+                    break;
+                case 'S':
+		    if (typeof arg !== 'number')
+			throw new Error ('format %S expected number but got ' + arg);
+		    arg = nlib.toString__S_O (arg);
                     break;
 		case 'T':
 		    if (arg instanceof Array)
