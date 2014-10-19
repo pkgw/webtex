@@ -1010,7 +1010,7 @@ register_command ('hss', function cmd_hss (engine) {
     var g = new Glue ();
     g.stretch_S = nlib.scale__I_S (1);
     g.stretch_order = 1;
-    g.shrink.set_to (Scaled.new_from_parts__II_S (1, 0));
+    g.shrink_S = nlib.scale__I_S (1);
     g.shrink_order = 1;
     engine.trace ('hss');
     engine.accum (new BoxGlue (g));
@@ -1068,7 +1068,7 @@ register_command ('vss', function cmd_vss (engine) {
     var g = new Glue ();
     g.stretch_S = nlib.scale__I_S (1);
     g.stretch_order = 1;
-    g.shrink.set_to (Scaled.new_from_parts__II_S (1, 0));
+    g.shrink_S = nlib.scale__I_S (1);
     g.shrink_order = 1;
     engine.trace ('vss');
     engine.accum (new BoxGlue (g));

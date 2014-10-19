@@ -1715,7 +1715,7 @@ var Engine = (function Engine_closure () {
 
 	if (this.scan_keyword ('minus')) {
 	    t = this.scan_dimen (mumode, true);
-	    g.shrink = t[0];
+	    g.shrink_S = t[0].sp.value_S;
 	    g.shrink_order = t[1];
 	}
 

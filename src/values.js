@@ -395,7 +395,7 @@ var Glue = (function Glue_closure () {
 	this.amount = new Dimen ();
 	this.stretch_S = nlib.Zero_S;
 	this.stretch_order = 0;
-	this.shrink = new Dimen ();
+	this.shrink_S = nlib.Zero_S;
 	this.shrink_order = 0;
     }
 
@@ -403,8 +403,8 @@ var Glue = (function Glue_closure () {
     var proto = Glue.prototype;
 
     proto.toString = function Glue_toString () {
-	return format ('<Glue %o plus %S|%d minus %o|%d>', this.amount,
-		       this.stretch_S, this.stretch_order, this.shrink,
+	return format ('<Glue %o plus %S|%d minus %S|%d>', this.amount,
+		       this.stretch_S, this.stretch_order, this.shrink_S,
 		       this.shrink_order);
     };
 
@@ -424,9 +424,9 @@ var Glue = (function Glue_closure () {
 	    }
 	}
 
-	if (this.shrink.is_nonzero ()) {
-	    t += ' minus ';
-	    t += this.shrink.to_texstr ();
+	if (this.shrink_S != 0) {
+	    t += format (' minus %S', this.shrink_S);
+
 	    if (this.shrink_order > 0) {
 		t = t.slice (0, -2); // strip trailing 'pt'
 		t += 'fil';
@@ -445,7 +445,7 @@ var Glue = (function Glue_closure () {
 	g.amount = this.amount.clone ();
 	g.stretch_S = this.stretch_S;
 	g.stretch_order = this.stretch_order;
-	g.shrink = this.shrink.clone ();
+	g.shrink_S = this.shrink_S;
 	g.shrink_order = this.shrink_order;
 	return g;
     };
@@ -454,7 +454,7 @@ var Glue = (function Glue_closure () {
 	return (this.amount.is_nonzero () ||
 		this.stretch_S != 0 ||
 		this.stretch_order != 0 ||
-		this.shrink.is_nonzero () ||
+		this.shrink_S != 0 ||
 		this.shrink_order != 0);
     };
 
@@ -474,7 +474,7 @@ var Glue = (function Glue_closure () {
 	return [this.amount.as_serializable (),
 		this.stretch_S,
 		this.stretch_order,
-		this.shrink.as_serializable (),
+		this.shrink_S,
 		this.shrink_order];
     };
 
@@ -483,7 +483,7 @@ var Glue = (function Glue_closure () {
 	g.amount = Dimen.deserialize (data[0]);
 	g.stretch_S = nlib.parse__O_S (data[1]);
 	g.stretch_order = nlib.parse__O_I (data[2]);
-	g.shrink = Dimen.deserialize (data[3]);
+	g.shrink_S = nlib.parse__O_S (data[3]);
 	g.shrink_order = nlib.parse__O_I (data[4]);
 	return g;
     };
@@ -492,7 +492,7 @@ var Glue = (function Glue_closure () {
 	var g = this.clone ();
 	g.amount = this.amount.advance (other.amount);
 	g.stretch_S += other.stretch_S;
-	g.shrink = this.shrink.advance (other.shrink);
+	g.shrink_S += other.shrink_S;
 	return g;
     };
 
@@ -501,7 +501,7 @@ var Glue = (function Glue_closure () {
 	var g = this.clone ();
 	g.amount = this.amount.product__I_O (k);
 	g.stretch_S = nlib.nx_plus_y__ISS_S (k, g.stretch_S, nlib.Zero_S);
-	g.shrink = this.shrink.product__I_O (k);
+	g.shrink_S = nlib.nx_plus_y__ISS_S (k, g.shrink_S, nlib.Zero_S);
 	return g;
     };
 
@@ -510,7 +510,7 @@ var Glue = (function Glue_closure () {
 	var g = this.clone ();
 	g.amount = this.amount.divide__I_O (k);q
 	g.stretch_S = nlib.x_over_n__SI_SS (g.stretch_S, k)[0];
-	g.shrink = this.shrink.divide__I_O (k);
+	g.shrink_S = nlib.x_over_n__SI_SS (g.shrink_S, k)[0];
 	return g;
     };
 

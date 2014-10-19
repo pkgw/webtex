@@ -141,7 +141,7 @@ var HBox = (function HBox_closure () {
 
 	var nat_width_S = nlib.Zero_S;
 	var stretches_S = [0, 0, 0, 0];
-	var shrinks = [0, 0, 0, 0];
+	var shrinks_S = [0, 0, 0, 0];
 	var height_S = nlib.Zero_S;
 	var depth_S = nlib.Zero_S;
 
@@ -158,7 +158,7 @@ var HBox = (function HBox_closure () {
 		var g = item.amount;
 		nat_width_S += g.amount.sp.value_S;
 		stretches_S[g.stretch_order] += g.stretch_S;
-		shrinks[g.shrink_order] += g.shrink.sp.value_S;
+		shrinks_S[g.shrink_order] += g.shrink_S;
 	    }
 	}
 
@@ -209,16 +209,16 @@ var HBox = (function HBox_closure () {
 	    // We're shrinking it.
 	    this.width_S = nat_width_S - setdelta;
 
-	    if (shrinks[3] != 0)
+	    if (shrinks_S[3] != 0)
 		this.glue_state = -4;
-	    else if (shrinks[2] != 0)
+	    else if (shrinks_S[2] != 0)
 		this.glue_state = -3;
-	    else if (shrinks[1] != 0)
+	    else if (shrinks_S[1] != 0)
 		this.glue_state = -2;
 	    else
 		this.glue_state = -1;
 
-	    this.glue_set = (1.0 * shrinks[-this.glue_state - 1]) / setdelta;
+	    this.glue_set = (1.0 * shrinks_S[-this.glue_state - 1]) / setdelta;
 	}
 
 	this.height_S = height_S;
@@ -255,7 +255,7 @@ var HBox = (function HBox_closure () {
 			dx += gr * g.stretch_S;
 		} else {
 		    if (g.shrink_order == -gs - 1)
-			dx += gr * g.shrink.sp.value_S;
+			dx += gr * g.shrink_S;
 		}
 
 		x += dx;
@@ -290,7 +290,7 @@ var VBox = (function VBox_closure () {
     proto.set_glue = function VBox_set_glue (engine, is_exact, spec) {
 	var nat_height_S = 0;
 	var stretches_S = [0, 0, 0, 0];
-	var shrinks = [0, 0, 0, 0];
+	var shrinks_S = [0, 0, 0, 0];
 	var width_S = nlib.Zero_S;
 	var prev_depth_S = nlib.Zero_S;
 
@@ -308,7 +308,7 @@ var VBox = (function VBox_closure () {
 		var g = item.amount;
 		nat_height_S += g.amount.sp.value_S + prev_depth_S;
 		stretches_S[g.stretch_order] += g.stretch_S;
-		shrinks[g.shrink_order] += g.shrink.sp.value_S;
+		shrinks_S[g.shrink_order] += g.shrink_S;
 		prev_depth_S = nlib.Zero_S;
 	    }
 	}
@@ -359,16 +359,16 @@ var VBox = (function VBox_closure () {
 	    // We're shrinking it.
 	    this.height_S = nat_height_S - setdelta;
 
-	    if (shrinks[3] != 0)
+	    if (shrinks_S[3] != 0)
 		this.glue_state = -4;
-	    else if (shrinks[2] != 0)
+	    else if (shrinks_S[2] != 0)
 		this.glue_state = -3;
-	    else if (shrinks[1] != 0)
+	    else if (shrinks_S[1] != 0)
 		this.glue_state = -2;
 	    else
 		this.glue_state = -1;
 
-	    this.glue_set = (1.0 * shrinks[-this.glue_state - 1]) / setdelta;
+	    this.glue_set = (1.0 * shrinks_S[-this.glue_state - 1]) / setdelta;
 	}
 
 	this.width_S = width_S;
@@ -429,7 +429,7 @@ var VBox = (function VBox_closure () {
 			dy += gr * g.stretch_S;
 		} else {
 		    if (g.shrink_order == -gs - 1)
-			dy += gr * g.shrink.sp.value_S;
+			dy += gr * g.shrink_S;
 		}
 
 		y += dy

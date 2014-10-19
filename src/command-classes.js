@@ -577,8 +577,8 @@ var SpacerCommand = (function SpacerCommand_closure () {
 		g.stretch_S = f.get_dimen (3).sp.value_S;
 		g.stretch_S = nlib.xn_over_d__ISI_SS (sf, g.stretch_S, 1000)[0];
 
-		g.shrink.set_to (f.get_dimen (4));
-		g.shrink.set_to (g.shrink.sp.times_n_over_d (1000, sf)[0]);
+		g.shrink_S = f.get_dimen (4).sp.value_S;
+		g.shrink_S = nlib.xn_over_d__ISI_SS (1000, g.shrink_S, sf)[0];
 	    }
 	}
 
