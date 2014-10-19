@@ -1705,7 +1705,7 @@ var Engine = (function Engine_closure () {
 
 	var g = new Glue ();
 	this.push_back (tok);
-	g.amount = this.scan_dimen (mumode, false).product__I_O (negfactor);
+	g.amount_S = negfactor * this.scan_dimen (mumode, false).sp.value_S;
 
 	if (this.scan_keyword ('plus')) {
 	    t = this.scan_dimen (mumode, true);

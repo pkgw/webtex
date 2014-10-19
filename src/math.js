@@ -586,7 +586,7 @@ var mathlib = (function mathlib_closure () {
 
 			if (op >= 0x80) { // op_byte >= kern_flag?
 			    var k = 256 * op + (data & 0xFF); // op_byte, rem_byte
-			    mlist.splice (i + 1, 0, new Kern (Dimen.new_scaled (k)));
+			    mlist.splice (i + 1, 0, new Kern (k));
 			} else {
 			    switch (op) {
 			    case 1: case 5:
@@ -694,9 +694,9 @@ var mathlib = (function mathlib_closure () {
     function overbar (b, k, t) {
 	t = new Scaled (t);
 	k = new Scaled (k);
-	return vpack_natural ([new Kern (Dimen.new_scaled (t)),
+	return vpack_natural ([new Kern (t.value_S),
 			       fraction_rule (t.value_S),
-			       new Kern (Dimen.new_scaled (k)),
+			       new Kern (k.value_S),
 			       b]);
     }
 
@@ -881,8 +881,8 @@ var mathlib = (function mathlib_closure () {
 	} else {
 	    var shift_up = state.ext_dimen (ExtDimens.BigOpSpacing3).sp.value_S - x.depth_S;
 	    shift_up = Math.max (shift_up, state.ext_dimen (ExtDimens.BigOpSpacing1).sp.value_S);
-	    var k1 = new Kern (Dimen.new_scaled (shift_up));
-	    var k2 = new Kern (state.ext_dimen (ExtDimens.BigOpSpacing5));
+	    var k1 = new Kern (shift_up);
+	    var k2 = new Kern (state.ext_dimen (ExtDimens.BigOpSpacing5).sp.value_S);
 	    v.list = [k2, x, k1, y];
 	    v.height_S += state.ext_dimen (ExtDimens.BigOpSpacing5).sp.value_S;
 	    v.height_S += x.height_S;
@@ -893,8 +893,8 @@ var mathlib = (function mathlib_closure () {
 	if (q.sub != null) {
 	    var shift_down = state.ext_dimen (ExtDimens.BigOpSpacing4).sp.value_S - z.height_S;
 	    shift_down = Math.max (shift_down, state.ext_dimen (ExtDimens.BigOpSpacing2).sp.value_S);
-	    var k1 = new Kern (Dimen.new_scaled (shift_down));
-	    var k2 = new Kern (state.ext_dimen (ExtDimens.BigOpSpacing5));
+	    var k1 = new Kern (shift_down);
+	    var k2 = new Kern (state.ext_dimen (ExtDimens.BigOpSpacing5).sp.value_S);
 	    v.list = v.list.concat ([k1, z, k2]);
 	    v.height_S += state.ext_dimen (ExtDimens.BigOpSpacing5).sp.value_S;
 	    v.height_S += z.height_S;
@@ -1012,8 +1012,8 @@ var mathlib = (function mathlib_closure () {
 		}
 
 		x.shift_amount_S = delta;
-		var k = new Kern (Dimen.new_scaled ((shift_up - x.depth_S) -
-						    (y.height_S - shift_down)));
+		var k = new Kern ((shift_up - x.depth_S) -
+				  (y.height_S - shift_down));
 		x = vpack_natural ([x, k, y]);
 		x.shift_amount_S = shift_down;
 	    }
@@ -1158,12 +1158,12 @@ var mathlib = (function mathlib_closure () {
 				     q.nuc.fam, q.nuc.ord);
 			p = null;
 		    } else {
-			delta = m.italic_correction (q.nuc.ord);
+			delta = m.italic_correction (q.nuc.ord).value_S;
 			p = [f.box_for_ord (q.nuc.ord)];
 			if (q.nuc instanceof MathTextChar && f.get_dimen (2).is_nonzero ())
 			    delta = 0;
 			if (q.sub == null && delta != 0) {
-			    p.push (new Kern (Dimen.new_scaled (delta)));
+			    p.push (new Kern (delta));
 			    delta = 0;
 			}
 		    }

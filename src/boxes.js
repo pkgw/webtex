@@ -153,10 +153,10 @@ var HBox = (function HBox_closure () {
 		height_S = Math.max (height_S, item.height_S - item.shift_amount_S);
 		depth_S = Math.max (depth_S, item.depth_S + item.shift_amount_S);
 	    } else if (item instanceof Kern) {
-		nat_width_S += item.amount.sp.value_S;
+		nat_width_S += item.amount_S;
 	    } else if (item instanceof BoxGlue) {
 		var g = item.amount;
-		nat_width_S += g.amount.sp.value_S;
+		nat_width_S += g.amount_S;
 		stretches_S[g.stretch_order] += g.stretch_S;
 		shrinks_S[g.shrink_order] += g.shrink_S;
 	    }
@@ -245,10 +245,10 @@ var HBox = (function HBox_closure () {
 		callback (x, y0 + item.shift_amount_S, item);
 		x += item.width_S;
 	    } else if (item instanceof Kern) {
-		x += item.amount.sp.value_S;
+		x += item.amount_S;
 	    } else if (item instanceof BoxGlue) {
 		var g = item.amount;
-		var dx = g.amount.sp.value_S;
+		var dx = g.amount_S;
 
 		if (gs > 0) {
 		    if (g.stretch_order == gs - 1)
@@ -302,11 +302,11 @@ var VBox = (function VBox_closure () {
 		prev_depth_S = item.depth_S;
 		width_S = Math.max (width_S, item.width_S + item.shift_amount_S);
 	    } else if (item instanceof Kern) {
-		nat_height_S += item.amount.sp.value_S + prev_depth_S;
+		nat_height_S += item.amount_S + prev_depth_S;
 		prev_depth_S = nlib.Zero_S;
 	    } else if (item instanceof BoxGlue) {
 		var g = item.amount;
-		nat_height_S += g.amount.sp.value_S + prev_depth_S;
+		nat_height_S += g.amount_S + prev_depth_S;
 		stretches_S[g.stretch_order] += g.stretch_S;
 		shrinks_S[g.shrink_order] += g.shrink_S;
 		prev_depth_S = nlib.Zero_S;
@@ -419,10 +419,10 @@ var VBox = (function VBox_closure () {
 		callback (x0 + item.shift_amount_S, y, item);
 		y += item.depth_S;
 	    } else if (item instanceof Kern) {
-		y += item.amount.sp.value_S;
+		y += item.amount_S;
 	    } else if (item instanceof BoxGlue) {
 		var g = item.amount;
-		var dy = g.amount.sp.value_S;
+		var dy = g.amount_S;
 
 		if (gs > 0) {
 		    if (g.stretch_order == gs - 1)
@@ -638,19 +638,19 @@ var Mark = (function Mark_closure () {
 
 
 var Kern = (function Kern_closure () {
-    function Kern (amount) {
-	if (!(amount instanceof Dimen))
-	    throw new TexInternalError ('Kern needs Dimen; got %o', amount);
-
+    function Kern (amount_S) {
 	this.ltype = LT_KERN;
-	this.amount = amount;
+	this.amount_S = amount_S;
+
+	if (typeof this.amount_S !== 'number')
+	    throw new TexInternalError ('QQQ %o', amount_S);
     }
 
     inherit (Kern, Listable);
     var proto = Kern.prototype;
 
     proto._uisummary = function Kern__uisummary () {
-	return 'Kern ' + this.amount;
+	return format ('Kern %S', this.amount_S);
     };
 
     return Kern;

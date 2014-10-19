@@ -46,7 +46,7 @@ register_command ('_space_', function cmd__space_ (engine) {
 
     // TODO: real font glue dimensions. T:TP 1041,1042.
     var g = new Glue ();
-    g.amount.set_to (Scaled.new_from_parts__II_S (12, 0));
+    g.amount_S = nlib.scale__I_S (12);
     engine.accum (new BoxGlue (g));
 });
 
@@ -59,14 +59,14 @@ register_command ('/', function cmd__fslash_ (engine) {
 	throw new TexRuntimeError ('cannot use \\/ in vertical mode');
     case M_MATH: M_DMATH:
 	engine.trace ('italic correction: math');
-	engine.push (new Kern (new Dimen ()));
+	engine.push (new Kern (nlib.Zero_S));
 	break;
     case M_HORZ: M_RHORZ:
 	// XXX: ignoring ligatures
 	engine.trace ('italic correction: text');
 	var last = engine.get_last_listable ();
 	if (last instanceof Character) {
-	    var k = new Kern (Dimen.new_scaled (last.font.italic_correction (last.ord)))
+	    var k = new Kern (last.font.italic_correction (last.ord).value_S);
 	    // XXX: kern.subtype = Explicit.
 	    engine.accum (k);
 	}
@@ -1156,9 +1156,9 @@ register_command ('moveleft', function cmd_moveleft (engine) {
 
 
 register_command ('kern', function cmd_kern (engine) {
-    var amount = engine.scan_dimen ();
-    engine.trace ('kern %o', amount);
-    engine.accum (new Kern (amount));
+    var amount_S = engine.scan_dimen ().sp.value_S;
+    engine.trace ('kern %S', amount_S);
+    engine.accum (new Kern (amount_S));
 });
 
 
@@ -1346,7 +1346,7 @@ register_command ('lastkern', (function LastkernCommand_closure () {
 	var val = new Dimen ();
 	var item = engine.get_last_listable ();
 	if (item != null && item.ltype == LT_KERN)
-	    val = item.amount.clone ();
+	    val = item.amount_S;
 	return new ConstantValref (T_DIMEN, val);
     };
 
