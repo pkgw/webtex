@@ -25,6 +25,9 @@
 //   N - a JS number (may be a float, may be out of TeX's int range)
 //   O - some non-numeric JS value
 //
+// The naming convention is not used for integer values that aren't used for
+// math, such as register numbers, character ordinals, etc.
+//
 // We define a "nlib" object that holds a library of useful routines relating
 // to all this numerical stuff.
 

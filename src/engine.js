@@ -1547,7 +1547,7 @@ var Engine = (function Engine_closure () {
 	 * value is [dimen, infinity_order] rather than just the dimension. */
 	var t = this._scan_signs ();
 	var negfactor = t[0], tok = t[1], inf_order = 0, val = null,
-	    frac = 0, nonfrac = null;
+	    frac_I = 0, nonfrac_I = null;
 
 	var vt = tok.to_cmd (this).get_valtype ();
 
@@ -1563,21 +1563,21 @@ var Engine = (function Engine_closure () {
 		return d;
 	    }
 	} else if (vt == T_INT) {
-	    nonfrac = tok.to_cmd (this).as_int (this);
+	    nonfrac_I = tok.to_cmd (this).as_int (this);
 	} else if (vt != null) {
 	    throw new TexRuntimeError ('expected dimen value; got %o (valtype=%d)', tok, vt);
 	}
 
-	if (nonfrac == null) {
+	if (nonfrac_I == null) {
 	    // We need to scan a literal number.
 	    if (tok.is_other_char (O_PERIOD) || tok.is_other_char (O_COMMA)) {
-		nonfrac = 0;
+		nonfrac_I = 0;
 	    } else {
 		this.push_back (tok);
-		nonfrac = this.scan_int__I ();
-		if (nonfrac < 0) {
+		nonfrac_I = this.scan_int__I ();
+		if (nonfrac_I < 0) {
 		    negfactor = -negfactor;
-		    nonfrac = -nonfrac;
+		    nonfrac_I = -nonfrac_I;
 		}
 		tok = this.next_x_tok ();
 	    }
@@ -1602,13 +1602,13 @@ var Engine = (function Engine_closure () {
 		    }
 		    digits.push (v);
 		}
-		frac = Scaled.new_from_decimals (digits);
+		frac_I = Scaled.new_from_decimals (digits);
 	    }
 	}
 
-	if (nonfrac < 0) {
+	if (nonfrac_I < 0) {
 	    negfactor = -negfactor;
-	    nonfrac = -nonfrac;
+	    nonfrac_I = -nonfrac_I;
 	}
 
 	if (this.scan_keyword ('true'))
@@ -1619,7 +1619,7 @@ var Engine = (function Engine_closure () {
 	var result = null;
 
 	if (val != null) {
-	    result = val.times_parts (nonfrac, frac);
+	    result = val.times_parts (nonfrac_I, frac_I);
 	} else {
 	    this.push_back (tok);
 
@@ -1631,23 +1631,23 @@ var Engine = (function Engine_closure () {
 			throw new TexSyntaxError ('illegal infinity value ' +
 						  '"fillll" or higher');
 		}
-		result = Scaled.new_from_parts (nonfrac, frac);
+		result = Scaled.new_from_parts (nonfrac_I, frac_I);
 	    } else if (mumode) {
 		if (this.scan_keyword ('mu'))
-		    result = Scaled.new_from_parts (nonfrac, frac);
+		    result = Scaled.new_from_parts (nonfrac_I, frac_I);
 		else
 		    throw new TexRuntimeError ('this quantity must have ' +
 					       'dimensions of "mu"');
 	    } else if (this.scan_keyword ('em')) {
 		v = this.get_misc ('cur_font').get_dimen (6).sp;
-		result = v.times_parts (nonfrac, frac);
+		result = v.times_parts (nonfrac_I, frac_I);
 	    } else if (this.scan_keyword ('ex')) {
 		v = this.get_misc ('cur_font').get_dimen (5).sp;
-		result = v.times_parts (nonfrac, frac);
+		result = v.times_parts (nonfrac_I, frac_I);
 	    } else if (this.scan_keyword ('sp')) {
-		result = new Scaled (nonfrac);
+		result = new Scaled (nonfrac_I);
 	    } else if (this.scan_keyword ('pt')) {
-		result = Scaled.new_from_parts (nonfrac, frac);
+		result = Scaled.new_from_parts (nonfrac_I, frac_I);
 	    } else {
 		var num, denom;
 
@@ -1678,7 +1678,7 @@ var Engine = (function Engine_closure () {
 					      'didn\'t find it; next is %o', tok);
 		}
 
-		result = Scaled.new_parts_product (num, denom, nonfrac, frac);
+		result = Scaled.new_parts_product (num, denom, nonfrac_I, frac_I);
 	    }
 	}
 

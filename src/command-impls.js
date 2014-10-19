@@ -271,9 +271,9 @@ register_command ('divide', function cmd_divide (engine) {
     var val = cmd.as_valref (engine); // might eat tokens
     engine.scan_keyword ('by');
     var cur = val.get (engine);
-    var denom = engine.scan_int__I ();
-    engine.trace ('divide %o = %o / %o', cmd, cur, denom);
-    val.set (engine, cur.intdivide (denom));
+    var denom_I = engine.scan_int__I ();
+    engine.trace ('divide %o = %o / %o', cmd, cur, denom_I);
+    val.set (engine, cur.intdivide (denom_I));
 });
 
 
@@ -283,9 +283,9 @@ register_command ('multiply', function cmd_multiply (engine) {
     var val = cmd.as_valref (engine); // might eat tokens
     engine.scan_keyword ('by');
     var cur = val.get (engine);
-    var factor = engine.scan_int__I ();
-    engine.trace ('multiply %o = %o * %o', cmd, cur, factor);
-    val.set (engine, cur.intproduct (factor));
+    var factor_I = engine.scan_int__I ();
+    engine.trace ('multiply %o = %o * %o', cmd, cur, factor_I);
+    val.set (engine, cur.intproduct (factor_I));
 });
 
 
@@ -1695,7 +1695,7 @@ register_command ('romannumeral', function cmd_romannumeral (engine) {
     // another puzzle: "GFY, DEK."
     var table = ['m', 2, 'd', 5, 'c', 2, 1, 5, 'x', 2, 'v', 5, 'i'];
     var v = 1000;
-    var n = engine.scan_int__I ();
+    var n = engine.scan_int__I (); // ignoring naming convention for sanity
     var n_orig = n;
     var k = 0, j = 0, u = 0;
     var result = '';
