@@ -64,10 +64,12 @@ var SpecialValref = (function SpecialValref_closure () {
     var proto = SpecialValref.prototype;
 
     proto.get = function SpecialValref_get (engine) {
-	return engine.get_special_value (this.valtype, this.name);
+	var rv = engine.get_special_value (this.valtype, this.name);
+	return Value.ensure_boxed (this.valtype, rv);
     };
 
     proto.set = function SpecialValref_set (engine, value) {
+	value = Value.ensure_unboxed (this.valtype, value);
 	engine.set_special_value (this.valtype, this.name, value);
     };
 

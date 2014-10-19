@@ -584,7 +584,7 @@ var Engine = (function Engine_closure () {
     };
 
     proto.set_special_value = function Engine_set_special_value (valtype, name, value) {
-	this.special_values[valtype][name] = Value.ensure_boxed (valtype, value);
+	this.special_values[valtype][name] = Value.ensure_unboxed (valtype, value);
     };
 
     proto.get_font = function Engine_get_font (name) {
@@ -959,7 +959,7 @@ var Engine = (function Engine_closure () {
 	// \end. \line{} is \hbox to\hsize{}.
 
 	if (this.build_stack[0].length == 0 &&
-	    this.get_special_value (T_INT, 'deadcycles').value_I == 0) {
+	    this.get_special_value (T_INT, 'deadcycles') == 0) {
 	    this.trace ('... completely done');
 	    this._force_end = true;
 	} else {
