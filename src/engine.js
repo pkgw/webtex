@@ -1439,9 +1439,9 @@ var Engine = (function Engine_closure () {
 	    throw new TexSyntaxError ('unhandled alpha number token %o', tok);
 	}
 
-	var v = tok.to_cmd (this).as_int (this);
+	var v = tok.to_cmd (this).as_int__I (this);
 	if (v != null)
-	    return v.product__I_O (negfactor).value_I;
+	    return v * negfactor;
 
 	// Looks like we have a literal integer
 
@@ -1563,7 +1563,7 @@ var Engine = (function Engine_closure () {
 		return d;
 	    }
 	} else if (vt == T_INT) {
-	    nonfrac_I = tok.to_cmd (this).as_int (this);
+	    nonfrac_I = tok.to_cmd (this).as_int__I (this);
 	} else if (vt != null) {
 	    throw new TexRuntimeError ('expected dimen value; got %o (valtype=%d)', tok, vt);
 	}

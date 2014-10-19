@@ -38,10 +38,10 @@ var Value = (function Value_closure () {
 	throw new TexInternalError ('not implemented Value.is_nonzero');
     };
 
-    proto.as_int = function Value_as_int () {
-	// Returns a TexInt that this value is equivalent to, or null if such
+    proto.as_int__I = function Value_as_int__I () {
+	// Returns an integer that this value is equivalent to, or null if such
 	// a conversion is not allowed.
-	throw new TexInternalError ('not implemented Value.as_int');
+	throw new TexInternalError ('not implemented Value.as_int__I');
     };
 
     proto.as_scaled = function Value_as_scaled () {
@@ -250,11 +250,11 @@ var Command = (function Command_closure () {
 	return null;
     };
 
-    proto.as_int = function Command_as_int (engine) {
+    proto.as_int__I = function Command_as_int__I (engine) {
 	var v = this.as_valref (engine);
 	if (v == null)
 	    return null;
-	return v.get (engine).as_int ();
+	return v.get (engine).as_int__I ();
     };
 
     proto.as_scaled = function Command_as_scaled (engine) {

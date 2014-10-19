@@ -28,8 +28,8 @@ var TexInt = (function TexInt_closure () {
 	return (this.value_I != 0);
     };
 
-    proto.as_int = function TexInt_as_int () {
-	return this; // NOTE: ok since TexInts are immutable
+    proto.as_int__I = function TexInt_as_int__I () {
+	return this.value_I;
     };
 
     proto.as_scaled = function TexInt_as_scaled () {
@@ -231,8 +231,8 @@ var Scaled = (function Scaled_closure () {
 	return (this.value_S != 0);
     };
 
-    proto.as_int = function Scaled_as_int () {
-	return new TexInt (this.value_S);
+    proto.as_int__I = function Scaled_as_int__I () {
+	return this.value_S; // Yes, this is correct.
     };
 
     proto.as_scaled = function Scaled_as_scaled () {
@@ -344,8 +344,8 @@ var Dimen = (function Dimen_closure () {
 	return this;
     };
 
-    proto.as_int = function Dimen_as_int () {
-	return this.sp.as_int ();
+    proto.as_int__I = function Dimen_as_int__I () {
+	return this.sp.as_int__I ();
     };
 
     proto.as_scaled = function Dimen_as_scaled () {
@@ -458,8 +458,8 @@ var Glue = (function Glue_closure () {
 		this.shrink_order != 0);
     };
 
-    proto.as_int = function Glue_as_int () {
-	return this.amount.as_int ();
+    proto.as_int__I = function Glue_as_int__I () {
+	return this.amount.as_int__I ();
     };
 
     proto.as_scaled = function Glue_as_scaled () {
