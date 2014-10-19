@@ -461,21 +461,21 @@ var mathlib = (function mathlib_closure () {
 
 	var proto = MathState.prototype;
 
-	proto.sym_dimen = function MathState_sym_dimen (size, number) {
+	proto.sym_dimen__NN_S = function MathState_sym_dimen__NN_S (size, number) {
 	    // Note that fontdimen numbers are 1-based, not 0-based.
 	    // get_font_family is defined in terms of the MS_* constants so no
 	    // offset needed there.
 	    var f = this.engine.get_font_family (size, 2);
 	    if (f == null)
 		throw new TexRuntimeError ('need math symbol fontdimen but no symbol font defined');
-	    return f.get_dimen (number);
+	    return f.get_dimen__N_S (number);
 	};
 
-	proto.ext_dimen = function MathState_ext_dimen (number) {
+	proto.ext_dimen__N_S = function MathState_ext_dimen__N_S (number) {
 	    var f = this.engine.get_font_family (this.size, 2);
 	    if (f == null)
 		throw new TexRuntimeError ('need math ext fontdimen but no ext font defined');
-	    return f.get_dimen (number);
+	    return f.get_dimen__N_S (number);
 	};
 
 	proto.font = function MathState_font (fam) {
@@ -491,7 +491,7 @@ var mathlib = (function mathlib_closure () {
 	    if (this.size == MS_DISPLAY)
 		this.size = MS_TEXT;
 
-	    var mq_S = this.sym_dimen (this.size, SymDimens.MathQuad).sp_S;
+	    var mq_S = this.sym_dimen__NN_S (this.size, SymDimens.MathQuad);
 	    this.mu_S = nlib.x_over_n__SI_SS (mq_S, 18)[0];
 	};
 
@@ -826,7 +826,7 @@ var mathlib = (function mathlib_closure () {
 	}
 
 	b.shift_amount_S = half (b.height_S - b.depth_S)
-	    - state.sym_dimen (state.size, SymDimens.AxisHeight).sp_S;
+	    - state.sym_dimen__NN_S (state.size, SymDimens.AxisHeight);
 	return b;
     }
 
@@ -849,7 +849,7 @@ var mathlib = (function mathlib_closure () {
 		x.width_S -= delta; // remove italic correction
 
 	    x.shift_amount_S = half ((x.height_S - x.depth_S)
-				     - state.sym_dimen (state.size, SymDimens.AxisHeight).sp_S);
+				     - state.sym_dimen__NN_S (state.size, SymDimens.AxisHeight));
 	    q.nuc = x;
 	}
 
@@ -873,24 +873,24 @@ var mathlib = (function mathlib_closure () {
 	if (q.sup == null) {
 	    v.list = [y];
 	} else {
-	    var shift_up = state.ext_dimen (ExtDimens.BigOpSpacing3).sp_S - x.depth_S;
-	    shift_up = Math.max (shift_up, state.ext_dimen (ExtDimens.BigOpSpacing1).sp_S);
+	    var shift_up = state.ext_dimen__N_S (ExtDimens.BigOpSpacing3) - x.depth_S;
+	    shift_up = Math.max (shift_up, state.ext_dimen__N_S (ExtDimens.BigOpSpacing1));
 	    var k1 = new Kern (shift_up);
-	    var k2 = new Kern (state.ext_dimen (ExtDimens.BigOpSpacing5).sp_S);
+	    var k2 = new Kern (state.ext_dimen__N_S (ExtDimens.BigOpSpacing5));
 	    v.list = [k2, x, k1, y];
-	    v.height_S += state.ext_dimen (ExtDimens.BigOpSpacing5).sp_S;
+	    v.height_S += state.ext_dimen__N_S (ExtDimens.BigOpSpacing5);
 	    v.height_S += x.height_S;
 	    v.height_S += x.depth_S;
 	    v.height_S += shift_up;
 	}
 
 	if (q.sub != null) {
-	    var shift_down = state.ext_dimen (ExtDimens.BigOpSpacing4).sp_S - z.height_S;
-	    shift_down = Math.max (shift_down, state.ext_dimen (ExtDimens.BigOpSpacing2).sp_S);
+	    var shift_down = state.ext_dimen__N_S (ExtDimens.BigOpSpacing4) - z.height_S;
+	    shift_down = Math.max (shift_down, state.ext_dimen__N_S (ExtDimens.BigOpSpacing2));
 	    var k1 = new Kern (shift_down);
-	    var k2 = new Kern (state.ext_dimen (ExtDimens.BigOpSpacing5).sp_S);
+	    var k2 = new Kern (state.ext_dimen__N_S (ExtDimens.BigOpSpacing5));
 	    v.list = v.list.concat ([k1, z, k2]);
-	    v.height_S += state.ext_dimen (ExtDimens.BigOpSpacing5).sp_S;
+	    v.height_S += state.ext_dimen__N_S (ExtDimens.BigOpSpacing5);
 	    v.height_S += z.height_S;
 	    v.height_S += z.depth_S;
 	    v.height_S += shift_down;
@@ -901,8 +901,8 @@ var mathlib = (function mathlib_closure () {
     }
 
     function make_radical (state, q) {
-	var drt = state.ext_dimen (ExtDimens.DefaultRuleThickness).sp_S;
-	var mxh = state.sym_dimen (state.size, SymDimens.MathXHeight).sp_S;
+	var drt = state.ext_dimen__N_S (ExtDimens.DefaultRuleThickness);
+	var mxh = state.sym_dimen__NN_S (state.size, SymDimens.MathXHeight);
 
 	// T:TP 737
 	var x = clean_box (state.to_cramped (), q.nuc);
@@ -931,12 +931,12 @@ var mathlib = (function mathlib_closure () {
 
 	var v = q.nuc;
 	var delta = v.height_S + v.depth_S;
-	v.height_S = state.sym_dimen (state.size, SymDimens.AxisHeight).sp_S + half (delta);
+	v.height_S = state.sym_dimen__NN_S (state.size, SymDimens.AxisHeight) + half (delta);
 	v.depth_S = delta - v.height_S;
     }
 
     function make_over (state, q) {
-	var drt_S = state.ext_dimen (ExtDimens.DefaultRuleThickness).sp_S;
+	var drt_S = state.ext_dimen__N_S (ExtDimens.DefaultRuleThickness);
 	q.nuc = overbar__OSS_O (clean_box (state.to_cramped (), q.nuc),
 				3 * drt_S,
 				drt_S);
@@ -949,7 +949,7 @@ var mathlib = (function mathlib_closure () {
 	var shift_down = 0;
 	var t = 0;
 	var clr = 0;
-	var mxh = state.sym_dimen (state.size, SymDimens.MathXHeight).sp_S;
+	var mxh = state.sym_dimen__NN_S (state.size, SymDimens.MathXHeight);
 
 	if (p == null || !(p[0] instanceof Character)) {
 	    var z = hpack_natural (engine, p);
@@ -958,8 +958,8 @@ var mathlib = (function mathlib_closure () {
 	    else
 		t = MS_SCRIPTSCRIPT;
 
-	    shift_up = z.height_S - state.sym_dimen (t, SymDimens.SupDrop).sp_S;
-	    shift_down = z.depth_S + state.sym_dimen (t, SymDimens.SubDrop).sp_S;
+	    shift_up = z.height_S - state.sym_dimen__NN_S (t, SymDimens.SupDrop);
+	    shift_down = z.depth_S + state.sym_dimen__NN_S (t, SymDimens.SubDrop);
 	}
 
 	if (q.sup == null) {
@@ -968,18 +968,18 @@ var mathlib = (function mathlib_closure () {
 	    x.width_S += engine.get_parameter (T_DIMEN, 'scriptspace').sp_S;
 
 	    clr = x.height_S - Math.abs (mxh * 4) / 5;
-	    var sub1 = state.sym_dimen (state.size, SymDimens.Sub1).sp_S;
+	    var sub1 = state.sym_dimen__NN_S (state.size, SymDimens.Sub1);
 	    x.shift_amount_S = Math.max (shift_down, clr, sub1);
 	} else {
 	    var x = clean_box (state.superscript (), q.sup);
 	    x.width_S += engine.get_parameter (T_DIMEN, 'scriptspace').sp_S;
 
 	    if (state.cramped)
-		clr = state.sym_dimen (state.size, SymDimens.Sup3).sp_S;
+		clr = state.sym_dimen__NN_S (state.size, SymDimens.Sup3);
 	    else if (state.style == MS_DISPLAY)
-		clr = state.sym_dimen (state.size, SymDimens.Sup1).sp_S;
+		clr = state.sym_dimen__NN_S (state.size, SymDimens.Sup1);
 	    else
-		clr = state.sym_dimen (state.size, SymDimens.Sup2).sp_S;
+		clr = state.sym_dimen__NN_S (state.size, SymDimens.Sup2);
 
 	    shift_up = Math.max (shift_up, clr);
 	    clr = x.depth_S + Math.abs (mxh) / 4
@@ -992,9 +992,9 @@ var mathlib = (function mathlib_closure () {
 		y.width_S += engine.get_parameter (T_DIMEN, 'scriptspace').sp_S;
 
 		shift_down = max (shift_down,
-				  state.sym_dimen (state.size, SymDimens.Sub2).sp_S);
+				  state.sym_dimen__NN_S (state.size, SymDimens.Sub2));
 
-		clr = 4 * state.ext_dimen (ExtDimens.DefaultRuleThickness).sp_S;
+		clr = 4 * state.ext_dimen__N_S (ExtDimens.DefaultRuleThickness);
 		clr -= (shift_up - x.depth_S) - (y.height_S - shift_down);
 		if (clr > 0) {
 		    shift_down += clr;
@@ -1154,7 +1154,7 @@ var mathlib = (function mathlib_closure () {
 		    } else {
 			delta = m.italic_correction__O_S (q.nuc.ord);
 			p = [f.box_for_ord (q.nuc.ord)];
-			if (q.nuc instanceof MathTextChar && f.get_dimen (2).is_nonzero ())
+			if (q.nuc instanceof MathTextChar && f.get_dimen__N_S (2) != 0)
 			    delta = 0;
 			if (q.sub == null && delta != 0) {
 			    p.push (new Kern (delta));

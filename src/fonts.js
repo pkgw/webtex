@@ -298,11 +298,10 @@ var Font = (function Font_closure () {
 	    this.metrics = new TfmMetrics (contents, scale);
 	}
 
-	this.dimens = [];
+	this.dimens_S = [];
 
 	for (var i = 0; i < this.metrics.font_dimens_S.length; i++) {
-	    this.dimens.push (new Dimen ());
-	    this.dimens[i].set_to (this.metrics.font_dimens_S[i]);
+	    this.dimens_S.push (this.metrics.font_dimens_S[i]);
 	}
 
 	engine.set_font (ident, this);
@@ -332,7 +331,7 @@ var Font = (function Font_closure () {
 		this._serialize_ident = state.fonts.length;
 		state.fonts.push ([this.ident,
 				   this.scale,
-				   this.dimens,
+				   this.dimens_S,
 				   this.hyphenchar,
 				   this.skewchar]);
 	    }
@@ -343,7 +342,7 @@ var Font = (function Font_closure () {
 
     Font.deserialize = function Font_deserialize (engine, data) {
 	var font = new Font (engine, data[0], data[1]);
-	font.dimens = data[2];
+	font.dimens_S = data[2];
 	font.hyphenchar = data[3];
 	font.skewchar = data[4];
 	return font;
@@ -353,20 +352,20 @@ var Font = (function Font_closure () {
 	return this.metrics;
     };
 
-    proto.get_dimen = function Font_get_dimen (number) {
+    proto.get_dimen__N_S = function Font_get_dimen__N_S (number) {
 	// TeX font dimens are 1-based; we offset.
-	if (number > this.dimens.length)
+	if (number > this.dimens_S.length)
 	    throw new TexRuntimeError ('undefined fontdimen #%d for %o', number, this);
-	return this.dimens[number - 1];
+	return this.dimens_S[number - 1];
     };
 
-    proto.set_dimen = function Font_set_dimen (number, value) {
+    proto.set_dimen__NS = function Font_set_dimen__NS (number, value_S) {
 	// XXX: we're supposed to only allow the number of parameters to be
 	// extended "just after the font has been loaded". (TeXBook p. 433).
 
-	while (this.dimens.length < number)
-	    this.dimens.push (new Dimen ());
-	this.dimens[number - 1] = value;
+	while (this.dimens_S.length < number)
+	    this.dimens_S.push (nlib.Zero_S);
+	this.dimens_S[number - 1] = value_S;
     };
 
     proto.has_ord = function Font_has_ord (ord) {
@@ -575,9 +574,9 @@ register_command ('fontdimen', (function FontDimenCommand_closure () {
 
 	var font = val.get (engine);
 	engine.scan_optional_equals ();
-	var val = engine.scan_dimen ();
-	engine.trace ('fontdimen %o %d = %o', font, num, val);
-	font.set_dimen (num, val);
+	var val_S = engine.scan_dimen ().sp_S;
+	engine.trace ('fontdimen %o %d = %S', font, num, val_S);
+	font.set_dimen__NS (num, val_S);
 	engine.maybe_insert_after_assign_token ();
     };
 
@@ -594,10 +593,10 @@ register_command ('fontdimen', (function FontDimenCommand_closure () {
 	    throw new TexRuntimeError ('expected \\fontdimen to be followed ' +
 				       'by a font; got %o', tok);
 
-	var val = font.get (engine).get_dimen (num);
-	engine.trace ('got: %o', val);
+	var val_S = font.get (engine).get_dimen__N_S (num);
+	engine.trace ('got: %S', val_S);
 	// FIXME: should be settable.
-	return new ConstantValref (T_DIMEN, val);
+	return new ConstantValref (T_DIMEN, val_S);
     };
 
     return FontDimenCommand;

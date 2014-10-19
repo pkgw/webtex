@@ -1639,10 +1639,10 @@ var Engine = (function Engine_closure () {
 		    throw new TexRuntimeError ('this quantity must have ' +
 					       'dimensions of "mu"');
 	    } else if (this.scan_keyword ('em')) {
-		v = new Scaled (this.get_misc ('cur_font').get_dimen (6).sp_S);
+		v = new Scaled (this.get_misc ('cur_font').get_dimen__N_S (6));
 		result = v.times_parts (nonfrac_I, frac_I);
 	    } else if (this.scan_keyword ('ex')) {
-		v = new Scaled (this.get_misc ('cur_font').get_dimen (5).sp_S);
+		v = new Scaled (this.get_misc ('cur_font').get_dimen__N_S (5));
 		result = v.times_parts (nonfrac_I, frac_I);
 	    } else if (this.scan_keyword ('sp')) {
 		result = new Scaled (nonfrac_I);
