@@ -687,12 +687,10 @@ var mathlib = (function mathlib_closure () {
 	return r;
     }
 
-    function overbar (b, k, t) {
-	t = new Scaled (t);
-	k = new Scaled (k);
-	return vpack_natural ([new Kern (t.value_S),
-			       fraction_rule (t.value_S),
-			       new Kern (k.value_S),
+    function overbar__OSS_O (b, k, t) {
+	return vpack_natural ([new Kern (t),
+			       fraction_rule (t),
+			       new Kern (k),
 			       b]);
     }
 
@@ -742,7 +740,7 @@ var mathlib = (function mathlib_closure () {
 			break;
 		    }
 
-		    var u = m.height (y).value_S + m.depth (y).value_S;
+		    var u = m.height_plus_depth__O_S (y);
 		    if (u > w) {
 			f = g;
 			c = y;
@@ -924,7 +922,7 @@ var mathlib = (function mathlib_closure () {
 	    clr += half (delta);
 
 	y.shift_amount_S = -(x.height_S + clr);
-	q.nuc = hpack_natural (state.engine, [y, overbar (x, clr, y.height_S)]);
+	q.nuc = hpack_natural (state.engine, [y, overbar__OSS_O (x, clr, y.height_S)]);
     }
 
     function make_vcenter (state, q) {
@@ -938,10 +936,10 @@ var mathlib = (function mathlib_closure () {
     }
 
     function make_over (state, q) {
-	var drt = state.ext_dimen (ExtDimens.DefaultRuleThickness).sp.value_S;
-	q.nuc = overbar (clean_box (state.to_cramped (), q.nuc),
-			 3 * drt,
-			 drt);
+	var drt_S = state.ext_dimen (ExtDimens.DefaultRuleThickness).sp.value_S;
+	q.nuc = overbar__OSS_O (clean_box (state.to_cramped (), q.nuc),
+				3 * drt_S,
+				drt_S);
     }
 
     function make_scripts (engine, state, q, delta) {

@@ -339,6 +339,8 @@ var Dimen = (function Dimen_closure () {
 	    this.sp = val;
 	else if (val instanceof Dimen)
 	    this.sp = val.sp;
+	else if (typeof val === 'number')
+	    this.sp.value_S = val;
 	else
 	    throw new TexInternalError ('expected Scaled or Dimen value, got %o', val);
 	return this;

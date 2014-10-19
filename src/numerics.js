@@ -124,7 +124,8 @@ var nlib = (function nlib_closure () {
 
 	if (x_S <= div (maxanswer_S - y_S, n_I) && -x_S <= div (maxanswer_S + y_S, n_I))
 	    return n_I * x_S + y_S;
-	throw new TexRuntimeError ('over/underflow in mult+add');
+	throw new TexRuntimeError ('over/underflow in mult+add (n=%o x=%o y=%o max=%o)',
+				   n_I, x_S, y_S, maxanswer_S);
     }
 
     function nx_plus_y__ISS_S (n_I, x_S, y_S) {

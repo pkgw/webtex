@@ -52,7 +52,7 @@ var TfmMetrics = (function TfmMetrics_closure () {
 	var beta = div (256, alpha);
 	alpha = alpha * z;
 
-	var fwts = (function fix_word_to_scaled (as_u32_be) {
+	var fwts__N_S = (function fix_word_to_scaled (as_u32_be) {
 	    // T:TP 571
 	    var a = (as_u32_be >> 24) & 0xFF;
 	    var b = (as_u32_be >> 16) & 0xFF;
@@ -62,13 +62,13 @@ var TfmMetrics = (function TfmMetrics_closure () {
 	    var sw = div (div (div (d * z, 0x100) + c * z, 0x100) + b * z, beta);
 
 	    if (a == 0)
-		return new Scaled (sw);
+		return sw;
 	    if (a == 0xFF)
-		return new Scaled (sw - alpha);
+		return sw - alpha;
 	    throw new TexRuntimeError ('illegal fix_word value');
 	});
 
-	return fwts;
+	return fwts__N_S;
     }
 
     function TfmMetrics (contents, scale_factor) {
@@ -114,10 +114,10 @@ var TfmMetrics = (function TfmMetrics_closure () {
 
 	this.first_code = first_code;
 	this.last_code = last_code;
-	this.ord_widths = new Array (256);
-	this.ord_heights = new Array (256);
-	this.ord_depths = new Array (256);
-	this.ord_ics = new Array (256);
+	this.ord_widths_S = new Array (256);
+	this.ord_heights_S = new Array (256);
+	this.ord_depths_S = new Array (256);
+	this.ord_ics_S = new Array (256);
 	this.ord_tags = new Array (256);
 	this.ord_rembytes = new Array (256);
 	this.font_dimens_S = [];
@@ -148,31 +148,29 @@ var TfmMetrics = (function TfmMetrics_closure () {
 	if (scale_factor != -1000) {
 	    if (scale_factor >= 0)
 		design_size = scale_factor;
-	    else {
-		var tmp = new Scaled (design_size);
-		design_size = tmp.times_n_over_d (-scale_factor, 1000)[0].value_S;
-	    }
+	    else
+		design_size = nlib.xn_over_d__ISI_SS (-scale_factor, design_size, 1000)[0];
 	}
 
-	this.fw2s = prep_fix_word_math (design_size);
+	this.fw2s__N_S = prep_fix_word_math (design_size);
 
 	// Create Scaleds out of all of the metrics.
 
-	var widths = new Array (num_wds);
+	var widths_S = new Array (num_wds);
 	for (var i = 0; i < num_wds; i++)
-	    widths[i] = this.fw2s (dv.getUint32 (width_ofs + 4 * i, false));
+	    widths_S[i] = this.fw2s__N_S (dv.getUint32 (width_ofs + 4 * i, false));
 
-	var heights = new Array (num_hts);
+	var heights_S = new Array (num_hts);
 	for (var i = 0; i < num_hts; i++)
-	    heights[i] = this.fw2s (dv.getUint32 (height_ofs + 4 * i, false));
+	    heights_S[i] = this.fw2s__N_S (dv.getUint32 (height_ofs + 4 * i, false));
 
-	var depths = new Array (num_dps);
+	var depths_S = new Array (num_dps);
 	for (var i = 0; i < num_dps; i++)
-	    depths[i] = this.fw2s (dv.getUint32 (depth_ofs + 4 * i, false));
+	    depths_S[i] = this.fw2s__N_S (dv.getUint32 (depth_ofs + 4 * i, false));
 
-	var ics = new Array (num_ics);
+	var ics_S = new Array (num_ics);
 	for (var i = 0; i < num_ics; i++)
-	    ics[i] = this.fw2s (dv.getUint32 (ic_ofs + 4 * i, false));
+	    ics_S[i] = this.fw2s__N_S (dv.getUint32 (ic_ofs + 4 * i, false));
 
 	// Read in other necessary tables.
 
@@ -184,7 +182,7 @@ var TfmMetrics = (function TfmMetrics_closure () {
 	for (var i = 0; i < num_xcs; i++)
 	    this.extensible[i] = dv.getUint32 (xc_ofs + 4 * i, false);
 
-	widths[0] = null; // TeX defines wd=0 to always mean invalid character.
+	widths_S[0] = null; // TeX defines wd=0 to always mean invalid character.
 
 	// Read in the character data.
 
@@ -192,16 +190,16 @@ var TfmMetrics = (function TfmMetrics_closure () {
 	    var x = dv.getUint32 (char_info_ofs + i * 4, false);
 
 	    var idx = (x >> 24) & 0xFF;
-	    this.ord_widths[first_code + i] = widths[idx];
+	    this.ord_widths_S[first_code + i] = widths_S[idx];
 
 	    idx = (x >> 20) & 0x0F;
-	    this.ord_heights[first_code + i] = heights[idx];
+	    this.ord_heights_S[first_code + i] = heights_S[idx];
 
 	    idx = (x >> 16) & 0x0F;
-	    this.ord_depths[first_code + i] = depths[idx];
+	    this.ord_depths_S[first_code + i] = depths_S[idx];
 
 	    idx = (x >> 10) & 0x3F; // ital corr
-	    this.ord_ics[first_code + i] = ics[idx];
+	    this.ord_ics_S[first_code + i] = ics_S[idx];
 
 	    idx = (x >>  8) & 0x03; // tag
 	    this.ord_tags[first_code + i] = idx;
@@ -217,7 +215,7 @@ var TfmMetrics = (function TfmMetrics_closure () {
 	// these out on init.
 
 	for (var i = 0; i < num_fps; i++)
-	    this.font_dimens_S.push (this.fw2s (dv.getUint32 (fp_ofs + 4 * i, false)).value_S);
+	    this.font_dimens_S.push (this.fw2s__N_S (dv.getUint32 (fp_ofs + 4 * i, false)));
 	for (var i = num_fps; i < 7; i++)
 	    this.font_dimens_S.push (nlib.Zero_S);
     }
@@ -232,7 +230,7 @@ var TfmMetrics = (function TfmMetrics_closure () {
 	    return false;
 	if (ord > this.last_code)
 	    return false;
-	return this.ord_widths[ord] != null;
+	return this.ord_widths_S[ord] != null;
     };
 
     proto.is_lig = function TfmMetrics_is_lig (ord) {
@@ -252,23 +250,23 @@ var TfmMetrics = (function TfmMetrics_closure () {
     };
 
     proto.height_plus_depth__O_S = function TfmMetrics_height_plus_depth__O_S (ord) {
-	return this.ord_heights[ord].value_S + this.ord_depths[ord].value_S;
+	return this.ord_heights_S[ord] + this.ord_depths_S[ord];
     };
 
     proto.italic_correction__O_S = function TfmMetrics_italic_correction__O_S (ord) {
-	return this.ord_ics[ord].value_S;
+	return this.ord_ics_S[ord];
     };
 
     proto.box_for_ord = function TfmMetrics_box_for_ord (font, ord) {
-	if (this.ord_widths[ord] == null) {
+	if (this.ord_widths_S[ord] == null) {
 	    // TODO: TeX warns in this case; then returns a zero-size box
 	    return new Character (font, ord);
 	}
 
 	var rv = new Character (font, ord);
-	rv.width_S = this.ord_widths[ord].value_S;
-	rv.height_S = this.ord_heights[ord].value_S;
-	rv.depth_S = this.ord_depths[ord].value_S;
+	rv.width_S = this.ord_widths_S[ord];
+	rv.height_S = this.ord_heights_S[ord];
+	rv.depth_S = this.ord_depths_S[ord];
 	return rv;
     };
 
@@ -304,7 +302,7 @@ var Font = (function Font_closure () {
 
 	for (var i = 0; i < this.metrics.font_dimens_S.length; i++) {
 	    this.dimens.push (new Dimen ());
-	    this.dimens[i].set_to (new Scaled (this.metrics.font_dimens_S[i]));
+	    this.dimens[i].set_to (this.metrics.font_dimens_S[i]);
 	}
 
 	engine.set_font (ident, this);
@@ -504,10 +502,9 @@ register_command ('font', (function FontCommand_closure () {
 	var s = -1000;
 
 	if (engine.scan_keyword ('at')) {
-	    s = engine.scan_dimen ()
-	    if (s.sp.value_S <= 0) // FIXME: || s > SC_MAX
+	    s = engine.scan_dimen ().sp.value_S;
+	    if (s <= 0) // FIXME: || s > SC_MAX
 		throw new TexRuntimeError ('illegal font size %o', s);
-	    s = s.sp.value_S;
 	} else if (engine.scan_keyword ('scaled')) {
 	    s = -engine.scan_int__I ();
 	    if (s >= 0 || s < -32768)
