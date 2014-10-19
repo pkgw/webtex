@@ -266,8 +266,8 @@ var EquivTable = (function EquivTable_closure () {
 
 	for (i = 0; i < 256; i++) {
 	    var r = this._registers[T_INT][i];
-	    if (r != null && r.is_nonzero ())
-		state.registers.ints[i] = r.as_serializable ();
+	    if (r != null && r != 0)
+		state.registers.ints[i] = r;
 
 	    r = this._registers[T_DIMEN][i];
 	    if (r != null && r.is_nonzero ())
@@ -302,7 +302,7 @@ var EquivTable = (function EquivTable_closure () {
 	    if (name == 'year' || name == 'month' || name == 'day' ||
 		name == 'time')
 		continue;
-	    state.parameters.ints[name] = this._parameters[T_INT][name].as_serializable ();
+	    state.parameters.ints[name] = this._parameters[T_INT][name];
 	}
 
 	for (name in this._parameters[T_DIMEN]) {
