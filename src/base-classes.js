@@ -89,9 +89,14 @@ var Value = (function Value_closure () {
 	    return new TexInt (value);
 
 	if (valtype == T_DIMEN) {
-	    if (!(value instanceof Dimen))
-		throw new TexInternalError ('value is not dimen: %o', value);
-	    return value;
+	    if (value instanceof Dimen)
+		return value;
+	    if (typeof value == 'number') {
+		var d = new Dimen ();
+		d.sp.value_S = value;
+		return d;
+	    }
+	    throw new TexInternalError ('value is not dimen: %o', value);
 	}
 
 	if (valtype == T_GLUE || valtype == T_MUGLUE) {

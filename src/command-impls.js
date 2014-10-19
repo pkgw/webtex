@@ -823,14 +823,14 @@ register_command ('dp', (function DpCommand_closure () {
 	// Valref is not so important.
 	var reg = engine.scan_char_code__I ();
 	engine.scan_optional_equals ();
-	var depth = engine.scan_dimen ();
+	var depth_S = engine.scan_dimen ().sp.value_S;
 	var box = engine.get_register (T_BOX, reg);
 
 	if (box.btype == BT_VOID) {
-	    engine.trace ('\\dp%d = %o -- noop on void box', reg, depth);
+	    engine.trace ('\\dp%d = %S -- noop on void box', reg, depth_S);
 	} else {
-	    engine.trace ('\\dp%d = %o', reg, depth);
-	    box.depth = depth;
+	    engine.trace ('\\dp%d = %S', reg, depth_S);
+	    box.depth_S = depth_S;
 	}
     };
 
@@ -841,7 +841,7 @@ register_command ('dp', (function DpCommand_closure () {
     proto.as_valref = function DpCommand_as_valref (engine) {
 	var reg = engine.scan_char_code__I ();
 	var box = engine.get_register (T_BOX, reg);
-	return new ConstantValref (T_DIMEN, box.depth);
+	return new ConstantValref (T_DIMEN, box.depth_S);
     };
 
     return DpCommand;
@@ -862,7 +862,7 @@ register_command ('hrule', function cmd_hrule (engine) {
 
     var rule = new Rule ();
     rule.height.sp.value_S = 26214; // default rule = 0.4pt; T:TP sec 463
-    rule.depth.sp.value_S = 0;
+    rule.depth_S = nlib.Zero_S;
 
     while (true) {
 	if (engine.scan_keyword ('width'))
@@ -870,7 +870,7 @@ register_command ('hrule', function cmd_hrule (engine) {
 	else if (engine.scan_keyword ('height'))
 	    rule.height = engine.scan_dimen ();
 	else if (engine.scan_keyword ('depth'))
-	    rule.depth = engine.scan_dimen ();
+	    rule.depth_S = engine.scan_dimen ().sp.value_S;
 	else
 	    break;
     }
@@ -893,7 +893,7 @@ register_command ('vrule', function cmd_vrule (engine) {
 	else if (engine.scan_keyword ('height'))
 	    rule.height = engine.scan_dimen ();
 	else if (engine.scan_keyword ('depth'))
-	    rule.depth = engine.scan_dimen ();
+	    rule.depth_S = engine.scan_dimen ().sp.value_S;
 	else
 	    break;
     }

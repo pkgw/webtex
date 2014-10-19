@@ -13,7 +13,7 @@ var Boxlike = (function Boxlike_closure () {
     function Boxlike () {
 	this.width = new Dimen ();
 	this.height = new Dimen ();
-	this.depth = new Dimen ();
+	this.depth_S = nlib.Zero_S;
 	this.shift_amount_S = nlib.Zero_S; // positive is down (right) in H (V) box
     }
 
@@ -21,13 +21,13 @@ var Boxlike = (function Boxlike_closure () {
     var proto = Boxlike.prototype;
 
     proto._uishape = function Boxlike__uishape () {
-	return 'w=' + this.width + ' h=' + this.height + ' d=' + this.depth;
+	return format ('w=%o h=%o d=%S', this.width, this.height, this.depth_S);
     };
 
     proto._copyto = function Boxlike__copyto (other) {
 	other.width = this.width.clone ();
 	other.height = this.height.clone ();
-	other.depth = this.depth.clone ();
+	other.depth_S = this.depth_S;
 	other.shift_amount_S = this.shift_amount_S;
     };
 
@@ -143,7 +143,7 @@ var HBox = (function HBox_closure () {
 	var stretches = [0, 0, 0, 0];
 	var shrinks = [0, 0, 0, 0];
 	var height = 0;
-	var depth = 0;
+	var depth_S = nlib.Zero_S;
 
 	for (var i = 0; i < this.list.length; i++) {
 	    var item = this.list[i];
@@ -151,7 +151,7 @@ var HBox = (function HBox_closure () {
 	    if (item instanceof Boxlike) {
 		nat_width += item.width.sp.value_S;
 		height = Math.max (height, item.height.sp.value_S - item.shift_amount_S);
-		depth = Math.max (depth, item.depth.sp.value_S + item.shift_amount_S);
+		depth_S = Math.max (depth_S, item.depth_S + item.shift_amount_S);
 	    } else if (item instanceof Kern) {
 		nat_width += item.amount.sp.value_S;
 	    } else if (item instanceof BoxGlue) {
@@ -222,7 +222,7 @@ var HBox = (function HBox_closure () {
 	}
 
 	this.height.sp.value_S = height;
-	this.depth.sp.value_S = depth;
+	this.depth_S = depth_S;
     };
 
     proto.traverse = function HBox_traverse (x0, y0, callback) {
@@ -292,24 +292,24 @@ var VBox = (function VBox_closure () {
 	var stretches = [0, 0, 0, 0];
 	var shrinks = [0, 0, 0, 0];
 	var width = 0;
-	var prev_depth = 0;
+	var prev_depth_S = nlib.Zero_S;
 
 	for (var i = 0; i < this.list.length; i++) {
 	    var item = this.list[i];
 
 	    if (item instanceof Boxlike) {
-		nat_height += item.width.sp.value_S + prev_depth;
-		prev_depth = item.depth.sp.value_S;
+		nat_height += item.width.sp.value_S + prev_depth_S;
+		prev_depth_S = item.depth_S;
 		width = Math.max (width, item.width.sp.value_S + item.shift_amount_S);
 	    } else if (item instanceof Kern) {
-		nat_height += item.amount.sp.value_S + prev_depth;
-		prev_depth = 0;
+		nat_height += item.amount.sp.value_S + prev_depth_S;
+		prev_depth_S = nlib.Zero_S;
 	    } else if (item instanceof BoxGlue) {
 		var g = item.amount;
-		nat_height += g.amount.sp.value_S + prev_depth;
+		nat_height += g.amount.sp.value_S + prev_depth_S;
 		stretches[g.stretch_order] += g.stretch.sp.value_S;
 		shrinks[g.shrink_order] += g.shrink.sp.value_S;
-		prev_depth = 0;
+		prev_depth_S = nlib.Zero_S;
 	    }
 	}
 
@@ -375,26 +375,26 @@ var VBox = (function VBox_closure () {
 
 	// Depth is prev_depth, unless \boxmaxdepth makes us shift the
 	// reference point.
-	var bmd = engine.get_parameter (T_DIMEN, 'boxmaxdepth').sp.value_S;
+	var bmd_S = engine.get_parameter (T_DIMEN, 'boxmaxdepth').sp.value_S;
 
-	if (prev_depth <= bmd) {
-	    this.depth.sp.value_S = prev_depth;
+	if (prev_depth_S <= bmd_S) {
+	    this.depth_S = prev_depth_S;
 	} else {
-	    var tot_height = prev_depth + this.height.sp.value_S;
-	    this.depth.sp.value_S = bmd;
-	    this.height.sp.value_S = tot_height - bmd;
+	    var tot_height = prev_depth_S + this.height.sp.value_S;
+	    this.depth_S = bmd_S;
+	    this.height.sp.value_S = tot_height - bmd_S;
 	}
     };
 
     proto.adjust_as_vtop = function VBox_adjust_as_vtop () {
-	var tot_height = this.height.sp.value_S + this.depth.sp.value_S;
+	var tot_height_S = this.height.sp.value_S + this.depth_S;
 	var height = 0;
 
 	if (this.list[0] instanceof Boxlike)
 	    height = this.list[0].height.sp.value_S;
 
 	this.height.sp.value_S = height;
-	this.depth.sp.value_S = tot_height - height;
+	this.depth_S = tot_height_S - height;
     };
 
     proto.traverse = function VBox_traverse (x0, y0, callback) {
@@ -413,11 +413,11 @@ var VBox = (function VBox_closure () {
 	    if (item instanceof ListBox) {
 		y += item.height.sp.value_S;
 		item.traverse (x0 + item.shift_amount_S, y, callback);
-		y += item.depth.sp.value_S;
+		y += item.depth_S;
 	    } else if (item instanceof Boxlike) {
 		y += item.height.sp.value_S;
 		callback (x0 + item.shift_amount_S, y, item);
-		y += item.depth.sp.value_S;
+		y += item.depth_S;
 	    } else if (item instanceof Kern) {
 		y += item.amount.sp.value_S;
 	    } else if (item instanceof BoxGlue) {
@@ -461,7 +461,7 @@ var CanvasBox = (function CanvasBox_closure () {
 
 	this.width = srcbox.width.clone ();
 	this.height = srcbox.height.clone ();
-	this.depth = srcbox.depth.clone ();
+	this.depth_S = srcbox.depth_S;
 	this.shift_amount_S = srcbox.shift_amount_S;
 
 	// TODO, I think: record true width/height/depth of subcomponents.
@@ -523,7 +523,7 @@ var CanvasBox = (function CanvasBox_closure () {
     proto.to_render_data = function CanvasBox_to_render_data () {
 	var data = {w: this.width.sp.value_S,
 		    h: this.height.sp.value_S,
-		    d: this.depth.sp.value_S};
+		    d: this.depth_S};
 	var gl = []; // "graphics list"
 
 	for (var i = 0; i < this.graphics.length; i++) {
@@ -542,7 +542,7 @@ var CanvasBox = (function CanvasBox_closure () {
 		gl.push ({x: x,
 			  y: y,
 			  w: subitem.width.sp.value_S,
-			  h: subitem.height.sp.value_S + subitem.depth.sp.value_S});
+			  h: subitem.height.sp.value_S + subitem.depth_S});
 	    } else {
 		throw new TexInternalError ('unhandled CanvasBox graphic %o', subitem);
 	    }
