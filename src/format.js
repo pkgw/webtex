@@ -125,7 +125,7 @@ var format = (function format_wrapper () {
                 case 'S':
 		    if (typeof arg !== 'number')
 			throw new Error ('format %S expected number but got ' + arg);
-		    arg = nlib.toString__S_O (arg);
+		    arg = nlib.to_texstr__S_O (arg);
                     break;
 		case 'T':
 		    if (arg instanceof Array)

@@ -986,7 +986,7 @@ register_command ('hfil', function cmd_hfil (engine) {
 	return; // this command will be reread after new paragraph is started.
 
     var g = new Glue ();
-    g.stretch.set_to (Scaled.new_from_parts__II_S (1, 0));
+    g.stretch_S = nlib.scale__I_S (1);
     g.stretch_order = 1;
     engine.trace ('hfil');
     engine.accum (new BoxGlue (g));
@@ -997,7 +997,7 @@ register_command ('hfill', function cmd_hfill (engine) {
 	return; // this command will be reread after new paragraph is started.
 
     var g = new Glue ();
-    g.stretch.set_to (Scaled.new_from_parts__II_S (1, 0));
+    g.stretch_S = nlib.scale__I_S (1);
     g.stretch_order = 2;
     engine.trace ('hfill');
     engine.accum (new BoxGlue (g));
@@ -1008,7 +1008,7 @@ register_command ('hss', function cmd_hss (engine) {
 	return; // this command will be reread after new paragraph is started.
 
     var g = new Glue ();
-    g.stretch.set_to (Scaled.new_from_parts__II_S (1, 0));
+    g.stretch_S = nlib.scale__I_S (1);
     g.stretch_order = 1;
     g.shrink.set_to (Scaled.new_from_parts__II_S (1, 0));
     g.shrink_order = 1;
@@ -1021,7 +1021,7 @@ register_command ('hfilneg', function cmd_hfilneg (engine) {
 	return; // this command will be reread after new paragraph is started.
 
     var g = new Glue ();
-    g.stretch.set_to (Scaled.new_from_parts__II_S (-1, 0));
+    g.stretch_S = nlib.scale__I_S (-1);
     g.stretch_order = 1;
     engine.trace ('hfilneg');
     engine.accum (new BoxGlue (g));
@@ -1042,7 +1042,7 @@ register_command ('vfil', function cmd_vfil (engine) {
 	return; // command will be reread after this graf is finished.
 
     var g = new Glue ();
-    g.stretch.set_to (Scaled.new_from_parts__II_S (1, 0));
+    g.stretch_S = nlib.scale__I_S (1);
     g.stretch_order = 1;
     engine.trace ('vfil');
     engine.accum (new BoxGlue (g));
@@ -1054,7 +1054,7 @@ register_command ('vfill', function cmd_vfill (engine) {
 	return; // command will be reread after this graf is finished.
 
     var g = new Glue ();
-    g.stretch.set_to (Scaled.new_from_parts__II_S (1, 0));
+    g.stretch_S = nlib.scale__I_S (1);
     g.stretch_order = 2;
     engine.trace ('vfill');
     engine.accum (new BoxGlue (g));
@@ -1066,7 +1066,7 @@ register_command ('vss', function cmd_vss (engine) {
 	return; // command will be reread after this graf is finished.
 
     var g = new Glue ();
-    g.stretch.set_to (Scaled.new_from_parts__II_S (1, 0));
+    g.stretch_S = nlib.scale__I_S (1);
     g.stretch_order = 1;
     g.shrink.set_to (Scaled.new_from_parts__II_S (1, 0));
     g.shrink_order = 1;
@@ -1079,7 +1079,7 @@ register_command ('vfilneg', function cmd_vfilneg (engine) {
 	return; // command will be reread after this graf is finished.
 
     var g = new Glue ();
-    g.stretch.set_to (Scaled.new_from_parts__II_S (-1, 0));
+    g.stretch_S = nlib.scale__I_S (-1);
     g.stretch_order = 1;
     engine.trace ('vfilneg');
     engine.accum (new BoxGlue (g));

@@ -980,7 +980,7 @@ var Engine = (function Engine_closure () {
 	    this.accum (hb);
 
 	    var g = new Glue ();
-	    g.stretch.set_to (Scaled.new_from_parts__II_S (1, 0));
+	    g.stretch_S = nlib.scale__I_S (1);
 	    g.stretch_order = 2;
 	    this.accum (new BoxGlue (g));
 
@@ -1709,7 +1709,7 @@ var Engine = (function Engine_closure () {
 
 	if (this.scan_keyword ('plus')) {
 	    t = this.scan_dimen (mumode, true);
-	    g.stretch = t[0];
+	    g.stretch_S = t[0].sp.value_S;
 	    g.stretch_order = t[1];
 	}
 

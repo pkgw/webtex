@@ -93,6 +93,17 @@ var nlib = (function nlib_closure () {
     }
     nlib.from_parts__II_S = from_parts__II_S;
 
+    function parse__O_S (text) {
+	var value_S = parseInt (text, 10);
+
+	if (Math.abs (value_S) <= SC_MAX)
+	    return value_S;
+
+	throw new TexRuntimeError ('out-of-range scaled value %d', value_S);
+    }
+    nlib.parse__O_S = parse__O_S;
+
+
 
     function div (a, b) {
 	// This function is used in a variety of contexts so it is special in
@@ -119,7 +130,7 @@ var nlib = (function nlib_closure () {
     function nx_plus_y__ISS_S (n_I, x_S, y_S) {
 	return mult_and_add__ISSS_S (n_I, x_S, y_S, SC_MAX - 1);
     }
-
+    nlib.nx_plus_y__ISS_S = nx_plus_y__ISS_S;
 
     function xn_over_d__ISI_SS (n_I, x_S, d_I) {
 	// returns: [result_S, remainder_S]
@@ -143,7 +154,7 @@ var nlib = (function nlib_closure () {
 	    return [w, v % d_I];
 	return [-w, -(v % d_I)];
     }
-
+    nlib.xn_over_d__ISI_SS = xn_over_d__ISI_SS;
 
     function x_over_n__SI_SS (x_S, n_I) {
 	// returns: [x/n, remainder]
@@ -176,7 +187,7 @@ var nlib = (function nlib_closure () {
 
 	return [rv_S, rem_S];
     }
-
+    nlib.x_over_n__SI_SS = x_over_n__SI_SS;
 
     function from_parts_product__IIII_S (num_I, denom_I, nonfrac_I, frac_I) {
 	// equivalent to `from_parts__II_S (nonfrac_I, frac_I) *
@@ -208,7 +219,7 @@ var nlib = (function nlib_closure () {
     }
 
 
-    function toString__S_O (value_S) {
+    function to_texstr__S_O (value_S) {
 	// Tex always shows at least 1 decimal place, and more if needed.
 	var text = unscale__S_N (value_S).toFixed (7);
 
@@ -220,7 +231,7 @@ var nlib = (function nlib_closure () {
 
 	return text + 'pt';
     }
-    nlib.toString__S_O = toString__S_O;
+    nlib.to_texstr__S_O = to_texstr__S_O;
 
     return nlib;
 }) ();

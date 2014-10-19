@@ -140,7 +140,7 @@ var HBox = (function HBox_closure () {
 	// T:TP 649
 
 	var nat_width_S = nlib.Zero_S;
-	var stretches = [0, 0, 0, 0];
+	var stretches_S = [0, 0, 0, 0];
 	var shrinks = [0, 0, 0, 0];
 	var height_S = nlib.Zero_S;
 	var depth_S = nlib.Zero_S;
@@ -157,7 +157,7 @@ var HBox = (function HBox_closure () {
 	    } else if (item instanceof BoxGlue) {
 		var g = item.amount;
 		nat_width_S += g.amount.sp.value_S;
-		stretches[g.stretch_order] += g.stretch.sp.value_S;
+		stretches_S[g.stretch_order] += g.stretch_S;
 		shrinks[g.shrink_order] += g.shrink.sp.value_S;
 	    }
 	}
@@ -194,17 +194,17 @@ var HBox = (function HBox_closure () {
 	    // We're stretching the box.
 	    this.width_S = nat_width_S + setdelta;
 
-	    if (stretches[3] != 0)
+	    if (stretches_S[3] != 0)
 		this.glue_state = 4;
-	    else if (stretches[2] != 0)
+	    else if (stretches_S[2] != 0)
 		this.glue_state = 3;
-	    else if (stretches[1] != 0)
+	    else if (stretches_S[1] != 0)
 		this.glue_state = 2;
 	    else
 		this.glue_state = 1;
 
 	    // Note: here, TeX does indeed use floating-point math.
-	    this.glue_set = (1.0 * stretches[this.glue_state - 1]) / setdelta;
+	    this.glue_set = (1.0 * stretches_S[this.glue_state - 1]) / setdelta;
 	} else {
 	    // We're shrinking it.
 	    this.width_S = nat_width_S - setdelta;
@@ -252,7 +252,7 @@ var HBox = (function HBox_closure () {
 
 		if (gs > 0) {
 		    if (g.stretch_order == gs - 1)
-			dx += gr * g.stretch.sp.value_S;
+			dx += gr * g.stretch_S;
 		} else {
 		    if (g.shrink_order == -gs - 1)
 			dx += gr * g.shrink.sp.value_S;
@@ -289,7 +289,7 @@ var VBox = (function VBox_closure () {
 
     proto.set_glue = function VBox_set_glue (engine, is_exact, spec) {
 	var nat_height_S = 0;
-	var stretches = [0, 0, 0, 0];
+	var stretches_S = [0, 0, 0, 0];
 	var shrinks = [0, 0, 0, 0];
 	var width_S = nlib.Zero_S;
 	var prev_depth_S = nlib.Zero_S;
@@ -307,7 +307,7 @@ var VBox = (function VBox_closure () {
 	    } else if (item instanceof BoxGlue) {
 		var g = item.amount;
 		nat_height_S += g.amount.sp.value_S + prev_depth_S;
-		stretches[g.stretch_order] += g.stretch.sp.value_S;
+		stretches_S[g.stretch_order] += g.stretch_S;
 		shrinks[g.shrink_order] += g.shrink.sp.value_S;
 		prev_depth_S = nlib.Zero_S;
 	    }
@@ -345,16 +345,16 @@ var VBox = (function VBox_closure () {
 	    // We're stretching the box.
 	    this.height_S = nat_height_S + setdelta;
 
-	    if (stretches[3] != 0)
+	    if (stretches_S[3] != 0)
 		this.glue_state = 4;
-	    else if (stretches[2] != 0)
+	    else if (stretches_S[2] != 0)
 		this.glue_state = 3;
-	    else if (stretches[1] != 0)
+	    else if (stretches_S[1] != 0)
 		this.glue_state = 2;
 	    else
 		this.glue_state = 1;
 
-	    this.glue_set = (1.0 * stretches[this.glue_state - 1]) / setdelta;
+	    this.glue_set = (1.0 * stretches_S[this.glue_state - 1]) / setdelta;
 	} else {
 	    // We're shrinking it.
 	    this.height_S = nat_height_S - setdelta;
@@ -426,7 +426,7 @@ var VBox = (function VBox_closure () {
 
 		if (gs > 0) {
 		    if (g.stretch_order == gs - 1)
-			dy += gr * g.stretch.sp.value_S;
+			dy += gr * g.stretch_S;
 		} else {
 		    if (g.shrink_order == -gs - 1)
 			dy += gr * g.shrink.sp.value_S;

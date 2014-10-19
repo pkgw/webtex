@@ -573,9 +573,11 @@ var SpacerCommand = (function SpacerCommand_closure () {
 		    g.amount.set_to (f.get_dimen (7));
 		else
 		    g.amount.set_to (f.get_dimen (2));
-		g.stretch.set_to (f.get_dimen (3));
+
+		g.stretch_S = f.get_dimen (3).sp.value_S;
+		g.stretch_S = nlib.xn_over_d__ISI_SS (sf, g.stretch_S, 1000)[0];
+
 		g.shrink.set_to (f.get_dimen (4));
-		g.stretch.set_to (g.stretch.sp.times_n_over_d (sf, 1000)[0]);
 		g.shrink.set_to (g.shrink.sp.times_n_over_d (1000, sf)[0]);
 	    }
 	}
