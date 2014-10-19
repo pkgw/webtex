@@ -193,8 +193,11 @@ var nlib = (function nlib_closure () {
     function from_parts_product__IIII_S (num_I, denom_I, nonfrac_I, frac_I) {
 	// equivalent to `from_parts__II_S (nonfrac_I, frac_I) *
 	// (num_I/denom_I)` with better precision than you'd get naively.
+	//
+	// From T:TP 458. Knuth's "cur_val" and "f" are "nonfrac_I" and
+	// "frac_I", respectively.
 
-	var tmp_SS = xn_over_d__ISI_SS (num_I, scale__I_S (nonfrac_I), denom_I);
+	var tmp_SS = xn_over_d__ISI_SS (num_I, from_raw__I_S (nonfrac_I), denom_I);
 	var result_S = tmp_SS[0], remainder_S = tmp_SS[1];
 	frac_I = div (num_I * frac_I + SC_UNITY * remainder_S, denom_I);
 	nonfrac_I = result_S + div (frac_I, SC_UNITY);
@@ -212,12 +215,14 @@ var nlib = (function nlib_closure () {
 
 	return div (a + 1, 2);
     }
+    nlib.from_decimals__O_S = from_decimals__O_S;
 
 
     function times_parts__SII_S (x_S, nonfrac_I, frac_I) {
 	var scfrac_S = xn_over_d__ISI_SS (frac_I, x_S, SC_UNITY)[0];
 	return nx_plus_y__ISS_S (nonfrac_I, x_S, scfrac_S);
     }
+    nlib.times_parts__SII_S = times_parts__SII_S;
 
 
     function to_texstr__S_O (value_S) {

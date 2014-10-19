@@ -32,8 +32,10 @@ var TexInt = (function TexInt_closure () {
 	return this.value_I;
     };
 
-    proto.as_scaled = function TexInt_as_scaled () {
-	return null;
+    proto.as_scaled__S = function TexInt_as_scaled__S () {
+	// typeof NaN is 'number' and typeof null is 'object', so undefined
+	// seems better just in case.
+	return undefined;
     };
 
     proto.as_glue = function TexInt_as_glue () {
@@ -235,8 +237,8 @@ var Scaled = (function Scaled_closure () {
 	return this.value_S; // Yes, this is correct.
     };
 
-    proto.as_scaled = function Scaled_as_scaled () {
-	return this; // NOTE: ok since Scaleds are immutable.
+    proto.as_scaled__S = function Scaled_as_scaled__S () {
+	return this.value_S;
     };
 
     proto.as_glue = function Scaled_as_glue () {
@@ -293,15 +295,9 @@ var Dimen = (function Dimen_closure () {
 	return d;
     };
 
-    Dimen.new_product = function Dimen_new_product (k, x) {
-	// k: tex-int
-	// x: Scaled
-	k = nlib.maybe_unbox__O_I (k);
-	if (!(x instanceof Scaled))
-	    throw new TexInternalError ('expected Scaled value, got %o', x);
-
+    Dimen.new_product__IS_O = function Dimen_new_product__IS_O (k_I, x_S) {
 	var d = new Dimen ();
-	d.sp_S = nlib.nx_plus_y__ISS_S (k, x.value_S, nlib.Zero_S);
+	d.sp_S = nlib.nx_plus_y__ISS_S (k_I, x_S, nlib.Zero_S);
 	return d;
     };
 
@@ -339,8 +335,8 @@ var Dimen = (function Dimen_closure () {
 	return this.sp_S; // Yes, this is correct.
     };
 
-    proto.as_scaled = function Dimen_as_scaled () {
-	return new Scaled (this.sp_S);
+    proto.as_scaled__S = function Dimen_as_scaled__S () {
+	return this.sp_S;
     };
 
     proto.as_glue = function Dimen_as_glue () {
@@ -359,7 +355,7 @@ var Dimen = (function Dimen_closure () {
 
     proto.advance = function Dimen_advance (other) {
 	var d = new Dimen ();
-	d.sp_S += other.as_scaled ().value_S;
+	d.sp_S += other.as_scaled__S ();
 	return d;
     };
 
@@ -453,8 +449,8 @@ var Glue = (function Glue_closure () {
 	return this.amount_S; // Yes, this is correct.
     };
 
-    proto.as_scaled = function Glue_as_scaled () {
-	return new Scaled (this.amount_S);
+    proto.as_scaled__S = function Glue_as_scaled__S () {
+	return this.amount_S;
     };
 
     proto.as_glue = function Glue_as_glue () {

@@ -44,12 +44,11 @@ var Value = (function Value_closure () {
 	throw new TexInternalError ('not implemented Value.as_int__I');
     };
 
-    proto.as_scaled = function Value_as_scaled () {
-	// Returns a Scaled that this value is equivalent to, or null if such
-	// a conversion is not allowed. Note that Scaleds are not exposed to
-	// TeX programs; they are always wrapped by Dimens. Currently this is
-	// only used in Engine.scan_dimen and may be superfluous.
-	throw new TexInternalError ('not implemented Value.as_scaled');
+    proto.as_scaled__S = function Value_as_scaled__S () {
+	// Returns a scaled that this value is equivalent to, or null if such
+	// a conversion is not allowed. Currently this is only used in
+	// Engine.scan_dimen and may be superfluous.
+	throw new TexInternalError ('not implemented Value.as_scaled__S');
     };
 
     proto.as_glue = function Value_as_glue () {
@@ -262,11 +261,11 @@ var Command = (function Command_closure () {
 	return v.get (engine).as_int__I ();
     };
 
-    proto.as_scaled = function Command_as_scaled (engine) {
+    proto.as_scaled__S = function Command_as_scaled__S (engine) {
 	var v = this.as_valref (engine);
 	if (v == null)
-	    return null;
-	return v.get (engine).as_scaled ();
+	    return undefined; // see comment in TexInt.as_scaled__S
+	return v.get (engine).as_scaled__S ();
     };
 
     proto.as_glue = function Command_as_glue (engine) {

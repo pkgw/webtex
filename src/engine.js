@@ -1543,21 +1543,26 @@ var Engine = (function Engine_closure () {
     };
 
     proto.scan_dimen = function Engine_scan_dimen (mumode, infmode) {
-	/* `infmode` says whether infinities are allowed. If true, the return
-	 * value is [dimen, infinity_order] rather than just the dimension. */
-	var t = this._scan_signs ();
-	var negfactor = t[0], tok = t[1], inf_order = 0, val = null,
-	    frac_I = 0, nonfrac_I = null;
+	// `infmode` says whether infinities are allowed. If true, the return
+	// value is [dimen, infinity_order] rather than just the dimension.
+
+	var tmp = this._scan_signs ();
+	var negfactor_I = tmp[0];
+	var tok = tmp[1];
+	var inf_order = 0;
+	var val = null;
+	var frac_I = 0;
+	var nonfrac_I = null;
 
 	var vt = tok.to_cmd (this).get_valtype ();
 
 	if (vt == T_DIMEN || vt == T_GLUE) {
-	    var v = tok.to_cmd (this).as_scaled (this);
+	    var v_S = tok.to_cmd (this).as_scaled__S (this);
 
 	    if (mumode) {
 		throw new TexRuntimeError ('not implemented');
 	    } else {
-		var d = Dimen.new_product (negfactor, v);
+		var d = Dimen.new_product__IS_O (negfactor_I, v_S);
 		if (infmode)
 		    return [d, 0];
 		return d;
@@ -1576,7 +1581,7 @@ var Engine = (function Engine_closure () {
 		this.push_back (tok);
 		nonfrac_I = this.scan_int__I ();
 		if (nonfrac_I < 0) {
-		    negfactor = -negfactor;
+		    negfactor_I = -negfactor_I;
 		    nonfrac_I = -nonfrac_I;
 		}
 		tok = this.next_x_tok ();
@@ -1602,12 +1607,12 @@ var Engine = (function Engine_closure () {
 		    }
 		    digits.push (v);
 		}
-		frac_I = Scaled.new_from_decimals (digits);
+		frac_I = nlib.from_decimals__O_S (digits); // Yes, this is correct.
 	    }
 	}
 
 	if (nonfrac_I < 0) {
-	    negfactor = -negfactor;
+	    negfactor_I = -negfactor_I;
 	    nonfrac_I = -nonfrac_I;
 	}
 
@@ -1615,11 +1620,11 @@ var Engine = (function Engine_closure () {
 	    throw new TexRuntimeError ('not implemented true-dimens');
 
 	tok = this.chomp_spaces ();
-	var val = tok.to_cmd (this).as_scaled (this);
-	var result = null;
+	var val_S = tok.to_cmd (this).as_scaled__S (this);
+	var result_S = null;
 
-	if (val != null) {
-	    result = val.times_parts (nonfrac_I, frac_I);
+	if (val_S != null) {
+	    result_S = nlib.times_parts__SII_S (val_S, nonfrac_I, frac_I);
 	} else {
 	    this.push_back (tok);
 
@@ -1631,23 +1636,23 @@ var Engine = (function Engine_closure () {
 			throw new TexSyntaxError ('illegal infinity value ' +
 						  '"fillll" or higher');
 		}
-		result = Scaled.new_from_parts__II_S (nonfrac_I, frac_I);
+		result_S = nlib.from_parts__II_S (nonfrac_I, frac_I);
 	    } else if (mumode) {
 		if (this.scan_keyword ('mu'))
-		    result = Scaled.new_from_parts__II_S (nonfrac_I, frac_I);
+		    result_S = nlib.from_parts__II_S (nonfrac_I, frac_I);
 		else
 		    throw new TexRuntimeError ('this quantity must have ' +
 					       'dimensions of "mu"');
 	    } else if (this.scan_keyword ('em')) {
-		v = new Scaled (this.get_misc ('cur_font').get_dimen__N_S (6));
-		result = v.times_parts (nonfrac_I, frac_I);
+		result_S = nlib.times_parts__SII_S (this.get_misc ('cur_font').get_dimen__N_S (6),
+						    nonfrac_I, frac_I);
 	    } else if (this.scan_keyword ('ex')) {
-		v = new Scaled (this.get_misc ('cur_font').get_dimen__N_S (5));
-		result = v.times_parts (nonfrac_I, frac_I);
+		result_S = nlib.times_parts__SII_S (this.get_misc ('cur_font').get_dimen__N_S (5),
+						    nonfrac_I, frac_I);
 	    } else if (this.scan_keyword ('sp')) {
-		result = new Scaled (nonfrac_I);
+		result_S = nlib.from_raw__I_S (nonfrac_I);
 	    } else if (this.scan_keyword ('pt')) {
-		result = Scaled.new_from_parts__II_S (nonfrac_I, frac_I);
+		result_S = nlib.from_parts__II_S (nonfrac_I, frac_I);
 	    } else {
 		var num, denom;
 
@@ -1678,17 +1683,17 @@ var Engine = (function Engine_closure () {
 					      'didn\'t find it; next is %o', tok);
 		}
 
-		result = Scaled.new_parts_product__IIII_S (num, denom, nonfrac_I, frac_I);
+		result_S = nlib.from_parts_product__IIII_S (num, denom, nonfrac_I, frac_I);
 	    }
 	}
 
 	// TODO this isn't always done.
 	this.scan_one_optional_space ();
 
-	result = Dimen.new_product (negfactor, result);
+	var dresult = Dimen.new_product__IS_O (negfactor_I, result_S);
 	if (infmode)
-	    return [result, inf_order];
-	return result;
+	    return [dresult, inf_order];
+	return dresult;
     };
 
     proto.scan_glue = function Engine_scan_glue (mumode) {
