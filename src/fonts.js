@@ -5,10 +5,10 @@ var FontMetrics = (function FontMetrics_closure () {
     // metrics for the null font, returning 0 for everything.
 
     function FontMetrics () {
-	this.font_dimens = [];
+	this.font_dimens_S = [];
 
 	for (var i = 0; i < 7; i++)
-	    this.font_dimens.push (new Scaled (0));
+	    this.font_dimens_S.push (nlib.Zero_S);
     }
 
     var proto = FontMetrics.prototype;
@@ -120,7 +120,7 @@ var TfmMetrics = (function TfmMetrics_closure () {
 	this.ord_ics = new Array (256);
 	this.ord_tags = new Array (256);
 	this.ord_rembytes = new Array (256);
-	this.font_dimens = [];
+	this.font_dimens_S = [];
 
 	//this.ord_tags = new Array (256); cf. T:TP 544.
 	//this.ord_remainder = new Array (256);
@@ -217,9 +217,9 @@ var TfmMetrics = (function TfmMetrics_closure () {
 	// these out on init.
 
 	for (var i = 0; i < num_fps; i++)
-	    this.font_dimens.push (this.fw2s (dv.getUint32 (fp_ofs + 4 * i, false)));
+	    this.font_dimens_S.push (this.fw2s (dv.getUint32 (fp_ofs + 4 * i, false)).value_S);
 	for (var i = num_fps; i < 7; i++)
-	    this.font_dimens.push (new Scaled (0));
+	    this.font_dimens_S.push (nlib.Zero_S);
     }
 
     inherit (TfmMetrics, FontMetrics);
@@ -302,9 +302,9 @@ var Font = (function Font_closure () {
 
 	this.dimens = [];
 
-	for (var i = 0; i < this.metrics.font_dimens.length; i++) {
+	for (var i = 0; i < this.metrics.font_dimens_S.length; i++) {
 	    this.dimens.push (new Dimen ());
-	    this.dimens[i].set_to (this.metrics.font_dimens[i]);
+	    this.dimens[i].set_to (new Scaled (this.metrics.font_dimens_S[i]));
 	}
 
 	engine.set_font (ident, this);
