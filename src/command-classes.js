@@ -375,7 +375,7 @@ var MathShiftCommand = (function MathShiftCommand_closure () {
 	    box.set_glue (engine, false, new Dimen ());
 	    box = new CanvasBox (box); // our magic!
 
-	    var ms_S = engine.get_parameter (T_DIMEN, 'mathsurround').sp.value_S;
+	    var ms_S = engine.get_parameter (T_DIMEN, 'mathsurround').sp_S;
 	    engine.accum (new MathDelim (ms_S, false));
 	    engine.accum (box);
 	    engine.accum (new MathDelim (ms_S, true));
@@ -570,14 +570,14 @@ var SpacerCommand = (function SpacerCommand_closure () {
 		var g = new Glue ();
 		var f = engine.get_misc ('cur_font');
 		if (sf >= 2000)
-		    g.amount_S = f.get_dimen (7).sp.value_S;
+		    g.amount_S = f.get_dimen (7).sp_S;
 		else
-		    g.amount_S = f.get_dimen (2).sp.value_S;
+		    g.amount_S = f.get_dimen (2).sp_S;
 
-		g.stretch_S = f.get_dimen (3).sp.value_S;
+		g.stretch_S = f.get_dimen (3).sp_S;
 		g.stretch_S = nlib.xn_over_d__ISI_SS (sf, g.stretch_S, 1000)[0];
 
-		g.shrink_S = f.get_dimen (4).sp.value_S;
+		g.shrink_S = f.get_dimen (4).sp_S;
 		g.shrink_S = nlib.xn_over_d__ISI_SS (1000, g.shrink_S, sf)[0];
 	    }
 	}

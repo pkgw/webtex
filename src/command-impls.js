@@ -751,7 +751,7 @@ register_command ('wd', (function WdCommand_closure () {
 	// Valref is not so important.
 	var reg = engine.scan_char_code__I ();
 	engine.scan_optional_equals ();
-	var width_S = engine.scan_dimen ().sp.value_S;
+	var width_S = engine.scan_dimen ().sp_S;
 	var box = engine.get_register (T_BOX, reg);
 
 	if (box.btype == BT_VOID) {
@@ -787,7 +787,7 @@ register_command ('ht', (function HtCommand_closure () {
 	// Valref is not so important.
 	var reg = engine.scan_char_code__I ();
 	engine.scan_optional_equals ();
-	var height_S = engine.scan_dimen ().sp.value_S;
+	var height_S = engine.scan_dimen ().sp_S;
 	var box = engine.get_register (T_BOX, reg);
 
 	if (box.btype == BT_VOID) {
@@ -823,7 +823,7 @@ register_command ('dp', (function DpCommand_closure () {
 	// Valref is not so important.
 	var reg = engine.scan_char_code__I ();
 	engine.scan_optional_equals ();
-	var depth_S = engine.scan_dimen ().sp.value_S;
+	var depth_S = engine.scan_dimen ().sp_S;
 	var box = engine.get_register (T_BOX, reg);
 
 	if (box.btype == BT_VOID) {
@@ -866,11 +866,11 @@ register_command ('hrule', function cmd_hrule (engine) {
 
     while (true) {
 	if (engine.scan_keyword ('width'))
-	    rule.width_S = engine.scan_dimen ().sp.value_S;
+	    rule.width_S = engine.scan_dimen ().sp_S;
 	else if (engine.scan_keyword ('height'))
-	    rule.height_S = engine.scan_dimen ().sp.value_S;
+	    rule.height_S = engine.scan_dimen ().sp_S;
 	else if (engine.scan_keyword ('depth'))
-	    rule.depth_S = engine.scan_dimen ().sp.value_S;
+	    rule.depth_S = engine.scan_dimen ().sp_S;
 	else
 	    break;
     }
@@ -889,11 +889,11 @@ register_command ('vrule', function cmd_vrule (engine) {
 
     while (true) {
 	if (engine.scan_keyword ('width'))
-	    rule.width_S = engine.scan_dimen ().sp.value_S;
+	    rule.width_S = engine.scan_dimen ().sp_S;
 	else if (engine.scan_keyword ('height'))
-	    rule.height_S = engine.scan_dimen ().sp.value_S;
+	    rule.height_S = engine.scan_dimen ().sp_S;
 	else if (engine.scan_keyword ('depth'))
-	    rule.depth_S = engine.scan_dimen ().sp.value_S;
+	    rule.depth_S = engine.scan_dimen ().sp_S;
 	else
 	    break;
     }
@@ -1122,7 +1122,7 @@ register_command ('penalty', function cmd_penalty (engine) {
 
 
 function _cmd_box_shift (engine, desc, negate) {
-    var amount_S = engine.scan_dimen ().sp.value_S;
+    var amount_S = engine.scan_dimen ().sp_S;
     engine.trace ('%s next box by %S ...', desc, amount_S);
 
     function shift_the_box (engine, box) {
@@ -1156,7 +1156,7 @@ register_command ('moveleft', function cmd_moveleft (engine) {
 
 
 register_command ('kern', function cmd_kern (engine) {
-    var amount_S = engine.scan_dimen ().sp.value_S;
+    var amount_S = engine.scan_dimen ().sp_S;
     engine.trace ('kern %S', amount_S);
     engine.accum (new Kern (amount_S));
 });

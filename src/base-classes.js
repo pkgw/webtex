@@ -93,7 +93,7 @@ var Value = (function Value_closure () {
 		return value;
 	    if (typeof value == 'number') {
 		var d = new Dimen ();
-		d.sp.value_S = value;
+		d.sp_S = value;
 		return d;
 	    }
 	    throw new TexInternalError ('value is not dimen: %o', value);

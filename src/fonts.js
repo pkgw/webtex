@@ -502,7 +502,7 @@ register_command ('font', (function FontCommand_closure () {
 	var s = -1000;
 
 	if (engine.scan_keyword ('at')) {
-	    s = engine.scan_dimen ().sp.value_S;
+	    s = engine.scan_dimen ().sp_S;
 	    if (s <= 0) // FIXME: || s > SC_MAX
 		throw new TexRuntimeError ('illegal font size %o', s);
 	} else if (engine.scan_keyword ('scaled')) {

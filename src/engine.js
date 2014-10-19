@@ -779,7 +779,7 @@ var Engine = (function Engine_closure () {
 
 	if (indent) {
 	    var b = new HBox ();
-	    b.width_S = this.get_parameter (T_DIMEN, 'parindent').sp.value_S;
+	    b.width_S = this.get_parameter (T_DIMEN, 'parindent').sp_S;
 	    b.set_glue (this, false, new Dimen ());
 	    this.accum (b);
 	}
@@ -976,7 +976,7 @@ var Engine = (function Engine_closure () {
 	    this.trace ('... forcing page build');
 
 	    var hb = new HBox ();
-	    hb.width_S = this.get_parameter (T_DIMEN, 'hsize').sp.value_S;
+	    hb.width_S = this.get_parameter (T_DIMEN, 'hsize').sp_S;
 	    this.accum (hb);
 
 	    var g = new Glue ();
@@ -1639,10 +1639,10 @@ var Engine = (function Engine_closure () {
 		    throw new TexRuntimeError ('this quantity must have ' +
 					       'dimensions of "mu"');
 	    } else if (this.scan_keyword ('em')) {
-		v = this.get_misc ('cur_font').get_dimen (6).sp;
+		v = new Scaled (this.get_misc ('cur_font').get_dimen (6).sp_S);
 		result = v.times_parts (nonfrac_I, frac_I);
 	    } else if (this.scan_keyword ('ex')) {
-		v = this.get_misc ('cur_font').get_dimen (5).sp;
+		v = new Scaled (this.get_misc ('cur_font').get_dimen (5).sp_S);
 		result = v.times_parts (nonfrac_I, frac_I);
 	    } else if (this.scan_keyword ('sp')) {
 		result = new Scaled (nonfrac_I);
@@ -1705,17 +1705,17 @@ var Engine = (function Engine_closure () {
 
 	var g = new Glue ();
 	this.push_back (tok);
-	g.amount_S = negfactor * this.scan_dimen (mumode, false).sp.value_S;
+	g.amount_S = negfactor * this.scan_dimen (mumode, false).sp_S;
 
 	if (this.scan_keyword ('plus')) {
 	    t = this.scan_dimen (mumode, true);
-	    g.stretch_S = t[0].sp.value_S;
+	    g.stretch_S = t[0].sp_S;
 	    g.stretch_order = t[1];
 	}
 
 	if (this.scan_keyword ('minus')) {
 	    t = this.scan_dimen (mumode, true);
-	    g.shrink_S = t[0].sp.value_S;
+	    g.shrink_S = t[0].sp_S;
 	    g.shrink_order = t[1];
 	}
 
@@ -2319,7 +2319,7 @@ var Engine = (function Engine_closure () {
 
 	var o = 0;
 	if (this.mode () == M_DMATH)
-	    o = this.get_parameter (T_DIMEN, 'displayindent').sp.value_S;
+	    o = this.get_parameter (T_DIMEN, 'displayindent').sp_S;
 
 	// TTP 801
 	// TTP 804

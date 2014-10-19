@@ -278,7 +278,7 @@ var Dimen = (function Dimen_closure () {
 
     // These objects are mutable.
     function Dimen () {
-	this.sp = new Scaled (0);
+	this.sp_S = nlib.Zero_S;
     }
 
     inherit (Dimen, Value);
@@ -289,7 +289,7 @@ var Dimen = (function Dimen_closure () {
 	    throw new TexInternalError ('expected Scaled value, got %o', sp);
 
 	var d = new Dimen ();
-	d.sp = sp;
+	d.sp_S = sp.value_S;
 	return d;
     };
 
@@ -301,57 +301,46 @@ var Dimen = (function Dimen_closure () {
 	    throw new TexInternalError ('expected Scaled value, got %o', x);
 
 	var d = new Dimen ();
-	d.sp = x.times_n_plus_y (k, new Scaled (0));
-	if (Math.abs (d.sp.value_S) > MAX_SCALED)
-	    throw new TexRuntimeError ('dimension out of range: %o', d);
+	d.sp_S = nlib.nx_plus_y__ISS_S (k, x.value_S, nlib.Zero_S);
 	return d;
     };
 
     proto.toString = function Dimen_toString () {
-	return this.sp.asfloat ().toFixed (3) + 'pt';
+	return nlib.unscale__S_N (this.sp_S).toFixed (3) + 'pt';
     };
 
     proto.to_texstr = function Dimen_to_texstr () {
-	// Tex always shows at least 1 decimal place, and more if needed.
-	var text = this.sp.asfloat ().toFixed (7);
-
-	while (text[text.length - 1] == '0') {
-	    if (text[text.length - 2] == '.')
-		break;
-	    text = text.slice (0, -1);
-	}
-
-	return text + 'pt';
+	return nlib.to_texstr__S_O (this.sp_S);
     };
 
     proto.clone = function Dimen_clone () {
 	var d = new Dimen ();
-	d.sp = this.sp.clone ();
+	d.sp_S = this.sp_S;
 	return d;
     };
 
     proto.is_nonzero = function Dimen_is_nonzero () {
-	return this.sp.is_nonzero ();
+	return this.sp_S != 0;
     };
 
     proto.set_to = function Dimen_set_to (val) {
 	if (val instanceof Scaled)
-	    this.sp = val;
+	    this.sp_S = val.value_S;
 	else if (val instanceof Dimen)
-	    this.sp = val.sp;
+	    this.sp_S = val.sp_S;
 	else if (typeof val === 'number')
-	    this.sp.value_S = val;
+	    this.sp_S = val;
 	else
 	    throw new TexInternalError ('expected Scaled or Dimen value, got %o', val);
 	return this;
     };
 
     proto.as_int__I = function Dimen_as_int__I () {
-	return this.sp.as_int__I ();
+	return this.sp_S; // Yes, this is correct.
     };
 
     proto.as_scaled = function Dimen_as_scaled () {
-	return this.sp; // NOTE: ok since Scaleds are immutable.
+	return new Scaled (this.sp_S);
     };
 
     proto.as_glue = function Dimen_as_glue () {
@@ -359,32 +348,32 @@ var Dimen = (function Dimen_closure () {
     };
 
     proto.as_serializable = function Dimen_as_serializable () {
-	return this.sp.as_serializable ();
+	return this.sp_S;
     };
 
     Dimen.deserialize = function Dimen_deserialize (data) {
 	var d = new Dimen ();
-	d.set_to (Scaled.deserialize (data));
+	d.sp_S = nlib.parse__O_S (data);
 	return d;
     };
 
     proto.advance = function Dimen_advance (other) {
 	var d = new Dimen ();
-	d.set_to (d.sp.advance (other.as_scaled ()));
+	d.sp_S += other.as_scaled ().value_S;
 	return d;
     };
 
     proto.product__I_O = function Dimen_product__I_O (k) {
 	k = nlib.maybe_unbox__O_I (k);
 	var d = new Dimen ();
-	d.set_to (this.sp.product__I_O (k));
+	d.sp_S = nlib.nx_plus_y__ISS_S (k, d.sp_S, nlib.Zero_S);
 	return d;
     };
 
     proto.divide__I_O = function Dimen_divide__I_O (k) {
 	k = nlib.maybe_unbox__O_I (k);
 	var d = this.clone ();
-	d.set_to (this.sp.divide__I_O (k));
+	d.sp_S = nlib.x_over_n__SI_SS (d.sp_S, k)[0];
 	return d;
     };
 

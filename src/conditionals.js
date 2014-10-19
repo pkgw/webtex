@@ -341,11 +341,11 @@
 	engine.done_parsing_condition ();
 
 	if (tok.is_other_char (O_LESS))
-	    result = (val1.sp.value_S < val2.sp.value_S);
+	    result = (val1.sp_S < val2.sp_S);
 	else if (tok.is_other_char (O_GREATER))
-	    result = (val1.sp.value_S > val2.sp.value_S);
+	    result = (val1.sp_S > val2.sp_S);
 	else if (tok.is_other_char (O_EQUALS))
-	    result = (val1.sp.value_S == val2.sp.value_S);
+	    result = (val1.sp_S == val2.sp_S);
 	else
 	    throw new TexSyntaxError ('expected <,=,> in \\ifdim but got %o', tok);
 

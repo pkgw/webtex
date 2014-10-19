@@ -167,21 +167,21 @@ var HBox = (function HBox_closure () {
 
 	if (is_exact) {
 	    // We're setting the box to an exact width.
-	    if (spec.sp.value_S > nat_width_S) {
+	    if (spec.sp_S > nat_width_S) {
 		settype = 1;
-		setdelta = spec.sp.value_S - nat_width_S;
-	    } else if (spec.sp.value_S < nat_width_S) {
+		setdelta = spec.sp_S - nat_width_S;
+	    } else if (spec.sp_S < nat_width_S) {
 		settype = 2;
-		setdelta = nat_width_S - spec.sp.value_S;
+		setdelta = nat_width_S - spec.sp_S;
 	    }
 	} else {
 	    // We're adjusting the box's width from its natural value.
-	    if (spec.sp.value_S > 0) {
+	    if (spec.sp_S > 0) {
 		settype = 1;
-		setdelta = spec.sp.value_S;
-	    } else if (spec.sp.value_S < 0) {
+		setdelta = spec.sp_S;
+	    } else if (spec.sp_S < 0) {
 		settype = 2;
-		setdelta = -spec.sp.value_S;
+		setdelta = -spec.sp_S;
 	    }
 	}
 
@@ -318,21 +318,21 @@ var VBox = (function VBox_closure () {
 
 	if (is_exact) {
 	    // We're setting the box to an exact height.
-	    if (spec.sp.value_S > nat_height_S) {
+	    if (spec.sp_S > nat_height_S) {
 		settype = 1;
-		setdelta = spec.sp.value_S - nat_height_S;
-	    } else if (spec.sp.value_S < nat_height_S) {
+		setdelta = spec.sp_S - nat_height_S;
+	    } else if (spec.sp_S < nat_height_S) {
 		settype = 2;
-		setdelta = nat_height_S - spec.sp.value_S;
+		setdelta = nat_height_S - spec.sp_S;
 	    }
 	} else {
 	    // We're adjusting the box's height from its natural value.
-	    if (spec.sp.value_S > 0) {
+	    if (spec.sp_S > 0) {
 		settype = 1;
-		setdelta = spec.sp.value_S;
-	    } else if (spec.sp.value_S < 0) {
+		setdelta = spec.sp_S;
+	    } else if (spec.sp_S < 0) {
 		settype = 2;
-		setdelta = -spec.sp.value_S;
+		setdelta = -spec.sp_S;
 	    }
 	}
 
@@ -375,7 +375,7 @@ var VBox = (function VBox_closure () {
 
 	// Depth is prev_depth, unless \boxmaxdepth makes us shift the
 	// reference point.
-	var bmd_S = engine.get_parameter (T_DIMEN, 'boxmaxdepth').sp.value_S;
+	var bmd_S = engine.get_parameter (T_DIMEN, 'boxmaxdepth').sp_S;
 
 	if (prev_depth_S <= bmd_S) {
 	    this.depth_S = prev_depth_S;
