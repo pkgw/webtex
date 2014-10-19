@@ -85,7 +85,7 @@ var TokenizerInput = (function TokenizerInput_closure () {
 
 	// XXX not so great re: encapsulation
 	var catcodes = this.engine.eqtb._catcodes;
-	var endlinechar = this.engine.get_parameter (T_INT, 'endlinechar').value_I;
+	var endlinechar = this.engine.get_parameter (T_INT, 'endlinechar');
 	var o = this.ordsrc.next (catcodes, endlinechar);
 
 	if (o == EOF) {

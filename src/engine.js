@@ -93,7 +93,7 @@ var EquivTable = (function EquivTable_closure () {
 	    throw new TexRuntimeError ('illegal value type for parameter: %s',
 				       vt_names[valtype]);
 
-	this._parameters[valtype][name] = Value.ensure_boxed (valtype, value);
+	this._parameters[valtype][name] = Value.ensure_unboxed (valtype, value);
 
 	if (global && this.parent != null)
 	    this.parent.set_parameter (valtype, name, value, global);
@@ -506,7 +506,7 @@ var Engine = (function Engine_closure () {
 
     proto._global_flag = function Engine__global_flag () {
 	// TeXBook p. 275
-	var gd = this.get_parameter (T_INT, 'globaldefs').value_I;
+	var gd = this.get_parameter (T_INT, 'globaldefs');
 	if (gd > 0)
 	    return true;
 	if (gd < 0)
@@ -2347,7 +2347,7 @@ var Engine = (function Engine_closure () {
 	};
 
     proto.escapechar = function Engine_escapechar () {
-	return this.get_parameter (T_INT, 'escapechar').value_I;
+	return this.get_parameter (T_INT, 'escapechar');
     };
 
     // Apply all of extensions registered by the various subsystems.

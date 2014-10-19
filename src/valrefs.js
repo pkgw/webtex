@@ -43,10 +43,12 @@ var ParamValref = (function ParamValref_closure () {
     var proto = ParamValref.prototype;
 
     proto.get = function ParamValref_get (engine) {
-	return engine.get_parameter (this.valtype, this.name);
+	var rv = engine.get_parameter (this.valtype, this.name);
+	return Value.ensure_boxed (this.valtype, rv);
     };
 
     proto.set = function ParamValref_set (engine, value) {
+	value = Value.ensure_unboxed (this.valtype, value);
 	engine.set_parameter (this.valtype, this.name, value);
     };
 
