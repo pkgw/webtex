@@ -96,15 +96,6 @@ var TexInt = (function TexInt_closure () {
 	return new TexInt (this.value_I / k >> 0);
     };
 
-    proto.rangecheck = function TexInt_rangecheck (engine, min, max) {
-	if (this.value_I >= min && this.value_I <= max)
-	    return this;
-
-	engine.warn ('expected integer in [%d,%d]; got %d; using 0',
-		     min, max, this.value_I);
-	return TexInt (0);
-    };
-
     return TexInt;
 }) ();
 

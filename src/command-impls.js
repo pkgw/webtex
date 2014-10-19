@@ -76,13 +76,13 @@ register_command ('/', function cmd__fslash_ (engine) {
 
 
 register_command ('char', function cmd__char (engine) {
-    var ord = engine.scan_char_code ();
+    var ord = engine.scan_char_code__I ();
     engine.trace ('char %C', ord);
     engine.push (Token.new_cmd (new GivenCharCommand (ord)));
 });
 
 register_command ('mathchar', function cmd_mathchar (engine) {
-    var ord = engine.scan_int_15bit ();
+    var ord = engine.scan_int_15bit__I ();
     engine.trace ('mathchar %x', ord);
     engine.push (Token.new_cmd (new GivenMathcharCommand (ord)));
 });
@@ -225,7 +225,7 @@ register_command ('string', function cmd_string (engine) {
 
 
 register_command ('number', function cmd_number (engine) {
-    var val = engine.scan_int ().value_I;
+    var val = engine.scan_int__I ();
     engine.trace ('* number %o', val);
     engine.push_string ('' + val);
 });
@@ -271,7 +271,7 @@ register_command ('divide', function cmd_divide (engine) {
     var val = cmd.as_valref (engine); // might eat tokens
     engine.scan_keyword ('by');
     var cur = val.get (engine);
-    var denom = engine.scan_int ();
+    var denom = engine.scan_int__I ();
     engine.trace ('divide %o = %o / %o', cmd, cur, denom);
     val.set (engine, cur.intdivide (denom));
 });
@@ -283,7 +283,7 @@ register_command ('multiply', function cmd_multiply (engine) {
     var val = cmd.as_valref (engine); // might eat tokens
     engine.scan_keyword ('by');
     var cur = val.get (engine);
-    var factor = engine.scan_int ();
+    var factor = engine.scan_int__I ();
     engine.trace ('multiply %o = %o * %o', cmd, cur, factor);
     val.set (engine, cur.intproduct (factor));
 });
@@ -292,7 +292,7 @@ register_command ('multiply', function cmd_multiply (engine) {
 function define_register (name, valtype, engine) {
     var cstok = engine.scan_r_token ();
     engine.scan_optional_equals ();
-    var reg = engine.scan_register_num ();
+    var reg = engine.scan_register_num__I ();
     engine.trace ('%sdef %o -> {\\%s%d}', name, cstok, name, reg);
     cstok.assign_cmd (engine, new GivenRegisterCommand (valtype, name, reg));
 };
@@ -332,9 +332,9 @@ var CharCodeCommand = (function CharCodeCommand_closure () {
     var proto = CharCodeCommand.prototype;
 
     proto.invoke = function CharCodeCommand_invoke (engine) {
-	var ord = engine.scan_char_code ();
+	var ord = engine.scan_char_code__I ();
 	engine.scan_optional_equals ();
-	var code = engine.scan_int ().value_I;
+	var code = engine.scan_int__I ();
 
 	if (code < 0 || code > ct_maxvals[this.codetype])
 	    throw new TexRuntimeException ('illegal value %d for %s', code,
@@ -349,7 +349,7 @@ var CharCodeCommand = (function CharCodeCommand_closure () {
     };
 
     proto.as_valref = function CharCodeCommand_as_valref (engine) {
-	var ord = engine.scan_char_code ();
+	var ord = engine.scan_char_code__I ();
 	return new ConstantValref (T_INT, engine.get_code (this.codetype, ord));
     };
 
@@ -369,7 +369,7 @@ register_command ('delcode', new CharCodeCommand (CT_DELIM, 'delcode'));
 register_command ('chardef', function cmd_chardef (engine) {
     var cstok = engine.scan_r_token ();
     engine.scan_optional_equals ();
-    var ord = engine.scan_char_code ();
+    var ord = engine.scan_char_code__I ();
     engine.trace ('chardef %o -> {inschar %C=%x}', cstok, ord, ord);
     cstok.assign_cmd (engine, new GivenCharCommand (ord));
 });
@@ -378,7 +378,7 @@ register_command ('chardef', function cmd_chardef (engine) {
 register_command ('mathchardef', function cmd_mathchardef (engine) {
     var cstok = engine.scan_r_token ();
     engine.scan_optional_equals ();
-    var val = engine.scan_int ().value_I;
+    var val = engine.scan_int__I ();
     if (val < 0 || val > 0x8000)
 	throw new TexRuntimeError ('need mathcode in [0,0x8000] but got %d', val);
     engine.trace ('mathchardef %o -> {insmathchar %x}', cstok, val);
@@ -541,7 +541,7 @@ register_command ('endgroup', function cmd_endgroup (engine) {
 
 function _cmd_if_boxtype (engine, wanttype) {
     engine.start_parsing_condition ();
-    var reg = engine.scan_char_code ();
+    var reg = engine.scan_char_code__I ();
     engine.done_parsing_condition ();
     var btype = engine.get_register (T_BOX, reg).btype;
     var result = (btype == wanttype);
@@ -634,7 +634,7 @@ register_command ('copy', (function CopyCommand_closure () {
     };
 
     proto.start_box = function CopyCommand_start_box (engine) {
-	var reg = engine.scan_char_code ();
+	var reg = engine.scan_char_code__I ();
 	var box = engine.get_register (T_BOX, reg);
 	engine.trace ('copy box %d', reg);
 	engine.handle_finished_box (box.clone ());
@@ -656,7 +656,7 @@ register_command ('box', (function BoxCommand_closure () {
     };
 
     proto.start_box = function BoxCommand_start_box (engine) {
-	var reg = engine.scan_char_code ();
+	var reg = engine.scan_char_code__I ();
 	var box = engine.get_register (T_BOX, reg);
 	engine.trace ('fetch box %d', reg);
 	engine.set_register (T_BOX, reg, new VoidBox ());
@@ -679,7 +679,7 @@ register_command ('vsplit', (function VsplitCommand_closure () {
     };
 
     proto.start_box = function VsplitCommand_start_box (engine) {
-	var reg = engine.scan_char_code ();
+	var reg = engine.scan_char_code__I ();
 	var box = engine.get_register (T_BOX, reg);
 
 	if (!engine.scan_keyword ('to'))
@@ -749,7 +749,7 @@ register_command ('wd', (function WdCommand_closure () {
     proto.invoke = function WdCommand_invoke (engine) {
 	// NOTE: you can't e.g. do \advance\wd0 so implementing as a settable
 	// Valref is not so important.
-	var reg = engine.scan_char_code ();
+	var reg = engine.scan_char_code__I ();
 	engine.scan_optional_equals ();
 	var width = engine.scan_dimen ();
 	var box = engine.get_register (T_BOX, reg);
@@ -767,7 +767,7 @@ register_command ('wd', (function WdCommand_closure () {
     };
 
     proto.as_valref = function WdCommand_as_valref (engine) {
-	var reg = engine.scan_char_code ();
+	var reg = engine.scan_char_code__I ();
 	var box = engine.get_register (T_BOX, reg);
 	return new ConstantValref (T_DIMEN, box.width);
     };
@@ -785,7 +785,7 @@ register_command ('ht', (function HtCommand_closure () {
     proto.invoke = function HtCommand_invoke (engine) {
 	// NOTE: you can't e.g. do \advance\ht0 so implementing as a settable
 	// Valref is not so important.
-	var reg = engine.scan_char_code ();
+	var reg = engine.scan_char_code__I ();
 	engine.scan_optional_equals ();
 	var height = engine.scan_dimen ();
 	var box = engine.get_register (T_BOX, reg);
@@ -803,7 +803,7 @@ register_command ('ht', (function HtCommand_closure () {
     };
 
     proto.as_valref = function HtCommand_as_valref (engine) {
-	var reg = engine.scan_char_code ();
+	var reg = engine.scan_char_code__I ();
 	var box = engine.get_register (T_BOX, reg);
 	return new ConstantValref (T_DIMEN, box.height);
     };
@@ -821,7 +821,7 @@ register_command ('dp', (function DpCommand_closure () {
     proto.invoke = function DpCommand_invoke (engine) {
 	// NOTE: you can't e.g. do \advance\dp0 so implementing as a settable
 	// Valref is not so important.
-	var reg = engine.scan_char_code ();
+	var reg = engine.scan_char_code__I ();
 	engine.scan_optional_equals ();
 	var depth = engine.scan_dimen ();
 	var box = engine.get_register (T_BOX, reg);
@@ -839,7 +839,7 @@ register_command ('dp', (function DpCommand_closure () {
     };
 
     proto.as_valref = function DpCommand_as_valref (engine) {
-	var reg = engine.scan_char_code ();
+	var reg = engine.scan_char_code__I ();
 	var box = engine.get_register (T_BOX, reg);
 	return new ConstantValref (T_DIMEN, box.depth);
     };
@@ -849,7 +849,7 @@ register_command ('dp', (function DpCommand_closure () {
 
 
 register_command ('setbox', function cmd_setbox (engine) {
-    var reg = engine.scan_char_code ();
+    var reg = engine.scan_char_code__I ();
     engine.scan_optional_equals ();
     engine.trace ('setbox: queue #%d = ...', reg);
     engine.handle_setbox (reg);
@@ -907,7 +907,7 @@ register_command ('unhbox', function cmd_unhbox (engine) {
     if (engine.ensure_horizontal (this))
 	return; // this command will be reread after new paragraph is started.
 
-    var reg = engine.scan_char_code ();
+    var reg = engine.scan_char_code__I ();
     var box = engine.get_register (T_BOX, reg);
 
     if (box.btype == BT_VOID) {
@@ -928,7 +928,7 @@ register_command ('unvbox', function cmd_unvbox (engine) {
     if (engine.ensure_vertical (this))
 	return; // command will be reread after this graf is finished.
 
-    var reg = engine.scan_char_code ();
+    var reg = engine.scan_char_code__I ();
     var box = engine.get_register (T_BOX, reg);
 
     if (box.btype == BT_VOID) {
@@ -949,7 +949,7 @@ register_command ('unhcopy', function cmd_unhcopy (engine) {
     if (engine.ensure_horizontal (this))
 	return; // this command will be reread after new paragraph is started.
 
-    var reg = engine.scan_char_code ();
+    var reg = engine.scan_char_code__I ();
     var box = engine.get_register (T_BOX, reg);
 
     if (box.btype == BT_VOID)
@@ -967,7 +967,7 @@ register_command ('unvcopy', function cmd_unvcopy (engine) {
     if (engine.ensure_vertical (this))
 	return; // command will be reread after this graf is finished.
 
-    var reg = engine.scan_char_code ();
+    var reg = engine.scan_char_code__I ();
     var box = engine.get_register (T_BOX, reg);
 
     if (box.btype == BT_VOID)
@@ -1114,7 +1114,7 @@ register_command ('special', function cmd_special (engine) {
 
 
 register_command ('penalty', function cmd_penalty (engine) {
-    var amount = engine.scan_int ();
+    var amount = engine.scan_int__I ();
     var penalty = new Penalty (amount);
     engine.trace ('penalty %o', amount);
     engine.accum (penalty);
@@ -1191,7 +1191,7 @@ register_command ('shipout', function cmd_shipout (engine) {
 
 
 register_command ('insert', function cmd_insert (engine) {
-    var num = engine.scan_char_code ();
+    var num = engine.scan_char_code__I ();
     if (num == 255)
 	throw new TexRuntimeError ('\\insert255 is forbidden');
 
@@ -1695,7 +1695,7 @@ register_command ('romannumeral', function cmd_romannumeral (engine) {
     // another puzzle: "GFY, DEK."
     var table = ['m', 2, 'd', 5, 'c', 2, 1, 5, 'x', 2, 'v', 5, 'i'];
     var v = 1000;
-    var n = engine.scan_int ().value_I;
+    var n = engine.scan_int__I ();
     var n_orig = n;
     var k = 0, j = 0, u = 0;
     var result = '';
@@ -1889,7 +1889,7 @@ register_command ('show', function cmd_show (engine) {
 });
 
 register_command ('showbox', function cmd_showbox (engine) {
-    var reg = engine.scan_register_num ();
+    var reg = engine.scan_register_num__I ();
     var box = engine.get_register (T_BOX, reg);
     engine.trace ('showbox %d = %U', reg, box);
 });

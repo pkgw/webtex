@@ -1406,7 +1406,7 @@ var Engine = (function Engine_closure () {
 	}
     };
 
-    proto.scan_int = function Engine_scan_int () {
+    proto.scan_int__I = function Engine_scan_int__I () {
 	var t = this._scan_signs ();
 	var negfactor = t[0], tok = t[1];
 
@@ -1419,19 +1419,19 @@ var Engine = (function Engine_closure () {
 		    this.align_state--;
 		else if (tok.is_cat (C_EGROUP))
 		    this.align_state++;
-		return new TexInt (negfactor * tok.ord);
+		return negfactor * tok.ord;
 	    }
 
 	    var csname = tok.name;
 	    if (csname.length == 1)
-		return new TexInt (negfactor * csname.charCodeAt (0));
+		return negfactor * csname.charCodeAt (0);
 
 	    throw new TexSyntaxError ('unhandled alpha number token %o', tok);
 	}
 
 	var v = tok.to_cmd (this).as_int (this);
 	if (v != null)
-	    return v.intproduct (negfactor);
+	    return v.intproduct (negfactor).value_I;
 
 	// Looks like we have a literal integer
 
@@ -1494,35 +1494,42 @@ var Engine = (function Engine_closure () {
 	}
 
 	this.scan_one_optional_space ();
-	return new TexInt (negfactor * val);
+	return negfactor * val;
     };
 
-    proto.scan_char_code = function Engine_scan_char_code () {
-	// note: returns JS integer, not TexInt.
-	return this.scan_int ().rangecheck (this, 0, 255).value_I;
+
+    proto.rangecheck__III_I = function Engine_rangecheck__III_I (value_I, min_I, max_I) {
+	if (value_I >= min_I && value_I <= max_I)
+	    return value_I;
+
+	this.warn ('expected integer in [%d,%d]; got %d; using 0',
+		   min_I, max_I, value_I);
+	return 0;
     };
 
-    proto.scan_register_num = function Engine_scan_register () {
-	// note: returns JS integer, not TexInt.
-	var v = this.scan_int ().value_I;
+    proto.scan_char_code__I = function Engine_scan_char_code__I () {
+	return this.rangecheck__III_I (this.scan_int__I (), 0, 255);
+    };
+
+    proto.scan_register_num__I = function Engine_scan_register_num__I () {
+	var v = this.scan_int__I ();
+
 	if (v < 0 || v > 255)
 	    throw new TexRuntimeError ('illegal register number %d', v);
+
 	return v;
     };
 
-    proto.scan_int_4bit = function Engine_scan_int_4bit () {
-	// note: returns JS integer, not TexInt.
-	return this.scan_int ().rangecheck (this, 0, 15).value_I;
+    proto.scan_int_4bit__I = function Engine_scan_int_4bit__I () {
+	return this.rangecheck__III_I (this.scan_int__I (), 0, 0xF);
     };
 
-    proto.scan_int_15bit = function Engine_scan_int_15bit () {
-	// note: returns JS integer, not TexInt.
-	return this.scan_int ().rangecheck (this, 0, 32767).value_I;
+    proto.scan_int_15bit__I = function Engine_scan_int_15bit__I () {
+	return this.rangecheck__III_I (this.scan_int__I (), 0, 0x7FFF);
     };
 
-    proto.scan_int_27bit = function Engine_scan_int_27bit () {
-	// note: returns JS integer, not TexInt.
-	return this.scan_int ().rangecheck (this, 0, 0x7FFFFFF).value_I;
+    proto.scan_int_27bit__I = function Engine_scan_int_27bit__I () {
+	return this.rangecheck__III_I (this.scan_int__I (), 0, 0x7FFFFFF);
     };
 
     proto.scan_dimen = function Engine_scan_dimen (mumode, infmode) {
@@ -1557,7 +1564,7 @@ var Engine = (function Engine_closure () {
 		nonfrac = 0;
 	    } else {
 		this.push_back (tok);
-		nonfrac = this.scan_int ().value_I;
+		nonfrac = this.scan_int__I ();
 		if (nonfrac < 0) {
 		    negfactor = -negfactor;
 		    nonfrac = -nonfrac;
@@ -1733,7 +1740,7 @@ var Engine = (function Engine_closure () {
 
     proto.scan_valtype = function Engine_scan_valtype (valtype) {
 	if (valtype == T_INT)
-	    return this.scan_int ();
+	    return new TexInt (this.scan_int__I ());
 	if (valtype == T_DIMEN)
 	    // XXX we don't know what to put for infmode.
 	    return this.scan_dimen (false, false);
@@ -1826,7 +1833,7 @@ var Engine = (function Engine_closure () {
 
 
     proto.scan_streamnum = function Engine_scan_streamnum () {
-	var snum = this.scan_int ().value_I;
+	var snum = this.scan_int__I ();
 	if (snum < 0 || snum > 15)
 	    return 16; // NOTE: our little convention
 	return snum;

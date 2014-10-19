@@ -475,7 +475,7 @@ var FontFamilyCommand = (function FontFamilyCommand_closure () {
     proto.assign_flag_mode = AFM_CONSUME;
 
     proto.invoke = function FontFamilyCommand_invoke (engine) {
-	var index = engine.scan_int_4bit ();
+	var index = engine.scan_int_4bit__I ();
 	engine.scan_optional_equals ();
 	var newval = engine.scan_valtype (T_FONT);
 	engine.trace ('%s #%d = %o', this.name, index, newval);
@@ -487,7 +487,7 @@ var FontFamilyCommand = (function FontFamilyCommand_closure () {
     };
 
     proto.as_valref = function FontFamilyCommand_as_valref (engine) {
-	var index = engine.scan_int_4bit ();
+	var index = engine.scan_int_4bit__I ();
 	return new FontFamilyValref (this.style, index);
     };
 
@@ -513,7 +513,7 @@ register_command ('font', (function FontCommand_closure () {
 		throw new TexRuntimeError ('illegal font size %o', s);
 	    s = s.sp.value_S;
 	} else if (engine.scan_keyword ('scaled')) {
-	    s = -engine.scan_int ().value;
+	    s = -engine.scan_int__I ();
 	    if (s >= 0 || s < -32768)
 		throw new TexRuntimeError ('illegal font magnification factor %d', -s);
 	}
@@ -572,7 +572,7 @@ register_command ('fontdimen', (function FontDimenCommand_closure () {
     proto.name = 'fontdimen';
 
     proto.invoke = function FontDimenCommand_invoke (engine) {
-	var num = engine.scan_int ().value_I;
+	var num = engine.scan_int__I ();
 	var tok = engine.next_tok_throw ();
 	var val = tok.to_cmd (engine).as_valref (engine);
 
@@ -593,7 +593,7 @@ register_command ('fontdimen', (function FontDimenCommand_closure () {
     };
 
     proto.as_valref = function FontDimenCommand_as_valref (engine) {
-	var num = engine.scan_int ().value_I;
+	var num = engine.scan_int__I ();
 	var tok = engine.next_tok_throw ();
 	var font = tok.to_cmd (engine).as_valref (engine);
 
@@ -621,7 +621,7 @@ register_command ('skewchar', function cmd_skewchar (engine) {
 
     var font = val.get (engine);
     engine.scan_optional_equals ();
-    var ord = engine.scan_char_code ();
+    var ord = engine.scan_char_code__I ();
     engine.trace ('skewchar %o = %C', font, ord);
     font.skewchar = ord;
     engine.maybe_insert_after_assign_token ();
@@ -638,7 +638,7 @@ register_command ('hyphenchar', function cmd_hyphenchar (engine) {
 
     var font = val.get (engine);
     engine.scan_optional_equals ();
-    var ord = engine.scan_char_code ();
+    var ord = engine.scan_char_code__I ();
     engine.trace ('hyphenchar %o = %C', font, ord);
     font.hyphenchar = ord;
     engine.maybe_insert_after_assign_token ();

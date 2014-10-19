@@ -341,10 +341,10 @@ var mathlib = (function mathlib_closure () {
 	} else if (cmd instanceof GivenMathcharCommand) {
 	    c = cmd.mathchar;
 	} else if (cmd.same_cmd (engine.commands['char'])) {
-	    c = engine.get_code (CT_MATH, engine.scan_char_code ());
+	    c = engine.get_code (CT_MATH, engine.scan_char_code__I ());
 	    check_active = true;
 	} else if (cmd.same_cmd (engine.commands['mathchar'])) {
-	    c = engine.scan_int_15bit ();
+	    c = engine.scan_int_15bit__I ();
 	}
 	// XXX unimplemented: \delimiter case
 
@@ -390,7 +390,7 @@ var mathlib = (function mathlib_closure () {
 	var val = null;
 
 	if (is_radical)
-	    val = engine.scan_int_27bit ();
+	    val = engine.scan_int_27bit__I ();
 	else {
 	    var tok = null; // T:TP 404 -- next non-blank non-relax non-call token:
 

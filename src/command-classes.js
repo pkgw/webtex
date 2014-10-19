@@ -869,7 +869,7 @@ var VariableRegisterCommand = (function VariableRegisterCommand_closure () {
     };
 
     proto.invoke = function VariableRegisterCommand_invoke (engine) {
-	var reg = engine.scan_char_code ();
+	var reg = engine.scan_char_code__I ();
 	var grc = new GivenRegisterCommand (this.valtype, this.name, reg);
 	grc.invoke (engine);
     };
@@ -879,7 +879,7 @@ var VariableRegisterCommand = (function VariableRegisterCommand_closure () {
     };
 
     proto.as_valref = function VariableRegisterCommand_as_valref (engine) {
-	var reg = engine.scan_char_code ();
+	var reg = engine.scan_char_code__I ();
 	return new RegisterValref (this.valtype, reg);
     };
 
