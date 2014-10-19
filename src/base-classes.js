@@ -220,7 +220,7 @@ var Command = (function Command_closure () {
     };
 
     proto.texmeaning = function Command_texmeaning (engine) {
-	return texchr (engine.escapechar ()) + this.name;
+	return texchr (engine.escapechar__I ()) + this.name;
     };
 
 

@@ -506,7 +506,7 @@ var Engine = (function Engine_closure () {
 
     proto._global_flag = function Engine__global_flag () {
 	// TeXBook p. 275
-	var gd = this.get_parameter (T_INT, 'globaldefs');
+	var gd = this.get_parameter__O_I ('globaldefs');
 	if (gd > 0)
 	    return true;
 	if (gd < 0)
@@ -525,6 +525,11 @@ var Engine = (function Engine_closure () {
 
     proto.get_parameter = function Engine_get_parameter (valtype, name) {
 	return this.eqtb.get_parameter (valtype, name);
+    };
+
+    proto.get_parameter__O_I = function Engine_get_parameter__O_I (name) {
+	// Alias to help with naming-convention consistency.
+	return this.eqtb.get_parameter (T_INT, name);
     };
 
     proto.set_parameter = function Engine_set_parameter (valtype, name, value) {
@@ -581,6 +586,11 @@ var Engine = (function Engine_closure () {
 
     proto.get_special_value = function Engine_get_special_value (valtype, name) {
 	return this.special_values[valtype][name];
+    };
+
+    proto.get_special_value__O_I = function Engine_get_special_value__O_I (name) {
+	// Alias to help with naming-convention consistency.
+	return this.special_values[T_INT][name];
     };
 
     proto.set_special_value = function Engine_set_special_value (valtype, name, value) {
@@ -2353,8 +2363,8 @@ var Engine = (function Engine_closure () {
 	    }
 	};
 
-    proto.escapechar = function Engine_escapechar () {
-	return this.get_parameter (T_INT, 'escapechar');
+    proto.escapechar__I = function Engine_escapechar__I () {
+	return this.get_parameter__O_I ('escapechar');
     };
 
     // Apply all of extensions registered by the various subsystems.

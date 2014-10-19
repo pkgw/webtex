@@ -364,7 +364,7 @@ var mathlib = (function mathlib_closure () {
 	    var fam = (c >> 8) % 16;
 
 	    if (c >= 0x7000) {
-		var cf = engine.get_parameter (T_INT, 'fam');
+		var cf = engine.get_parameter__O_I ('fam');
 		if (cf >= 0 && cf <= 15)
 		    fam = cf;
 	    }

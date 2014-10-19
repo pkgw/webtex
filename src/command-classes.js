@@ -557,7 +557,7 @@ var SpacerCommand = (function SpacerCommand_closure () {
 
 	if (engine.mode () == M_HORZ || engine.mode () == M_RHORZ) {
 	    engine.trace ('spacer: h mode, accumed.');
-	    var sf = engine.get_special_value (T_INT, 'spacefactor');
+	    var sf = engine.get_special_value__O_I ('spacefactor');
 	    var xs = engine.get_parameter (T_GLUE, 'xspaceskip');
 	    var ss = engine.get_parameter (T_GLUE, 'spaceskip');
 	    var g = null;
@@ -607,7 +607,7 @@ var InsertLetterCommand = (function InsertLetterCommand_closure () {
 	    // XXX copy-pasted in letter and GivenChar
 	    var mc = engine.get_code (CT_MATH, this.ord);
 	    engine.trace ('math-accum letter %C -> %x', this.ord, mc);
-	    var fam = engine.get_parameter (T_INT, 'fam');
+	    var fam = engine.get_parameter__O_I ('fam');
 	    var node = mathlib.set_math_char (engine, this.ord, mc, fam);
 	    if (node != null) // may get null if character is active.
 		engine.accum (node);
@@ -640,7 +640,7 @@ var InsertOtherCommand = (function InsertOtherCommand_closure () {
 	    // XXX copy-pasted in letter and GivenChar
 	    var mc = engine.get_code (CT_MATH, this.ord);
 	    engine.trace ('math-accum other %C -> %x', this.ord, mc);
-	    var fam = engine.get_parameter (T_INT, 'fam');
+	    var fam = engine.get_parameter__O_I ('fam');
 	    var node = mathlib.set_math_char (engine, this.ord, mc, fam);
 	    if (node != null) // may get null if character is active.
 		engine.accum (node);
@@ -693,7 +693,7 @@ var GivenCharCommand = (function GivenCharCommand_closure () {
 	    // XXX copy-pasted in letter and GivenChar
 	    var mc = engine.get_code (CT_MATH, this.ord);
 	    engine.trace ('math-accum given-char %C -> %x', this.ord, mc);
-	    var fam = engine.get_parameter (T_INT, 'fam');
+	    var fam = engine.get_parameter__O_I ('fam');
 	    var node = mathlib.set_math_char (engine, this.ord, mc, fam);
 	    if (node != null) // may get null if character is active.
 		engine.accum (node);
@@ -723,7 +723,7 @@ var GivenCharCommand = (function GivenCharCommand_closure () {
     };
 
     proto.texmeaning = function GivenCharCommand_texmeaning (engine) {
-	return texchr (engine.escapechar ()) + 'char"' +
+	return texchr (engine.escapechar__I ()) + 'char"' +
 	    this.ord.toString (16).toUpperCase ();
     };
 
@@ -757,7 +757,7 @@ var GivenMathcharCommand = (function GivenMathcharCommand_closure () {
 	    throw new TexRuntimeError ('cannot insert math character in non-math context');
 
 	engine.trace ('given-math %x', this.mathchar);
-	var fam = engine.get_parameter (T_INT, 'fam');
+	var fam = engine.get_parameter__O_I ('fam');
 	var node = mathlib.set_math_char (engine, this.mathchar & 0xFF, this.mathchar, fam);
 	if (node != null) // may get null if character is active.
 	    engine.accum (node);
@@ -780,7 +780,7 @@ var GivenMathcharCommand = (function GivenMathcharCommand_closure () {
     };
 
     proto.texmeaning = function GivenMathcharCommand_texmeaning (engine) {
-	return texchr (engine.escapechar ()) + 'mathchar"' +
+	return texchr (engine.escapechar__I ()) + 'mathchar"' +
 	    this.mathchar.toString (16).toUpperCase ();
     };
 
@@ -838,7 +838,7 @@ var GivenRegisterCommand = (function GivenRegisterCommand_closure () {
     };
 
     proto.texmeaning = function GivenRegisterCommand_texmeaning (engine) {
-	return texchr (engine.escapechar ()) + this.desc +
+	return texchr (engine.escapechar__I ()) + this.desc +
 	    this.register;
     };
 

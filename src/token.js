@@ -61,7 +61,7 @@ var Token = (function Token_closure () {
 	}
 
 	if (this.kind == TK_CSEQ)
-	    return (texchr (engine.escapechar ()) +
+	    return (texchr (engine.escapechar__I ()) +
 		    escape (texchr, this.name) + ' ');
 
 	if (this.kind == TK_PARAM)

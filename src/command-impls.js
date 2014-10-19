@@ -214,7 +214,7 @@ register_command ('string', function cmd_string (engine) {
     }
 
     if (tok.is_cslike ()) { // active chars were handled above
-	var expn = tok.name, esc = engine.escapechar ();
+	var expn = tok.name, esc = engine.escapechar__I ();
 	if (esc >= 0 && esc < 256)
 	    expn = String.fromCharCode (esc) + expn;
     } else
