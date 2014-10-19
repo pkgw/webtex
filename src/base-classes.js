@@ -69,18 +69,18 @@ var Value = (function Value_closure () {
 	throw new TexInternalError ('not implemented Value.advance');
     };
 
-    proto.intproduct = function Value_intproduct (other) {
+    proto.product__I_O = function Value_product__I_O (other) {
 	// Implement \multiply for this value, which is integer
 	// multiplication. `other` should be passed through TexInt.xcheck().
 	// Returns a new multiplied value, because some Values are immutable.
-	throw new TexInternalError ('not implemented Value.intproduct');
+	throw new TexInternalError ('not implemented Value.product__I_O');
     };
 
-    proto.intdivide = function Value_intdivide (other) {
+    proto.divide__I_O = function Value_divide__I_O (other) {
 	// Implement \divide for this value, which is integer division.
 	// `other` should be passed through TexInt.xcheck(). Returns a new
 	// divided value, because some Values are immutable.
-	throw new TexInternalError ('not implemented Value.intdivide');
+	throw new TexInternalError ('not implemented Value.divide__I_O');
     };
 
     // Static functions.

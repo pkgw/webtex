@@ -86,12 +86,12 @@ var TexInt = (function TexInt_closure () {
 	return new TexInt (this.value_I + other.value_I);
     };
 
-    proto.intproduct = function TexInt_intproduct (k) {
+    proto.product__I_O = function TexInt_product__I_O (k) {
 	k = TexInt.xcheck (k);
 	return new TexInt (this.value_I * k);
     };
 
-    proto.intdivide = function TexInt_intdivide (k) {
+    proto.divide__I_O = function TexInt_divide__I_O (k) {
 	k = TexInt.xcheck (k);
 	return new TexInt (this.value_I / k >> 0);
     };
@@ -299,12 +299,12 @@ var Scaled = (function Scaled_closure () {
 	return new Scaled (this.value_S + other.value_S);
     };
 
-    proto.intproduct = function Scaled_intproduct (k) {
+    proto.product__I_O = function Scaled_product__I_O (k) {
 	k = TexInt.xcheck (k);
 	return this.times_parts (k, 0);
     };
 
-    proto.intdivide = function Scaled_intdivide (k) {
+    proto.divide__I_O = function Scaled_divide__I_O (k) {
 	k = TexInt.xcheck (k);
 	return this.clone ().over_n (k)[0];
     };
@@ -416,17 +416,17 @@ var Dimen = (function Dimen_closure () {
 	return d;
     };
 
-    proto.intproduct = function Dimen_intproduct (k) {
+    proto.product__I_O = function Dimen_product__I_O (k) {
 	k = TexInt.xcheck (k);
 	var d = new Dimen ();
-	d.set_to (this.sp.intproduct (k));
+	d.set_to (this.sp.product__I_O (k));
 	return d;
     };
 
-    proto.intdivide = function Dimen_intdivide (k) {
+    proto.divide__I_O = function Dimen_divide__I_O (k) {
 	k = TexInt.xcheck (k);
 	var d = this.clone ();
-	d.set_to (this.sp.intdivide (k));
+	d.set_to (this.sp.divide__I_O (k));
 	return d;
     };
 
@@ -540,21 +540,21 @@ var Glue = (function Glue_closure () {
 	return g;
     };
 
-    proto.intproduct = function Glue_intproduct (k) {
+    proto.product__I_O = function Glue_product__I_O (k) {
 	k = TexInt.xcheck (k);
 	var g = this.clone ();
-	g.amount = this.amount.intproduct (k);
-	g.stretch = this.stretch.intproduct (k);
-	g.shrink = this.shrink.intproduct (k);
+	g.amount = this.amount.product__I_O (k);
+	g.stretch = this.stretch.product__I_O (k);
+	g.shrink = this.shrink.product__I_O (k);
 	return g;
     };
 
-    proto.intdivide = function Glue_intdivide (k) {
+    proto.divide__I_O = function Glue_divide__I_O (k) {
 	k = TexInt.xcheck (k);
 	var g = this.clone ();
-	g.amount = this.amount.intdivide (k);
-	g.stretch = this.stretch.intdivide (k);
-	g.shrink = this.shrink.intdivide (k);
+	g.amount = this.amount.divide__I_O (k);
+	g.stretch = this.stretch.divide__I_O (k);
+	g.shrink = this.shrink.divide__I_O (k);
 	return g;
     };
 

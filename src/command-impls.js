@@ -273,7 +273,7 @@ register_command ('divide', function cmd_divide (engine) {
     var cur = val.get (engine);
     var denom_I = engine.scan_int__I ();
     engine.trace ('divide %o = %o / %o', cmd, cur, denom_I);
-    val.set (engine, cur.intdivide (denom_I));
+    val.set (engine, cur.divide__I_O (denom_I));
 });
 
 
@@ -285,7 +285,7 @@ register_command ('multiply', function cmd_multiply (engine) {
     var cur = val.get (engine);
     var factor_I = engine.scan_int__I ();
     engine.trace ('multiply %o = %o * %o', cmd, cur, factor_I);
-    val.set (engine, cur.intproduct (factor_I));
+    val.set (engine, cur.product__I_O (factor_I));
 });
 
 
@@ -1128,7 +1128,7 @@ function _cmd_box_shift (engine, desc, negate) {
     function shift_the_box (engine, box) {
 	engine.trace ('... finish %s', desc);
 	if (negate)
-	    amount = amount.intproduct (-1);
+	    amount = amount.product__I_O (-1);
 	box.shift_amount = box.shift_amount.advance (amount);
 	engine.accum (box);
     }

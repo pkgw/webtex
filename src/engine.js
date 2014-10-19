@@ -1441,7 +1441,7 @@ var Engine = (function Engine_closure () {
 
 	var v = tok.to_cmd (this).as_int (this);
 	if (v != null)
-	    return v.intproduct (negfactor).value_I;
+	    return v.product__I_O (negfactor).value_I;
 
 	// Looks like we have a literal integer
 
@@ -1701,11 +1701,11 @@ var Engine = (function Engine_closure () {
 	// type.
 	var cmd = tok.to_cmd (this);
 	if (cmd.get_valtype () == T_GLUE)
-	    return tok.to_cmd (this).as_glue (this).intproduct (negfactor);
+	    return tok.to_cmd (this).as_glue (this).product__I_O (negfactor);
 
 	var g = new Glue ();
 	this.push_back (tok);
-	g.amount = this.scan_dimen (mumode, false).intproduct (negfactor);
+	g.amount = this.scan_dimen (mumode, false).product__I_O (negfactor);
 
 	if (this.scan_keyword ('plus')) {
 	    t = this.scan_dimen (mumode, true);
