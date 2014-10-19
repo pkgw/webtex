@@ -692,7 +692,7 @@ var mathlib = (function mathlib_closure () {
     }
 
     function overbar (b, k, t) {
-	t = new Scaled (t); // this auto-calls TexInt.xcheck()
+	t = new Scaled (t);
 	k = new Scaled (k);
 	return vpack_natural ([new Kern (Dimen.new_scaled (t)),
 			       fraction_rule (Dimen.new_scaled (t)),

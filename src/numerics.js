@@ -61,6 +61,13 @@ var nlib = (function nlib_closure () {
     }
     nlib.parse__O_I = parse__O_I;
 
+    function maybe_unbox__O_I (value) {
+	if (value instanceof TexInt)
+	    return value.value_I;
+	return checkint__N_I (value);
+    }
+    nlib.maybe_unbox__O_I = maybe_unbox__O_I;
+
 
     function scale__I_S (value_I) {
 	return value_I * SC_UNITY;
@@ -71,6 +78,13 @@ var nlib = (function nlib_closure () {
 	return value_S * UNSCALE;
     }
     nlib.unscale__S_N = unscale__S_N;
+
+    function from_raw__I_S (value_I) {
+	// This function exists to clarify what's going on when tricky things
+	// are happening when constructing scaled values.
+	return value_I;
+    }
+    nlib.from_raw__I_S = from_raw__I_S;
 
     function from_parts__II_S (nonfrac_I, frac_I) {
 	return nonfrac_I * SC_UNITY + frac_I; // type safety: this is correct.

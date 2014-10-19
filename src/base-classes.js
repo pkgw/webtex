@@ -71,15 +71,14 @@ var Value = (function Value_closure () {
 
     proto.product__I_O = function Value_product__I_O (other) {
 	// Implement \multiply for this value, which is integer
-	// multiplication. `other` should be passed through TexInt.xcheck().
-	// Returns a new multiplied value, because some Values are immutable.
+	// multiplication. Returns a new multiplied value, because some Values
+	// are immutable.
 	throw new TexInternalError ('not implemented Value.product__I_O');
     };
 
     proto.divide__I_O = function Value_divide__I_O (other) {
 	// Implement \divide for this value, which is integer division.
-	// `other` should be passed through TexInt.xcheck(). Returns a new
-	// divided value, because some Values are immutable.
+	// Returns a new divided value, because some Values are immutable.
 	throw new TexInternalError ('not implemented Value.divide__I_O');
     };
 
@@ -87,7 +86,7 @@ var Value = (function Value_closure () {
 
     Value.ensure_boxed = function Value_ensure_boxed (valtype, value) {
 	if (valtype == T_INT)
-	    return new TexInt (TexInt.xcheck (value));
+	    return new TexInt (value);
 
 	if (valtype == T_DIMEN) {
 	    if (!(value instanceof Dimen))

@@ -1,50 +1,16 @@
 // The core TeX Value implementations.
 
 var TexInt = (function TexInt_closure () {
-    var INT_MAX = 2147483647; // 2**31 - 1
-
     // These objects are immutable.
     function TexInt (value) {
-	if (value instanceof TexInt) {
-	    this.value_I = value;
-	} else if (typeof value != 'number') {
-	    throw new TexInternalError ('non-numeric TexInt value %o', value);
-	} else if (value % 1 != 0) {
-	    throw new TexInternalError ('non-integer TexInt value %o', value);
-	} else {
-	    this.value_I = value | 0;
-	}
-
-	if (Math.abs (this.value_I) > INT_MAX)
-	    throw new TexRuntimeError ('out-of-range TexInt value %d', value);
+	if (value instanceof TexInt)
+	    this.value_I = value.value_I;
+	else
+	    this.value_I = nlib.checkint__N_I (value);
     }
 
     inherit (TexInt, Value);
     var proto = TexInt.prototype;
-
-    TexInt.xcheck = function TexInt_xcheck (value) {
-	/* This function checks that its input could be a valid TeX integer,
-	 * though it's agnostic as to whether it's a TexInt instance or a
-	 * JS-native number. It returns that input as a JS integer; I call
-	 * these checked values "tex-int"s. This simplifies a lot of math with
-	 * Scaleds where it'd be irritating to keep on converting JS ints to
-	 * TexInts for temporary manipulations. */
-
-	if (value instanceof TexInt)
-	    return value.value_I;
-
-	if (typeof value != 'number')
-	    throw new TexInternalError ('non-numeric tex-int value %o', value);
-	if (value % 1 != 0)
-	    throw new TexInternalError ('non-integer tex-int value %o', value);
-
-	value = value | 0; // magic coercion to trustworthy int representation.
-
-	if (Math.abs (value) > INT_MAX)
-	    throw new TexRuntimeError ('out-of-range tex-int value %d', value);
-
-	return value;
-    };
 
     proto.toString = function TexInt_toString () {
 	return '<' + this.value_I + '|i>';
@@ -86,14 +52,12 @@ var TexInt = (function TexInt_closure () {
 	return new TexInt (this.value_I + other.value_I);
     };
 
-    proto.product__I_O = function TexInt_product__I_O (k) {
-	k = TexInt.xcheck (k);
-	return new TexInt (this.value_I * k);
+    proto.product__I_O = function TexInt_product__I_O (k_I) {
+	return new TexInt (this.value_I * k_I);
     };
 
-    proto.divide__I_O = function TexInt_divide__I_O (k) {
-	k = TexInt.xcheck (k);
-	return new TexInt (this.value_I / k >> 0);
+    proto.divide__I_O = function TexInt_divide__I_O (k_I) {
+	return new TexInt (this.value_I / k_I >> 0);
     };
 
     return TexInt;
@@ -105,15 +69,14 @@ var Scaled = (function Scaled_closure () {
         SC_UNITY = 0x10000,    // 2**16 = 65536      = '200000
         SC_TWO   = 0x20000,    // 2**17 = 131072     = '400000
         SC_MAX   = 0x40000000, // 2**30 = 1073741824 = '10000000000
-        UNSCALE  = Math.pow (2, -16),
-        INT_MAX = 2147483647; // 2**31 - 1 ; XXX redundant with above.
+        UNSCALE  = Math.pow (2, -16);
 
     // These objects are immutable.
     function Scaled (value) {
 	if (value instanceof Scaled)
 	    this.value_S = value.value_S;
 	else
-	    this.value_S = TexInt.xcheck (value);
+	    this.value_S = nlib.from_raw__I_S (value);
     }
 
     inherit (Scaled, Value);
@@ -147,27 +110,20 @@ var Scaled = (function Scaled_closure () {
 	throw new TexRuntimeError ('over/underflow in mult+add');
     }
 
-    Scaled.new_from_parts = function Scaled_new_from_parts (nonfrac, frac) {
-	nonfrac = TexInt.xcheck (nonfrac);
-	frac = TexInt.xcheck (frac);
-	return new Scaled (nonfrac * SC_UNITY + frac);
+    Scaled.new_from_parts__II_S = function Scaled_new_from_parts__II_S (nonfrac_I, frac_I) {
+	return new Scaled (nlib.from_parts__II_S (nonfrac_I, frac_I));
     };
 
-    Scaled.new_parts_product =
-	function Scaled_new_parts_product (num, denom, nonfrac, frac) {
+    Scaled.new_parts_product__IIII_S =
+	function Scaled_new_parts_product__IIII_S (num, denom, nonfrac, frac) {
 	    // equivalent to `new_from_parts (nonfrac, frac) * (num/denom)` with
 	    // better precision than you'd get naively.
-	    num = TexInt.xcheck (num);
-	    denom = TexInt.xcheck (denom);
-	    nonfrac = TexInt.xcheck (nonfrac);
-	    frac = TexInt.xcheck (frac);
-
 	    var s = new Scaled (nonfrac);
 	    var t = s.times_n_over_d (num, denom); // -> [result, remainder]
 	    frac = div ((num * frac + SC_UNITY * t[1]), denom);
 	    nonfrac = t[0].value_S + div (frac, SC_UNITY);
 	    frac = frac % SC_UNITY;
-	    return Scaled.new_from_parts (nonfrac, frac);
+	    return Scaled.new_from_parts__II_S (nonfrac, frac);
 	};
 
     Scaled.new_from_decimals =
@@ -184,7 +140,7 @@ var Scaled = (function Scaled_closure () {
 	// y: Scaled
 	// returns: Scaled(n*this+y)
 
-	n = TexInt.xcheck (n);
+	n = nlib.maybe_unbox__O_I (n);
 	if (!(y instanceof Scaled))
 	    throw new TexInternalError ('nx+y called with non-Scaled y: %o', y);
 	return mult_and_add (n, this, y, SC_MAX - 1);
@@ -198,8 +154,8 @@ var Scaled = (function Scaled_closure () {
 	//   where the remainder is relevant if the low-significance digits
 	//   of (this*n/d) must be rounded off.
 
-	n = TexInt.xcheck (n);
-	d = TexInt.xcheck (d);
+	n = nlib.maybe_unbox__O_I (n);
+	d = nlib.maybe_unbox__O_I (d);
 
 	var positive = (this.value_S >= 0);
 	if (positive)
@@ -228,7 +184,7 @@ var Scaled = (function Scaled_closure () {
 	//   where the remainder is relevant if the low-significance digits
 	//   of (this/n) must be rounded off.
 
-	n = TexInt.xcheck (n);
+	n = nlib.maybe_unbox__O_I (n);
 	if (n.value_I == 0)
 	    throw new TexRuntimeError ('really, dividing by 0?');
 
@@ -255,8 +211,8 @@ var Scaled = (function Scaled_closure () {
     };
 
     proto.times_parts = function Scaled_times_parts (nonfrac, frac) {
-	nonfrac = TexInt.xcheck (nonfrac);
-	frac = TexInt.xcheck (frac);
+	nonfrac = nlib.maybe_unbox__O_I (nonfrac);
+	frac = nlib.maybe_unbox__O_I (frac);
 	var res = this.times_n_over_d (frac, SC_UNITY)[0];
 	return this.times_n_plus_y (nonfrac, res);
     };
@@ -300,12 +256,12 @@ var Scaled = (function Scaled_closure () {
     };
 
     proto.product__I_O = function Scaled_product__I_O (k) {
-	k = TexInt.xcheck (k);
+	k = nlib.maybe_unbox__O_I (k);
 	return this.times_parts (k, 0);
     };
 
     proto.divide__I_O = function Scaled_divide__I_O (k) {
-	k = TexInt.xcheck (k);
+	k = nlib.maybe_unbox__O_I (k);
 	return this.clone ().over_n (k)[0];
     };
 
@@ -340,7 +296,7 @@ var Dimen = (function Dimen_closure () {
     Dimen.new_product = function Dimen_new_product (k, x) {
 	// k: tex-int
 	// x: Scaled
-	k = TexInt.xcheck (k);
+	k = nlib.maybe_unbox__O_I (k);
 	if (!(x instanceof Scaled))
 	    throw new TexInternalError ('expected Scaled value, got %o', x);
 
@@ -417,14 +373,14 @@ var Dimen = (function Dimen_closure () {
     };
 
     proto.product__I_O = function Dimen_product__I_O (k) {
-	k = TexInt.xcheck (k);
+	k = nlib.maybe_unbox__O_I (k);
 	var d = new Dimen ();
 	d.set_to (this.sp.product__I_O (k));
 	return d;
     };
 
     proto.divide__I_O = function Dimen_divide__I_O (k) {
-	k = TexInt.xcheck (k);
+	k = nlib.maybe_unbox__O_I (k);
 	var d = this.clone ();
 	d.set_to (this.sp.divide__I_O (k));
 	return d;
@@ -541,7 +497,7 @@ var Glue = (function Glue_closure () {
     };
 
     proto.product__I_O = function Glue_product__I_O (k) {
-	k = TexInt.xcheck (k);
+	k = nlib.maybe_unbox__O_I (k);
 	var g = this.clone ();
 	g.amount = this.amount.product__I_O (k);
 	g.stretch = this.stretch.product__I_O (k);
@@ -550,7 +506,7 @@ var Glue = (function Glue_closure () {
     };
 
     proto.divide__I_O = function Glue_divide__I_O (k) {
-	k = TexInt.xcheck (k);
+	k = nlib.maybe_unbox__O_I (k);
 	var g = this.clone ();
 	g.amount = this.amount.divide__I_O (k);
 	g.stretch = this.stretch.divide__I_O (k);

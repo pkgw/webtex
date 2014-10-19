@@ -683,7 +683,7 @@ var Special = (function Special_closure () {
 var Penalty = (function Penalty_closure () {
     function Penalty (amount) {
 	this.ltype = LT_PENALTY;
-	this.amount = TexInt.xcheck (amount);
+	this.amount = nlib.maybe_unbox__O_I (amount);
     }
 
     inherit (Penalty, Listable);

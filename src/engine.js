@@ -980,7 +980,7 @@ var Engine = (function Engine_closure () {
 	    this.accum (hb);
 
 	    var g = new Glue ();
-	    g.stretch.set_to (Scaled.new_from_parts (1, 0));
+	    g.stretch.set_to (Scaled.new_from_parts__II_S (1, 0));
 	    g.stretch_order = 2;
 	    this.accum (new BoxGlue (g));
 
@@ -1631,10 +1631,10 @@ var Engine = (function Engine_closure () {
 			throw new TexSyntaxError ('illegal infinity value ' +
 						  '"fillll" or higher');
 		}
-		result = Scaled.new_from_parts (nonfrac_I, frac_I);
+		result = Scaled.new_from_parts__II_S (nonfrac_I, frac_I);
 	    } else if (mumode) {
 		if (this.scan_keyword ('mu'))
-		    result = Scaled.new_from_parts (nonfrac_I, frac_I);
+		    result = Scaled.new_from_parts__II_S (nonfrac_I, frac_I);
 		else
 		    throw new TexRuntimeError ('this quantity must have ' +
 					       'dimensions of "mu"');
@@ -1647,7 +1647,7 @@ var Engine = (function Engine_closure () {
 	    } else if (this.scan_keyword ('sp')) {
 		result = new Scaled (nonfrac_I);
 	    } else if (this.scan_keyword ('pt')) {
-		result = Scaled.new_from_parts (nonfrac_I, frac_I);
+		result = Scaled.new_from_parts__II_S (nonfrac_I, frac_I);
 	    } else {
 		var num, denom;
 
@@ -1678,7 +1678,7 @@ var Engine = (function Engine_closure () {
 					      'didn\'t find it; next is %o', tok);
 		}
 
-		result = Scaled.new_parts_product (num, denom, nonfrac_I, frac_I);
+		result = Scaled.new_parts_product__IIII_S (num, denom, nonfrac_I, frac_I);
 	    }
 	}
 
