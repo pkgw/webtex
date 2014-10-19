@@ -773,7 +773,7 @@ var mathlib = (function mathlib_closure () {
 
 	if (f == null) {
 	    b = new HBox ();
-	    b.width.set_to (state.engine.get_parameter (T_DIMEN, 'nulldelimiterspace'));
+	    b.width_S = state.engine.get_parameter (T_DIMEN, 'nulldelimiterspace').sp.value_S;
 	} else if (!f.get_metrics ().is_extensible (c)) {
 	    b = new HBox ();
 	    b.list = [new Character (f, c)];
@@ -791,8 +791,7 @@ var mathlib = (function mathlib_closure () {
 	    c = rep;
 	    var u = height_plus_depth (m, c);
 	    w = 0;
-	    b.width.set_to (m.width (c));
-	    b.width.advance (m.italic_correction (c));
+	    b.width_S = m.width (c).value_S + m.italic_correction (c).value_S;
 
 	    if (bot != 0)
 		w += height_plus_depth (m, bot);
@@ -849,11 +848,11 @@ var mathlib = (function mathlib_closure () {
 	    // XXX skipping list-tag char stuff
 	    var f = state.font (q.nuc.fam);
 	    var m = f.get_metrics ();
-	    delta = m.italic_correction (q.nuc.ord);
+	    delta = m.italic_correction (q.nuc.ord).value_S;
 	    var x = clean_box (state, q.nuc);
 
 	    if (q.sub != null && q.limtype != LIMTYPE_LIMITS)
-		x.width.sp.value_S -= delta // remove italic correction
+		x.width_S -= delta; // remove italic correction
 
 	    x.shift_amount_S = half ((x.height_S - x.depth_S)
 				     - state.sym_dimen (state.size, SymDimens.AxisHeight).sp.value_S);
@@ -867,11 +866,11 @@ var mathlib = (function mathlib_closure () {
 	var y = clean_box (state, q.nuc);
 	var z = clean_box (state.subscript (), q.sub);
 	var v = new VBox ();
-	v.width.sp.value_S = Math.max (x.width.sp.value_S, y.width.sp.value_S, z.width.sp.value_S);
+	v.width_S = Math.max (x.width_S, y.width_S, z.width_S);
 
-	x = rebox (x, v.width.sp.value_S);
-	y = rebox (y, v.width.sp.value_S);
-	z = rebox (z, v.width.sp.value_S);
+	x = rebox (x, v.width_S);
+	y = rebox (y, v.width_S);
+	z = rebox (z, v.width_S);
 	x.shift_amount_S = half (delta);
 	z.shift_amount_S = -x.shift_amount_S;
 	v.height_S = y.height_S;
@@ -972,14 +971,14 @@ var mathlib = (function mathlib_closure () {
 	if (q.sup == null) {
 	    // We're only called if there's a script, so sub most be non-null.
 	    var x = clean_box (state.subscript (), q.sub);
-	    x.width.advance (engine.get_parameter (T_DIMEN, 'scriptspace'));
+	    x.width_S += engine.get_parameter (T_DIMEN, 'scriptspace').sp.value_S;
 
 	    clr = x.height_S - Math.abs (mxh * 4) / 5;
 	    var sub1 = state.sym_dimen (state.size, SymDimens.Sub1).sp.value_S;
 	    x.shift_amount_S = Math.max (shift_down, clr, sub1);
 	} else {
 	    var x = clean_box (state.superscript (), q.sup);
-	    x.width.advance (engine.get_parameter (T_DIMEN, 'scriptspace'));
+	    x.width_S += engine.get_parameter (T_DIMEN, 'scriptspace').sp.value_S;
 
 	    if (state.cramped)
 		clr = state.sym_dimen (state.size, SymDimens.Sup3).sp.value_S;
@@ -996,7 +995,7 @@ var mathlib = (function mathlib_closure () {
 		x.shift_amount_S = -shift_up;
 	    else {
 		var y = clean_box (state.subscript (), q.sub);
-		y.width.advance (engine.get_parameter (T_DIMEN, 'scriptspace'));
+		y.width_S += engine.get_parameter (T_DIMEN, 'scriptspace').sp.value_S;
 
 		shift_down = max (shift_down,
 				  state.sym_dimen (state.size, SymDimens.Sub2).sp.value_S);

@@ -11,7 +11,7 @@
 var Boxlike = (function Boxlike_closure () {
     // A box-like listable has width, height, depth.
     function Boxlike () {
-	this.width = new Dimen ();
+	this.width_S = nlib.Zero_S;
 	this.height_S = nlib.Zero_S;
 	this.depth_S = nlib.Zero_S;
 	this.shift_amount_S = nlib.Zero_S; // positive is down (right) in H (V) box
@@ -21,11 +21,11 @@ var Boxlike = (function Boxlike_closure () {
     var proto = Boxlike.prototype;
 
     proto._uishape = function Boxlike__uishape () {
-	return format ('w=%o h=%S d=%S', this.width, this.height_S, this.depth_S);
+	return format ('w=%S h=%S d=%S', this.width_S, this.height_S, this.depth_S);
     };
 
     proto._copyto = function Boxlike__copyto (other) {
-	other.width = this.width.clone ();
+	other.width_S = this.width_S;
 	other.height_S = this.height_S;
 	other.depth_S = this.depth_S;
 	other.shift_amount_S = this.shift_amount_S;
@@ -139,7 +139,7 @@ var HBox = (function HBox_closure () {
     proto.set_glue = function HBox_set_glue (engine, is_exact, spec) {
 	// T:TP 649
 
-	var nat_width = 0;
+	var nat_width_S = nlib.Zero_S;
 	var stretches = [0, 0, 0, 0];
 	var shrinks = [0, 0, 0, 0];
 	var height_S = nlib.Zero_S;
@@ -149,14 +149,14 @@ var HBox = (function HBox_closure () {
 	    var item = this.list[i];
 
 	    if (item instanceof Boxlike) {
-		nat_width += item.width.sp.value_S;
+		nat_width_S += item.width_S;
 		height_S = Math.max (height_S, item.height_S - item.shift_amount_S);
 		depth_S = Math.max (depth_S, item.depth_S + item.shift_amount_S);
 	    } else if (item instanceof Kern) {
-		nat_width += item.amount.sp.value_S;
+		nat_width_S += item.amount.sp.value_S;
 	    } else if (item instanceof BoxGlue) {
 		var g = item.amount;
-		nat_width += g.amount.sp.value_S;
+		nat_width_S += g.amount.sp.value_S;
 		stretches[g.stretch_order] += g.stretch.sp.value_S;
 		shrinks[g.shrink_order] += g.shrink.sp.value_S;
 	    }
@@ -167,12 +167,12 @@ var HBox = (function HBox_closure () {
 
 	if (is_exact) {
 	    // We're setting the box to an exact width.
-	    if (spec.sp.value_S > nat_width) {
+	    if (spec.sp.value_S > nat_width_S) {
 		settype = 1;
-		setdelta = spec.sp.value_S - nat_width;
-	    } else if (spec.sp.value_S < nat_width) {
+		setdelta = spec.sp.value_S - nat_width_S;
+	    } else if (spec.sp.value_S < nat_width_S) {
 		settype = 2;
-		setdelta = nat_width - spec.sp.value_S;
+		setdelta = nat_width_S - spec.sp.value_S;
 	    }
 	} else {
 	    // We're adjusting the box's width from its natural value.
@@ -187,12 +187,12 @@ var HBox = (function HBox_closure () {
 
 	if (settype == 0) {
 	    // Natural width.
-	    this.width.sp.value_S = nat_width;
+	    this.width_S = nat_width_S;
 	    this.glue_state = 1; // ordinary (zeroth-order infinite) stretch
 	    this.glue_set = 0.; // ... but no actual stretching.
 	} else if (settype == 1) {
 	    // We're stretching the box.
-	    this.width.sp.value_S = nat_width + setdelta;
+	    this.width_S = nat_width_S + setdelta;
 
 	    if (stretches[3] != 0)
 		this.glue_state = 4;
@@ -207,7 +207,7 @@ var HBox = (function HBox_closure () {
 	    this.glue_set = (1.0 * stretches[this.glue_state - 1]) / setdelta;
 	} else {
 	    // We're shrinking it.
-	    this.width.sp.value_S = nat_width - setdelta;
+	    this.width_S = nat_width_S - setdelta;
 
 	    if (shrinks[3] != 0)
 		this.glue_state = -4;
@@ -240,10 +240,10 @@ var HBox = (function HBox_closure () {
 
 	    if (item instanceof ListBox) {
 		item.traverse (x, y0 + item.shift_amount_S, callback);
-		x += item.width.sp.value_S;
+		x += item.width_S;
 	    } else if (item instanceof Boxlike) {
 		callback (x, y0 + item.shift_amount_S, item);
-		x += item.width.sp.value_S;
+		x += item.width_S;
 	    } else if (item instanceof Kern) {
 		x += item.amount.sp.value_S;
 	    } else if (item instanceof BoxGlue) {
@@ -291,16 +291,16 @@ var VBox = (function VBox_closure () {
 	var nat_height_S = 0;
 	var stretches = [0, 0, 0, 0];
 	var shrinks = [0, 0, 0, 0];
-	var width = 0;
+	var width_S = nlib.Zero_S;
 	var prev_depth_S = nlib.Zero_S;
 
 	for (var i = 0; i < this.list.length; i++) {
 	    var item = this.list[i];
 
 	    if (item instanceof Boxlike) {
-		nat_height_S += item.width.sp.value_S + prev_depth_S;
+		nat_height_S += item.width_S + prev_depth_S;
 		prev_depth_S = item.depth_S;
-		width = Math.max (width, item.width.sp.value_S + item.shift_amount_S);
+		width_S = Math.max (width_S, item.width_S + item.shift_amount_S);
 	    } else if (item instanceof Kern) {
 		nat_height_S += item.amount.sp.value_S + prev_depth_S;
 		prev_depth_S = nlib.Zero_S;
@@ -371,7 +371,7 @@ var VBox = (function VBox_closure () {
 	    this.glue_set = (1.0 * shrinks[-this.glue_state - 1]) / setdelta;
 	}
 
-	this.width.sp.value_S = width;
+	this.width_S = width_S;
 
 	// Depth is prev_depth, unless \boxmaxdepth makes us shift the
 	// reference point.
@@ -459,7 +459,7 @@ var CanvasBox = (function CanvasBox_closure () {
 	ListBox.call (this, BT_CBOX);
 	this.graphics = [];
 
-	this.width = srcbox.width.clone ();
+	this.width_S = srcbox.width_S;
 	this.height_S = srcbox.height_S;
 	this.depth_S = srcbox.depth_S;
 	this.shift_amount_S = srcbox.shift_amount_S;
@@ -521,7 +521,7 @@ var CanvasBox = (function CanvasBox_closure () {
     };
 
     proto.to_render_data = function CanvasBox_to_render_data () {
-	var data = {w: this.width.sp.value_S,
+	var data = {w: this.width_S,
 		    h: this.height_S,
 		    d: this.depth_S};
 	var gl = []; // "graphics list"
@@ -541,7 +541,7 @@ var CanvasBox = (function CanvasBox_closure () {
 		y -= subitem.height_S;
 		gl.push ({x: x,
 			  y: y,
-			  w: subitem.width.sp.value_S,
+			  w: subitem.width_S,
 			  h: subitem.height_S + subitem.depth_S});
 	    } else {
 		throw new TexInternalError ('unhandled CanvasBox graphic %o', subitem);
@@ -599,13 +599,10 @@ var Character = (function Character_closure () {
 
 
 var MathDelim = (function MathDelim_closure () {
-    function MathDelim (width, is_after) {
-	if (!(width instanceof Dimen))
-	    throw new TexInternalError ('MathDelim needs dimen; got %o', width);
-
+    function MathDelim (width_S, is_after) {
 	Boxlike.call (this);
 	this.ltype = LT_MATH;
-	this.width = width;
+	this.width_S = width_S;
 	this.is_after = is_after;
     }
 
@@ -613,7 +610,7 @@ var MathDelim = (function MathDelim_closure () {
     var proto = MathDelim.prototype;
 
     proto._uisummary = function MathDelim__uisummary () {
-	return 'MathDelim w=' + this.width;
+	return format ('MathDelim w=%S', this.width_S);
     };
 
     return MathDelim;

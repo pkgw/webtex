@@ -751,14 +751,14 @@ register_command ('wd', (function WdCommand_closure () {
 	// Valref is not so important.
 	var reg = engine.scan_char_code__I ();
 	engine.scan_optional_equals ();
-	var width = engine.scan_dimen ();
+	var width_S = engine.scan_dimen ().sp.value_S;
 	var box = engine.get_register (T_BOX, reg);
 
 	if (box.btype == BT_VOID) {
-	    engine.trace ('\\wd%d = %o -- noop on void box', reg, width);
+	    engine.trace ('\\wd%d = %S -- noop on void box', reg, width_S);
 	} else {
-	    engine.trace ('\\wd%d = %o', reg, width);
-	    box.width = width;
+	    engine.trace ('\\wd%d = %S', reg, width_S);
+	    box.width_S = width_S;
 	}
     };
 
@@ -769,7 +769,7 @@ register_command ('wd', (function WdCommand_closure () {
     proto.as_valref = function WdCommand_as_valref (engine) {
 	var reg = engine.scan_char_code__I ();
 	var box = engine.get_register (T_BOX, reg);
-	return new ConstantValref (T_DIMEN, box.width);
+	return new ConstantValref (T_DIMEN, box.width_S);
     };
 
     return WdCommand;
@@ -866,7 +866,7 @@ register_command ('hrule', function cmd_hrule (engine) {
 
     while (true) {
 	if (engine.scan_keyword ('width'))
-	    rule.width = engine.scan_dimen ();
+	    rule.width_S = engine.scan_dimen ().sp.value_S;
 	else if (engine.scan_keyword ('height'))
 	    rule.height_S = engine.scan_dimen ().sp.value_S;
 	else if (engine.scan_keyword ('depth'))
@@ -885,11 +885,11 @@ register_command ('vrule', function cmd_vrule (engine) {
 	throw new TexRuntimeError ('can only create \\vrule in horizontal mode');
 
     var rule = new Rule ();
-    rule.width.sp.value_S = 26214; // default rule = 0.4pt; T:TP sec 463
+    rule.width_S = 26214; // default rule = 0.4pt; T:TP sec 463
 
     while (true) {
 	if (engine.scan_keyword ('width'))
-	    rule.width = engine.scan_dimen ();
+	    rule.width_S = engine.scan_dimen ().sp.value_S;
 	else if (engine.scan_keyword ('height'))
 	    rule.height_S = engine.scan_dimen ().sp.value_S;
 	else if (engine.scan_keyword ('depth'))

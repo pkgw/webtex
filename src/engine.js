@@ -779,7 +779,7 @@ var Engine = (function Engine_closure () {
 
 	if (indent) {
 	    var b = new HBox ();
-	    b.width = this.get_parameter (T_DIMEN, 'parindent');
+	    b.width_S = this.get_parameter (T_DIMEN, 'parindent').sp.value_S;
 	    b.set_glue (this, false, new Dimen ());
 	    this.accum (b);
 	}
@@ -976,7 +976,7 @@ var Engine = (function Engine_closure () {
 	    this.trace ('... forcing page build');
 
 	    var hb = new HBox ();
-	    hb.width = this.get_parameter (T_DIMEN, 'hsize');
+	    hb.width_S = this.get_parameter (T_DIMEN, 'hsize').sp.value_S;
 	    this.accum (hb);
 
 	    var g = new Glue ();
@@ -2248,7 +2248,7 @@ var Engine = (function Engine_closure () {
 		b.list = this.build_stack.pop ();
 		this.build_stack.push ([]);
 		b.set_glue (this, false, new Dimen ());
-		w = b.width.sp.value_S;
+		w = b.width_S;
 	    } else {
 		b = new VBox ();
 		b.list = this.build_stack.pop ();

@@ -375,10 +375,10 @@ var MathShiftCommand = (function MathShiftCommand_closure () {
 	    box.set_glue (engine, false, new Dimen ());
 	    box = new CanvasBox (box); // our magic!
 
-	    var ms = engine.get_parameter (T_DIMEN, 'mathsurround');
-	    engine.accum (new MathDelim (ms, false));
+	    var ms_S = engine.get_parameter (T_DIMEN, 'mathsurround').sp.value_S;
+	    engine.accum (new MathDelim (ms_S, false));
 	    engine.accum (box);
-	    engine.accum (new MathDelim (ms, true));
+	    engine.accum (new MathDelim (ms_S, true));
 	    engine.unnest_eqtb ();
 	} else {
 	    engine.trace ('math shift: enter');
