@@ -1492,17 +1492,17 @@ register_command ('vcenter', function cmd_vcenter (engine) {
     // XXX this is scan_spec (TTP:645), which is duplicated in
     // Engine._handle_box and Engine.init_align.
 
-    var is_exact, spec;
+    var is_exact, spec_S;
 
     if (engine.scan_keyword ('to')) {
 	is_exact = true;
-	spec = engine.scan_dimen ();
+	spec_S = engine.scan_dimen ().sp_S;
     } else if (engine.scan_keyword ('spread')) {
 	is_exact = false;
-	spec = engine.scan_dimen ();
+	spec_S = engine.scan_dimen ().sp_S;
     } else {
 	is_exact = false;
-	spec = new Dimen ();
+	spec_S = nlib.Zero_S;
     }
 
     engine.scan_left_brace ();
@@ -1520,7 +1520,7 @@ register_command ('vcenter', function cmd_vcenter (engine) {
 	var box = new VBox ();
 	box.list = engine.leave_mode ();
 	engine.unnest_eqtb ();
-	box.set_glue (engine, is_exact, spec);
+	box.set_glue__OOS (engine, is_exact, spec_S);
 
 	var atom = new AtomNode (MT_VCENTER);
 	atom.nuc = box;

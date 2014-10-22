@@ -136,7 +136,7 @@ var HBox = (function HBox_closure () {
 	return b;
     };
 
-    proto.set_glue = function HBox_set_glue (engine, is_exact, spec) {
+    proto.set_glue__OOS = function HBox_set_glue__OOS (engine, is_exact, spec_S) {
 	// T:TP 649
 
 	var nat_width_S = nlib.Zero_S;
@@ -163,25 +163,25 @@ var HBox = (function HBox_closure () {
 	}
 
 	var settype = 0; // 0: exact; 1: stretch; 2: shrink
-	var setdelta = 0; // always nonnegative
+	var setdelta_S = 0; // always nonnegative
 
 	if (is_exact) {
 	    // We're setting the box to an exact width.
-	    if (spec.sp_S > nat_width_S) {
+	    if (spec_S > nat_width_S) {
 		settype = 1;
-		setdelta = spec.sp_S - nat_width_S;
-	    } else if (spec.sp_S < nat_width_S) {
+		setdelta_S = spec_S - nat_width_S;
+	    } else if (spec_S < nat_width_S) {
 		settype = 2;
-		setdelta = nat_width_S - spec.sp_S;
+		setdelta_S = nat_width_S - spec_S;
 	    }
 	} else {
 	    // We're adjusting the box's width from its natural value.
-	    if (spec.sp_S > 0) {
+	    if (spec_S > 0) {
 		settype = 1;
-		setdelta = spec.sp_S;
-	    } else if (spec.sp_S < 0) {
+		setdelta_S = spec_S;
+	    } else if (spec_S < 0) {
 		settype = 2;
-		setdelta = -spec.sp_S;
+		setdelta_S = -spec_S;
 	    }
 	}
 
@@ -192,7 +192,7 @@ var HBox = (function HBox_closure () {
 	    this.glue_set = 0.; // ... but no actual stretching.
 	} else if (settype == 1) {
 	    // We're stretching the box.
-	    this.width_S = nat_width_S + setdelta;
+	    this.width_S = nat_width_S + setdelta_S;
 
 	    if (stretches_S[3] != 0)
 		this.glue_state = 4;
@@ -204,10 +204,10 @@ var HBox = (function HBox_closure () {
 		this.glue_state = 1;
 
 	    // Note: here, TeX does indeed use floating-point math.
-	    this.glue_set = (1.0 * stretches_S[this.glue_state - 1]) / setdelta;
+	    this.glue_set = (1.0 * stretches_S[this.glue_state - 1]) / setdelta_S;
 	} else {
 	    // We're shrinking it.
-	    this.width_S = nat_width_S - setdelta;
+	    this.width_S = nat_width_S - setdelta_S;
 
 	    if (shrinks_S[3] != 0)
 		this.glue_state = -4;
@@ -218,7 +218,7 @@ var HBox = (function HBox_closure () {
 	    else
 		this.glue_state = -1;
 
-	    this.glue_set = (1.0 * shrinks_S[-this.glue_state - 1]) / setdelta;
+	    this.glue_set = (1.0 * shrinks_S[-this.glue_state - 1]) / setdelta_S;
 	}
 
 	this.height_S = height_S;
@@ -287,7 +287,7 @@ var VBox = (function VBox_closure () {
 	return b;
     };
 
-    proto.set_glue = function VBox_set_glue (engine, is_exact, spec) {
+    proto.set_glue__OOS = function VBox_set_glue__OOS (engine, is_exact, spec_S) {
 	var nat_height_S = 0;
 	var stretches_S = [0, 0, 0, 0];
 	var shrinks_S = [0, 0, 0, 0];
@@ -314,25 +314,25 @@ var VBox = (function VBox_closure () {
 	}
 
 	var settype = 0; // 0: exact; 1: stretch; 2: shrink
-	var setdelta = 0; // always nonnegative
+	var setdelta_S = 0; // always nonnegative
 
 	if (is_exact) {
 	    // We're setting the box to an exact height.
-	    if (spec.sp_S > nat_height_S) {
+	    if (spec_S > nat_height_S) {
 		settype = 1;
-		setdelta = spec.sp_S - nat_height_S;
-	    } else if (spec.sp_S < nat_height_S) {
+		setdelta_S = spec_S - nat_height_S;
+	    } else if (spec_S < nat_height_S) {
 		settype = 2;
-		setdelta = nat_height_S - spec.sp_S;
+		setdelta_S = nat_height_S - spec_S;
 	    }
 	} else {
 	    // We're adjusting the box's height from its natural value.
-	    if (spec.sp_S > 0) {
+	    if (spec_S > 0) {
 		settype = 1;
-		setdelta = spec.sp_S;
-	    } else if (spec.sp_S < 0) {
+		setdelta_S = spec_S;
+	    } else if (spec_S < 0) {
 		settype = 2;
-		setdelta = -spec.sp_S;
+		setdelta_S = -spec_S;
 	    }
 	}
 
@@ -343,7 +343,7 @@ var VBox = (function VBox_closure () {
 	    this.glue_set = 0.; // ... but no actual stretching.
 	} else if (settype == 1) {
 	    // We're stretching the box.
-	    this.height_S = nat_height_S + setdelta;
+	    this.height_S = nat_height_S + setdelta_S;
 
 	    if (stretches_S[3] != 0)
 		this.glue_state = 4;
@@ -354,10 +354,10 @@ var VBox = (function VBox_closure () {
 	    else
 		this.glue_state = 1;
 
-	    this.glue_set = (1.0 * stretches_S[this.glue_state - 1]) / setdelta;
+	    this.glue_set = (1.0 * stretches_S[this.glue_state - 1]) / setdelta_S;
 	} else {
 	    // We're shrinking it.
-	    this.height_S = nat_height_S - setdelta;
+	    this.height_S = nat_height_S - setdelta_S;
 
 	    if (shrinks_S[3] != 0)
 		this.glue_state = -4;
@@ -368,7 +368,7 @@ var VBox = (function VBox_closure () {
 	    else
 		this.glue_state = -1;
 
-	    this.glue_set = (1.0 * shrinks_S[-this.glue_state - 1]) / setdelta;
+	    this.glue_set = (1.0 * shrinks_S[-this.glue_state - 1]) / setdelta_S;
 	}
 
 	this.width_S = width_S;

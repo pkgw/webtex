@@ -780,7 +780,7 @@ var Engine = (function Engine_closure () {
 	if (indent) {
 	    var b = new HBox ();
 	    b.width_S = this.get_parameter (T_DIMEN, 'parindent').sp_S;
-	    b.set_glue (this, false, new Dimen ());
+	    b.set_glue__OOS (this, false, nlib.Zero_S);
 	    this.accum (b);
 	}
 
@@ -806,7 +806,7 @@ var Engine = (function Engine_closure () {
 	list.push (new EndTag ('p')); // webtex special!
 	var hbox = new HBox ();
 	hbox.list = list;
-	hbox.set_glue (this, false, new Dimen ());
+	hbox.set_glue__OOS (this, false, nlib.Zero_S);
 	// skip: interline glue and penalties
 	this.accum (hbox);
 	if (this.mode () == M_VERT)
@@ -887,7 +887,7 @@ var Engine = (function Engine_closure () {
 
 	var vbox = new VBox ();
 	vbox.list = list;
-	vbox.set_glue (this, false, new Dimen ());
+	vbox.set_glue__OOS (this, false, nlib.Zero_S);
 	this.set_register (T_BOX, 255, vbox);
 	this.build_stack[0] = [];
 	this._running_output = true;
@@ -1927,25 +1927,25 @@ var Engine = (function Engine_closure () {
     };
 
     proto._handle_box = function Engine__handle_box (boxtype, newmode, is_vtop) {
-	var is_exact, spec;
+	var is_exact, spec_S;
 
 	if (this.scan_keyword ('to')) {
 	    is_exact = true;
-	    spec = this.scan_dimen ();
+	    spec_S = this.scan_dimen ().sp_S;
 	} else if (this.scan_keyword ('spread')) {
 	    is_exact = false;
-	    spec = this.scan_dimen ();
+	    spec_S = this.scan_dimen ().sp_S;
 	} else {
 	    is_exact = false;
-	    spec = new Dimen ();
+	    spec_S = nlib.Zero_S;
 	}
 
 	function finish_box (engine) {
-	    this.trace ('finish_box is_exact=%b spec=%o', is_exact, spec);
+	    this.trace ('finish_box is_exact=%b spec=%S', is_exact, spec_S);
 	    this.unnest_eqtb ();
 	    var box = ListBox.create (boxtype);
 	    box.list = this.leave_mode ();
-	    box.set_glue (this, is_exact, spec);
+	    box.set_glue__OOS (this, is_exact, spec_S);
 	    if (is_vtop)
 		box.adjust_as_vtop ();
 	    engine.handle_finished_box (box);
@@ -2035,18 +2035,19 @@ var Engine = (function Engine_closure () {
 	}
 
 	// XXX this is scan_spec (TTP:645), which is duplicated in _handle_box.
+	// XXXXXX is_exact and spec_S are unused!
 
-	var is_exact, spec;
+	var is_exact, spec_S;
 
 	if (this.scan_keyword ('to')) {
 	    is_exact = true;
-	    spec = this.scan_dimen ();
+	    spec_S = this.scan_dimen ().sp_S;
 	} else if (this.scan_keyword ('spread')) {
 	    is_exact = false;
-	    spec = this.scan_dimen ();
+	    spec_S = this.scan_dimen ().sp_S;
 	} else {
 	    is_exact = false;
-	    spec = new Dimen ();
+	    spec_S = nlib.Zero_S;
 	}
 
 	this.scan_left_brace ();
@@ -2252,13 +2253,13 @@ var Engine = (function Engine_closure () {
 		b = new HBox ();
 		b.list = this.build_stack.pop ();
 		this.build_stack.push ([]);
-		b.set_glue (this, false, new Dimen ());
+		b.set_glue__OOS (this, false, nlib.Zero_S);
 		w = b.width_S;
 	    } else {
 		b = new VBox ();
 		b.list = this.build_stack.pop ();
 		this.build_stack.push ([]);
-		b.set_glue (this, false, new Dimen ());
+		b.set_glue__OOS (this, false, nlib.Zero_S);
 		w = b.height_S;
 	    }
 

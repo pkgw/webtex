@@ -372,7 +372,7 @@ var MathShiftCommand = (function MathShiftCommand_closure () {
 	    var hlist = mathlib.mlist_to_hlist (engine, mlist, mstyle, false, false);
 	    var box = new HBox ();
 	    box.list = hlist;
-	    box.set_glue (engine, false, new Dimen ());
+	    box.set_glue__OOS (engine, false, nlib.Zero_S);
 	    box = new CanvasBox (box); // our magic!
 
 	    var ms_S = engine.get_parameter (T_DIMEN, 'mathsurround').sp_S;

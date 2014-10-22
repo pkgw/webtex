@@ -632,7 +632,7 @@ var mathlib = (function mathlib_closure () {
 
 	if (hlist != null) {
 	    b.list = hlist;
-	    b.set_glue (engine, false, new Dimen ());
+	    b.set_glue__OOS (engine, false, nlib.Zero_S);
 	}
 
 	return b;
@@ -643,7 +643,7 @@ var mathlib = (function mathlib_closure () {
 
 	if (vlist != null) {
 	    b.list = vlist;
-	    b.set_glue (engine, false, new Dimen ());
+	    b.set_glue__OOS (engine, false, nlib.Zero_S);
 	}
 
 	return b;
@@ -771,7 +771,7 @@ var mathlib = (function mathlib_closure () {
 	} else if (!f.get_metrics ().is_extensible (c)) {
 	    b = new HBox ();
 	    b.list = [new Character (f, c)];
-	    b.set_glue (state.engine, false, new Dimen ());
+	    b.set_glue__OOS (state.engine, false, nlib.Zero_S);
 	} else {
 	    // Need to build a giant delimiter manually :-(
 	    b = new VBox ();
