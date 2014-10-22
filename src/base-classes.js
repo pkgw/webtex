@@ -47,7 +47,7 @@ var Value = (function Value_closure () {
     proto.as_scaled__S = function Value_as_scaled__S () {
 	// Returns a scaled that this value is equivalent to, or null if such
 	// a conversion is not allowed. Currently this is only used in
-	// Engine.scan_dimen and may be superfluous.
+	// Engine.scan_dimen__O_S and may be superfluous.
 	throw new TexInternalError ('not implemented Value.as_scaled__S');
     };
 
@@ -90,11 +90,8 @@ var Value = (function Value_closure () {
 	if (valtype == T_DIMEN) {
 	    if (value instanceof Dimen)
 		return value;
-	    if (typeof value == 'number') {
-		var d = new Dimen ();
-		d.sp_S = value;
-		return d;
-	    }
+	    if (typeof value == 'number')
+		return new Dimen (value);
 	    throw new TexInternalError ('value is not dimen: %o', value);
 	}
 

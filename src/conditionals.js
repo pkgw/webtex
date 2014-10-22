@@ -327,7 +327,7 @@
 
     register_command ('ifdim', function cmd_ifdim (engine) {
 	engine.start_parsing_condition ();
-	var val1 = engine.scan_dimen ();
+	var val1_S = engine.scan_dimen__O_S (false);
 
 	while (1) {
 	    var tok = engine.next_x_tok ();
@@ -337,19 +337,20 @@
 		break;
 	}
 
-	var val2 = engine.scan_dimen (), result;
+	var val2_S = engine.scan_dimen__O_S (false);
+	var result;
 	engine.done_parsing_condition ();
 
 	if (tok.is_other_char (O_LESS))
-	    result = (val1.sp_S < val2.sp_S);
+	    result = (val1_S < val2_S);
 	else if (tok.is_other_char (O_GREATER))
-	    result = (val1.sp_S > val2.sp_S);
+	    result = (val1_S > val2_S);
 	else if (tok.is_other_char (O_EQUALS))
-	    result = (val1.sp_S == val2.sp_S);
+	    result = (val1_S == val2_S);
 	else
 	    throw new TexSyntaxError ('expected <,=,> in \\ifdim but got %o', tok);
 
-	engine.trace ('ifdim %o %o %o => %b', val1, tok, val2, result);
+	engine.trace ('ifdim %S %o %S => %b', val1_S, tok, val2_S, result);
 	engine.handle_if (result);
     });
 

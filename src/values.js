@@ -67,24 +67,15 @@ var TexInt = (function TexInt_closure () {
 
 
 var Dimen = (function Dimen_closure () {
-    var MAX_SCALED = 0x40000000; // 2**30 = 1073741824 = '10000000000
-
-    // These objects are mutable.
-    function Dimen () {
-	this.sp_S = nlib.Zero_S;
+    function Dimen (sp_S) {
+	this.sp_S = nlib.check__N_S (sp_S);
     }
 
     inherit (Dimen, Value);
     var proto = Dimen.prototype;
 
-    Dimen.new_product__IS_O = function Dimen_new_product__IS_O (k_I, x_S) {
-	var d = new Dimen ();
-	d.sp_S = nlib.nx_plus_y__ISS_S (k_I, x_S, nlib.Zero_S);
-	return d;
-    };
-
     proto.toString = function Dimen_toString () {
-	return nlib.unscale__S_N (this.sp_S).toFixed (3) + 'pt';
+	return nlib.to_texstr__S_O (this.sp_S);
     };
 
     proto.to_texstr = function Dimen_to_texstr () {
@@ -92,23 +83,11 @@ var Dimen = (function Dimen_closure () {
     };
 
     proto.clone = function Dimen_clone () {
-	var d = new Dimen ();
-	d.sp_S = this.sp_S;
-	return d;
+	return new Dimen (this.sp_S);
     };
 
     proto.is_nonzero = function Dimen_is_nonzero () {
 	return this.sp_S != 0;
-    };
-
-    proto.set_to = function Dimen_set_to (val) {
-	if (val instanceof Dimen)
-	    this.sp_S = val.sp_S;
-	else if (typeof val === 'number')
-	    this.sp_S = val;
-	else
-	    throw new TexInternalError ('expected int or Dimen value, got %o', val);
-	return this;
     };
 
     proto.as_int__I = function Dimen_as_int__I () {
@@ -128,29 +107,21 @@ var Dimen = (function Dimen_closure () {
     };
 
     Dimen.deserialize = function Dimen_deserialize (data) {
-	var d = new Dimen ();
-	d.sp_S = nlib.parse__O_S (data);
-	return d;
+	return new Dimen (nlib.parse__O_S (data));
     };
 
     proto.advance = function Dimen_advance (other) {
-	var d = new Dimen ();
-	d.sp_S += other.as_scaled__S ();
-	return d;
+	return new Dimen (this.sp_S + other.as_scaled__S ());
     };
 
     proto.product__I_O = function Dimen_product__I_O (k) {
 	k = nlib.maybe_unbox__O_I (k);
-	var d = new Dimen ();
-	d.sp_S = nlib.nx_plus_y__ISS_S (k, d.sp_S, nlib.Zero_S);
-	return d;
+	return new Dimen (nlib.nx_plus_y__ISS_S (k, this.sp_S, nlib.Zero_S));
     };
 
     proto.divide__I_O = function Dimen_divide__I_O (k) {
 	k = nlib.maybe_unbox__O_I (k);
-	var d = this.clone ();
-	d.sp_S = nlib.x_over_n__SI_SS (d.sp_S, k)[0];
-	return d;
+	return new Dimen (nlib.x_over_n__SI_SS (this.sp_S, k)[0]);
     };
 
     return Dimen;

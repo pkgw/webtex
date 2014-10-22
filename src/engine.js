@@ -1553,7 +1553,7 @@ var Engine = (function Engine_closure () {
 	return this.rangecheck__III_I (this.scan_int__I (), 0, 0x7FFFFFF);
     };
 
-    proto.scan_dimen = function Engine_scan_dimen (mumode, infmode) {
+    proto._scan_dimen__OO_SX = function Engine__scan_dimen__OO_SX (mumode, infmode) {
 	// `infmode` says whether infinities are allowed. If true, the return
 	// value is [dimen, infinity_order] rather than just the dimension.
 
@@ -1568,15 +1568,14 @@ var Engine = (function Engine_closure () {
 	var vt = tok.to_cmd (this).get_valtype ();
 
 	if (vt == T_DIMEN || vt == T_GLUE) {
-	    var v_S = tok.to_cmd (this).as_scaled__S (this);
+	    var result_S = tok.to_cmd (this).as_scaled__S (this);
 
 	    if (mumode) {
 		throw new TexRuntimeError ('not implemented');
 	    } else {
-		var d = Dimen.new_product__IS_O (negfactor_I, v_S);
 		if (infmode)
-		    return [d, 0];
-		return d;
+		    return [negfactor_I * result_S, 0];
+		return negfactor_I * result_S;
 	    }
 	} else if (vt == T_INT) {
 	    nonfrac_I = tok.to_cmd (this).as_int__I (this);
@@ -1701,19 +1700,26 @@ var Engine = (function Engine_closure () {
 	// TODO this isn't always done.
 	this.scan_one_optional_space ();
 
-	var dresult = Dimen.new_product__IS_O (negfactor_I, result_S);
 	if (infmode)
-	    return [dresult, inf_order];
-	return dresult;
+	    return [negfactor_I * result_S, inf_order];
+	return negfactor_I * result_S;
+    };
+
+    proto.scan_dimen__O_S = function Engine_scan_dimen__O_S (mumode) {
+	return this._scan_dimen__OO_SX (mumode, false);
+    };
+
+    proto.scan_infdimen__O_SO = function Engine_scan_infdimen__O_SO (mumode) {
+	return this._scan_dimen__OO_SX (mumode, true);
     };
 
     proto.scan_glue = function Engine_scan_glue (mumode) {
-	var t = this._scan_signs ();
-	var negfactor = t[0], tok = t[1];
+	var tmp = this._scan_signs ();
+	var negfactor = tmp[0], tok = tmp[1];
 
 	// Here's another case where we need to use get_valtype() because if
 	// we get the valref instance, we may eat upcoming tokens that will
-	// then be needed when scan_dimen() also tries to examine the value
+	// then be needed when scan_dimen__O_S() also tries to examine the value
 	// type.
 	var cmd = tok.to_cmd (this);
 	if (cmd.get_valtype () == T_GLUE)
@@ -1721,18 +1727,18 @@ var Engine = (function Engine_closure () {
 
 	var g = new Glue ();
 	this.push_back (tok);
-	g.amount_S = negfactor * this.scan_dimen (mumode, false).sp_S;
+	g.amount_S = negfactor * this.scan_dimen__O_S (mumode);
 
 	if (this.scan_keyword ('plus')) {
-	    t = this.scan_dimen (mumode, true);
-	    g.stretch_S = t[0].sp_S;
-	    g.stretch_order = t[1];
+	    tmp = this.scan_infdimen__O_SO (mumode);
+	    g.stretch_S = tmp[0];
+	    g.stretch_order = tmp[1];
 	}
 
 	if (this.scan_keyword ('minus')) {
-	    t = this.scan_dimen (mumode, true);
-	    g.shrink_S = t[0].sp_S;
-	    g.shrink_order = t[1];
+	    tmp = this.scan_infdimen__O_SO (mumode);
+	    g.shrink_S = tmp[0];
+	    g.shrink_order = tmp[1];
 	}
 
 	return g;
@@ -1765,11 +1771,12 @@ var Engine = (function Engine_closure () {
     };
 
     proto.scan_valtype = function Engine_scan_valtype (valtype) {
+	// Always returns a boxed value.
+
 	if (valtype == T_INT)
 	    return new TexInt (this.scan_int__I ());
 	if (valtype == T_DIMEN)
-	    // XXX we don't know what to put for infmode.
-	    return this.scan_dimen (false, false);
+	    return new Dimen (this.scan_dimen__O_S (false));
 	if (valtype == T_GLUE)
 	    return this.scan_glue (false);
 	if (valtype == T_MUGLUE)
@@ -1942,10 +1949,10 @@ var Engine = (function Engine_closure () {
 
 	if (this.scan_keyword ('to')) {
 	    is_exact = true;
-	    spec_S = this.scan_dimen ().sp_S;
+	    spec_S = this.scan_dimen__O_S (false);
 	} else if (this.scan_keyword ('spread')) {
 	    is_exact = false;
-	    spec_S = this.scan_dimen ().sp_S;
+	    spec_S = this.scan_dimen__O_S (false);
 	} else {
 	    is_exact = false;
 	    spec_S = nlib.Zero_S;
@@ -2052,10 +2059,10 @@ var Engine = (function Engine_closure () {
 
 	if (this.scan_keyword ('to')) {
 	    is_exact = true;
-	    spec_S = this.scan_dimen ().sp_S;
+	    spec_S = this.scan_dimen__O_S (false);
 	} else if (this.scan_keyword ('spread')) {
 	    is_exact = false;
-	    spec_S = this.scan_dimen ().sp_S;
+	    spec_S = this.scan_dimen__O_S (false);
 	} else {
 	    is_exact = false;
 	    spec_S = nlib.Zero_S;

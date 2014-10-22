@@ -501,7 +501,7 @@ register_command ('font', (function FontCommand_closure () {
 	var s = -1000;
 
 	if (engine.scan_keyword ('at')) {
-	    s = engine.scan_dimen ().sp_S;
+	    s = engine.scan_dimen__O_S (false);
 	    if (s <= 0) // FIXME: || s > SC_MAX
 		throw new TexRuntimeError ('illegal font size %o', s);
 	} else if (engine.scan_keyword ('scaled')) {
@@ -574,7 +574,7 @@ register_command ('fontdimen', (function FontDimenCommand_closure () {
 
 	var font = val.get (engine);
 	engine.scan_optional_equals ();
-	var val_S = engine.scan_dimen ().sp_S;
+	var val_S = engine.scan_dimen__O_S (false);
 	engine.trace ('fontdimen %o %d = %S', font, num, val_S);
 	font.set_dimen__NS (num, val_S);
 	engine.maybe_insert_after_assign_token ();
