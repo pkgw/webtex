@@ -208,7 +208,7 @@ var EquivTable = (function EquivTable_closure () {
 	    this._codes[CT_LOWERCASE][i] = 0;
 	    this._codes[CT_UPPERCASE][i] = 0;
 	    this._registers[T_INT][i] = 0;
-	    this._registers[T_DIMEN][i] = new Dimen ();
+	    this._registers[T_DIMEN][i] = nlib.Zero_S;
 	    this._registers[T_GLUE][i] = new Glue ();
 	    this._registers[T_MUGLUE][i] = new Glue ();
 	    this._registers[T_TOKLIST][i] = new Toklist ();
@@ -270,8 +270,8 @@ var EquivTable = (function EquivTable_closure () {
 		state.registers.ints[i] = r;
 
 	    r = this._registers[T_DIMEN][i];
-	    if (r != null && r.is_nonzero ())
-		state.registers.dimens[i] = r.as_serializable ();
+	    if (r != null && r != 0)
+		state.registers.dimens[i] = r;
 
 	    r = this._registers[T_GLUE][i];
 	    if (r != null && r.is_nonzero ())
@@ -308,7 +308,7 @@ var EquivTable = (function EquivTable_closure () {
 	for (name in this._parameters[T_DIMEN]) {
 	    if (!this._parameters[T_DIMEN].hasOwnProperty (name))
 		continue;
-	    state.parameters.dimens[name] = this._parameters[T_DIMEN][name].as_serializable ();
+	    state.parameters.dimens[name] = this._parameters[T_DIMEN][name];
 	}
 
 	for (name in this._parameters[T_GLUE]) {
@@ -420,15 +420,15 @@ var Engine = (function Engine_closure () {
 	this.set_special_value (T_INT, 'prevgraf', 0);
 	this.set_special_value (T_INT, 'deadcycles', 0);
 	this.set_special_value (T_INT, 'insertpenalties', 0);
-	this.set_special_value (T_DIMEN, 'prevdepth', new Dimen ());
-	this.set_special_value (T_DIMEN, 'pagegoal', new Dimen ());
-	this.set_special_value (T_DIMEN, 'pagetotal', new Dimen ());
-	this.set_special_value (T_DIMEN, 'pagestretch', new Dimen ());
-	this.set_special_value (T_DIMEN, 'pagefilstretch', new Dimen ());
-	this.set_special_value (T_DIMEN, 'pagefillstretch', new Dimen ());
-	this.set_special_value (T_DIMEN, 'pagefilllstretch', new Dimen ());
-	this.set_special_value (T_DIMEN, 'pageshrink', new Dimen ());
-	this.set_special_value (T_DIMEN, 'pagedepth', new Dimen ());
+	this.set_special_value (T_DIMEN, 'prevdepth', nlib.Zero_S);
+	this.set_special_value (T_DIMEN, 'pagegoal', nlib.Zero_S);
+	this.set_special_value (T_DIMEN, 'pagetotal', nlib.Zero_S);
+	this.set_special_value (T_DIMEN, 'pagestretch', nlib.Zero_S);
+	this.set_special_value (T_DIMEN, 'pagefilstretch', nlib.Zero_S);
+	this.set_special_value (T_DIMEN, 'pagefillstretch', nlib.Zero_S);
+	this.set_special_value (T_DIMEN, 'pagefilllstretch', nlib.Zero_S);
+	this.set_special_value (T_DIMEN, 'pageshrink', nlib.Zero_S);
+	this.set_special_value (T_DIMEN, 'pagedepth', nlib.Zero_S);
 
 	this._fonts = {};
 
@@ -532,8 +532,19 @@ var Engine = (function Engine_closure () {
 	return this.eqtb.get_parameter (T_INT, name);
     };
 
+    proto.get_parameter__O_S = function Engine_get_parameter__O_S (name) {
+	// Alias to help with naming-convention consistency.
+	return this.eqtb.get_parameter (T_DIMEN, name);
+    };
+
     proto.set_parameter = function Engine_set_parameter (valtype, name, value) {
 	this.eqtb.set_parameter (valtype, name, value, this._global_flag ());
+	this.maybe_insert_after_assign_token ();
+    };
+
+    proto.set_parameter__OS = function Engine_set_parameter__OS (name, value_S) {
+	// Alias to help with naming-convention consistency.
+	this.eqtb.set_parameter (T_DIMEN, name, value_S, this._global_flag ());
 	this.maybe_insert_after_assign_token ();
     };
 
@@ -779,7 +790,7 @@ var Engine = (function Engine_closure () {
 
 	if (indent) {
 	    var b = new HBox ();
-	    b.width_S = this.get_parameter (T_DIMEN, 'parindent').sp_S;
+	    b.width_S = this.get_parameter__O_S ('parindent');
 	    b.set_glue__OOS (this, false, nlib.Zero_S);
 	    this.accum (b);
 	}
@@ -813,7 +824,7 @@ var Engine = (function Engine_closure () {
 	    this.run_page_builder ();
 
 	this.set_parameter (T_INT, 'looseness', 0);
-	this.set_parameter (T_DIMEN, 'hangindent', new Dimen ());
+	this.set_parameter__OS ('hangindent', nlib.Zero_S);
 	this.set_parameter (T_INT, 'hangafter', 1);
 	// TODO: clear \parshape info, which nests in the EqTb.
     };
@@ -976,7 +987,7 @@ var Engine = (function Engine_closure () {
 	    this.trace ('... forcing page build');
 
 	    var hb = new HBox ();
-	    hb.width_S = this.get_parameter (T_DIMEN, 'hsize').sp_S;
+	    hb.width_S = this.get_parameter__O_S ('hsize');
 	    this.accum (hb);
 
 	    var g = new Glue ();
@@ -1142,11 +1153,11 @@ var Engine = (function Engine_closure () {
 
 	for (var reg in json.registers.ints)
 	    this.set_register (T_INT, nlib.parse__O_I (reg),
-			       TexInt.deserialize (json.registers.ints[reg]));
+			       nlib.parse__O_I (json.registers.ints[reg]));
 
 	for (var reg in json.registers.dimens)
 	    this.set_register (T_DIMEN, nlib.parse__O_I (reg),
-			       Dimen.deserialize (json.registers.dimens[reg]));
+			       nlib.parse__O_S (json.registers.dimens[reg]));
 
 	for (var reg in json.registers.glues)
 	    this.set_register (T_GLUE, nlib.parse__O_I (reg),
@@ -1167,7 +1178,7 @@ var Engine = (function Engine_closure () {
 	    this.set_parameter (T_INT, name, nlib.parse__O_I (json.parameters.ints[name]));
 
 	for (var name in json.parameters.dimens)
-	    this.set_parameter (T_DIMEN, name, Dimen.deserialize (json.parameters.dimens[name]));
+	    this.set_parameter__OS (name, nlib.parse__O_S (json.parameters.dimens[name]));
 
 	for (var name in json.parameters.glues)
 	    this.set_parameter (T_GLUE, name, Glue.deserialize (json.parameters.glues[name]));
@@ -2139,7 +2150,7 @@ var Engine = (function Engine_closure () {
 		if (this.mode () == M_IVERT) {
 		    // T:TP 1070: normal_paragraph
 		    this.set_parameter (T_INT, 'looseness', 0);
-		    this.set_parameter (T_DIMEN, 'hangindent', new Dimen ());
+		    this.set_parameter__OS ('hangindent', nlib.Zero_S);
 		    this.set_parameter (T_INT, 'hangafter', 1);
 		    // TODO: clear \parshape info, which nests in the EqTb.
 		}
@@ -2187,7 +2198,7 @@ var Engine = (function Engine_closure () {
 	else {
 	    // T:TP 1070: normal_paragraph
 	    this.set_parameter (T_INT, 'looseness', 0);
-	    this.set_parameter (T_DIMEN, 'hangindent', new Dimen ());
+	    this.set_parameter__OS ('hangindent', nlib.Zero_S);
 	    this.set_parameter (T_INT, 'hangafter', 1);
 	    // TODO: clear \parshape info, which nests in the EqTb.
 	    // XXX: ignoring ignore_depth
@@ -2323,9 +2334,9 @@ var Engine = (function Engine_closure () {
 
 	var list = this.leave_mode ();
 
-	var o = 0;
+	var o_S = nlib.Zero_S;
 	if (this.mode () == M_DMATH)
-	    o = this.get_parameter (T_DIMEN, 'displayindent').sp_S;
+	    o_S = this.get_parameter__O_S ('displayindent');
 
 	// TTP 801
 	// TTP 804

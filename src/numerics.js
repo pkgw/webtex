@@ -43,40 +43,63 @@ var nlib = (function nlib_closure () {
 
     nlib.Zero_S = 0; // just for naming convention clarity.
 
-    function checkint__N_I (value) {
+    function rangecheck__N_I (value) {
+	// We arrange the logic this way to error out appropriately on NaN.
+	if (Math.abs (value) <= INT_MAX)
+	    return value;
+	throw new TexRuntimeError ('out-of-range tex-int value %o', value);
+    }
+    nlib.rangecheck__N_I = rangecheck__N_I;
+
+    function check__N_I (value) {
 	if (typeof value != 'number')
 	    throw new TexInternalError ('non-numeric tex-int value %o', value);
 	if (value % 1 != 0)
 	    throw new TexInternalError ('non-integer tex-int value %o', value);
-
-	value = +value; // magic coercion to trustworthy int representation.
-
-	if (Math.abs (value) > INT_MAX)
-	    throw new TexRuntimeError ('out-of-range tex-int value %d', value);
-
-	return value; // type safety ok: magic promotion to TeX-compatible int.
+	return rangecheck__N_I (value | 0); // magic conversion to integer
     }
-    nlib.checkint__N_I = checkint__N_I;
+    nlib.check__N_I = check__N_I;
 
     function parse__O_I (text) {
-	return checkint__N_I (parseInt (text, 10));
+	var v = parseInt (text, 10);
+	if (isNaN (v))
+	    throw new TexRuntimeError ('non-numeric text "%s"', text);
+	return rangecheck__N_I (v);
     }
     nlib.parse__O_I = parse__O_I;
 
     function maybe_unbox__O_I (value) {
 	if (value instanceof TexInt)
 	    return value.value_I;
-	return checkint__N_I (value);
+	return check__N_I (value);
     }
     nlib.maybe_unbox__O_I = maybe_unbox__O_I;
 
 
+    function rangecheck__N_S (value) {
+	// We arrange the logic this way to error out appropriately on NaN.
+	if (Math.abs (value) <= SC_MAX)
+	    return value;
+	throw new TexRuntimeError ('out-of-range scaled value %o', value);
+    }
+    nlib.rangecheck__N_S = rangecheck__N_S;
+
+    function check__N_S (value) {
+	if (typeof value != 'number')
+	    throw new TexInternalError ('non-numeric scaled value %o', value);
+	if (value % 1 != 0)
+	    throw new TexInternalError ('non-integer scaled value %o', value);
+	return rangecheck__N_S (value | 0); // magic conversion to integer
+    }
+    nlib.check__N_S = check__N_S;
+
     function scale__I_S (value_I) {
-	return value_I * SC_UNITY;
+	return rangecheck__N_S (value_I * SC_UNITY);
     }
     nlib.scale__I_S = scale__I_S;
 
     function unscale__S_N (value_S) {
+	rangecheck__N_S (value_S);
 	return value_S * UNSCALE;
     }
     nlib.unscale__S_N = unscale__S_N;
@@ -84,22 +107,21 @@ var nlib = (function nlib_closure () {
     function from_raw__I_S (value_I) {
 	// This function exists to clarify what's going on when tricky things
 	// are happening when constructing scaled values.
-	return value_I;
+	return rangecheck__N_S (value_I);
     }
     nlib.from_raw__I_S = from_raw__I_S;
 
     function from_parts__II_S (nonfrac_I, frac_I) {
-	return nonfrac_I * SC_UNITY + frac_I; // type safety: this is correct.
+	// Yes, the type conversion here is correct.
+	return rangecheck__N_S (nonfrac_I * SC_UNITY + frac_I);
     }
     nlib.from_parts__II_S = from_parts__II_S;
 
     function parse__O_S (text) {
-	var value_S = parseInt (text, 10);
-
-	if (Math.abs (value_S) <= SC_MAX)
-	    return value_S;
-
-	throw new TexRuntimeError ('out-of-range scaled value %d', value_S);
+	var v = parseInt (text, 10);
+	if (isNaN (v))
+	    throw new TexRuntimeError ('non-numeric text "%s"', text);
+	return rangecheck__N_S (v);
     }
     nlib.parse__O_S = parse__O_S;
 

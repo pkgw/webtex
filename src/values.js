@@ -6,7 +6,7 @@ var TexInt = (function TexInt_closure () {
 	if (value instanceof TexInt)
 	    this.value_I = value.value_I;
 	else
-	    this.value_I = nlib.checkint__N_I (value);
+	    this.value_I = nlib.check__N_I (value);
     }
 
     inherit (TexInt, Value);

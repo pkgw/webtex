@@ -375,7 +375,7 @@ var VBox = (function VBox_closure () {
 
 	// Depth is prev_depth, unless \boxmaxdepth makes us shift the
 	// reference point.
-	var bmd_S = engine.get_parameter (T_DIMEN, 'boxmaxdepth').sp_S;
+	var bmd_S = engine.get_parameter__O_S ('boxmaxdepth');
 
 	if (prev_depth_S <= bmd_S) {
 	    this.depth_S = prev_depth_S;

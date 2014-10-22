@@ -152,7 +152,7 @@ def mac_init_parameters (emit, data, restargs):
             'muglue': ('T_MUGLUE', 'new Glue ()'),
             'toklist': ('T_TOKLIST', 'new Toklist ()'),
             'int': ('T_INT', '0'),
-            'dimen': ('T_DIMEN', 'new Dimen (0)'),
+            'dimen': ('T_DIMEN', 'nlib.Zero_S'),
         }
 
     for item in data.namedparams:

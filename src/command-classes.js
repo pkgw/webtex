@@ -375,7 +375,7 @@ var MathShiftCommand = (function MathShiftCommand_closure () {
 	    box.set_glue__OOS (engine, false, nlib.Zero_S);
 	    box = new CanvasBox (box); // our magic!
 
-	    var ms_S = engine.get_parameter (T_DIMEN, 'mathsurround').sp_S;
+	    var ms_S = engine.get_parameter__O_S ('mathsurround');
 	    engine.accum (new MathDelim (ms_S, false));
 	    engine.accum (box);
 	    engine.accum (new MathDelim (ms_S, true));

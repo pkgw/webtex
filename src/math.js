@@ -767,7 +767,7 @@ var mathlib = (function mathlib_closure () {
 
 	if (f == null) {
 	    b = new HBox ();
-	    b.width_S = state.engine.get_parameter (T_DIMEN, 'nulldelimiterspace').sp_S;
+	    b.width_S = state.engine.get_parameter__O_S ('nulldelimiterspace');
 	} else if (!f.get_metrics ().is_extensible (c)) {
 	    b = new HBox ();
 	    b.list = [new Character (f, c)];
@@ -965,14 +965,14 @@ var mathlib = (function mathlib_closure () {
 	if (q.sup == null) {
 	    // We're only called if there's a script, so sub most be non-null.
 	    var x = clean_box (state.subscript (), q.sub);
-	    x.width_S += engine.get_parameter (T_DIMEN, 'scriptspace').sp_S;
+	    x.width_S += engine.get_parameter__O_S ('scriptspace');
 
 	    clr = x.height_S - Math.abs (mxh * 4) / 5;
 	    var sub1 = state.sym_dimen__NN_S (state.size, SymDimens.Sub1);
 	    x.shift_amount_S = Math.max (shift_down, clr, sub1);
 	} else {
 	    var x = clean_box (state.superscript (), q.sup);
-	    x.width_S += engine.get_parameter (T_DIMEN, 'scriptspace').sp_S;
+	    x.width_S += engine.get_parameter__O_S ('scriptspace');
 
 	    if (state.cramped)
 		clr = state.sym_dimen__NN_S (state.size, SymDimens.Sup3);
@@ -989,7 +989,7 @@ var mathlib = (function mathlib_closure () {
 		x.shift_amount_S = -shift_up;
 	    else {
 		var y = clean_box (state.subscript (), q.sub);
-		y.width_S += engine.get_parameter (T_DIMEN, 'scriptspace').sp_S;
+		y.width_S += engine.get_parameter__O_S ('scriptspace');
 
 		shift_down = max (shift_down,
 				  state.sym_dimen__NN_S (state.size, SymDimens.Sub2));

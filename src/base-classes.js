@@ -129,7 +129,13 @@ var Value = (function Value_closure () {
 	if (valtype == T_INT) {
 	    if (value instanceof TexInt)
 		value = value.value_I;
-	    return nlib.checkint__N_I (value);
+	    return nlib.check__N_I (value);
+	}
+
+	if (valtype == T_DIMEN) {
+	    if (value instanceof Dimen)
+		return value.sp_S;
+	    return nlib.check__N_S (value);
 	}
 
 	return Value.ensure_boxed (valtype, value);

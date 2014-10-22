@@ -9,7 +9,7 @@ register_command ('par', function cmd_par (engine) {
 	// T:TP 1070
 	engine.trace ('par: vertical -> reset params');
 	engine.set_parameter (T_INT, 'looseness', 0);
-	engine.set_parameter (T_DIMEN, 'hangindent', new Dimen ());
+	engine.set_parameter__OS ('hangindent', nlib.Zero_S);
 	engine.set_parameter (T_INT, 'hangafter', 1);
 	// TODO: clear \parshape info, which nests in the EqTb.
     } else if (m == M_RHORZ) {
@@ -1201,7 +1201,7 @@ register_command ('insert', function cmd_insert (engine) {
 
     // T:TP 1070: "normal_paragraph"
     engine.set_parameter (T_INT, 'looseness', 0);
-    engine.set_parameter (T_DIMEN, 'hangindent', new Dimen ());
+    engine.set_parameter__OS ('hangindent', nlib.Zero_S);
     engine.set_parameter (T_INT, 'hangafter', 1);
     // TODO: clear \parshape info, which nests in the EqTb.
 
@@ -1343,11 +1343,11 @@ register_command ('lastkern', (function LastkernCommand_closure () {
     };
 
     proto.as_valref = function LastkernCommand_as_valref (engine) {
-	var val = new Dimen ();
+	var val_S = nlib.Zero_S;
 	var item = engine.get_last_listable ();
 	if (item != null && item.ltype == LT_KERN)
-	    val = item.amount_S;
-	return new ConstantValref (T_DIMEN, val);
+	    val_S = item.amount_S;
+	return new ConstantValref (T_DIMEN, val_S);
     };
 
     return LastkernCommand;
@@ -1509,7 +1509,7 @@ register_command ('vcenter', function cmd_vcenter (engine) {
 
     // T:TP 1070 -- XXX this is normal_paragraph
     engine.set_parameter (T_INT, 'looseness', 0);
-    engine.set_parameter (T_DIMEN, 'hangindent', new Dimen ());
+    engine.set_parameter__OS ('hangindent', nlib.Zero_S);
     engine.set_parameter (T_INT, 'hangafter', 1);
     // TODO: clear \parshape info, which nests in the EqTb.
 
