@@ -116,7 +116,7 @@ var Dimen = (function Dimen_closure () {
 
     proto.product__I_O = function Dimen_product__I_O (k) {
 	k = nlib.maybe_unbox__O_I (k);
-	return new Dimen (nlib.nx_plus_y__ISS_S (k, this.sp_S, nlib.Zero_S));
+	return new Dimen (nlib.n_times_x__IS_S (k, this.sp_S));
     };
 
     proto.divide__I_O = function Dimen_divide__I_O (k) {
@@ -237,9 +237,9 @@ var Glue = (function Glue_closure () {
     proto.product__I_O = function Glue_product__I_O (k) {
 	k = nlib.maybe_unbox__O_I (k);
 	var g = this.clone ();
-	g.amount_S = nlib.nx_plus_y__ISS_S (k, g.amount_S, nlib.Zero_S);
-	g.stretch_S = nlib.nx_plus_y__ISS_S (k, g.stretch_S, nlib.Zero_S);
-	g.shrink_S = nlib.nx_plus_y__ISS_S (k, g.shrink_S, nlib.Zero_S);
+	g.amount_S = nlib.n_times_x__IS_S (k, g.amount_S);
+	g.stretch_S = nlib.n_times_x__IS_S (k, g.stretch_S);
+	g.shrink_S = nlib.n_times_x__IS_S (k, g.shrink_S);
 	return g;
     };
 

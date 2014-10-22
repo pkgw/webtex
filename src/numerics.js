@@ -155,6 +155,19 @@ var nlib = (function nlib_closure () {
     }
     nlib.nx_plus_y__ISS_S = nx_plus_y__ISS_S;
 
+
+    function n_times_x__IS_S (n_I, x_S) {
+	// You know what? We're going to skip the paranoia.
+	var r_S = n_I * x_S;
+
+	if (Math.abs (r_S) <= SC_MAX)
+	    return r_S;
+
+	throw new TexRuntimeError ('overflow in n_times_x (n=%o x=%o)', n_I, x_S);
+    }
+    nlib.n_times_x__IS_S = n_times_x__IS_S;
+
+
     function xn_over_d__ISI_SS (n_I, x_S, d_I) {
 	// returns: [result_S, remainder_S]
 	//   where the remainder is relevant if the low-significance digits
