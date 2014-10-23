@@ -344,7 +344,8 @@ var register_command = (function register_command_wrapper () {
 
 var engine_proto = (function engine_proto_wrapper () {
     function EnginePrototype () {
-	this.methods = {};
+	this.engine_methods = {};
+	this.nesting_methods = {};
 	this.state_items = [];
     }
 
@@ -354,19 +355,40 @@ var engine_proto = (function engine_proto_wrapper () {
 	if (typeof func !== 'function')
 	    throw new TexInternalError ('unexpected register_method() arg %o', func);
 
-	if (this.methods.hasOwnProperty (name))
+	if (this.engine_methods.hasOwnProperty (name))
 	    throw new TexInternalError ('reregistring Engine method "%s"', name);
 
-	this.methods[name] = func;
+	this.engine_methods[name] = func;
 	return func; // convenience
     };
 
     proto._apply_methods = function EnginePrototype__apply_methods (engproto) {
-	for (var stem in this.methods) {
-	    if (!this.methods.hasOwnProperty (stem))
+	for (var stem in this.engine_methods) {
+	    if (!this.engine_methods.hasOwnProperty (stem))
 		continue;
 
-	    engproto[stem] = this.methods[stem];
+	    engproto[stem] = this.engine_methods[stem];
+	}
+    };
+
+
+    proto.register_nesting_method = function EnginePrototype_register_nesting_method (name, func) {
+	if (typeof func !== 'function')
+	    throw new TexInternalError ('unexpected register_nesting_method() arg %o', func);
+
+	if (this.nesting_methods.hasOwnProperty (name))
+	    throw new TexInternalError ('reregistring EquivTable method "%s"', name);
+
+	this.nesting_methods[name] = func;
+	return func; // convenience
+    };
+
+    proto._apply_nesting_methods = function EnginePrototype__apply_nesting_methods (eqtbproto) {
+	for (var stem in this.nesting_methods) {
+	    if (!this.nesting_methods.hasOwnProperty (stem))
+		continue;
+
+	    eqtbproto[stem] = this.nesting_methods[stem];
 	}
     };
 
@@ -381,13 +403,22 @@ var engine_proto = (function engine_proto_wrapper () {
     proto._call_state_funcs = function EnginePrototype__call_state_funcs (name/*, ...implicit*/) {
 	var args = Array.prototype.slice.call (arguments, 1);
 
-	for (var i = 0; i < this.state_items.length; i++)
-	    this.state_items[i][name].apply (null, args);
+	for (var i = 0; i < this.state_items.length; i++) {
+	    var func = this.state_items[i][name];
+
+	    if (func != null)
+		func.apply (null, args);;
+	}
     };
 
     proto._is_clean = function EnginePrototype__is_clean (engine) {
 	for (var i = 0; i < this.state_items.length; i++) {
-	    var r = this.state_items[i].is_clean (engine);
+	    var func = this.state_items[i].is_clean;
+
+	    if (func == null)
+		continue
+
+	    var r = func (engine);
 	    if (!r)
 		return false;
 	}

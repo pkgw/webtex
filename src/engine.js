@@ -12,13 +12,7 @@ var EquivTable = (function EquivTable_closure () {
 	    this._catcodes = parent._catcodes.slice ();
 	}
 
-	this._registers = {};
-	this._registers[T_INT] = {};
-	this._registers[T_DIMEN] = {};
-	this._registers[T_GLUE] = {};
-	this._registers[T_MUGLUE] = {};
-	this._registers[T_TOKLIST] = {};
-	this._registers[T_BOX] = {};
+	engine_proto._call_state_funcs ('nested_init', this);
 
 	this._parameters = {};
 	this._parameters[T_INT] = {};
@@ -47,34 +41,6 @@ var EquivTable = (function EquivTable_closure () {
     }
 
     var proto = EquivTable.prototype;
-
-    proto.get_register = function EquivTable_get_register (valtype, reg) {
-	if (!vt_ok_for_register[valtype])
-	    throw new TexRuntimeError ('illegal value type for register: %s',
-				       vt_names[valtype]);
-	if (reg < 0 || reg > 255)
-	    throw new TexRuntimeError ('illegal register number %d', reg);
-
-	if (this._registers[valtype].hasOwnProperty (reg))
-	    return this._registers[valtype][reg];
-	if (this.parent == null)
-	    throw new TexRuntimeError ('unset register; type=%s number=%d',
-				       vt_names[valtype], reg);
-	return this.parent.get_register (valtype, reg);
-    };
-
-    proto.set_register = function EquivTable_set_register (valtype, reg, value, global) {
-	if (!vt_ok_for_register[valtype])
-	    throw new TexRuntimeError ('illegal value type for register: %s',
-				       vt_names[valtype]);
-	if (reg < 0 || reg > 255)
-	    throw new TexRuntimeError ('illegal register number %d', reg);
-
-	this._registers[valtype][reg] = Value.ensure_unboxed (valtype, value);
-
-	if (global && this.parent != null)
-	    this.parent.set_register (valtype, reg, value, global);
-    };
 
     proto.get_parameter = function EquivTable_get_parameter (valtype, name) {
 	if (!vt_ok_for_parameter[valtype])
@@ -200,6 +166,8 @@ var EquivTable = (function EquivTable_closure () {
     };
 
     proto._toplevel_init = function EquivTable__toplevel_init () {
+	engine_proto._call_state_funcs ('nested_toplevel_init', this);
+
 	for (var i = 0; i < 256; i++) {
 	    this._catcodes[i] = C_OTHER;
 	    this._codes[CT_MATH][i] = i;
@@ -207,12 +175,6 @@ var EquivTable = (function EquivTable_closure () {
 	    this._codes[CT_DELIM][i] = -1;
 	    this._codes[CT_LOWERCASE][i] = 0;
 	    this._codes[CT_UPPERCASE][i] = 0;
-	    this._registers[T_INT][i] = 0;
-	    this._registers[T_DIMEN][i] = nlib.Zero_S;
-	    this._registers[T_GLUE][i] = new Glue ();
-	    this._registers[T_MUGLUE][i] = new Glue ();
-	    this._registers[T_TOKLIST][i] = new Toklist ();
-	    this._registers[T_BOX][i] = new VoidBox ();
 	}
 
 	for (var i = 0; i < 26; i++) {
@@ -257,39 +219,14 @@ var EquivTable = (function EquivTable_closure () {
 	var name = null;
 
 	state.catcodes = this._catcodes;
-	state.registers = {ints: {}, dimens: {}, glues: {}, muglues: {},
-			   toklists: {}};
 	state.parameters = {ints: {}, dimens: {}, glues: {}, muglues: {},
 			    toklists: {}};
 	state.commands = {};
 	state.actives = {};
 
+	engine_proto._call_state_funcs ('nested_serialize', this, state, housekeeping);
+
 	for (i = 0; i < 256; i++) {
-	    var r = this._registers[T_INT][i];
-	    if (r != null && r != 0)
-		state.registers.ints[i] = r;
-
-	    r = this._registers[T_DIMEN][i];
-	    if (r != null && r != 0)
-		state.registers.dimens[i] = r;
-
-	    r = this._registers[T_GLUE][i];
-	    if (r != null && r.is_nonzero ())
-		state.registers.glues[i] = r.as_serializable ();
-
-	    r = this._registers[T_MUGLUE][i];
-	    if (r != null && r.is_nonzero ())
-		state.registers.muglues[i] = r.as_serializable ();
-
-	    r = this._registers[T_TOKLIST][i];
-	    if (r != null && r.is_nonzero ())
-		state.registers.toklists[i] = r.as_serializable ();
-
-	    //Box contents don't get serialized. I think.
-	    //r = this._registers[T_BOX][i];
-	    //if (r != null && r.is_nonzero ())
-	    //	state.registers.boxes[i] = r.as_serializable ();
-
 	    if (this._actives.hasOwnProperty (i))
 		state.actives[i] = this._actives[i].get_serialize_ident (state, housekeeping);
 	}
@@ -383,6 +320,8 @@ var EquivTable = (function EquivTable_closure () {
 
 	return state;
     };
+
+    engine_proto._apply_nesting_methods (proto);
 
     return EquivTable;
 })();
@@ -512,15 +451,6 @@ var Engine = (function Engine_closure () {
 	if (gd < 0)
 	    return false;
 	return this.assign_flags & AF_GLOBAL;
-    };
-
-    proto.get_register = function Engine_get_register (valtype, reg) {
-	return this.eqtb.get_register (valtype, reg);
-    };
-
-    proto.set_register = function Engine_get_register (valtype, reg, value) {
-	this.eqtb.set_register (valtype, reg, value, this._global_flag ());
-	this.maybe_insert_after_assign_token ();
     };
 
     proto.get_parameter = function Engine_get_parameter (valtype, name) {
@@ -1142,6 +1072,8 @@ var Engine = (function Engine_closure () {
 	// -- it's a little bit sketchy that this function is so far from that,
 	// but it seems good to take advantage of our wrapper setter functions.
 
+	engine_proto._call_state_funcs ('deserialize', this, json, housekeeping);
+
 	for (i = 0; i < 255; i++) {
 	    this.set_code (CT_CATEGORY, i, json.catcodes[i]);
 	    this.set_code (CT_LOWERCASE, i, json.codes.lower[i]);
@@ -1150,26 +1082,6 @@ var Engine = (function Engine_closure () {
 	    this.set_code (CT_MATH, i, json.codes.math[i]);
 	    this.set_code (CT_DELIM, i, json.codes.delim[i]);
 	}
-
-	for (var reg in json.registers.ints)
-	    this.set_register (T_INT, nlib.parse__O_I (reg),
-			       nlib.parse__O_I (json.registers.ints[reg]));
-
-	for (var reg in json.registers.dimens)
-	    this.set_register (T_DIMEN, nlib.parse__O_I (reg),
-			       nlib.parse__O_S (json.registers.dimens[reg]));
-
-	for (var reg in json.registers.glues)
-	    this.set_register (T_GLUE, nlib.parse__O_I (reg),
-			       Glue.deserialize (json.registers.glues[reg]));
-
-	for (var reg in json.registers.muglues)
-	    this.set_register (T_MUGLUE, nlib.parse__O_I (reg),
-			       Glue.deserialize (json.registers.muglues[reg]));
-
-	for (var reg in json.registers.toklists)
-	    this.set_register (T_TOKLIST, nlib.parse__O_I (reg),
-			       Toklist.deserialize (json.registers.toklists[reg]));
 
 	for (var ord in json.actives)
 	    this.set_active (nlib.parse__O_I (ord), getcmd (json.actives[ord]));
@@ -1530,15 +1442,6 @@ var Engine = (function Engine_closure () {
 
     proto.scan_char_code__I = function Engine_scan_char_code__I () {
 	return this.rangecheck__III_I (this.scan_int__I (), 0, 255);
-    };
-
-    proto.scan_register_num__I = function Engine_scan_register_num__I () {
-	var v = this.scan_int__I ();
-
-	if (v < 0 || v > 255)
-	    throw new TexRuntimeError ('illegal register number %d', v);
-
-	return v;
     };
 
     proto.scan_int_4bit__I = function Engine_scan_int_4bit__I () {
