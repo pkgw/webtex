@@ -5,7 +5,7 @@
     var CS_FI = 0, CS_ELSE_FI = 1, CS_OR_ELSE_FI = 2, CS_INCONDITION = 3;
 
     engine_proto.register_state ({
-	init: function (engine) {
+	engine_init: function (engine) {
 	    engine.conditional_stack = [];
 	},
 	is_clean: function (engine) {

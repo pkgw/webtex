@@ -375,20 +375,14 @@ var engine_proto = (function engine_proto_wrapper () {
 	if (typeof info !== 'object')
 	    throw new TexInternalError ('unexpected register_state() arg %o', info);
 
-	if (typeof info.init !== 'function')
-	    throw new TexInternalError ('register_state() data %j must have ' +
-					'"init" function', info);
-
-	if (typeof info.is_clean !== 'function')
-	    throw new TexInternalError ('register_state() data %j must have ' +
-					'"is_clean" function', info);
-
 	this.state_items.push (info);
     };
 
-    proto._apply_inits = function EnginePrototype__apply_inits (engine) {
+    proto._call_state_funcs = function EnginePrototype__call_state_funcs (name/*, ...implicit*/) {
+	var args = Array.prototype.slice.call (arguments, 1);
+
 	for (var i = 0; i < this.state_items.length; i++)
-	    this.state_items[i].init (engine);
+	    this.state_items[i][name].apply (null, args);
     };
 
     proto._is_clean = function EnginePrototype__is_clean (engine) {

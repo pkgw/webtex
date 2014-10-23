@@ -450,7 +450,7 @@ var Engine = (function Engine_closure () {
 	    this.outfiles[i] = null;
 	}
 
-	engine_proto._apply_inits (this);
+	engine_proto._call_state_funcs ('engine_init', this);
 
 	this.commands = {};
 	fill_cseq_commands (this);
