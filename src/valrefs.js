@@ -1,32 +1,5 @@
 // References to values, as many commands are.
 
-var ParamValref = (function ParamValref_closure () {
-    function ParamValref (valtype, name) {
-	if (!vt_ok_for_parameter[valtype])
-	    throw new TexInternalError ('illegal valtype for parameter: %s',
-					vt_names[valtype]);
-
-	Valref.call (this, valtype);
-	this.name = name;
-    }
-
-    inherit (ParamValref, Valref);
-    var proto = ParamValref.prototype;
-
-    proto.get = function ParamValref_get (engine) {
-	var rv = engine.get_parameter (this.valtype, this.name);
-	return Value.ensure_boxed (this.valtype, rv);
-    };
-
-    proto.set = function ParamValref_set (engine, value) {
-	value = Value.ensure_unboxed (this.valtype, value);
-	engine.set_parameter (this.valtype, this.name, value);
-    };
-
-    return ParamValref;
-}) ();
-
-
 var SpecialValref = (function SpecialValref_closure () {
     function SpecialValref (valtype, name) {
 	Valref.call (this, valtype);

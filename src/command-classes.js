@@ -838,50 +838,6 @@ var MathStyleCommand = (function MathStyleCommand_closure () {
 })();
 
 
-// Commands for named parameters
-
-var NamedParamCommand = (function NamedParamCommand_closure () {
-    function NamedParamCommand (name, valtype) {
-	if (!vt_ok_for_parameter[valtype])
-	    throw new TexInternalError ('illegal valtype for parameter: %s',
-					vt_names[valtype]);
-
-	Command.call (this);
-	this.name = name;
-	this.valtype = valtype;
-    }
-
-    inherit (NamedParamCommand, Command);
-    var proto = NamedParamCommand.prototype;
-    proto.assign_flag_mode = AFM_CONSUME;
-
-    proto.same_cmd = function NamedParamCommand_same_cmd (other) {
-	if (other == null)
-	    return false;
-	if (this.name != other.name)
-	    return false;
-	return this.valtype == other.valtype;
-    };
-
-    proto.get_valtype = function NamedParamCommand_get_valtype () {
-	return this.valtype;
-    };
-
-    proto.as_valref = function NamedParamCommand_as_valref (engine) {
-	return new ParamValref (this.valtype, this.name);
-    };
-
-    proto.invoke = function NamedParamCommand_invoke (engine) {
-	engine.scan_optional_equals ();
-	var newval = engine.scan_valtype (this.valtype);
-	engine.trace ('%s = %o', this.name, newval);
-	this.as_valref (engine).set (engine, newval);
-    };
-
-    return NamedParamCommand;
-})();
-
-
 var SpecialValueCommand = (function SpecialValueCommand_closure () {
     function SpecialValueCommand (valtype, name) {
 	Command.call (this);

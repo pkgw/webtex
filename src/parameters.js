@@ -1,7 +1,13 @@
 // TeX's named parameters. These have various types and participate in the
 // nesting state system.
+//
+// We have export NamedParamCommand so that engine-helpers-tmpl.js can use it
+// to populate all of the ... named parameter commands.
 
-(function parameter_wrapper () {
+var NamedParamCommand = (function parameter_wrapper () {
+    // XXX: indexed by the T_* values in constants.js.
+    var vt_ok_for_parameter = [true, true, true, true, true, false, false];
+
     engine_proto.register_state ({
 	nested_init: function (eqtb) {
 	    eqtb._parameters = {};
@@ -153,4 +159,75 @@
 	this.eqtb.set_parameter (T_DIMEN, name, value_S, this._global_flag ());
 	this.maybe_insert_after_assign_token ();
     });
+
+
+    var ParamValref = (function ParamValref_closure () {
+	function ParamValref (valtype, name) {
+	    if (!vt_ok_for_parameter[valtype])
+		throw new TexInternalError ('illegal valtype for parameter: %s',
+					    vt_names[valtype]);
+
+	    Valref.call (this, valtype);
+	    this.name = name;
+	}
+
+	inherit (ParamValref, Valref);
+	var proto = ParamValref.prototype;
+
+	proto.get = function ParamValref_get (engine) {
+	    var rv = engine.get_parameter (this.valtype, this.name);
+	    return Value.ensure_boxed (this.valtype, rv);
+	};
+
+	proto.set = function ParamValref_set (engine, value) {
+	    value = Value.ensure_unboxed (this.valtype, value);
+	    engine.set_parameter (this.valtype, this.name, value);
+	};
+
+	return ParamValref;
+    }) ();
+
+
+    var NamedParamCommand = (function NamedParamCommand_closure () {
+	function NamedParamCommand (name, valtype) {
+	    if (!vt_ok_for_parameter[valtype])
+		throw new TexInternalError ('illegal valtype for parameter: %s',
+					    vt_names[valtype]);
+
+	    Command.call (this);
+	    this.name = name;
+	    this.valtype = valtype;
+	}
+
+	inherit (NamedParamCommand, Command);
+	var proto = NamedParamCommand.prototype;
+	proto.assign_flag_mode = AFM_CONSUME;
+
+	proto.same_cmd = function NamedParamCommand_same_cmd (other) {
+	    if (other == null)
+		return false;
+	    if (this.name != other.name)
+		return false;
+	    return this.valtype == other.valtype;
+	};
+
+	proto.get_valtype = function NamedParamCommand_get_valtype () {
+	    return this.valtype;
+	};
+
+	proto.as_valref = function NamedParamCommand_as_valref (engine) {
+	    return new ParamValref (this.valtype, this.name);
+	};
+
+	proto.invoke = function NamedParamCommand_invoke (engine) {
+	    engine.scan_optional_equals ();
+	    var newval = engine.scan_valtype (this.valtype);
+	    engine.trace ('%s = %o', this.name, newval);
+	    this.as_valref (engine).set (engine, newval);
+	};
+
+	return NamedParamCommand;
+    })();
+
+    return NamedParamCommand;
 }) ();
