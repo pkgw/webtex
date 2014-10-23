@@ -245,13 +245,7 @@ register_command ('aftergroup', function cmd_aftergroup (engine) {
 });
 
 
-// Register access and manipulation: \count, \advance, etc.
-
-register_command ('count', new VariableRegisterCommand ('count', T_INT));
-register_command ('dimen', new VariableRegisterCommand ('dimen', T_DIMEN));
-register_command ('skip', new VariableRegisterCommand ('skip', T_GLUE));
-register_command ('muskip', new VariableRegisterCommand ('muskip', T_MUGLUE));
-register_command ('toks', new VariableRegisterCommand ('toks', T_TOKLIST));
+// Basic math
 
 register_command ('advance', function cmd_advance (engine) {
     var tok = engine.next_x_tok ();
@@ -286,36 +280,6 @@ register_command ('multiply', function cmd_multiply (engine) {
     var factor_I = engine.scan_int__I ();
     engine.trace ('multiply %o = %o * %o', cmd, cur, factor_I);
     val.set (engine, cur.product__I_O (factor_I));
-});
-
-
-function define_register (name, valtype, engine) {
-    var cstok = engine.scan_r_token ();
-    engine.scan_optional_equals ();
-    var reg = engine.scan_register_num__I ();
-    engine.trace ('%sdef %o -> {\\%s%d}', name, cstok, name, reg);
-    cstok.assign_cmd (engine, new GivenRegisterCommand (valtype, name, reg));
-};
-
-
-register_command ('countdef', function cmd_countdef (engine) {
-    define_register ('count', T_INT, engine);
-});
-
-register_command ('dimendef', function cmd_dimendef (engine) {
-    define_register ('dimen', T_DIMEN, engine);
-});
-
-register_command ('skipdef', function cmd_skipdef (engine) {
-    define_register ('skip', T_GLUE, engine);
-});
-
-register_command ('muskipdef', function cmd_muskipdef (engine) {
-    define_register ('muskip', T_MUGLUE, engine);
-});
-
-register_command ('toksdef', function cmd_toksdef (engine) {
-    define_register ('toks', T_TOKLIST, engine);
 });
 
 

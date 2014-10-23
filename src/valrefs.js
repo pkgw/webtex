@@ -1,34 +1,5 @@
 // References to values, as many commands are.
 
-var RegisterValref = (function RegisterValref_closure () {
-    function RegisterValref (valtype, reg) {
-	if (!vt_ok_for_register[valtype])
-	    throw new TexInternalError ('illegal valtype for register: %s',
-					vt_names[valtype]);
-	if (reg < 0 || reg > 255)
-	    throw new TexInternalError ('illegal register %d', reg);
-
-	Valref.call (this, valtype);
-	this.reg = reg;
-    }
-
-    inherit (RegisterValref, Valref);
-    var proto = RegisterValref.prototype;
-
-    proto.get = function RegisterValref_get (engine) {
-	var rv = engine.get_register (this.valtype, this.reg);
-	return Value.ensure_boxed (this.valtype, rv);
-    };
-
-    proto.set = function RegisterValref_set (engine, value) {
-	value = Value.ensure_unboxed (this.valtype, value);
-	engine.set_register (this.valtype, this.reg, value);
-    };
-
-    return RegisterValref;
-}) ();
-
-
 var ParamValref = (function ParamValref_closure () {
     function ParamValref (valtype, name) {
 	if (!vt_ok_for_parameter[valtype])

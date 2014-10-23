@@ -1002,36 +1002,23 @@ var Engine = (function Engine_closure () {
 	return this.eqtb.serialize (state, housekeeping);
     };
 
-    var command_ctors = {
-	'<begin-group>': BeginGroupCommand.deserialize,
-	'<end-group>': EndGroupCommand.deserialize,
-	'<given-char>': GivenCharCommand.deserialize,
-	'<given-count>': function deserialize_count (data, hk) {
-	    return new GivenRegisterCommand (T_INT, 'count', nlib.parse__O_I (data));
-	},
-	'<given-dimen>': function deserialize_dimen (data, hk) {
-	    return new GivenRegisterCommand (T_DIMEN, 'dimen', nlib.parse__O_I (data));
-	},
-	'<given-font>': function deserialize_font (data, hk) {
-	    return new GivenFontCommand (hk.fonts[data]);
-	},
-	'<given-skip>': function deserialize_skip (data, hk) {
-	    return new GivenRegisterCommand (T_GLUE, 'skip', nlib.parse__O_I (data));
-	},
-	'<given-toks>': function deserialize_skip (data, hk) {
-	    return new GivenRegisterCommand (T_TOKLIST, 'toks', nlib.parse__O_I (data));
-	},
-	'<given-mathchar>': GivenMathcharCommand.deserialize,
-	'<macro>': MacroCommand.deserialize,
-	'<space>': SpacerCommand.deserialize,
-	'<subscript>': SubCommand.deserialize,
-	'<superscript>': SuperCommand.deserialize,
-	'undefined': UndefinedCommand.deserialize,
-    };
+    register_command_deserializer ('<begin-group>', BeginGroupCommand.deserialize);
+    register_command_deserializer ('<end-group>', EndGroupCommand.deserialize);
+    register_command_deserializer ('<given-char>', GivenCharCommand.deserialize);
+    register_command_deserializer ('<given-mathchar>', GivenMathcharCommand.deserialize);
+    register_command_deserializer ('<macro>', MacroCommand.deserialize);
+    register_command_deserializer ('<space>', SpacerCommand.deserialize);
+    register_command_deserializer ('<subscript>', SubCommand.deserialize);
+    register_command_deserializer ('<superscript>', SuperCommand.deserialize);
+    register_command_deserializer ('undefined', UndefinedCommand.deserialize);
+    register_command_deserializer ('<given-font>', function deserialize_font (data, hk) {
+	return new GivenFontCommand (hk.fonts[data]);
+    });
 
     proto.restore_serialized_state = function Engine_restore_serialized_state (json) {
 	this._check_clean ();
 
+	var command_ctors = register_command_deserializer._registry;
 	var housekeeping = {fonts: {}};
 	var i = 0;
 

@@ -10,7 +10,6 @@ var T_INT = 0,     // a simple integer
     T_BOX = 5,     // a box
     T_FONT = 6;    // a font.
 
-var vt_ok_for_register = [true, true, true, true, true, true, false];
 var vt_ok_for_parameter = [true, true, true, true, true, false, false];
 var vt_names = ['int', 'dimen', 'glue', 'muglue', 'toklist', 'box', 'font'];
 

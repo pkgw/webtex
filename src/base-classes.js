@@ -337,6 +337,23 @@ var register_command = (function register_command_wrapper () {
 }) ();
 
 
+var register_command_deserializer = (function register_command_deserializer_wrapper () {
+    var deserializers = {};
+
+    function register_command_deserializer (name, value) {
+	if (deserializers[name] != null)
+	    throw new TexInternalError ('duplicate registration of command ' +
+					'deserializer "%s"', name);
+
+	deserializers[name] = value;
+    }
+
+    register_command_deserializer._registry = deserializers;
+
+    return register_command_deserializer;
+}) ();
+
+
 // We don't actually define the Engine class here, but we define hooks for
 // extending it in various ways. This lets us have the convenience of being
 // able to call methods on the Engine without having to have a giant file that
