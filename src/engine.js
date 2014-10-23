@@ -14,13 +14,6 @@ var EquivTable = (function EquivTable_closure () {
 
 	engine_proto._call_state_funcs ('nested_init', this);
 
-	this._parameters = {};
-	this._parameters[T_INT] = {};
-	this._parameters[T_DIMEN] = {};
-	this._parameters[T_GLUE] = {};
-	this._parameters[T_MUGLUE] = {};
-	this._parameters[T_TOKLIST] = {};
-
 	this._codes = {};
 	this._codes[CT_LOWERCASE] = {};
 	this._codes[CT_UPPERCASE] = {};
@@ -41,29 +34,6 @@ var EquivTable = (function EquivTable_closure () {
     }
 
     var proto = EquivTable.prototype;
-
-    proto.get_parameter = function EquivTable_get_parameter (valtype, name) {
-	if (!vt_ok_for_parameter[valtype])
-	    throw new TexRuntimeError ('illegal value type for parameter: %s',
-				       vt_names[valtype]);
-
-	if (this._parameters[valtype].hasOwnProperty (name))
-	    return this._parameters[valtype][name];
-	if (this.parent == null)
-	    throw new TexRuntimeError ('undefined named parameter %s', name);
-	return this.parent.get_parameter (valtype, name);
-    };
-
-    proto.set_parameter = function EquivTable_set_parameter (valtype, name, value, global) {
-	if (!vt_ok_for_parameter[valtype])
-	    throw new TexRuntimeError ('illegal value type for parameter: %s',
-				       vt_names[valtype]);
-
-	this._parameters[valtype][name] = Value.ensure_unboxed (valtype, value);
-
-	if (global && this.parent != null)
-	    this.parent.set_parameter (valtype, name, value, global);
-    };
 
     proto.get_code = function EquivTable_get_code (codetype, ord) {
 	if (ord < 0 || ord > 255)
@@ -208,8 +178,6 @@ var EquivTable = (function EquivTable_closure () {
 	    this._font_families[MS_SCRIPTSCRIPT][i] = null;
 	}
 
-	// Needed for Engine initialization to work:
-	this._parameters[T_INT].globaldefs = 0;
     };
 
     // Serialization. Our equivalent of the \dump primitive.
@@ -219,8 +187,6 @@ var EquivTable = (function EquivTable_closure () {
 	var name = null;
 
 	state.catcodes = this._catcodes;
-	state.parameters = {ints: {}, dimens: {}, glues: {}, muglues: {},
-			    toklists: {}};
 	state.commands = {};
 	state.actives = {};
 
@@ -229,41 +195,6 @@ var EquivTable = (function EquivTable_closure () {
 	for (i = 0; i < 256; i++) {
 	    if (this._actives.hasOwnProperty (i))
 		state.actives[i] = this._actives[i].get_serialize_ident (state, housekeeping);
-	}
-
-	// Parameters
-
-	for (name in this._parameters[T_INT]) {
-	    if (!this._parameters[T_INT].hasOwnProperty (name))
-		continue;
-	    if (name == 'year' || name == 'month' || name == 'day' ||
-		name == 'time')
-		continue;
-	    state.parameters.ints[name] = this._parameters[T_INT][name];
-	}
-
-	for (name in this._parameters[T_DIMEN]) {
-	    if (!this._parameters[T_DIMEN].hasOwnProperty (name))
-		continue;
-	    state.parameters.dimens[name] = this._parameters[T_DIMEN][name];
-	}
-
-	for (name in this._parameters[T_GLUE]) {
-	    if (!this._parameters[T_GLUE].hasOwnProperty (name))
-		continue;
-	    state.parameters.glues[name] = this._parameters[T_GLUE][name].as_serializable ();
-	}
-
-	for (name in this._parameters[T_MUGLUE]) {
-	    if (!this._parameters[T_MUGLUE].hasOwnProperty (name))
-		continue;
-	    state.parameters.muglues[name] = this._parameters[T_MUGLUE][name].as_serializable ();
-	}
-
-	for (name in this._parameters[T_TOKLIST]) {
-	    if (!this._parameters[T_TOKLIST].hasOwnProperty (name))
-		continue;
-	    state.parameters.toklists[name] = this._parameters[T_TOKLIST][name].as_serializable ();
 	}
 
 	// Various other "codes".
@@ -389,8 +320,6 @@ var Engine = (function Engine_closure () {
 	    this.outfiles[i] = null;
 	}
 
-	engine_proto._call_state_funcs ('engine_init', this);
-
 	this.commands = {};
 	fill_cseq_commands (this);
 	engine_init_parameters (this);
@@ -399,19 +328,7 @@ var Engine = (function Engine_closure () {
 	this.commands['<end-group>'] = new Command.catcode_commands[C_EGROUP] (O_LEFT_BRACE);
 	this.commands['<endv>'] = new register_command._registry._endv_ ();
 
-	// T:TP sec 240; has to go after $init_parameters
-	this.set_parameter (T_INT, 'mag', 1000);
-	this.set_parameter (T_INT, 'tolerance', 1000);
-	this.set_parameter (T_INT, 'hangafter', 1);
-	this.set_parameter (T_INT, 'maxdeadcycles', 25);
-	this.set_parameter (T_INT, 'escapechar', O_BACKSLASH);
-	this.set_parameter (T_INT, 'endlinechar', O_RETURN);
-
-	var d = new Date ();
-	this.set_parameter (T_INT, 'year', d.getFullYear ());
-	this.set_parameter (T_INT, 'month', d.getMonth ());
-	this.set_parameter (T_INT, 'day', d.getDay ());
-	this.set_parameter (T_INT, 'time', d.getHours () * 60 + d.getMinutes ());
+	engine_proto._call_state_funcs ('engine_init', this);
 
 	var nf = new Font (this, 'nullfont', -1000);
 	this._fonts['<null>'] = this._fonts['nullfont'];
@@ -451,31 +368,6 @@ var Engine = (function Engine_closure () {
 	if (gd < 0)
 	    return false;
 	return this.assign_flags & AF_GLOBAL;
-    };
-
-    proto.get_parameter = function Engine_get_parameter (valtype, name) {
-	return this.eqtb.get_parameter (valtype, name);
-    };
-
-    proto.get_parameter__O_I = function Engine_get_parameter__O_I (name) {
-	// Alias to help with naming-convention consistency.
-	return this.eqtb.get_parameter (T_INT, name);
-    };
-
-    proto.get_parameter__O_S = function Engine_get_parameter__O_S (name) {
-	// Alias to help with naming-convention consistency.
-	return this.eqtb.get_parameter (T_DIMEN, name);
-    };
-
-    proto.set_parameter = function Engine_set_parameter (valtype, name, value) {
-	this.eqtb.set_parameter (valtype, name, value, this._global_flag ());
-	this.maybe_insert_after_assign_token ();
-    };
-
-    proto.set_parameter__OS = function Engine_set_parameter__OS (name, value_S) {
-	// Alias to help with naming-convention consistency.
-	this.eqtb.set_parameter (T_DIMEN, name, value_S, this._global_flag ());
-	this.maybe_insert_after_assign_token ();
     };
 
     proto.get_code = function Engine_get_code (valtype, ord) {
@@ -1072,21 +964,6 @@ var Engine = (function Engine_closure () {
 
 	for (var ord in json.actives)
 	    this.set_active (nlib.parse__O_I (ord), getcmd (json.actives[ord]));
-
-	for (var name in json.parameters.ints)
-	    this.set_parameter (T_INT, name, nlib.parse__O_I (json.parameters.ints[name]));
-
-	for (var name in json.parameters.dimens)
-	    this.set_parameter__OS (name, nlib.parse__O_S (json.parameters.dimens[name]));
-
-	for (var name in json.parameters.glues)
-	    this.set_parameter (T_GLUE, name, Glue.deserialize (json.parameters.glues[name]));
-
-	for (var name in json.parameters.muglues)
-	    this.set_parameter (T_MUGLUE, name, Glue.deserialize (json.parameters.muglues[name]));
-
-	for (var name in json.parameters.toklists)
-	    this.set_parameter (T_TOKLIST, name, Toklist.deserialize (json.parameters.toklists[name]));
 
 	for (var cseq in json.cseqs)
 	    this.set_cseq (cseq, getcmd (json.cseqs[cseq]));

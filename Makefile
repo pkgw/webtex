@@ -18,6 +18,7 @@ sharedjs = \
   src/base-classes.js \
   src/values.js \
   src/registers.js \
+  src/parameters.js \
   src/conditionals.js \
   src/fonts.js \
   src/boxes.js \
