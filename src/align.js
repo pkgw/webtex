@@ -7,7 +7,7 @@
 	function AlignColumn () {
 	    this.u_tmpl = [];
 	    this.v_tmpl = [];
-	    this.span_widths = {};
+	    this.span_widths_S = {};
 	}
 
 	var proto = AlignColumn.prototype;
@@ -334,27 +334,27 @@
 	    // current mode. I'm doing the same for now, even though it feels
 	    // gross.
 
-	    var w, b;
+	    var w_S, b;
 
 	    if (engine.mode () == M_RHORZ) {
 		b = new HBox ();
 		b.list = engine.build_stack.pop ();
 		engine.build_stack.push ([]);
 		b.set_glue__OOS (engine, false, nlib.Zero_S);
-		w = b.width_S;
+		w_S = b.width_S;
 	    } else {
 		b = new VBox ();
 		b.list = engine.build_stack.pop ();
 		engine.build_stack.push ([]);
 		b.set_glue__OOS (engine, false, nlib.Zero_S);
-		w = b.height_S;
+		w_S = b.height_S;
 	    }
 
 	    var n = astate.cur_col - astate.cur_span_col + 1;
-	    if (!col.span_widths.hasOwnProperty (n))
-		col.span_widths[n] = w;
+	    if (!col.span_widths_S.hasOwnProperty (n))
+		col.span_widths_S[n] = w_S;
 	    else
-		col.span_widths[n] = Math.max (col.span_widths[n], w);
+		col.span_widths_S[n] = Math.max (col.span_widths_S[n], w_S);
 
 	    // XXX: TTP796 calculates glue order here. I don't think we need
 	    // to?
