@@ -1496,54 +1496,6 @@ register_command ('vcenter', function cmd_vcenter (engine) {
 });
 
 
-// Alignments
-
-register_command ('cr', function cmd_cr (engine) {
-    throw new TexRuntimeError ('\\cr may only be used inside alignments');
-});
-
-register_command ('crcr', function cmd_crcr (engine) {
-    throw new TexRuntimeError ('\\crcr may only be used inside alignments');
-});
-
-register_command ('omit', function cmd_omit (engine) {
-    throw new TexRuntimeError ('\\omit may only be used inside alignments');
-});
-
-register_command ('span', function cmd_span (engine) {
-    throw new TexRuntimeError ('\\span may only be used inside alignments');
-});
-
-register_command ('noalign', function cmd_noalign (engine) {
-    throw new TexRuntimeError ('\\noalign may only be used inside alignments');
-});
-
-register_command ('_endv_', (function EndvCommand_closure () {
-    function EndvCommand () { Command.call (this); }
-    inherit (EndvCommand, Command);
-    var proto = EndvCommand.prototype;
-    proto.name = '<endv>';
-
-    proto.invoke = function EndvCommand_invoke (engine) {
-	if (engine.mode () == M_MATH || engine.mode () == M_DMATH)
-	    throw new TexRuntimeError ('\\endv may not be used in math mode');
-
-	engine.handle_endv ();
-    };
-
-    return EndvCommand;
-}) ());
-
-register_command ('halign', function cmd_halign (engine) {
-    engine.trace ('halign');
-    engine.init_align (false);
-});
-
-register_command ('valign', function cmd_valign (engine) {
-    engine.trace ('valign');
-    engine.init_align (true);
-});
-
 // Hyphenation
 
 register_command ('patterns', function cmd_patterns (engine) {
