@@ -323,7 +323,7 @@ var Engine = (function Engine_closure () {
 	engine_init_param_cseqs (this);
 	this.commands['<space>'] = new Command.catcode_commands[C_SPACE] (O_SPACE);
 	this.commands['<end-group>'] = new Command.catcode_commands[C_EGROUP] (O_LEFT_BRACE);
-	this.commands['<endv>'] = new register_command._registry._endv_ ();
+	this.commands['<endv>'] = new register_command._registry['<endv>'] ();
 
 	engine_proto._call_state_funcs ('engine_init', this);
 

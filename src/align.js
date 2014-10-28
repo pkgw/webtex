@@ -445,7 +445,10 @@
 	throw new TexRuntimeError ('\\noalign may only be used inside alignments');
     });
 
-    register_command ('_endv_', (function EndvCommand_closure () {
+    register_command ('<endv>', (function EndvCommand_closure () {
+	// This is kind of lame -- we need to implement a whole EndvCommand
+	// class so that we can instantiate a command for the Engine.
+
 	function EndvCommand () { Command.call (this); }
 	inherit (EndvCommand, Command);
 	var proto = EndvCommand.prototype;
