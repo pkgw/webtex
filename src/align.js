@@ -37,6 +37,7 @@
 
     var AlignState = (function AlignState_closure () {
 	function AlignState () {
+	    this.is_valign = false;
 	    this.tabskips = [];
 	    this.columns = [];
 	    this.rows = [];
@@ -45,6 +46,8 @@
 	    this.cur_span_col = 0;
 	    this.col_is_omit = false;
 	    this.col_ender = null;
+	    this.pack_is_exact = false;
+	    this.pack_spec_S = nlib.Zero_S;
 	}
 
 	var proto = AlignState.prototype;
@@ -109,8 +112,6 @@
 	engine.align_stack.push (astate);
 	engine.align_state = -1000000;
 
-	engine.nest_eqtb ();
-
 	switch (engine.mode ()) {
 	case M_DMATH:
 	    if (engine.get_last_listable () != null)
@@ -130,20 +131,19 @@
 	    break;
 	}
 
-	// XXX this is scan_spec (TTP:645), which is duplicated in _handle_box.
-	// XXXXXX is_exact and spec_S are unused!
+	astate.is_valign = is_valign;
 
-	var is_exact, spec_S;
+	// XXX this is scan_spec (TTP:645), which is duplicated in _handle_box.
 
 	if (engine.scan_keyword ('to')) {
-	    is_exact = true;
-	    spec_S = engine.scan_dimen__O_S (false);
+	    astate.pack_is_exact = true;
+	    astate.pack_spec_S = engine.scan_dimen__O_S (false);
 	} else if (engine.scan_keyword ('spread')) {
-	    is_exact = false;
-	    spec_S = engine.scan_dimen__O_S (false);
+	    astate.pack_is_exact = false;
+	    astate.pack_spec_S = engine.scan_dimen__O_S (false);
 	} else {
-	    is_exact = false;
-	    spec_S = nlib.Zero_S;
+	    astate.pack_is_exact = false;
+	    astate.pack_spec_S = nlib.Zero_S;
 	}
 
 	engine.scan_left_brace ();
@@ -212,6 +212,11 @@
 	    astate.columns.push (col);
 	}
 
+	// One of these is for the whole alignment (not obvious in the TeX
+	// code since it's buried in scan_spec), one is for the current span.
+	engine.nest_eqtb ();
+	engine.nest_eqtb ();
+
 	engine.enter_group ('align', _end_align);
 
 	engine.maybe_push_toklist ('everycr');
@@ -236,9 +241,11 @@
 
 	    if (tok.is_cmd (engine, 'noalign')) {
 		engine.scan_left_brace ();
+		engine.nest_eqtb ();
 		engine.enter_group ('noalign', function (eng) {
 		    // TTP 1133
 		    engine.end_graf ();
+		    engine.unnest_eqtb ();
 		    align_peek (engine);
 		}.bind (engine));
 
@@ -265,7 +272,6 @@
 
     function align_begin_row (engine) {
 	engine.trace ('align: begin row');
-	engine.nest_eqtb ();
 
 	switch (engine.mode ()) {
 	case M_VERT: case M_IVERT:
@@ -279,16 +285,20 @@
 	}
 
 	engine.set_special_value (T_INT, 'spacefactor', 0);
-	// XXX: ignore prev_depth
-	// XXX: stuff about inserting tabskip
+
+	var astate = engine.align_stack[engine.align_stack.length - 1];
+	engine.accum (new BoxGlue (astate.tabskips[0]));
+
 	align_begin_span (engine);
     }
 
     function align_begin_span (engine) {
 	engine.trace ('align: begin span');
-	engine.nest_eqtb ();
 
-	if (engine.mode () == M_RHORZ)
+	var mode = engine.mode ();
+	engine.enter_mode (mode);
+
+	if (mode == M_RHORZ)
 	    engine.set_special_value (T_INT, 'spacefactor', 1000);
 	else {
 	    // T:TP 1070: normal_paragraph
@@ -348,28 +358,26 @@
 	astate.cur_col++;
 
 	if (!(astate.col_ender.same_cmd (engine.commands['span']))) {
-	    // TTP 796 - package the current cell. XXX: I think TeX futzes
-	    // with the current list being built without actually leaving the
-	    // current mode. I'm doing the same for now, even though it feels
-	    // gross.
+	    engine.unnest_eqtb ();
+	    engine.nest_eqtb ();
+
+	    // TTP 796 - package the current cell.
 
 	    var w_S, b;
 
-	    if (engine.mode () == M_RHORZ) {
-		b = new HBox ();
-		// XXX I think this is all wrong!
-		b.list = engine.build_stack.pop ();
-		engine.build_stack.push ([]);
-		b.set_glue__OOS (engine, false, nlib.Zero_S);
-		w_S = b.width_S;
-	    } else {
+	    if (astate.is_valign) {
 		b = new VBox ();
-		// XXX I think this is all wrong!
-		b.list = engine.build_stack.pop ();
-		engine.build_stack.push ([]);
+		b.list = engine.leave_mode ();
 		b.set_glue__OOS (engine, false, nlib.Zero_S);
 		w_S = b.height_S;
+	    } else {
+		b = new HBox ();
+		b.list = engine.leave_mode ();
+		b.set_glue__OOS (engine, false, nlib.Zero_S);
+		w_S = b.width_S;
 	    }
+
+	    engine.trace ('align: end col: packaging %U', b);
 
 	    if (astate.cur_span_col == astate.cur_col) {
 		if (col.width_S == null)
@@ -408,11 +416,12 @@
 
 	    // XXX: TTP796 calculates glue order here. I don't think we need
 	    // to?
+	    //
+	    // NOTE: cur_col has already been incremented, so the code below
+	    // does indeed include the right tabskip.
 
-	    engine.unnest_eqtb ();
 	    engine.accum (b);
-
-	    // TTP 795 appends tabskip glue, but we save that til later.
+	    engine.accum (new BoxGlue (astate.tabskips[astate.cur_col]));
 
 	    if (!(astate.col_ender instanceof AlignTabCommand)) {
 		astate.cur_col = 0;
@@ -436,10 +445,19 @@
 	if (l == 0)
 	    throw new TexInternalError ('ending row outside of align');
 
-	// XXX diverging somewhat significantly from TeX impl
 	var astate = engine.align_stack[l-1];
-	engine.accum (engine.leave_mode ());
-	engine.unnest_eqtb ();
+	var items = engine.leave_mode ();
+	var b = null;
+
+	if (astate.is_valign) {
+	    b = new VBox ();
+	    b.list = items;
+	} else {
+	    b = new HBox ();
+	    b.list = items;
+	}
+
+	engine.accum (b);
 
 	if (engine.mode () != M_RHORZ)
 	    engine.set_special_value (T_INT, 'spacefactor', 1000);
@@ -457,6 +475,9 @@
 	    throw new TexRuntimeError ('ended alignment when should have ' +
 				       'gotten other group-ender; depth=%d cb=%0',
 				       engine.group_exit_stack.length, info[1]);
+
+	engine.unnest_eqtb ();
+	engine.unnest_eqtb ();
 
 	var list = engine.leave_mode ();
 
@@ -530,15 +551,56 @@
 		}
 	    }
 
-	    // XXX: "convert" col into an unset_node box with all defaults.
+	    // XXX: "convert" col into an unset_node box with all defaults. I
+	    // think we can just put this off til later.
 	}
 
-	// TTP 804
-	// TTP 805
+	// TTP 804. Now, pack the preamble to its target width, so that we know
+	// the settings for the tabskip glues.
 
+	var tmpbox = new HBox ();
+
+	for (var i = 0; i < astate.columns.length; i++) {
+	    tmpbox.list.push (astate.tabskips[i]);
+
+	    var tmprule = new Rule ();
+	    tmprule.width_S = astate.columns[i].width_S;
+	    tmpbox.list.push (tmprule);
+	}
+
+	tmpbox.list.push (astate.tabskips[astate.tabskips.length - 1]);
+	tmpbox.set_glue__OOS (engine, astate.pack_is_exact, astate.pack_spec_S);
+
+	// TTP 805. Go through the outer list, which is a set of rows and/or
+	// rules.
+
+	for (var i = 0; i < list.length; i++) {
+	    var item = list[i];
+	    engine.trace ('align row thingie: %U', item);
+
+	    if (item instanceof ListBox) {
+		// TTP 807. This is a row. It has the same shape as tmpbox, so
+		// we can just copy over its glue-set results. In fact, we
+		// can't just call set_glue on it, since the widths of its
+		// sub-items aren't yet set correctly.
+		item.glue_set = tmpbox.glue_set;
+		item.glue_state = tmpbox.glue_state;
+		item.shift_amount_S = o_S;
+
+		if (astate.is_valign) {
+		    item.height_S = tmpbox.width_S;
+		} else {
+		    item.width_S = tmpbox.width_S;
+		}
+	    } else if (item instanceof Rule) {
+		// TTP 806. Make the rule full-width if it has "running"
+		// dimensions.
+		engine.trace ('XXX TODO: running rule widths');
+	    }
+	}
 
 	// TTP 812
-	engine.unnest_eqtb ();
+	throw new TexRuntimeError ('WIP');
     }
 
 

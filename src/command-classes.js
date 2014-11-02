@@ -379,7 +379,7 @@ var MathShiftCommand = (function MathShiftCommand_closure () {
 	    engine.accum (new MathDelim (ms_S, false));
 	    engine.accum (box);
 	    engine.accum (new MathDelim (ms_S, true));
-	    engine.unnest_eqtb ();
+	    engine.unnest_eqtb (); // XXX: check that this matches an unsave, not pop_nest
 	} else {
 	    engine.trace ('math shift: enter');
 
