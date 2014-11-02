@@ -115,7 +115,7 @@ var format = (function format_wrapper () {
                     arg = JSON.stringify (arg);
                     break;
                 case 'o':
-                    arg = arg.toString ();
+                    arg = '' + arg; // This works even for undefined, etc; arg.toString() doesn't.
                     break;
                 case 's':
 		    if (typeof arg !== 'string')
