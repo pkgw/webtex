@@ -13,6 +13,9 @@ hex.
 "preamble" points to linked list of the preamble info. It alternates between
 tabskip glue records, and alignrecords storing state info for each column.
 
+
+set_glue_ratio_zero(x) literally means "x = 0.0".
+set_glue_ratio_one(x) is analogous.
 """
 
 
@@ -165,20 +168,20 @@ def fin_align ():
                 q.glue_sign = p.glue_sign
                 q.glue_set = p.glue_set
                 q.shift_amount = o
-                r = q.list_ptr.link
-                s = p.list_ptr.link
+                r = q.list_ptr.link # items within this row's box
+                s = p.list_ptr.link # first column specification in the alignment
 
                 while True:
                     #<808>
-                    n = r.span_count
-                    t = s.width
-                    w = t
-                    u = hold_head
+                    n = r.span_count # number of columns spanned by this cell
+                    t = s.width # total width of this span
+                    w = t # width of the first column of this span
+                    u = hold_head # temporary list
 
                     while n > 0:
                         n -= 1
                         #<809>
-                        s = s.link
+                        s = s.link # s is now tabskip glue after this col
                         v = s.glue_ptr
                         u.link = new_glue (v)
                         u = u.link
@@ -192,7 +195,7 @@ def fin_align ():
                             if v.shrink_order == p.glue_order:
                                 t -= round (float (p.glue_set) * v.shrink)
 
-                        s = s.link
+                        s = s.link # s is now the next col
                         u.link = new_null_box ()
                         u = u.link
                         t += s.width
@@ -212,20 +215,24 @@ def fin_align ():
                         if r.width == t:
                             r.glue_sign = Normal
                             r.glue_order = Normal
-                            set_glue_ratio_zero (r.glue_set)
+                            #set_glue_ratio_zero (r.glue_set)
+                            r.glue_set = 0.
                         elif t > r.width:
                             r.glue_sign = Stretching
                             if r.glue_stretch == 0:
-                                set_glue_ratio_zero (r.glue_set)
+                                #set_glue_ratio_zero (r.glue_set)
+                                r.glue_set = 0.
                             else:
                                 r.glue_set = unfloat ((t - r.width) / r.glue_stretch)
                         else:
                             r.glue_order = r.glue_sign
                             r.glue_sign = Shrinking
                             if r.glue_shrink == 0:
-                                set_glue_ratio_zero (r.glue_set)
+                                #set_glue_ratio_zero (r.glue_set)
+                                r.glue_set = 0.
                             elif r.glue_order == Normal and r.width - t > r.glue_shrink:
-                                set_glue_ratio_one (r.glue_set)
+                                #set_glue_ratio_one (r.glue_set)
+                                r.glue_set = 1.
                             else:
                                 r.glue_set = unfloat ((r.width - t) / r.glue_shrink)
 
@@ -239,20 +246,24 @@ def fin_align ():
                         if r.height == t:
                             r.glue_sign = Normal
                             r.glue_order = Normal
-                            set_glue_ratio_zero (r.glue_set)
+                            #set_glue_ratio_zero (r.glue_set)
+                            r.glue_set = 0.
                         elif t > r.height:
                             r.glue_sign = Stretching
                             if r.glue_stretch == 0:
-                                set_glue_ratio_zero (r.glue_set)
+                                #set_glue_ratio_zero (r.glue_set)
+                                r.glue_set = 0.
                             else:
                                 r.glue_set = unfloat ((t - r.height) / r.glue_stretch)
                         else:
                             r.glue_order = r.glue_sign
                             r.glue_sign = Shrinking
                             if r.glue_shrink == 0:
-                                set_glue_ratio_zero (r.glue_set)
+                                #set_glue_ratio_zero (r.glue_set)
+                                r.glue_set = 0.
                             elif r.glue_order == Normal and r.height - t > r.glue_shrink:
-                                set_glue_ratio_one (r.glue_set)
+                                #set_glue_ratio_one (r.glue_set)
+                                r.glue_set = 1.
                             else:
                                 r.glue_set = unfloat ((r.height - t) / r.glue_shrink)
 
@@ -268,8 +279,8 @@ def fin_align ():
                         r = u
                     #</808>
 
-                    r = r.link.link
-                    s = s.link.link
+                    r = r.link.link # next cell box
+                    s = s.link.link # next column spec
 
                     if r is None:
                         break

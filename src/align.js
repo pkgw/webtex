@@ -354,8 +354,9 @@
 	    throw new TexInternalError ('alignment loops not implemented');
 	}
 
-	col = astate.columns[astate.cur_col];
-	astate.cur_col++;
+	var cur_col = astate.cur_col;
+	col = astate.columns[cur_col];
+	astate.cur_col++; // easiest to increment here, but then downstream stuff gets confusing
 
 	if (!(astate.col_ender.same_cmd (engine.commands['span']))) {
 	    engine.unnest_eqtb ();
@@ -379,15 +380,21 @@
 
 	    engine.trace ('align: end col: packaging %U', b);
 
-	    if (astate.cur_span_col == astate.cur_col) {
+	    if (astate.cur_span_col == cur_col) {
 		if (col.width_S == null)
 		    // Note: TeX impl relies on end_span ~= -infinity
 		    col.width_S = w_S;
 		else
 		    col.width_S = Math.max (col.width_S, w_S);
+
+		b.nspanned = 1;
+		engine.trace ('align: end col: no spanning: %d %d', cur_col, b.nspanned);
 	    } else {
-		var n = astate.cur_col - astate.cur_span_col + 1;
+		var n = cur_col - astate.cur_span_col + 1;
 		var snode = {next: col.span_nodes, dummy: true};
+
+		b.nspanned = n;
+		engine.trace ('align: end col: spanning!: %d %d', cur_col, b.nspanned);
 
 		while (snode.next.nspanned < n)
 		    // Note: if col.span_nodes is EndSpan, snode.next.nspanned
@@ -416,12 +423,9 @@
 
 	    // XXX: TTP796 calculates glue order here. I don't think we need
 	    // to?
-	    //
-	    // NOTE: cur_col has already been incremented, so the code below
-	    // does indeed include the right tabskip.
 
 	    engine.accum (b);
-	    engine.accum (new BoxGlue (astate.tabskips[astate.cur_col]));
+	    engine.accum (new BoxGlue (astate.tabskips[cur_col+1]));
 
 	    if (!(astate.col_ender instanceof AlignTabCommand)) {
 		astate.cur_col = 0;
@@ -498,16 +502,21 @@
 
 	    if (col.width_S == null) {
 		// This column was always spanned over -- nullify its width
-		// and remove its tabskip glue
+		// and its tabskip glue (modifying the existing object, so the
+		// BoxGlues that point to it will also be nullified).
 		col.width_S = nlib.Zero_S;
-		astate.tabskips[i+1] = new Glue ();
+		astate.tabskips[i+1].amount_S = nlib.Zero_S;
+		astate.tabskips[i+1].stretch_S = nlib.Zero_S;
+		astate.tabskips[i+1].stretch_order = 0;
+		astate.tabskips[i+1].shrink_S = nlib.Zero_S;
+		astate.tabskips[i+1].shrink_order = 0;
 	    }
 
-	    if (col.span_nodes != null) {
+	    if (col.span_nodes !== EndSpan) {
 		var totwidth_S = col.width_S + astate.tabskips[i+1].amount_S; // "t" in TeX
 		var curcol_snode = col.span_nodes; // "r" in TeX
 		var n = 1;
-		var nextcol_snode = null; // "s" in TeX
+		var nextcol_snode = EndSpan; // "s" in TeX
 
 		if (nextcol != null)
 		    nextcol_snode = {next: nextcol.span_nodes, dummy: true};
@@ -551,8 +560,8 @@
 		}
 	    }
 
-	    // XXX: "convert" col into an unset_node box with all defaults. I
-	    // think we can just put this off til later.
+	    // TeX converts the column into an unset_node box, but that's not
+	    // how we do things.
 	}
 
 	// TTP 804. Now, pack the preamble to its target width, so that we know
@@ -592,6 +601,59 @@
 		} else {
 		    item.width_S = tmpbox.width_S;
 		}
+
+		var col = 0;
+		var newlist = [];
+
+		for (var j = 1; j < item.list.length; j += 2) {
+		    // TTP 808. Set the properties of each cell within the row.
+		    var subitem = item.list[j];
+		    engine.trace ('xxx %o %o %o', col, j, subitem.nspanned);
+		    var t_S = astate.columns[col].width_S; // 't' in TeX
+		    var w_S = t_S; // 'w' in TeX
+		    var extra_items = []; // 'u' in TeX
+
+		    for (var k = 1; k < subitem.nspanned; k++) {
+			// Manually add the tabskip glue between current and next spanned col.
+
+			var tabglue = astate.tabskips[col + k]
+			extra_items.push (new BoxGlue (tabglue));
+			t_S += tabglue.amount_S;
+
+			if (tmpbox.glue_state > 0 && tabglue.stretch_order == tmpbox.glue_state - 1)
+			    t_S += (tmpbox.glue_set * tabglue.stretch_S) | 0;
+			else if (tmpbox.glue_state < 0 && tabglue.shrink_order == -(1 + tmpbox.glue_state))
+			    t_S -= (tmpbox.glue_set * tabglue.shrink_S) | 0;
+
+			// Manually add an empty box of the correct width.
+
+			var padbox;
+
+			if (astate.is_valign) {
+			    padbox = new VBox ();
+			    padbox.height_S = astate.columns[col + k].width_S;
+			} else {
+			    padbox = new HBox ();
+			    padbox.width_S = astate.columns[col + k].width_S;
+			}
+
+			t_S += astate.columns[col + k].width_S;
+			extra_items.push (padbox);
+		    }
+
+		    if (astate.is_valign) {
+			// TTP 811
+		    } else {
+			// TTP 810
+		    }
+
+		    subitem.shift_amount_S = nlib.Zero_S;
+		    newlist.push (subitem);
+		    newlist = newlist.concat (extra_items);
+		    col += subitem.nspanned;
+		}
+
+		item.list = newlist;
 	    } else if (item instanceof Rule) {
 		// TTP 806. Make the rule full-width if it has "running"
 		// dimensions.
