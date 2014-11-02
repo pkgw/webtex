@@ -3,11 +3,30 @@
 // "It's sort of a miracle whenever \halign and \valign work ..." -- T:TP 768.
 
 (function align_closure () {
+    // Magic sentinel value that makes linked list manipulations a lot easier.
+
+    var EndSpan = { width_S: NaN,
+		    nspanned: 257,
+		    next: null };
+
+    var SpanNode = (function SpanNode_closure () {
+	function SpanNode () {
+	    this.width_S = nlib.Zero_S; // "width" in TeX
+	    this.nspanned = 0; // "link" in TeX
+	    this.next = EndSpan; // "info" in TeX
+	}
+
+	var proto = SpanNode.prototype;
+
+	return SpanNode;
+    }) ();
+
     var AlignColumn = (function AlignColumn_closure () {
 	function AlignColumn () {
 	    this.u_tmpl = [];
 	    this.v_tmpl = [];
-	    this.span_widths_S = {};
+	    this.span_nodes = EndSpan;
+	    this.width_S = undefined;
 	}
 
 	var proto = AlignColumn.prototype;
@@ -338,23 +357,54 @@
 
 	    if (engine.mode () == M_RHORZ) {
 		b = new HBox ();
+		// XXX I think this is all wrong!
 		b.list = engine.build_stack.pop ();
 		engine.build_stack.push ([]);
 		b.set_glue__OOS (engine, false, nlib.Zero_S);
 		w_S = b.width_S;
 	    } else {
 		b = new VBox ();
+		// XXX I think this is all wrong!
 		b.list = engine.build_stack.pop ();
 		engine.build_stack.push ([]);
 		b.set_glue__OOS (engine, false, nlib.Zero_S);
 		w_S = b.height_S;
 	    }
 
-	    var n = astate.cur_col - astate.cur_span_col + 1;
-	    if (!col.span_widths_S.hasOwnProperty (n))
-		col.span_widths_S[n] = w_S;
-	    else
-		col.span_widths_S[n] = Math.max (col.span_widths_S[n], w_S);
+	    if (astate.cur_span_col == astate.cur_col) {
+		if (col.width_S == null)
+		    // Note: TeX impl relies on end_span ~= -infinity
+		    col.width_S = w_S;
+		else
+		    col.width_S = Math.max (col.width_S, w_S);
+	    } else {
+		var n = astate.cur_col - astate.cur_span_col + 1;
+		var snode = {next: col.span_nodes, dummy: true};
+
+		while (snode.next.nspanned < n)
+		    // Note: if col.span_nodes is EndSpan, snode.next.nspanned
+		    // is 257 and always bigger than n, so we don't exit
+		    // immediately.
+		    snode = snode.next;
+
+		if (snode.next.nspanned == n)
+		    snode.next.width_S = Math.max (snode.next.width_S, w_S);
+		else {
+		    // Need to splice in a new node.
+		    var newnode = new SpanNode ();
+		    newnode.width_S = w_S;
+		    newnode.nspanned = n;
+
+		    if (snode.dummy)
+			// Here we have to make a concession to the fact that
+			// we're not doing nasty dummy-head operations.
+			col.span_nodes = newnode;
+		    else {
+			newnode.next = snode.next;
+			snode.next = newnode;
+		    }
+		}
+	    }
 
 	    // XXX: TTP796 calculates glue order here. I don't think we need
 	    // to?
@@ -415,10 +465,77 @@
 	    o_S = engine.get_parameter__O_S ('displayindent');
 
 	// TTP 801
+
+	var astate = engine.align_stack.pop ();
+
+	for (var i = 0; i < astate.columns.length; i++) {
+	    var col = astate.columns[i];
+	    var nextcol = null;
+
+	    if (i + 1 < astate.columns.length)
+		nextcol = astate.columns[i+1];
+
+	    if (col.width_S == null) {
+		// This column was always spanned over -- nullify its width
+		// and remove its tabskip glue
+		col.width_S = nlib.Zero_S;
+		astate.tabskips[i+1] = new Glue ();
+	    }
+
+	    if (col.span_nodes != null) {
+		var totwidth_S = col.width_S + astate.tabskips[i+1].amount_S; // "t" in TeX
+		var curcol_snode = col.span_nodes; // "r" in TeX
+		var n = 1;
+		var nextcol_snode = null; // "s" in TeX
+
+		if (nextcol != null)
+		    nextcol_snode = {next: nextcol.span_nodes, dummy: true};
+
+		while (true) {
+		    curcol_snode.width_S -= totwidth_S;
+		    var tmpnext = curcol_snode.next; // "u" in TeX
+
+		    if (nextcol != null) {
+			// Find an "n" (= nextcol_snode.nspanned + 1) that's
+			// at least as large as curcol_snode.nspanned.
+
+			while (curcol_snode.nspanned > n) {
+			    // Once again, the high nspanned value of EndSpan
+			    // will make sure we exit in a good state.
+			    nextcol_snode = nextcol_snode.next;
+			    n = nextcol_snode.next.nspanned + 1; // since we're one col over
+			}
+
+			if (curcol_snode.nspanned < n) {
+			    // This span-node fits between the active ones in the
+			    // next column. Splice it in.
+			    curcol_snode.next = nextcol_snode.next;
+
+			    if (nextcol_snode.dummy)
+				nextcol.span_nodes = curcol_snode;
+			    else
+				nextcol_snode.next = curcol_snode;
+			    curcol_snode.nspanned--;
+			    nextcol_snode = curcol_snode;
+			} else if (curcol_snode.width_S > nextcol_snode.next.width_S) {
+			    // This node spans as many or more columns than the current
+			    // one in the next column. Boost its width.
+			    nextcol_snode.next.width_S = curcol_snode.width_S;
+			}
+		    }
+
+		    if (tmpnext === EndSpan)
+			break;
+		    curcol_snode = tmpnext;
+		}
+	    }
+
+	    // XXX: "convert" col into an unset_node box with all defaults.
+	}
+
 	// TTP 804
 	// TTP 805
 
-	engine.align_stack.pop ();
 
 	// TTP 812
 	engine.unnest_eqtb ();
