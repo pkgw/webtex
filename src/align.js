@@ -421,8 +421,10 @@
 		}
 	    }
 
-	    // XXX: TTP796 calculates glue order here. I don't think we need
-	    // to?
+	    // TTP 796. I don't understand why things are done this way, but I
+	    // presume there's a reason for not just calling hpack/vpack in
+	    // fin_align ...
+	    b.save_glue_info ();
 
 	    engine.accum (b);
 	    engine.accum (new BoxGlue (astate.tabskips[cur_col+1]));
@@ -607,8 +609,7 @@
 
 		for (var j = 1; j < item.list.length; j += 2) {
 		    // TTP 808. Set the properties of each cell within the row.
-		    var subitem = item.list[j];
-		    engine.trace ('xxx %o %o %o', col, j, subitem.nspanned);
+		    var subitem = item.list[j]; // 'r' in TeX
 		    var t_S = astate.columns[col].width_S; // 't' in TeX
 		    var w_S = t_S; // 'w' in TeX
 		    var extra_items = []; // 'u' in TeX
@@ -642,9 +643,57 @@
 		    }
 
 		    if (astate.is_valign) {
-			// TTP 811
+			// TTP 811. TODO: can we just call set_glue? We must
+			// not be able to because TeX does all this junk
+			// instead of just calling vpack, but I don't
+			// understand why.
+			subitem.width_S = tmpbox.width_S;
+
+			if (subitem.height_S == t_S) {
+			    subitem.glue_state = 1;
+			    subitem.glue_set = 0.;
+			} else if (t_S > subitem.height_S) {
+			    subitem.glue_state = 1 + subitem._glue_stretch_order;
+			    if (subitem._glue_stretch_S == 0)
+				subitem.glue_set = 0.;
+			    else
+				subitem.glue_set = 1.0 * (t_S - subitem.height_S) / subitem._glue_stretch_S;
+			} else {
+			    subitem.glue_state = -1 - subitem._glue_shrink_order;
+			    if (subitem._glue_shrink_S == 0)
+				subitem.glue_set = 0.;
+			    else if (subitem.glue_state == -1 && subitem.height_S - t_S > subitem._glue_shrink_S)
+				subitem.glue_set = 1.;
+			    else
+				subitem.glue_set = 1.0 * (subitem.height_S - t_S) / subitem._glue_shrink_S;
+			}
+
+			subitem.height_S = w_S;
 		    } else {
 			// TTP 810
+			subitem.height_S = tmpbox.height_S;
+			subitem.depth_S = tmpbox.depth_S;
+
+			if (subitem.width_S == t_S) {
+			    subitem.glue_state = 1;
+			    subitem.glue_set = 0.;
+			} else if (t_S > subitem.width_S) {
+			    subitem.glue_state = 1 + subitem._glue_stretch_order;
+			    if (subitem._glue_stretch_S == 0)
+				subitem.glue_set = 0.;
+			    else
+				subitem.glue_set = 1.0 * (t_S - subitem.width_S) / subitem._glue_stretch_S;
+			} else {
+			    subitem.glue_state = -1 - subitem._glue_shrink_order;
+			    if (subitem._glue_shrink_S == 0)
+				subitem.glue_set = 0.;
+			    else if (subitem.glue_state == -1 && subitem.width_S - t_S > subitem._glue_shrink_S)
+				subitem.glue_set = 1.;
+			    else
+				subitem.glue_set = 1.0 * (subitem.width_S - t_S) / subitem._glue_shrink_S;
+			}
+
+			subitem.width_S = w_S;
 		    }
 
 		    subitem.shift_amount_S = nlib.Zero_S;

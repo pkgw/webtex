@@ -150,7 +150,7 @@ def fin_align ():
     #</804>
 
     #<805>
-    q = head.link
+    q = head.link # first row
     s = head
 
     while q is not None:

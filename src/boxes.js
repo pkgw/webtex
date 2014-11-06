@@ -71,6 +71,53 @@ var ListBox = (function ListBox_closure () {
 	other.list = this.list.slice ();
     };
 
+    proto.save_glue_info = function ListBox_save_glue_info () {
+	// Bastardized version of TTP 649, for alignments (specifically TTP
+	// 796 & 810). I don't get why TeX doesn't just call vpack in the alignment
+	// reboxing routines, but there must be a reason.
+
+	var stretches_S = [0, 0, 0, 0];
+	var shrinks_S = [0, 0, 0, 0];
+
+	for (var i = 0; i < this.list.length; i++) {
+	    var item = this.list[i];
+
+	    if (item instanceof BoxGlue) {
+		var g = item.amount;
+		stretches_S[g.stretch_order] += g.stretch_S;
+		shrinks_S[g.shrink_order] += g.shrink_S;
+	    }
+	}
+
+	if (stretches_S[3] != 0) {
+	    this._glue_stretch_order = 3;
+	    this._glue_stretch_S = stretches_S[3];
+	} else if (stretches_S[2] != 0) {
+	    this._glue_stretch_order = 2;
+	    this._glue_stretch_S = stretches_S[2];
+	} else if (stretches_S[1] != 0) {
+	    this._glue_stretch_order = 1;
+	    this._glue_stretch_S = stretches_S[1];
+	} else {
+	    this._glue_stretch_order = 0;
+	    this._glue_stretch_S = stretches_S[0];
+	}
+
+	if (shrinks_S[3] != 0) {
+	    this._glue_shrink_order = 3;
+	    this._glue_shrink_S = shrinks_S[3];
+	} else if (shrinks_S[2] != 0) {
+	    this._glue_shrink_order = 2;
+	    this._glue_shrink_S = shrinks_S[2];
+	} else if (shrinks_S[1] != 0) {
+	    this._glue_shrink_order = 1;
+	    this._glue_shrink_S = shrinks_S[1];
+	} else {
+	    this._glue_shrink_order = 0;
+	    this._glue_shrink_S = shrinks_S[0];
+	}
+    };
+
     ListBox.create = function ListBox_create (btype) {
 	if (btype == BT_VOID)
 	    return new VoidBox ();
