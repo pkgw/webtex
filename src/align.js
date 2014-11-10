@@ -715,7 +715,19 @@
 	if (engine.mode () == M_DMATH) {
 	    throw new TexInternalError ('not implemented: math displays');
 	} else {
-	    engine.accum_list (list);
+	    // TeX effectively does "engine.accum_list (list)". We instead generate
+	    // a CanvasBox.
+	    var b;
+
+	    if (astate.is_valign)
+		b = new HBox ();
+	    else
+		b = new VBox ();
+
+	    b.list = list;
+	    b.set_glue__OOS (engine, false, nlib.Zero_S);
+	    engine.accum (new CanvasBox (b));
+
 	    if (engine.mode () == M_VERT || engine.mode () == M_IVERT)
 		engine.run_page_builder ();
 	}

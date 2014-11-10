@@ -13,6 +13,7 @@ var DOMRenderer = (function DOMRenderer_callback () {
 	lmmi10: '28px LMMathItalic10',
 	lmr7: '19.6px LMRoman7',
 	'rm-lmr7': '19.6px LMRoman7',
+	'rm-lmr10': '28px LMRoman7',
     };
 
     proto.handle_render = function DOMRenderer_handle_render (data) {

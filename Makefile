@@ -70,6 +70,7 @@ primaries += $(builddir)/worker-webtex.js $(builddir)/node-webtex.js
 
 masterjs = \
   src/preamble.js \
+  src/format.js \
   src/master-object.js \
   src/dom-renderer.js
 
