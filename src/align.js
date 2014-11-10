@@ -458,16 +458,14 @@
 	if (astate.is_valign) {
 	    b = new VBox ();
 	    b.list = items;
+	    b.set_glue__OOS (engine, false, nlib.Zero_S);
+	    engine.set_special_value (T_INT, 'spacefactor', 1000);
 	} else {
 	    b = new HBox ();
 	    b.list = items;
+	    b.set_glue__OOS (engine, false, nlib.Zero_S);
+	    engine.accum_to_vlist (b);
 	}
-
-	b.set_glue__OOS (engine, false, nlib.Zero_S);
-	engine.accum (b);
-
-	if (engine.mode () != M_RHORZ)
-	    engine.set_special_value (T_INT, 'spacefactor', 1000);
 
 	engine.maybe_push_toklist ('everycr');
 	align_peek (engine);

@@ -261,6 +261,7 @@ var EquivTable = (function EquivTable_closure () {
 var Engine = (function Engine_closure () {
     var AF_GLOBAL = 1 << 0;
     var BO_SETBOX = 0;
+    var ignore_depth_S = nlib.from_raw__I_S (-65536000); // TTP 212
 
     function Engine (args) {
 	/* Possible properties of args:
@@ -326,6 +327,8 @@ var Engine = (function Engine_closure () {
 	this.commands['<endv>'] = new register_command._registry['<endv>'] ();
 
 	engine_proto._call_state_funcs ('engine_init', this);
+
+	this.prev_depth_S = ignore_depth_S;
 
 	var nf = new Font (this, 'nullfont', -1000);
 	this._fonts['<null>'] = this._fonts['nullfont'];
@@ -685,6 +688,30 @@ var Engine = (function Engine_closure () {
 	// process individual items.
 	Array.prototype.push.apply (this.build_stack[this.build_stack.length - 1],
 				    list);
+    };
+
+    proto.accum_to_vlist = function Engine_accum_to_vlist (item) {
+	// TTP 679 "append_to_vlist". This function is needed to add the
+	// baselineskip glue, which we need for things like alignments and
+	// some aspects of equations.
+
+	if (this.prev_depth_S > ignore_depth_S) {
+	    var bs = this.get_parameter (T_GLUE, 'baselineskip');
+	    var d_S = bs.amount_S - this.prev_depth_S - item.height_S;
+	    var g;
+
+	    if (d_S < this.get_parameter (T_DIMEN, 'lineskiplimit'))
+		g = this.get_parameter (T_GLUE, 'lineskip');
+	    else {
+		var g = this.get_parameter (T_GLUE, 'baselineskip').clone ();
+		g.amount_S = d_S;
+	    }
+
+	    this.build_stack[this.build_stack.length - 1].push (new BoxGlue (g));
+	}
+
+	this.build_stack[this.build_stack.length - 1].push (item);
+	this.prev_depth_S = item.depth_S;
     };
 
     proto.run_page_builder = function Engine_run_page_builder () {
@@ -1668,6 +1695,9 @@ var Engine = (function Engine_closure () {
 		var ord = new AtomNode (MT_ORD);
 		ord.nuc = box;
 		engine.accum (ord);
+	    } else if (engine.mode () == M_VERT || engine.mode () == M_IVERT) {
+		engine.trace ('... accumulate the finished box (vertical)');
+		engine.accum_to_vlist (box);
 	    } else {
 		engine.trace ('... accumulate the finished box (non-math)');
 		engine.accum (box);
