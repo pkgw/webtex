@@ -711,7 +711,13 @@
 	}
 
 	// TTP 812
-	throw new TexRuntimeError ('WIP');
+	if (engine.mode () == M_DMATH) {
+	    throw new TexInternalError ('not implemented: math displays');
+	} else {
+	    engine.accum_list (list);
+	    if (engine.mode () == M_VERT || engine.mode () == M_IVERT)
+		engine.run_page_builder ();
+	}
     }
 
 
