@@ -571,18 +571,18 @@
 	var tmpbox = new HBox ();
 
 	for (var i = 0; i < astate.columns.length; i++) {
-	    tmpbox.list.push (astate.tabskips[i]);
+	    tmpbox.list.push (new BoxGlue (astate.tabskips[i]));
 
 	    var tmprule = new Rule ();
 	    tmprule.width_S = astate.columns[i].width_S;
 	    tmpbox.list.push (tmprule);
 	}
 
-	tmpbox.list.push (astate.tabskips[astate.tabskips.length - 1]);
+	tmpbox.list.push (new BoxGlue (astate.tabskips[astate.tabskips.length - 1]));
 	tmpbox.set_glue__OOS (engine, astate.pack_is_exact, astate.pack_spec_S);
 
-	// TTP 805. Go through the outer list, which is a set of rows and/or
-	// rules.
+	// TTP 805. Go through the outer list, which is a set of row boxes and
+	// arbitrary other things inserted via \noalign.
 
 	for (var i = 0; i < list.length; i++) {
 	    var item = list[i];
@@ -593,6 +593,9 @@
 		// we can just copy over its glue-set results. In fact, we
 		// can't just call set_glue on it, since the widths of its
 		// sub-items aren't yet set correctly.
+		//
+		// XXX: we need something like Tex's unset_node to distinguish
+		// rows from miscellaneous \noalign material.
 		item.glue_set = tmpbox.glue_set;
 		item.glue_state = tmpbox.glue_state;
 		item.shift_amount_S = o_S;
@@ -604,7 +607,7 @@
 		}
 
 		var col = 0;
-		var newlist = [];
+		var newlist = [item.list[0]]; // Initial tabskip
 
 		for (var j = 1; j < item.list.length; j += 2) {
 		    // TTP 808. Set the properties of each cell within the row.
@@ -697,11 +700,13 @@
 
 		    subitem.shift_amount_S = nlib.Zero_S;
 		    newlist.push (subitem);
+		    newlist.push (item.list[j+1]); // next tabskip glue; unsure about correctness with \spans
 		    newlist = newlist.concat (extra_items);
 		    col += subitem.nspanned;
 		}
 
 		item.list = newlist;
+		engine.trace ('align row after adjustment: %U', item);
 	    } else if (item instanceof Rule) {
 		// TTP 806. Make the rule full-width if it has "running"
 		// dimensions.

@@ -251,7 +251,7 @@ var HBox = (function HBox_closure () {
 		this.glue_state = 1;
 
 	    // Note: here, TeX does indeed use floating-point math.
-	    this.glue_set = (1.0 * stretches_S[this.glue_state - 1]) / setdelta_S;
+	    this.glue_set = (1.0 * setdelta_S) / stretches_S[this.glue_state - 1];
 	} else {
 	    // We're shrinking it.
 	    this.width_S = nat_width_S - setdelta_S;
@@ -265,7 +265,7 @@ var HBox = (function HBox_closure () {
 	    else
 		this.glue_state = -1;
 
-	    this.glue_set = (1.0 * shrinks_S[-this.glue_state - 1]) / setdelta_S;
+	    this.glue_set = (1.0 * setdelta_S) / shrinks_S[-this.glue_state - 1];
 	}
 
 	this.height_S = height_S;
@@ -401,7 +401,7 @@ var VBox = (function VBox_closure () {
 	    else
 		this.glue_state = 1;
 
-	    this.glue_set = (1.0 * stretches_S[this.glue_state - 1]) / setdelta_S;
+	    this.glue_set = (1.0 * setdelta_S) / stretches_S[this.glue_state - 1];
 	} else {
 	    // We're shrinking it.
 	    this.height_S = nat_height_S - setdelta_S;
@@ -415,7 +415,7 @@ var VBox = (function VBox_closure () {
 	    else
 		this.glue_state = -1;
 
-	    this.glue_set = (1.0 * shrinks_S[-this.glue_state - 1]) / setdelta_S;
+	    this.glue_set = (1.0 * setdelta_S) / shrinks_S[-this.glue_state - 1];
 	}
 
 	this.width_S = width_S;
