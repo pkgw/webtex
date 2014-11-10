@@ -463,6 +463,7 @@
 	    b.list = items;
 	}
 
+	b.set_glue__OOS (engine, false, nlib.Zero_S);
 	engine.accum (b);
 
 	if (engine.mode () != M_RHORZ)
@@ -647,7 +648,7 @@
 			// not be able to because TeX does all this junk
 			// instead of just calling vpack, but I don't
 			// understand why.
-			subitem.width_S = tmpbox.width_S;
+			subitem.width_S = item.width_S;
 
 			if (subitem.height_S == t_S) {
 			    subitem.glue_state = 1;
@@ -671,8 +672,8 @@
 			subitem.height_S = w_S;
 		    } else {
 			// TTP 810
-			subitem.height_S = tmpbox.height_S;
-			subitem.depth_S = tmpbox.depth_S;
+			subitem.height_S = item.height_S;
+			subitem.depth_S = item.depth_S;
 
 			if (subitem.width_S == t_S) {
 			    subitem.glue_state = 1;
