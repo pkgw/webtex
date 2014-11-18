@@ -634,6 +634,19 @@ var Rule = (function Rule_closure () {
 	return 'Rule ' + this._uishape ();
     };
 
+    proto._uishape = function Rule__uishape () {
+	var w = '(running)', h = '(running)', d = '(running)';
+
+	if (this.width_S != running_S)
+	    w = format ('%S', this.width_S);
+	if (this.height_S != running_S)
+	    h = format ('%S', this.height_S);
+	if (this.depth_S != running_S)
+	    d = format ('%S', this.depth_S);
+
+	return format ('w=%s h=%s d=%s', w, h, d);
+    };
+
     proto.is_running__S = function Rule__is_running__S (amount_S) {
 	return amount_S == running_S;
     };
