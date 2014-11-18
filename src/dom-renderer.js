@@ -49,6 +49,12 @@ var DOMRenderer = (function DOMRenderer_callback () {
 		e.height = Math.ceil (scale * (item.h + item.d));
 		dom_stack[idom].appendChild (e);
 
+		// If we have a depth, must offset relative to the text baseline.
+		if (item.d != 0) {
+		    e.style.position = 'relative';
+		    e.style.bottom = (-scale * item.d).toFixed (3) + 'px';
+		}
+
 		var ctx = e.getContext ('2d');
 		ctx.fillStyle = 'rgba(0,0,0,0.8)';
 		//ctx.strokeRect (0, 0, e.width, e.height); // XXX debugging
