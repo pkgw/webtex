@@ -11,6 +11,7 @@ var DOMRenderer = (function DOMRenderer_callback () {
 
     proto.fontmap = {
 	lmmi10: '28px LMMathItalic10',
+	lmmi7: '19.6px LMMathItalic7',
 	lmr7: '19.6px LMRoman7',
 	'rm-lmr7': '19.6px LMRoman7',
 	'rm-lmr10': '28px LMRoman7',
