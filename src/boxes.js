@@ -521,11 +521,11 @@ var CanvasBox = (function CanvasBox_closure () {
 	    if (item instanceof Character) {
 		this.graphics.push ([x, y, item]);
 	    } else if (item instanceof Rule) {
-		if (item.is_running__S (item.width_S))
+		if (Rule.is_running__S (item.width_S))
 		    item.width_S = parent.width_S;
-		if (item.is_running__S (item.height_S))
+		if (Rule.is_running__S (item.height_S))
 		    item.height_S = parent.height_S;
-		if (item.is_running__S (item.depth_S))
+		if (Rule.is_running__S (item.depth_S))
 		    item.depth_S = parent.depth_S;
 
 		this.graphics.push ([x, y, item]);
@@ -647,7 +647,8 @@ var Rule = (function Rule_closure () {
 	return format ('w=%s h=%s d=%s', w, h, d);
     };
 
-    proto.is_running__S = function Rule__is_running__S (amount_S) {
+    Rule.is_running__S = function Rule__is_running__S (amount_S) {
+	// Note: classmethod: call Rule.is_running__S()
 	return amount_S == running_S;
     };
 
