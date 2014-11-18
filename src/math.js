@@ -140,7 +140,7 @@ var FractionNode = (function FractionNode_closure () {
     function FractionNode () {
 	// In TeX, numer and denom must always be math lists.
 	MathNode.call (this, MT_FRACTION);
-	this.thickness = null;
+	this.thickness_S = null;
 	this.denom = null;
 	this.numer = null;
 	this.left_delim = new Delimiter ();
@@ -151,8 +151,8 @@ var FractionNode = (function FractionNode_closure () {
     var proto = FractionNode.prototype;
 
     proto._uisummary = function FractionNode__uisummary () {
-	return 'Fraction thickness=' + this.thickness + ' left=' + this.left_delim +
-	    ' right=' + this.right_delim;
+	return format ('Fraction thickness=%s left=%o right=%o',
+		       this.thickness_S, this.left_delim, this.right_delim);
     };
 
     proto._uiitems = function FractionNode__uiitems () {
@@ -255,6 +255,15 @@ var StyleChoiceNode = (function StyleChoiceNode_closure () {
 var mathlib = (function mathlib_closure () {
     var ml = {};
 
+    engine_proto.register_state ({
+	engine_init: function (engine) {
+	    engine.unfinished_math_node = null; // "incompleat_noad"
+	},
+	is_clean: function (engine) {
+	    return engine.unfinished_math_node == null;
+	}
+    });
+
     ml._addui = function mathlib__addui (uilist, desc, elem) {
 	if (elem == null)
 	    return;
@@ -320,6 +329,36 @@ var mathlib = (function mathlib_closure () {
 	return atom;
     };
 
+    // Scanning equations and built-in math commands
+
+    var default_thickness_marker_S = 0x40000000;
+
+    function finish_math_list (engine, trailing_right_node) {
+	// TTP 1184 "fin_mlist"
+	var retval = engine.leave_mode ();
+
+	if (engine.unfinished_math_node != null) {
+	    var n = engine.unfinished_math_node;
+	    n.denom = retval;
+
+	    if (trailing_right_node == null)
+		retval = [n];
+	    else {
+		// "{\left| a \over b \right|}" was temporarily parsed as
+		// `FractionNode { numer = \left| a, denom = b }` ; we need to
+		// pull the \left| out of the fraction.
+		if (n.numer[0].ltype != MT_LEFT)
+		    throw new TexRuntimeError ('\\right must come after \\left');
+
+		var left = n.numer.shift ();
+		retval = [left, n, trailing_right_node];
+	    }
+	}
+
+	return retval;
+    }
+    ml.finish_math_list = finish_math_list;
+
     ml.scan_math = function mathlib_scan_math (engine, callback) {
 	// T:TP 1151
 	var tok = null;
@@ -380,7 +419,7 @@ var mathlib = (function mathlib_closure () {
 	engine.nest_eqtb ();
 	engine.enter_mode (M_MATH);
 	engine.enter_group ('submath', function (eng) {
-	    var list = eng.leave_mode ();
+	    var list = finish_math_list (eng, null);
 	    eng.unnest_eqtb ();
 	    callback (eng, list);
 	});
@@ -416,6 +455,69 @@ var mathlib = (function mathlib_closure () {
 	d.large_ord = (val >> 0) & 0xFF;
 	return d;
     };
+
+    // TTP 1178: fraction-type stuff
+
+    function handle_math_fraction (engine, kind, has_delims) {
+	// TTP 1181: "math_fraction"
+	if (engine.mode () != M_MATH && engine.mode () != M_DMATH)
+	    throw new TexRuntimeError ('%o not allowed outside of math mode', kind);
+
+	if (engine.unfinished_math_node != null)
+	    throw new TexRuntimeError ('consecutive ungrouped \\%s-type commands ' +
+				       'are not allowed', kind);
+
+	var n = new FractionNode ();
+	n.numer = engine.build_stack[engine.build_stack.length-1];
+
+	if (has_delims) {
+	    n.left_delim = ml.scan_delimiter (engine, false);
+	    n.right_delim = ml.scan_delimiter (engine, false);
+	}
+
+	if (kind == 'above') {
+	    n.thickness_S = engine.scan_dimen__O_S (false);
+	} else if (kind == 'over') {
+	    n.thickness_S = default_thickness_marker_S;
+	} else { // atop:
+	    n.thickness_S = nlib.Zero_S;
+	}
+
+	engine.unfinished_math_node = n;
+	engine.build_stack[engine.build_stack.length-1] = [];
+    }
+
+    register_command ('above', function cmd_above (engine) {
+	engine.trace ('above');
+	handle_math_fraction (engine, 'above', false);
+    });
+
+    register_command ('atop', function cmd_atop (engine) {
+	engine.trace ('atop');
+	handle_math_fraction (engine, 'atop', false);
+    });
+
+    register_command ('over', function cmd_over (engine) {
+	engine.trace ('over');
+	handle_math_fraction (engine, 'over', false);
+    });
+
+    register_command ('abovewithdelims', function cmd_above_with_delims (engine) {
+	engine.trace ('abovewithdelims');
+	handle_math_fraction (engine, 'above', true);
+    });
+
+    register_command ('atopwithdelims', function cmd_atop_with_delims (engine) {
+	engine.trace ('atopwithdelims');
+	handle_math_fraction (engine, 'atop', true);
+    });
+
+    register_command ('overwithdelims', function cmd_over_with_delims (engine) {
+	engine.trace ('overwithdelims');
+	handle_math_fraction (engine, 'overwithdelims', true);
+    });
+
+    // Rendering of math lists into horizontal lists
 
     var SymDimens = {
 	MathXHeight: 5,
@@ -472,7 +574,7 @@ var mathlib = (function mathlib_closure () {
 	};
 
 	proto.ext_dimen__N_S = function MathState_ext_dimen__N_S (number) {
-	    var f = this.engine.get_font_family (this.size, 2);
+	    var f = this.engine.get_font_family (this.size, 3);
 	    if (f == null)
 		throw new TexRuntimeError ('need math ext fontdimen but no ext font defined');
 	    return f.get_dimen__N_S (number);
@@ -499,6 +601,9 @@ var mathlib = (function mathlib_closure () {
 	    return new MathState (this.engine, this.style, this.cramped);
 	};
 
+	var ms_sup_style = [MS_SCRIPT, MS_SCRIPT, MS_SCRIPTSCRIPT, MS_SCRIPTSCRIPT];
+	var ms_num_style = [MS_TEXT, MS_SCRIPT, MS_SCRIPTSCRIPT, MS_SCRIPTSCRIPT];
+
 	proto.superscript = function MathState_superscript () {
 	    var res = this.clone ();
 	    res.style = ms_sup_style[res.style];
@@ -514,6 +619,19 @@ var mathlib = (function mathlib_closure () {
 
 	proto.to_cramped = function MathState_to_cramped () {
 	    var res = this.clone ();
+	    res.cramped = true;
+	    return res;
+	};
+
+	proto.to_numer = function MathState_to_numer () {
+	    var res = this.clone ();
+	    res.style = ms_num_style[res.style];
+	    return res;
+	};
+
+	proto.to_denom = function MathState_to_denom () {
+	    var res = this.clone ();
+	    res.style = ms_num_style[res.style];
 	    res.cramped = true;
 	    return res;
 	};
@@ -681,9 +799,40 @@ var mathlib = (function mathlib_closure () {
 	return x;
     }
 
+    function rebox__OOS (engine, box, width_S) {
+	// TTP 715 "rebox"
+
+	if (box.width_S == width_S || box.list.length == 0) {
+	    box.width_S = width_S;
+	    return box;
+	}
+
+	if (box instanceof VBox)
+	    box = hpack_natural (engine, box);
+
+	if (box.list.length == 1 && (box.list[0] instanceof Character)) {
+	    // Compensate for the italic correction of this lone character
+	    var v_S = box.list[0].font.box_for_ord (box.list[0].ord).width_S;
+	    if (v_S != box.width_S)
+		box.list.push (new Kern (box.width_S - v_S));
+	}
+
+	var hss = new Glue ();
+	hss.stretch_S = nlib.scale__I_S (1);
+	hss.stretch_order = 1;
+	hss.shrink_S = nlib.scale__I_S (1);
+	hss.shrink_order = 1;
+
+	box.list.unshift (new BoxGlue (hss));
+	box.list.push (new BoxGlue (hss));
+	box.set_glue__OOS (engine, true, width_S);
+	return box;
+    }
+
     function fraction_rule (t_S) {
 	var r = new Rule ();
 	r.height_S = t_S;
+	r.depth_S = nlib.Zero_S;
 	return r;
     }
 
@@ -862,9 +1011,9 @@ var mathlib = (function mathlib_closure () {
 	var v = new VBox ();
 	v.width_S = Math.max (x.width_S, y.width_S, z.width_S);
 
-	x = rebox (x, v.width_S);
-	y = rebox (y, v.width_S);
-	z = rebox (z, v.width_S);
+	x = rebox__OOS (state.engine, x, v.width_S);
+	y = rebox__OOS (state.engine, y, v.width_S);
+	z = rebox__OOS (state.engine, z, v.width_S);
 	x.shift_amount_S = half (delta);
 	z.shift_amount_S = -x.shift_amount_S;
 	v.height_S = y.height_S;
@@ -940,6 +1089,91 @@ var mathlib = (function mathlib_closure () {
 	q.nuc = overbar__OSS_O (clean_box (state.to_cramped (), q.nuc),
 				3 * drt_S,
 				drt_S);
+    }
+
+    function make_fraction (state, q) {
+	var drt_S = state.ext_dimen__N_S (ExtDimens.DefaultRuleThickness);
+	var ah_S = state.sym_dimen__NN_S (state.size, SymDimens.AxisHeight);
+
+	if (q.thickness_S == default_thickness_marker_S)
+	    q.thickness_S = drt_S;
+
+	var x = clean_box (state.to_numer (), q.numer);
+	var z = clean_box (state.to_denom (), q.denom);
+
+	if (x.width_S < z.width_S)
+	    x = rebox__OOS (state.engine, x, z.width_S);
+	else
+	    z = rebox__OOS (state.engine, z, x.width_S);
+
+	var shift_up_S, shift_down_S;
+
+	if (state.style == MS_DISPLAY) {
+	    shift_up_S = state.sym_dimen__NN_S (state.size, SymDimens.Num1);
+	    shift_down_S = state.sym_dimen__NN_S (state.size, SymDimens.Denom1);
+	} else {
+	    shift_down_S = state.sym_dimen__NN_S (state.size, SymDimens.Denom2);
+	    if (q.thickness_S != 0)
+		shift_up_S = state.sym_dimen__NN_S (state.size, SymDimens.Num2);
+	    else
+		shift_up_S = state.sym_dimen__NN_S (state.size, SymDimens.Num3);
+	}
+
+	var clr_S, delta_S;
+
+	if (q.thickness_S == 0) {
+	    if (state.style == MS_DISPLAY)
+		clr_S = 7 * drt_S;
+	    else
+		clr_S = 3 * drt_S;
+
+	    delta_S = half (clr_S - ((shift_up_S - x.depth_S) - (z.height_S - shift_down_S)));
+
+	    if (delta_S > 0) {
+		shift_up_S += delta_S;
+		shift_down_S += delta_S;
+	    }
+	} else {
+	    if (state.style == MS_DISPLAY)
+		clr_S = 3 * drt_S;
+	    else
+		clr_S = drt_S;
+
+	    delta_S = half (q.thickness_S);
+	    var delta1_S = clr_S - ((shift_up_S - x.depth_S) - (ah_S + delta_S));
+	    var delta2_S = clr_S - ((ah_S - delta_S) - (z.height_S - shift_down_S));
+
+	    if (delta1_S > 0)
+		shift_up_S += delta1_S;
+	    if (delta2_S > 0)
+		shift_down_S += delta2_S;
+	}
+
+	var v = new VBox ();
+	v.height_S = x.height_S + shift_up_S;
+	v.depth_S = z.depth_S + shift_down_S;
+	v.width_S = x.width_S;
+	v.glue_state = 1; // pretend we've set the glue
+	v.glue_set = 1;
+
+	if (q.thickness_S == 0) {
+	    var k = new Kern ((shift_up_S + x.depth_S) - (z.height_S - shift_down_S));
+	    v.list = [x, k, z];
+	} else {
+	    var y = fraction_rule (q.thickness_S);
+	    var p1 = new Kern ((ah_S - delta_S) - (z.height_S - shift_down_S));
+	    var p2 = new Kern ((shift_up_S - x.depth_S) - (ah_S + delta_S));
+	    v.list = [x, p2, y, p1, z];
+	}
+
+	if (state.style == MS_DISPLAY)
+	    delta_S = state.sym_dimen__NN_S (state.size, SymDimens.Delim1);
+	else
+	    delta_S = state.sym_dimen__NN_S (state.size, SymDimens.Delim2);
+
+	x = var_delimiter (state, q.left_delim, delta_S);
+	z = var_delimiter (state, q.right_delim, delta_S);
+	q.new_hlist = hpack_natural (state.engine, [x, v, z]);
     }
 
     function make_scripts (engine, state, q, delta) {
@@ -1100,6 +1334,10 @@ var mathlib = (function mathlib_closure () {
 		make_over (state, q);
 		break;
 	    case MT_FRACTION:
+		make_fraction (state, q);
+		// goto check_dimensions:
+		process_atom = false;
+		break;
 	    case MT_OPEN:
 	    case MT_INNER:
 	    case MT_UNDER:

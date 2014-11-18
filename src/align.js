@@ -114,8 +114,7 @@
 
 	switch (engine.mode ()) {
 	case M_DMATH:
-	    if (engine.get_last_listable () != null)
-		// XXX todo: or if there is an incompleat_node
+	    if (engine.get_last_listable () != null || engine.unfinished_math_node != null)
 		throw new TexRuntimeError ('cannot use alignments in non-empty math displays');
 	    engine.enter_mode (M_IVERT);
 	    // XXX: ignoring prev_depth

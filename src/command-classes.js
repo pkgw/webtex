@@ -364,7 +364,7 @@ var MathShiftCommand = (function MathShiftCommand_closure () {
 	if (m == M_DMATH || m == M_MATH) {
 	    // T:TP 1194 -- after_math(). XXX: this code is a poor approximation so far.
 	    engine.trace ('math shift: exit');
-	    var mlist = engine.leave_mode ();
+	    var mlist = mathlib.finish_math_list (engine, null);
 	    var mstyle = MS_DISPLAY;
 	    if (m == M_MATH)
 		mstyle = MS_TEXT;

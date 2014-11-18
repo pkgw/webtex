@@ -185,6 +185,10 @@ var HBox = (function HBox_closure () {
 
     proto.set_glue__OOS = function HBox_set_glue__OOS (engine, is_exact, spec_S) {
 	// T:TP 649
+	//
+	// TTP 653: "The code here implicitly uses the fact that running
+	// dimensions are indicated by [running_S], which will be ignored in
+	// the calculations because it is a highly negative number."
 
 	var nat_width_S = nlib.Zero_S;
 	var stretches_S = [0, 0, 0, 0];
@@ -289,7 +293,7 @@ var HBox = (function HBox_closure () {
 		item.traverse (x, y0 + item.shift_amount_S, callback);
 		x += item.width_S;
 	    } else if (item instanceof Boxlike) {
-		callback (x, y0 + item.shift_amount_S, item);
+		callback (x, y0 + item.shift_amount_S, item, this);
 		x += item.width_S;
 	    } else if (item instanceof Kern) {
 		x += item.amount_S;
@@ -307,7 +311,7 @@ var HBox = (function HBox_closure () {
 
 		x += dx;
 	    } else {
-		callback (x, y0, item);
+		callback (x, y0, item, this);
 	    }
 	}
     };
@@ -463,7 +467,7 @@ var VBox = (function VBox_closure () {
 		y += item.depth_S;
 	    } else if (item instanceof Boxlike) {
 		y += item.height_S;
-		callback (x0 + item.shift_amount_S, y, item);
+		callback (x0 + item.shift_amount_S, y, item, this);
 		y += item.depth_S;
 	    } else if (item instanceof Kern) {
 		y += item.amount_S;
@@ -481,7 +485,7 @@ var VBox = (function VBox_closure () {
 
 		y += dy
 	    } else {
-		callback (x0, y, item);
+		callback (x0, y, item, this);
 	    }
 	}
     };
@@ -513,8 +517,17 @@ var CanvasBox = (function CanvasBox_closure () {
 
 	// TODO, I think: record true width/height/depth of subcomponents.
 
-	srcbox.traverse (0, 0, function (x, y, item) {
-	    if (item instanceof Character || item instanceof Rule) {
+	srcbox.traverse (0, 0, function (x, y, item, parent) {
+	    if (item instanceof Character) {
+		this.graphics.push ([x, y, item]);
+	    } else if (item instanceof Rule) {
+		if (item.is_running__S (item.width_S))
+		    item.width_S = parent.width_S;
+		if (item.is_running__S (item.height_S))
+		    item.height_S = parent.height_S;
+		if (item.is_running__S (item.depth_S))
+		    item.depth_S = parent.depth_S;
+
 		this.graphics.push ([x, y, item]);
 	    } else {
 		this.list.push (item);
@@ -563,7 +576,7 @@ var CanvasBox = (function CanvasBox_closure () {
 
     proto.traverse = function CanvasBox_traverse (x0, y0, callback) {
 	for (var i = 0; i < this.list.length; i++) {
-	    callback (x0, y0, this.list[i]);
+	    callback (x0, y0, this.list[i], this);
 	}
     };
 
@@ -604,9 +617,14 @@ var CanvasBox = (function CanvasBox_closure () {
 
 
 var Rule = (function Rule_closure () {
+    var running_S = -0x40000000; // "running" rule dimension
+
     function Rule () {
 	Boxlike.call (this);
 	this.ltype = LT_RULE;
+	this.width_S = running_S;
+	this.depth_S = running_S;
+	this.height_S = running_S;
     }
 
     inherit (Rule, Boxlike);
@@ -614,6 +632,10 @@ var Rule = (function Rule_closure () {
 
     proto._uisummary = function Rule__uisummary () {
 	return 'Rule ' + this._uishape ();
+    };
+
+    proto.is_running__S = function Rule__is_running__S (amount_S) {
+	return amount_S == running_S;
     };
 
     return Rule;
