@@ -349,7 +349,7 @@ var VBox = (function VBox_closure () {
 	    var item = this.list[i];
 
 	    if (item instanceof Boxlike) {
-		nat_height_S += item.width_S + prev_depth_S;
+		nat_height_S += item.height_S + prev_depth_S;
 		prev_depth_S = item.depth_S;
 		width_S = Math.max (width_S, item.width_S + item.shift_amount_S);
 	    } else if (item instanceof Kern) {
