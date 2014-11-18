@@ -416,8 +416,7 @@ var mathlib = (function mathlib_closure () {
 
 	engine.push_back (tok);
 	engine.scan_left_brace ();
-	engine.nest_eqtb ();
-	engine.enter_mode (M_MATH);
+	engine.enter_math (M_MATH, false);
 	engine.enter_group ('submath', function (eng) {
 	    var list = finish_math_list (eng, null);
 	    eng.unnest_eqtb ();

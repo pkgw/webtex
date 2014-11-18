@@ -1806,7 +1806,7 @@ var Engine = (function Engine_closure () {
     // Math box construction
 
     proto.enter_math = function Engine_enter_math (mode, is_outer) {
-	// TTP 1136
+	// TTP 1136: "push_math", more or less
 	this.enter_mode (mode);
 	this.trace ('<is_outer=%b>', is_outer);
 	this.unfinished_math_node = null;
