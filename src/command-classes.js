@@ -373,6 +373,7 @@ var MathShiftCommand = (function MathShiftCommand_closure () {
 	    var box = new HBox ();
 	    box.list = hlist;
 	    box.set_glue__OOS (engine, false, nlib.Zero_S);
+	    engine.trace ('rendered math: %U', box);
 	    box = new CanvasBox (box); // our magic!
 
 	    var ms_S = engine.get_parameter__O_S ('mathsurround');
