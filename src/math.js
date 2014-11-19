@@ -1063,7 +1063,7 @@ var mathlib = (function mathlib_closure () {
 	    clr += half (delta);
 
 	y.shift_amount_S = -(x.height_S + clr);
-	q.nuc = [hpack_natural (state.engine, [y, overbar__OSS_O (x, clr, y.height_S)])];
+	q.nuc = hpack_natural (state.engine, [y, overbar__OSS_O (x, clr, y.height_S)]);
     }
 
     function make_vcenter (state, q) {
