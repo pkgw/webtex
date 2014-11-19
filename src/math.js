@@ -739,6 +739,8 @@ var mathlib = (function mathlib_closure () {
 	var b = new HBox ();
 
 	if (hlist != null) {
+	    if (!(hlist instanceof Array))
+		throw new TexInternalError ('hpack_natural takes arrays');
 	    b.list = hlist;
 	    b.set_glue__OOS (engine, false, nlib.Zero_S);
 	}
@@ -1035,7 +1037,7 @@ var mathlib = (function mathlib_closure () {
 	    v.height_S += shift_down;
 	}
 
-	q.new_hlist = v;
+	q.new_hlist = [v];
 	return delta;
     }
 
@@ -1061,7 +1063,7 @@ var mathlib = (function mathlib_closure () {
 	    clr += half (delta);
 
 	y.shift_amount_S = -(x.height_S + clr);
-	q.nuc = hpack_natural (state.engine, [y, overbar__OSS_O (x, clr, y.height_S)]);
+	q.nuc = [hpack_natural (state.engine, [y, overbar__OSS_O (x, clr, y.height_S)])];
     }
 
     function make_vcenter (state, q) {
@@ -1163,7 +1165,7 @@ var mathlib = (function mathlib_closure () {
 
 	x = var_delimiter (state, q.left_delim, delta_S);
 	z = var_delimiter (state, q.right_delim, delta_S);
-	q.new_hlist = hpack_natural (state.engine, [x, v, z]);
+	q.new_hlist = [hpack_natural (state.engine, [x, v, z])];
     }
 
     function make_scripts (engine, state, q, delta) {
@@ -1396,7 +1398,7 @@ var mathlib = (function mathlib_closure () {
 		} else if (q.nuc instanceof Array) {
 		    var sublist = mlist_to_hlist (engine, q.nuc, state.style,
 						  state.cramped, false);
-		    p = [hpack_natural (sublist)];
+		    p = [hpack_natural (engine, sublist)];
 		} else {
 		    throw new TexInternalError ('unrecognized nucleus value %o', q.nuc);
 		}
