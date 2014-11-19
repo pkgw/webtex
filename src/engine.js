@@ -261,7 +261,6 @@ var EquivTable = (function EquivTable_closure () {
 var Engine = (function Engine_closure () {
     var AF_GLOBAL = 1 << 0;
     var BO_SETBOX = 0;
-    var ignore_depth_S = nlib.from_raw__I_S (-65536000); // TTP 212
 
     function Engine (args) {
 	/* Possible properties of args:
@@ -287,11 +286,8 @@ var Engine = (function Engine_closure () {
 	this.special_values = {};
 	this.special_values[T_INT] = {};
 	this.special_values[T_DIMEN] = {};
-	this.set_special_value (T_INT, 'spacefactor', 1000);
-	this.set_special_value (T_INT, 'prevgraf', 0);
 	this.set_special_value (T_INT, 'deadcycles', 0);
 	this.set_special_value (T_INT, 'insertpenalties', 0);
-	this.set_special_value (T_DIMEN, 'prevdepth', nlib.Zero_S);
 	this.set_special_value (T_DIMEN, 'pagegoal', nlib.Zero_S);
 	this.set_special_value (T_DIMEN, 'pagetotal', nlib.Zero_S);
 	this.set_special_value (T_DIMEN, 'pagestretch', nlib.Zero_S);
@@ -303,8 +299,6 @@ var Engine = (function Engine_closure () {
 
 	this._fonts = {};
 
-	this.mode_stack = [M_VERT];
-	this.build_stack = [[]];
 	this.group_exit_stack = [];
 	this.boxop_stack = [];
 
@@ -327,8 +321,6 @@ var Engine = (function Engine_closure () {
 	this.commands['<endv>'] = new register_command._registry['<endv>'] ();
 
 	engine_proto._call_state_funcs ('engine_init', this);
-
-	this.prev_depth_S = ignore_depth_S;
 
 	var nf = new Font (this, 'nullfont', -1000);
 	this._fonts['<null>'] = this._fonts['nullfont'];
@@ -482,56 +474,6 @@ var Engine = (function Engine_closure () {
 	this.eqtb = this.eqtb.parent;
     };
 
-    proto.mode = function Engine_mode () {
-	return this.mode_stack[this.mode_stack.length - 1];
-    };
-
-    proto.enter_mode = function Engine_enter_mode (mode) {
-	this.trace ('<enter %s mode>', mode_abbrev[mode]);
-	this.mode_stack.push (mode);
-	this.build_stack.push ([]);
-    };
-
-    proto.leave_mode = function Engine_leave_mode () {
-	var oldmode = this.mode_stack.pop ();
-	var list = this.build_stack.pop ();
-	this.trace ('<leave %s mode: %d items>', mode_abbrev[oldmode], list.length);
-	return list;
-    };
-
-    proto.ensure_horizontal = function Engine_ensure_horizontal (cmd) {
-	// If we must start a new paragraph, we have to push the command back
-	// onto the input stack (T:TP back_input) before doing so, because the
-	// output routine must execute and may insert tokens between this
-	// command and any arguments it may have.
-	var m = this.mode ();
-
-	if (m == M_VERT || m == M_IVERT) {
-	    this.push_back (Token.new_cmd (cmd));
-	    this.begin_graf (true);
-	    return true; // command will be rerun
-	}
-
-	return false;
-    };
-
-    proto.ensure_vertical = function Engine_ensure_vertical (cmd) {
-	// Here, we want to escape to vmode. If we're in horizontal mode,
-	// insert a \par then reread the current command.
-	var m = this.mode ();
-
-	if (m == M_VERT || m == M_IVERT)
-	    return false;
-
-	if (m == M_HORZ) {
-	    this.push_back (Token.new_cmd (cmd));
-	    this.push (Token.new_cmd (this.commands['par']));
-	    return true;
-	}
-
-	throw new TexRuntimeError ('need to, but cannot, escape to vertical mode');
-    };
-
     proto.enter_group = function Engine_enter_group (groupname, callback) {
 	this.trace ('< ---> %d %s>', this.group_exit_stack.length, groupname);
 	this.group_exit_stack.push ([groupname, callback, []]);
@@ -596,13 +538,13 @@ var Engine = (function Engine_closure () {
 	if (this.mode () == M_VERT)
 	    this.run_page_builder ();
 
-	this.set_special_value (T_INT, 'prevgraf', 0);
+	this.set_prevgraf (0);
 
-	if (this.mode () == M_VERT || this.build_stack[this.build_stack.length-1].length)
+	if (this.mode () == M_VERT || this.get_cur_list ().length)
 	    this.accum (new BoxGlue (this.get_parameter (T_GLUE, 'parskip')));
 
 	this.enter_mode (M_HORZ);
-	this.set_special_value (T_INT, 'spacefactor', 1000);
+	this.set_spacefactor (1000);
 
 	this.accum (new StartTag ('p', {})); // webtex special!
 
@@ -655,65 +597,6 @@ var Engine = (function Engine_closure () {
 
     // List-building.
 
-    proto.accum = function Engine_accum (item) {
-	this.build_stack[this.build_stack.length - 1].push (item);
-
-	// spacefactor management. TeXBook p. 76.
-
-	if (item.ltype == LT_CHARACTER) {
-	    var prevsf = this.get_special_value (T_INT, 'spacefactor');
-	    var thissf = this.get_code (CT_SPACEFAC, item.ord);
-	    var newsf = null;
-
-	    if (thissf == 1000) {
-		newsf = 1000;
-	    } else if (thissf < 1000) {
-		if (thissf > 0)
-		    newsf = thissf;
-	    } else if (prevsf < 1000) {
-		newsf = 1000;
-	    } else {
-		newsf = thissf;
-	    }
-
-	    if (newsf != null)
-		this.set_special_value (T_INT, 'spacefactor', newsf);
-	} else if (item instanceof Boxlike) {
-	    this.set_special_value (T_INT, 'spacefactor', 1000);
-	}
-    };
-
-    proto.accum_list = function Engine_accum_list (list) {
-	// unhbox and friends do not cause \prevdepth etc. to be computed, so we don't
-	// process individual items.
-	Array.prototype.push.apply (this.build_stack[this.build_stack.length - 1],
-				    list);
-    };
-
-    proto.accum_to_vlist = function Engine_accum_to_vlist (item) {
-	// TTP 679 "append_to_vlist". This function is needed to add the
-	// baselineskip glue, which we need for things like alignments and
-	// some aspects of equations.
-
-	if (this.prev_depth_S > ignore_depth_S) {
-	    var bs = this.get_parameter (T_GLUE, 'baselineskip');
-	    var d_S = bs.amount_S - this.prev_depth_S - item.height_S;
-	    var g;
-
-	    if (d_S < this.get_parameter (T_DIMEN, 'lineskiplimit'))
-		g = this.get_parameter (T_GLUE, 'lineskip');
-	    else {
-		var g = this.get_parameter (T_GLUE, 'baselineskip').clone ();
-		g.amount_S = d_S;
-	    }
-
-	    this.build_stack[this.build_stack.length - 1].push (new BoxGlue (g));
-	}
-
-	this.build_stack[this.build_stack.length - 1].push (item);
-	this.prev_depth_S = item.depth_S;
-    };
-
     proto.run_page_builder = function Engine_run_page_builder () {
 	// Real TeX pays attention to the height of the page-in-progress and
 	// decides to break with a bunch of complex logic. We don't need any
@@ -722,7 +605,7 @@ var Engine = (function Engine_closure () {
 	// called.
 	if (this.mode () != M_VERT)
 	    throw new TexInternalError ('tried to build page outside of vertical mode');
-	if (this.build_stack.length != 1)
+	if (this.mode_stack.length != 1)
 	    throw new TexInternalError ('vertical mode is not deepest?')
 
 	if (this._running_output)
@@ -732,7 +615,7 @@ var Engine = (function Engine_closure () {
 	// preserve the penalty for the next batch of output, but since (I think)
 	// we don't need it for anything, we just pop it off the list.
 
-	var list = this.build_stack[0];
+	var list = this.get_cur_list ();
 	var l = list.length;
 
 	if (l > 0 && list[l-1].ltype == LT_PENALTY) {
@@ -748,7 +631,7 @@ var Engine = (function Engine_closure () {
 	vbox.list = list;
 	vbox.set_glue__OOS (this, false, nlib.Zero_S);
 	this.set_register (T_BOX, 255, vbox);
-	this.build_stack[0] = [];
+	this.reset_cur_list ();
 	this._running_output = true;
 
 	function finish_output (eng) {
@@ -781,24 +664,6 @@ var Engine = (function Engine_closure () {
 	this.shiptarget.process (box);
     };
 
-    proto.handle_un_listify = function Engine_handle_un_listify (targtype) {
-	// TODO?: TeXBook p. 280: not allowed in vmode if main vertical list
-	// has been entirely contributed to current page.
-
-	var l = this.build_stack.length;
-	if (l == 0)
-	    return;
-
-	var list = this.build_stack[l - 1];
-	l = list.length;
-	if (l == 0)
-	    return;
-
-	if (list[l - 1].ltype == targtype)
-	    list.pop ();
-    };
-
-
     // Input nesting and other I/O
 
     proto.handle_input = function Engine_handle_input (texfn) {
@@ -827,7 +692,7 @@ var Engine = (function Engine_closure () {
 	// \penalty-'10000000000' into the main vertical list and reread the
 	// \end. \line{} is \hbox to\hsize{}.
 
-	if (this.build_stack[0].length == 0 &&
+	if (this.get_cur_list ().length == 0 &&
 	    this.get_special_value (T_INT, 'deadcycles') == 0) {
 	    this.trace ('... completely done');
 	    this._force_end = true;
@@ -885,10 +750,6 @@ var Engine = (function Engine_closure () {
 	    throw new TexRuntimeError ('can only serialize Engine at topmost input');
 	if (this.eqtb.parent !== null)
 	    throw new TexRuntimeError ('can only serialize Engine in topmost eqtb');
-	if (this.mode_stack.length > 1)
-	    throw new TexRuntimeError ('can only serialize Engine in topmost mode');
-	if (this.build_stack.length > 1 || this.build_stack[0].length > 0)
-	    throw new TexRuntimeError ('cannot serialize Engine with queued build items');
 	if (this.group_exit_stack.length > 0)
 	    throw new TexRuntimeError ('can only serialize Engine without open groups');
 	if (this.boxop_stack.length > 0)
@@ -1690,12 +1551,12 @@ var Engine = (function Engine_closure () {
 
     proto.scan_box_for_accum = function Engine_scan_box_for_accum (cmd) {
 	function accum_box (engine, box) {
-	    if (engine.mode () == M_MATH || engine.mode () == M_DMATH) {
+	    if (engine.absmode () == M_DMATH) {
 		engine.trace ('... accumulate the finished box (math)');
 		var ord = new AtomNode (MT_ORD);
 		ord.nuc = box;
 		engine.accum (ord);
-	    } else if (engine.mode () == M_VERT || engine.mode () == M_IVERT) {
+	    } else if (engine.absmode () == M_VERT) {
 		engine.trace ('... accumulate the finished box (vertical)');
 		engine.accum_to_vlist (box);
 	    } else {
@@ -1780,36 +1641,12 @@ var Engine = (function Engine_closure () {
     };
 
 
-    proto.get_last_listable = function Engine_get_last_listable () {
-	var l = this.build_stack.length;
-	if (l == 0)
-	    return null;
-	var c = this.build_stack[l - 1];
-	l = c.length;
-	if (l == 0)
-	    return null;
-	return c[l - 1];
-    };
-
-    proto.pop_last_listable = function Engine_pop_last_listable () {
-	var l = this.build_stack.length;
-	if (l == 0)
-	    throw new TexInternalError ('no build_stack to pop from');
-	var c = this.build_stack[l - 1];
-	l = c.length;
-	if (l == 0)
-	    throw new TexInternalError ('build_stack empty');
-	return c.pop ();
-    };
-
-
     // Math box construction
 
     proto.enter_math = function Engine_enter_math (mode, is_outer) {
 	// TTP 1136: "push_math", more or less
 	this.enter_mode (mode);
 	this.trace ('<is_outer=%b>', is_outer);
-	this.unfinished_math_node = null;
 	this.nest_eqtb ();
 
 	if (is_outer)

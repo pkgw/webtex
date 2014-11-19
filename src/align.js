@@ -114,7 +114,7 @@
 
 	switch (engine.mode ()) {
 	case M_DMATH:
-	    if (engine.get_last_listable () != null || engine.unfinished_math_node != null)
+	    if (engine.get_last_listable () != null || engine.get_unfinished_math_node () != null)
 		throw new TexRuntimeError ('cannot use alignments in non-empty math displays');
 	    engine.enter_mode (M_IVERT);
 	    // XXX: ignoring prev_depth
@@ -283,7 +283,7 @@
 	    throw new TexInternalError ('align row in math mode?');
 	}
 
-	engine.set_special_value (T_INT, 'spacefactor', 0);
+	engine.set_spacefactor (0);
 
 	var astate = engine.align_stack[engine.align_stack.length - 1];
 	engine.accum (new BoxGlue (astate.tabskips[0]));
@@ -298,7 +298,7 @@
 	engine.enter_mode (mode);
 
 	if (mode == M_RHORZ)
-	    engine.set_special_value (T_INT, 'spacefactor', 1000);
+	    engine.set_spacefactor (1000);
 	else {
 	    // T:TP 1070: normal_paragraph
 	    engine.set_parameter (T_INT, 'looseness', 0);
@@ -458,7 +458,7 @@
 	    b = new VBox ();
 	    b.list = items;
 	    b.set_glue__OOS (engine, false, nlib.Zero_S);
-	    engine.set_special_value (T_INT, 'spacefactor', 1000);
+	    engine.set_spacefactor (1000);
 	} else {
 	    b = new HBox ();
 	    b.list = items;

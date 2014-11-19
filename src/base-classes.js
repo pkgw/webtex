@@ -319,6 +319,26 @@ var Command = (function Command_closure () {
 })();
 
 
+var AssignmentCommand = (function AssignmentCommand_closure () {
+    function AssignmentCommand () {
+	Command.call (this);
+    }
+
+    inherit (AssignmentCommand, Command);
+    var proto = AssignmentCommand.prototype;
+
+    proto.invoke = function AssignmentCommand_invoke (engine) {
+	var as_valref = this.as_valref (engine);
+	engine.scan_optional_equals ();
+	var newval = engine.scan_valtype (this.get_valtype ());
+	engine.trace ('%s = %o', this.name, newval);
+	as_valref.set (engine, newval);
+    };
+
+    return AssignmentCommand;
+})();
+
+
 // Registry of command specifications.
 
 var register_command = (function register_command_wrapper () {
@@ -336,6 +356,13 @@ var register_command = (function register_command_wrapper () {
     return register_command;
 }) ();
 
+function register_assignment_command (name, valtype, as_valref) {
+    var cmd = new AssignmentCommand ();
+    cmd.name = name;
+    cmd.get_valtype = function () { return valtype; };
+    cmd.as_valref = as_valref.bind (cmd);
+    register_command (name, cmd);
+}
 
 var register_command_deserializer = (function register_command_deserializer_wrapper () {
     var deserializers = {};

@@ -1181,10 +1181,10 @@ register_command ('insert', function cmd_insert (engine) {
 
 // "Special registers" with single global values:
 //
-// ints: \prevgraf, \deadcycles, \insertpenalties, \spacefactor.
+// ints: \deadcycles, \insertpenalties.
 //
 // dimens: \pagetotal, \pagegoal, \pagestretch, \pagefilstretch,
-// \pagefillstretch, \pagefilllstretch, \pageshrink, \pagedepth, \prevdepth.
+// \pagefillstretch, \pagefilllstretch, \pageshrink, \pagedepth.
 //
 // Other internal values; listed as a superset of the specials in TeXBook.
 // distinction unclear:
@@ -1192,11 +1192,8 @@ register_command ('insert', function cmd_insert (engine) {
 // ints: \parshape \inputlineno \badness \lastpenalty
 // dimens: \lastkern
 
-register_command ('prevgraf', new SpecialValueCommand (T_INT, 'prevgraf'));
 register_command ('deadcycles', new SpecialValueCommand (T_INT, 'deadcycles'));
 register_command ('insertpenalties', new SpecialValueCommand (T_INT, 'insertpenalties'));
-register_command ('spacefactor', new SpecialValueCommand (T_INT, 'spacefactor'));
-register_command ('prevdepth', new SpecialValueCommand (T_DIMEN, 'prevdepth')); // XXX: only valid in vertical mode
 register_command ('pagegoal', new SpecialValueCommand (T_DIMEN, 'pagegoal'));
 register_command ('pagetotal', new SpecialValueCommand (T_DIMEN, 'pagetotal'));
 register_command ('pagestretch', new SpecialValueCommand (T_DIMEN, 'pagestretch'));
@@ -1491,7 +1488,7 @@ register_command ('vcenter', function cmd_vcenter (engine) {
 	engine.accum (atom);
     });
 
-    // XXX: prev_depth = ignore_depth;
+    engine.set_prev_depth_to_ignore ();
     engine.maybe_push_toklist ('everyvbox');
 });
 

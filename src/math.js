@@ -255,15 +255,6 @@ var StyleChoiceNode = (function StyleChoiceNode_closure () {
 var mathlib = (function mathlib_closure () {
     var ml = {};
 
-    engine_proto.register_state ({
-	engine_init: function (engine) {
-	    engine.unfinished_math_node = null; // "incompleat_noad"
-	},
-	is_clean: function (engine) {
-	    return engine.unfinished_math_node == null;
-	}
-    });
-
     ml._addui = function mathlib__addui (uilist, desc, elem) {
 	if (elem == null)
 	    return;
@@ -335,23 +326,23 @@ var mathlib = (function mathlib_closure () {
 
     function finish_math_list (engine, trailing_right_node) {
 	// TTP 1184 "fin_mlist"
+	var umn = engine.get_unfinished_math_node ();
 	var retval = engine.leave_mode ();
 
-	if (engine.unfinished_math_node != null) {
-	    var n = engine.unfinished_math_node;
-	    n.denom = retval;
+	if (umn != null) {
+	    umn.denom = retval;
 
 	    if (trailing_right_node == null)
-		retval = [n];
+		retval = [umn];
 	    else {
 		// "{\left| a \over b \right|}" was temporarily parsed as
 		// `FractionNode { numer = \left| a, denom = b }` ; we need to
 		// pull the \left| out of the fraction.
-		if (n.numer[0].ltype != MT_LEFT)
+		if (umn.numer[0].ltype != MT_LEFT)
 		    throw new TexRuntimeError ('\\right must come after \\left');
 
-		var left = n.numer.shift ();
-		retval = [left, n, trailing_right_node];
+		var left = umn.numer.shift ();
+		retval = [left, umn, trailing_right_node];
 	    }
 	}
 
@@ -462,12 +453,12 @@ var mathlib = (function mathlib_closure () {
 	if (engine.mode () != M_MATH && engine.mode () != M_DMATH)
 	    throw new TexRuntimeError ('%o not allowed outside of math mode', kind);
 
-	if (engine.unfinished_math_node != null)
+	if (engine.get_unfinished_math_node () != null)
 	    throw new TexRuntimeError ('consecutive ungrouped \\%s-type commands ' +
 				       'are not allowed', kind);
 
 	var n = new FractionNode ();
-	n.numer = engine.build_stack[engine.build_stack.length-1];
+	n.numer = engine.get_cur_list ();
 
 	if (has_delims) {
 	    n.left_delim = ml.scan_delimiter (engine, false);
@@ -482,8 +473,8 @@ var mathlib = (function mathlib_closure () {
 	    n.thickness_S = nlib.Zero_S;
 	}
 
-	engine.unfinished_math_node = n;
-	engine.build_stack[engine.build_stack.length-1] = [];
+	engine.set_unfinished_math_node (n);
+	engine.reset_cur_list ();
     }
 
     register_command ('above', function cmd_above (engine) {

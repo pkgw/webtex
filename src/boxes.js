@@ -339,7 +339,7 @@ var VBox = (function VBox_closure () {
     };
 
     proto.set_glue__OOS = function VBox_set_glue__OOS (engine, is_exact, spec_S) {
-	var nat_height_S = 0;
+	var nat_height_S = nlib.Zero_S;
 	var stretches_S = [0, 0, 0, 0];
 	var shrinks_S = [0, 0, 0, 0];
 	var width_S = nlib.Zero_S;

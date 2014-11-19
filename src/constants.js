@@ -103,18 +103,6 @@ var ct_maxvals = [15, 255, 255, 0x7FFF, 0x8000, 0xFFFFFF];
 var ct_names = ['catcode', 'lccode', 'uccode', 'sfcode', 'mathcode', 'delcode'];
 
 
-var M_VERT = 0,  // standard vertical mode
-    M_IVERT = 1, // internal vertical mode
-    M_HORZ = 2,  // standard horizontal mode
-    M_RHORZ = 3, // restricted horizontal mode
-    M_MATH = 4,  // standard math mode
-    M_DMATH = 5; // display math mode
-
-var mode_abbrev = [
-    'vert', 'ivert', 'horz', 'rhorz', 'math', 'dmath'
-];
-
-
 var C_ESCAPE = 0,
     C_BGROUP = 1,
     C_EGROUP = 2,

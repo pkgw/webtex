@@ -17,6 +17,7 @@ sharedjs = \
   src/numerics.js \
   src/base-classes.js \
   src/values.js \
+  src/modes.js \
   src/registers.js \
   src/parameters.js \
   src/conditionals.js \
