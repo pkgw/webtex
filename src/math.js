@@ -151,7 +151,7 @@ var FractionNode = (function FractionNode_closure () {
     var proto = FractionNode.prototype;
 
     proto._uisummary = function FractionNode__uisummary () {
-	return format ('Fraction thickness=%s left=%o right=%o',
+	return format ('Fraction thickness=%S left=%o right=%o',
 		       this.thickness_S, this.left_delim, this.right_delim);
     };
 
