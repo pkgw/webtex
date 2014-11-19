@@ -1385,9 +1385,8 @@ register_command ('mathchoice', function cmd_mathchoice (engine) {
     mc._cur = 0;
 
     function finish_one (eng) {
-	var list = engine.leave_mode ();
+	var list = mathlib.finish_math_list (engine, null);
 	engine.unnest_eqtb ();
-	// XXX? this is fin_mlist() [TTP 1184]; we're skipping 'incompleat_node' futzing
 
 	if (mc._cur == 0)
 	    mc.in_display = list;
@@ -1406,9 +1405,7 @@ register_command ('mathchoice', function cmd_mathchoice (engine) {
     }
 
     function scan_one () {
-	// XXX? this is push_math() [TTP 1136]; we're skipping 'incompleat_node' futzing
-	engine.nest_eqtb ();
-	engine.enter_mode (M_MATH);
+	engine.enter_math (M_MATH, false);
 	engine.enter_group ('mathchoice', finish_one);
 	engine.scan_left_brace ();
     }
