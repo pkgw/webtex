@@ -480,10 +480,21 @@ var Engine = (function Engine_closure () {
     };
 
     proto.handle_bgroup = function Engine_handle_bgroup () {
-	this.nest_eqtb ();
-	this.enter_group ('simple', function (eng) {
-	    this.unnest_eqtb ();
-	}.bind (this));
+	if (this.absmode () == M_DMATH) {
+	    // TTP 1150
+	    var atom = new AtomNode (MT_ORD);
+	    this.accum (atom);
+	    // XXX: hack since push_back looks at iscat
+	    this.push_back (Token.new_char (C_BGROUP, O_LEFT_BRACE));
+	    mathlib.scan_math (this, function (eng, item) {
+		atom.nuc = item;
+	    });
+	} else {
+	    this.nest_eqtb ();
+	    this.enter_group ('simple', function (eng) {
+		this.unnest_eqtb ();
+	    }.bind (this));
+	}
     };
 
     proto.handle_egroup = function Engine_handle_egroup () {
@@ -873,9 +884,10 @@ var Engine = (function Engine_closure () {
     };
 
     proto.push_back = function Engine_push_back (tok) {
-	// This is a special version of push() that is to be used when the most
-	// recently-read token is being returned to the input stream. It
-	// un-does changes to align_state that will have just happened.
+	// TTP 325: "back_input". This is a special version of push() that is
+	// to be used when the most recently-read token is being returned to
+	// the input stream. It un-does changes to align_state that will have
+	// just happened.
 	this.inputstack.push_toklist ([tok]);
 
 	if (tok.is_cat (C_BGROUP))
