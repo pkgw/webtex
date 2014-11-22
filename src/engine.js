@@ -978,7 +978,7 @@ var Engine = (function Engine_closure () {
     };
 
     proto.next_x_tok = function Engine_next_x_tok () {
-	while (1) {
+	while (true) {
 	    var tok = this.next_tok ();
 	    if (tok === EOF)
 		return tok;
@@ -1113,6 +1113,29 @@ var Engine = (function Engine_closure () {
 		return [negfactor, tok];
 	    }
 	}
+    };
+
+    proto.scan_through_assignments = function Engine_scan_through_assignments () {
+	// TTP 1270, "do_assignments". Also includes TTP 404.
+
+	var tok = null;
+
+	while (true) {
+	    tok = this.next_x_tok_throw ();
+	    if (tok.is_space (this) || tok.is_cmd (this, 'relax'))
+		continue;
+
+	    var cmd = tok.to_cmd (this);
+
+	    if (cmd.assign_flag_mode == AFM_INVALID)
+		break;
+
+	    // XXX TeX sets a global flag set_box_allowed=False that does what
+	    // it sounds like.
+	    cmd.invoke (this);
+	}
+
+	return tok;
     };
 
     proto.scan_int__I = function Engine_scan_int__I () {

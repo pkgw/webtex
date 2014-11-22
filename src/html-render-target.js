@@ -29,23 +29,22 @@ worker_ship_targets['html-render'] = (function HTMLRenderTarget_closure () {
 	    var item = box_stack[ibox].list[j_stack[ibox]];
 	    j_stack[ibox]++; // This item is dealt with.
 
-	    if (item instanceof CanvasBox) {
-		// We have to handle this before ListBox because CanvasBoxes
-		// are ListBoxes. Or we could, you know, use object
-		// orientation.
+	    if (item instanceof ListBox) {
+		if (!item.render_as_canvas) {
+		    box_stack.push (item);
+		    j_stack.push (0);
+		    ibox++;
+		} else {
+		    if (queued_text.length) {
+			rendered.push (queued_text);
+			queued_text = '';
+		    }
 
-		if (queued_text.length) {
-		    rendered.push (queued_text);
-		    queued_text = '';
+		    item = new CanvasBox (item);
+		    var data = item.to_render_data ();
+		    data.kind = 'canvas';
+		    rendered.push (data);
 		}
-
-		var data = item.to_render_data ();
-		data.kind = 'canvas';
-		rendered.push (data);
-	    } else if (item instanceof ListBox) {
-		box_stack.push (item);
-		j_stack.push (0);
-		ibox++;
 	    } else if (item instanceof StartTag) {
 		if (queued_text.length) {
 		    rendered.push (queued_text);

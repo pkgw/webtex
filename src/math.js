@@ -457,6 +457,20 @@ var mathlib = (function mathlib_closure () {
 	    this.set_parameter (T_INT, 'fam', -1);
     });
 
+    function resume_after_display (engine) {
+	// TTP 1200 "resume_after_display" XXX probably not complete
+
+	// XXX square off grouping, modes, etc.
+	// XXX: moving pagebuilder invocation
+	if (engine.mode () == M_VERT)
+	    engine.run_page_builder ();
+
+	engine.enter_mode (M_HORZ);
+	engine.set_spacefactor (1000);
+	// XXX: set clang, prev_graf
+	engine.scan_one_optional_space ();
+    }
+    ml.resume_after_display = resume_after_display;
 
     // Math commands
 

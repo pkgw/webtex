@@ -732,22 +732,39 @@
 	    }
 	}
 
+	// XXX: insert specials bracketing the list to tell the HTML renderer
+	// to process it all as a big canvas. We can't stuff it all into a
+	// single box because various packages (e.g. amsmath) poke around
+	// inside displays after constructing them.
+
 	// TTP 812
 	if (engine.mode () == M_DMATH) {
-	    throw new TexInternalError ('not implemented: math displays');
+	    // TTP 1206. XXX: there's some monkeying with prevdepth that I
+	    // don't quite get since I think it shouldn't be legal since we're
+	    // not in vmode. Ignoring it for now. (See also TTP 775.)
+
+	    var tok = engine.scan_through_assignments ();
+	    if (!(tok.to_cmd (engine) instanceof MathShiftCommand))
+		throw new TexRuntimeError ('alignments must occur in display math ' +
+					   'unaccompanied; next tok is %o', tok);
+
+	    tok = engine.next_x_tok ();
+	    if (!(tok.to_cmd (engine) instanceof MathShiftCommand))
+		throw new TexRuntimeError ('display math should end with $$; I got one then %o', tok);
+
+	    // undo effects of enter_math: by design, this align is the only thing
+	    // in the display, so we can ignore the list returned by leave_mode().
+	    engine.unnest_eqtb ();
+	    engine.leave_mode ();
+
+	    engine.accum (new Penalty (engine.get_parameter__O_I ('predisplaypenalty')));
+	    engine.accum (new BoxGlue (engine.get_parameter (T_GLUE, 'abovedisplayskip')));
+	    engine.accum_list (list);
+	    engine.accum (new Penalty (engine.get_parameter__O_I ('postdisplaypenalty')));
+	    engine.accum (new BoxGlue (engine.get_parameter (T_GLUE, 'belowdisplayskip')));
+	    mathlib.resume_after_display (engine);
 	} else {
-	    // TeX effectively does "engine.accum_list (list)". We instead generate
-	    // a CanvasBox.
-	    var b;
-
-	    if (astate.is_valign)
-		b = new HBox ();
-	    else
-		b = new VBox ();
-
-	    b.list = list;
-	    b.set_glue__OOS (engine, false, nlib.Zero_S);
-	    engine.accum (new CanvasBox (b));
+	    engine.accum_list (list);
 
 	    if (engine.mode () == M_VERT)
 		engine.run_page_builder ();
