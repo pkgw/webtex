@@ -895,9 +895,9 @@ var Engine = (function Engine_closure () {
 
 	var cmd = tok.to_cmd (this);
 
-	if (cmd instanceof BeginGroupCommand) {
+	if (tok.is_cat (C_BGROUP)) {
 	    this.align_state -= 1;
-	} else if (cmd instanceof EndGroupCommand) {
+	} else if (tok.is_cat (C_EGROUP)) {
 	    this.align_state += 1;
 	}
     };
@@ -939,9 +939,9 @@ var Engine = (function Engine_closure () {
 
 	var cmd = tok.to_cmd (this);
 
-	if (cmd instanceof BeginGroupCommand) {
+	if (tok.is_cat (C_BGROUP)) {
 	    this.align_state += 1;
-	} else if (cmd instanceof EndGroupCommand) {
+	} else if (tok.is_cat (C_EGROUP)) {
 	    this.align_state -= 1;
 	} else if (cmd instanceof AlignTabCommand ||
 		   tok.is_cmd (this, 'span') ||
@@ -1149,9 +1149,9 @@ var Engine = (function Engine_closure () {
 		// Undo align-state shift that we don't want here.
 		var cmd = tok.to_cmd (this);
 
-		if (cmd instanceof BeginGroupCommand) {
+		if (tok.is_cat (C_BGROUP)) {
 		    this.align_state--;
-		} else if (cmd instanceof EndGroupCommand) {
+		} else if (tok.is_cat (C_EGROUP)) {
 		    this.align_state++;
 		}
 		return negfactor * tok.ord;
