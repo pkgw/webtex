@@ -246,3 +246,5 @@ wd			n	n	consume	# -> "set_box_dimen"
 write			n	n	inval # -> *"extension"
 xdef			n	n	consume # -> "def"
 xleaders		n	n	inval # -> "leader_ship"
+
+WEBTEXtraceon		n	n	inval

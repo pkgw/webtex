@@ -1651,3 +1651,7 @@ register_command ('showbox', function cmd_showbox (engine) {
     var box = engine.get_register (T_BOX, reg);
     engine.trace ('showbox %d = %U', reg, box);
 });
+
+register_command ('WEBTEXtraceon', function cmd_webtex_traceon (engine) {
+    engine.set_tracing (true);
+});

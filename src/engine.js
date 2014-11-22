@@ -331,10 +331,7 @@ var Engine = (function Engine_closure () {
 	    this.set_font_family (MS_SCRIPTSCRIPT, i, nf);
 	}
 
-	if (args.debug_trace)
-	    this.trace = this._trace;
-	else
-	    this.trace = function (t) {};
+	this.set_tracing (args.debug_trace);
     }
 
     var proto = Engine.prototype;
@@ -349,6 +346,12 @@ var Engine = (function Engine_closure () {
 	global_warn (format.apply (null, arguments));
     };
 
+    proto.set_tracing = function Engine_set_tracing (tracing_on) {
+	if (tracing_on)
+	    this.trace = this._trace;
+	else
+	    this.trace = function (t) {};
+    };
 
     // Wrappers for the EquivTable.
 

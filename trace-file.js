@@ -13,7 +13,7 @@ var eng = webtex.setup_process_basic ({
     inputpath: inputpath,
     dumppath: dumppath,
     bundlepath: 'build/latest.zip',
-    debug_trace: true,
+    debug_trace: false,
     debug_input_lines: true,
     shiptarget: new webtex.ConsoleDumpTarget (),
 });
