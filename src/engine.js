@@ -317,7 +317,8 @@ var Engine = (function Engine_closure () {
 	engine_init_parameters (this);
 	engine_init_param_cseqs (this);
 	this.commands['<space>'] = new Command.catcode_commands[C_SPACE] (O_SPACE);
-	this.commands['<end-group>'] = new Command.catcode_commands[C_EGROUP] (O_LEFT_BRACE);
+	this.commands['<begin-group>'] = new Command.catcode_commands[C_BGROUP] (O_LEFT_BRACE);
+	this.commands['<end-group>'] = new Command.catcode_commands[C_EGROUP] (O_RIGHT_BRACE);
 	this.commands['<endv>'] = new register_command._registry['<endv>'] ();
 
 	engine_proto._call_state_funcs ('engine_init', this);
@@ -487,8 +488,7 @@ var Engine = (function Engine_closure () {
 	    // TTP 1150
 	    var atom = new AtomNode (MT_ORD);
 	    this.accum (atom);
-	    // XXX: hack since push_back looks at iscat
-	    this.push_back (Token.new_char (C_BGROUP, O_LEFT_BRACE));
+	    this.push_back (Token.new_cmd (this.commands['<begin-group>']));
 	    mathlib.scan_math (this, function (eng, item) {
 		atom.nuc = item;
 	    });
@@ -893,9 +893,11 @@ var Engine = (function Engine_closure () {
 	// just happened.
 	this.inputstack.push_toklist ([tok]);
 
-	if (tok.is_cat (C_BGROUP))
+	var cmd = tok.to_cmd (this);
+
+	if (cmd instanceof BeginGroupCommand)
 	    this.align_state -= 1;
-	else if (tok.is_cat (C_EGROUP))
+	else if (cmd instanceof EndGroupCommand)
 	    this.align_state += 1;
     };
 
@@ -934,9 +936,11 @@ var Engine = (function Engine_closure () {
 	if (tok === EOF)
 	    return tok;
 
-	if (tok.is_cat (C_BGROUP)) {
+	var cmd = tok.to_cmd (this);
+
+	if (cmd instanceof BeginGroupCommand) {
 	    this.align_state += 1;
-	} else if (tok.is_cat (C_EGROUP)) {
+	} else if (cmd instanceof EndGroupCommand) {
 	    this.align_state -= 1;
 	} else if (tok.to_cmd (this) instanceof AlignTabCommand ||
 		   tok.is_cmd (this, 'span') ||

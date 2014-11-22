@@ -362,7 +362,7 @@ function _cmd_def (engine, cname, expand_replacement) {
 	var tok = engine.next_tok_throw ();
 
 	if (last_was_param) {
-	    if (tok.is_cat (C_BGROUP)) {
+	    if (tok.to_cmd (engine) instanceof BeginGroupCommand) {
 		tmpl_toks.push (tok);
 		end_with_lbrace = true;
 		engine.align_state--; // TTP 394 ... I think??
