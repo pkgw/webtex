@@ -382,19 +382,25 @@ var MathShiftCommand = (function MathShiftCommand_closure () {
 	    engine.accum (new MathDelim (ms_S, true));
 	    engine.unnest_eqtb (); // XXX: check that this matches an unsave, not pop_nest
 	} else {
-	    engine.trace ('math shift: enter');
-
 	    var tok = engine.next_tok_throw ();
 	    if (tok.to_cmd (engine) instanceof MathShiftCommand &&
 		(m == M_VERT || m == M_HORZ || m == M_DMATH)) { // XXX don't understand mode check; see T:TP
 		    engine.end_graf ();
+		engine.trace ('math shift: enter display');
 		engine.enter_math (M_DMATH, true);
-		// XXX: pre_display_size_code to an overhang of prev graf (T:TP 1145)
-		// XXX: display_width_code to width of display
-		// XXX: display_indent_code to its indent
+
+		// TTP 1146: setting predisplaysize. We use the default, which is max_dimen:
+		engine.set_parameter__OS ('predisplaysize', 0x3fffffff);
+
+		// TeX futzes the display width based on the indentation parameters,
+		// but it's essentially hsize. TTP 1149.
+		engine.set_parameter__OS ('displaywidth',
+					  engine.get_parameter__O_S ('hsize'));
+		engine.set_parameter__OS ('displayindent', nlib.Zero_S);
 		engine.maybe_push_toklist ('everydisplay');
 		// XXX: no pagebuilder
 	    } else {
+		engine.trace ('math shift: enter non-display');
 		engine.push_back (tok);
 		engine.enter_math (M_MATH, true);
 		engine.maybe_push_toklist ('everymath');
