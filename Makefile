@@ -7,6 +7,10 @@ default: all
 
 # The engine implementations: Web Worker and Node.js backends
 
+genlists = \
+  commands.txt \
+  namedparams.txt
+
 sharedjs = \
   src/preamble.js \
   src/format.js \
@@ -59,9 +63,9 @@ generate.py src/node-wrapper.js $(preamble) $(sharedjs) $(nodejs) \
 	$(python) $^ $@
 
 $(builddir)/%-helpers.js: \
-generate.py src/%-helpers-tmpl.js \
+generate.py src/%-helpers-tmpl.js $(genlists) \
 | $(builddir)
-	$(python) $^ $@
+	$(python) $< src/$*-helpers-tmpl.js $@
 
 primaries += $(builddir)/worker-webtex.js $(builddir)/node-webtex.js
 
