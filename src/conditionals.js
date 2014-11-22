@@ -225,53 +225,60 @@
     // Now we can get to the basic conditional commands. These all
     // delegate to engine.handle_if().
 
-    register_command ('if', function cmd_if (engine) {
-	engine.start_parsing_condition ();
-	var t1 = engine.next_x_tok (), t2 = engine.next_x_tok ();
-	engine.done_parsing_condition ();
+    function if_key (engine, tok) {
+	if (tok.is_char ())
+	    return tok.ord;
 
-	// The comparison rules here are a bit funky.
-
-	function key (tok) {
-	    if (tok.is_char ())
-		return tok.catcode * 1000 + tok.ord;
-	    if (tok.is_cslike ()) { // active chars will be caught by above
-		var cmd = tok.to_cmd (engine);
-		if (cmd instanceof GivenCharCommand)
-		    throw new TexInternalError ('not implemented');
-		return 16 * 1000 + 256;
-	    }
-	    throw new TexRuntimeError ('illegal comparison subject %o', tok);
+	if (tok.is_cslike ()) { // active chars will be caught by above
+	    var cmd = tok.to_cmd (engine);
+	    if (cmd instanceof GivenCharCommand)
+		throw new TexInternalError ('not implemented');
+	    return 256;
 	}
 
-	var result = (key (t1) == key (t2));
-	engine.trace ('if %o ~ %o => %b', t1, t2, result);
+	throw new TexRuntimeError ('illegal comparison subject %o', tok);
+    }
+
+    function ifcat_key (engine, tok) {
+	if (tok.is_char ())
+	    return tok.catcode;
+
+	if (tok.is_cslike ()) { // active chars will be caught by above
+	    var cmd = tok.to_cmd (engine);
+	    if (cmd instanceof GivenCharCommand)
+		throw new TexInternalError ('not implemented');
+	    return 16;
+	}
+
+	throw new TexRuntimeError ('illegal comparison subject %o', tok);
+    }
+
+    function eval_if_and_ifcat (engine, ifname, is_ifcat) {
+	// Handling of active characters is baroque, but I think our
+	// implementation just does what we want. TTP 506. \ifcat is coded
+	// there in terms of command codes, rather than category codes, since
+	// in TeX they're the same thing.
+
+	engine.start_parsing_condition ();
+	var t1 = engine.next_x_tok ();
+	var t2 = engine.next_x_tok ();
+	engine.done_parsing_condition ();
+
+	var key = if_key;
+	if (is_ifcat)
+	    key = ifcat_key;
+
+	var result = (key (engine, t1) == key (engine, t2));
+	engine.trace ('%s %o ~ %o => %b', ifname, t1, t2, result);
 	engine.handle_if (result);
+    }
+
+    register_command ('if', function cmd_if (engine) {
+	eval_if_and_ifcat (engine, 'if', false);
     });
 
-
     register_command ('ifcat', function cmd_ifcat (engine) {
-	engine.start_parsing_condition ();
-	var t1 = engine.next_x_tok (), t2 = engine.next_x_tok ();
-	engine.done_parsing_condition ();
-
-	// The comparison rules here are a bit funky.
-
-	function key (tok) {
-	    if (tok.is_char ())
-		return tok.catcode;
-	    if (tok.is_cslike ()) { // active chars will be caught by above
-		var cmd = tok.to_cmd (engine);
-		if (cmd instanceof GivenCharCommand)
-		    throw new TexInternalError ('not implemented');
-		return 16;
-	    }
-	    throw new TexRuntimeError ('illegal comparison subject %o', tok);
-	}
-
-	var result = (key (t1) == key (t2));
-	engine.trace ('ifcat %o ~ %o => %b', t1, t2, result);
-	engine.handle_if (result);
+	eval_if_and_ifcat (engine, 'ifcat', true);
     });
 
 
