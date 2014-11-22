@@ -1088,8 +1088,10 @@ var Engine = (function Engine_closure () {
 	if (i == n)
 	    return true; // got it
 
-	// optional keyword not found; push back scanned tokens
-	this.push_toks (scanned);
+	// optional keyword not found; push back scanned tokens. This could be
+	// more efficient since each individual push_back is a new stack entry.
+	while (scanned.length)
+	    this.push_back (scanned.pop ());
 	return false;
     };
 
