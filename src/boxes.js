@@ -68,6 +68,8 @@ var ListBox = (function ListBox_closure () {
     proto._copyto = function ListBox__copyto (other) {
 	Boxlike.prototype._copyto.call (this, other);
 	other.btype = this.btype;
+	other.glue_state = this.glue_state;
+	other.glue_set = this.glue_set;
 	other.list = this.list.slice ();
     };
 
