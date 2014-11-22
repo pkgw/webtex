@@ -198,9 +198,10 @@ register_command ('futurelet', function cmd_futurelet (engine) {
     var cstok = engine.scan_r_token ();
     var thenexpand = engine.next_tok_throw ();
     var equiv = engine.next_tok_throw ();
+    engine.push_back (equiv); // must do this to maintain align_state
+    engine.push_back (thenexpand);
     engine.trace ('futurelet %o = %o; %o', cstok, equiv, thenexpand);
     cstok.assign_cmd (engine, equiv.to_cmd (engine));
-    engine.push_toks ([thenexpand, equiv]);
 });
 
 
