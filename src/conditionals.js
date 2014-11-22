@@ -376,19 +376,23 @@
 
     register_command ('ifhmode', function cmd_ifhmode (engine) {
 	engine.trace ('ifhmode');
-	engine.handle_if (engine.mode () == M_HORZ || engine.mode () == M_RHORZ);
+	engine.handle_if (engine.absmode () == M_HORZ);
     });
 
 
     register_command ('ifvmode', function cmd_ifvmode (engine) {
 	engine.trace ('ifvmode');
-	engine.handle_if (engine.mode () == M_VERT || engine.mode () == M_IVERT);
+	engine.handle_if (engine.absmode () == M_VERT);
     });
 
 
     register_command ('ifmmode', function cmd_ifmmode (engine) {
 	engine.trace ('ifmmode');
-	engine.handle_if (engine.mode () == M_MATH || engine.mode () == M_DMATH);
+	engine.handle_if (engine.absmode () == M_DMATH);
     });
 
+    register_command ('ifinner', function cmd_ifinner (engine) {
+	engine.trace ('ifinner');
+	engine.handle_if (engine.mode () < 0);
+    });
 }) ();
