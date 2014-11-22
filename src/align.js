@@ -730,7 +730,7 @@
 	    b.set_glue__OOS (engine, false, nlib.Zero_S);
 	    engine.accum (new CanvasBox (b));
 
-	    if (engine.mode () == M_VERT || engine.mode () == M_IVERT)
+	    if (engine.mode () == M_VERT)
 		engine.run_page_builder ();
 	}
     }
