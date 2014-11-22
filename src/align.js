@@ -31,6 +31,13 @@
 
 	var proto = AlignColumn.prototype;
 
+	proto.clone_for_periodic = function AlignColumn_clone_for_periodic () {
+	    var other = new AlignColumn ();
+	    other.u_tmpl = this.u_tmpl.slice ();
+	    other.v_tmpl = this.v_tmpl.slice ();
+	    return other;
+	};
+
 	return AlignColumn;
     }) ();
 
@@ -354,8 +361,15 @@
 	    if (astate.loop_idx < 0)
 		throw new TexRuntimeError ('too many &s in alignment row');
 
-	    // XXX: T:TP 793. various tokens created and inserted right here
-	    throw new TexInternalError ('alignment loops not implemented');
+	    // TTP 793. Lengthen the preamble periodically.
+	    var nperiodic = astate.columns.length - astate.cur_col;
+
+	    for (var i = 0; i < nperiodic; i++) {
+		astate.columns.push (astate.columns[astate.loop_idx + i].clone_for_periodic ());
+		astate.tabskips.push (astate.tabskips[astate.loop_idx + i + 1].clone ());
+	    }
+
+	    astate.loop_idx += nperiodic;
 	}
 
 	var cur_col = astate.cur_col;
