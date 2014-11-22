@@ -327,7 +327,10 @@ var mathlib = (function mathlib_closure () {
 	var umn = engine.get_unfinished_math_node ();
 	var retval = engine.leave_mode ();
 
-	if (umn != null) {
+	if (umn == null) {
+	    if (trailing_right_node != null)
+		retval.push (trailing_right_node);
+	} else {
 	    umn.denom = retval;
 
 	    if (trailing_right_node == null)
@@ -1087,7 +1090,7 @@ var mathlib = (function mathlib_closure () {
 	// First we figure out the right size character to use.
 
 	var foundit = false;
-	var w = 0; // best seen height so far
+	var w_S = nlib.Zero_S; // best seen height so far
 	var info = [[delim.small_fam, delim.small_ord],
 		    [delim.large_fam, delim.large_ord]];
 
@@ -1123,13 +1126,13 @@ var mathlib = (function mathlib_closure () {
 			break;
 		    }
 
-		    var u = m.height_plus_depth__O_S (y);
-		    if (u > w) {
+		    var u_S = m.height_plus_depth__O_S (y);
+		    if (u_S > w_S) {
 			f = g;
 			c = y;
-			w = u;
+			w_S = u_S;
 
-			if (u >= v_S) {
+			if (u_S >= v_S) {
 			    // big enough; go with it
 			    foundit = true;
 			    s = -1;
@@ -1149,14 +1152,17 @@ var mathlib = (function mathlib_closure () {
 	var b = null;
 
 	if (f == null) {
+	    state.engine.trace ('making null delimiter');
 	    b = new HBox ();
 	    b.width_S = state.engine.get_parameter__O_S ('nulldelimiterspace');
 	} else if (!f.get_metrics ().is_extensible (c)) {
+	    state.engine.trace ('making single-char delimiter font=%o chr=%c', f, c);
 	    b = new HBox ();
-	    b.list = [new Character (f, c)];
+	    b.list = [f.box_for_ord (c)];
 	    b.set_glue__OOS (state.engine, false, nlib.Zero_S);
 	} else {
 	    // Need to build a giant delimiter manually :-(
+	    state.engine.trace ('making extensible delimiter');
 	    b = new VBox ();
 	    var m = f.get_metrics ();
 	    var r = m.extensible_recipe (c);
@@ -1166,27 +1172,27 @@ var mathlib = (function mathlib_closure () {
 	    var top = (r >> 24) & 0xFF;
 
 	    c = rep;
-	    var u = m.height_plus_depth__O_S (c);
-	    w = 0;
+	    var u_S = m.height_plus_depth__O_S (c);
+	    w_S = nlib.Zero_S;
 	    b.width_S = m.width (c).value_S + m.italic_correction__O_S (c);
 
 	    if (bot != 0)
-		w += m.height_plus_depth__O_S (bot);
+		w_S += m.height_plus_depth__O_S (bot);
 
 	    if (mid != 0)
-		w += m.height_plus_depth__O_S (mid);
+		w_S += m.height_plus_depth__O_S (mid);
 
 	    if (top != 0)
-		w += m.height_plus_depth__O_S (top);
+		w_S += m.height_plus_depth__O_S (top);
 
 	    // how many pieces?
 	    var n = 0;
-	    if (u > 0) {
-		while (w < v_S) {
-		    w += u;
+	    if (u_S > 0) {
+		while (w_S < v_S) {
+		    w_S += u_S;
 		    n += 1;
 		    if (mid != 0)
-			w += u;
+			w_S += u_S;
 		}
 	    }
 
@@ -1205,7 +1211,7 @@ var mathlib = (function mathlib_closure () {
 	    if (top != 0)
 		stack_into_box (b, f, top);
 
-	    b.depth_S = w - b.height_S;
+	    b.depth_S = w_S - b.height_S;
 	}
 
 	b.shift_amount_S = half (b.height_S - b.depth_S)
