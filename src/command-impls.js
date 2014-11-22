@@ -880,7 +880,7 @@ register_command ('unhbox', function cmd_unhbox (engine) {
     }
 
     if (box.btype != BT_HBOX)
-	throw new TexRuntimeError ('trying to unhbox a non-hbox');
+	throw new TexRuntimeError ('trying to unhbox non-hbox reg %d: %U', reg, box);
 
     engine.trace ('unhbox %d (non-void)', reg);
     engine.set_register (T_BOX, reg, new VoidBox ());
@@ -901,7 +901,7 @@ register_command ('unvbox', function cmd_unvbox (engine) {
     }
 
     if (box.btype != BT_VBOX)
-	throw new TexRuntimeError ('trying to unvbox a non-vbox');
+	throw new TexRuntimeError ('trying to unvbox non-vbox reg %d: %U', reg, box);
 
     engine.trace ('unvbox %d (non-void)', reg);
     engine.set_register (T_BOX, reg, new VoidBox ());
