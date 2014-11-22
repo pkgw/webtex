@@ -254,7 +254,7 @@ register_command ('advance', function cmd_advance (engine) {
     engine.scan_keyword ('by');
     var cur = val.get (engine);
     var delta = engine.scan_valtype (val.valtype);
-    engine.trace ('advance %o = %o + %o', cmd, cur, delta);
+    engine.trace ('advance %s = %o + %o', cmd.texmeaning (engine), cur, delta);
     val.set (engine, cur.advance (delta));
 });
 
@@ -266,7 +266,7 @@ register_command ('divide', function cmd_divide (engine) {
     engine.scan_keyword ('by');
     var cur = val.get (engine);
     var denom_I = engine.scan_int__I ();
-    engine.trace ('divide %o = %o / %o', cmd, cur, denom_I);
+    engine.trace ('divide %s = %o / %o', cmd.texmeaning (engine), cur, denom_I);
     val.set (engine, cur.divide__I_O (denom_I));
 });
 
@@ -278,7 +278,7 @@ register_command ('multiply', function cmd_multiply (engine) {
     engine.scan_keyword ('by');
     var cur = val.get (engine);
     var factor_I = engine.scan_int__I ();
-    engine.trace ('multiply %o = %o * %o', cmd, cur, factor_I);
+    engine.trace ('multiply %s = %o * %o', cmd.texmeaning (engine), cur, factor_I);
     val.set (engine, cur.product__I_O (factor_I));
 });
 
@@ -882,7 +882,7 @@ register_command ('unhbox', function cmd_unhbox (engine) {
     if (box.btype != BT_HBOX)
 	throw new TexRuntimeError ('trying to unhbox non-hbox reg %d: %U', reg, box);
 
-    engine.trace ('unhbox %d (non-void)', reg);
+    engine.trace ('unhbox %d (non-void) -> %U', reg, box);
     engine.set_register (T_BOX, reg, new VoidBox ());
     engine.accum_list (box.list);
 });
