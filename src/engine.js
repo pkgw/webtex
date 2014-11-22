@@ -1602,10 +1602,18 @@ var Engine = (function Engine_closure () {
         // expression. The TeX design is such that rather than trying to read
         // in the whole box at once, we instead remember that we were doing a
         // setbox operation.
+	//
+	// We have to remember the global-ness of the assignment operation
+	// since the callback may be called somewhere much later in the
+	// processing.
+
+	var is_global = this._global_flag ();
 
         function set_the_box (engine, box) {
-            engine.trace ('... finish setbox: #%d = %U', reg, box);
-            engine.set_register (T_BOX, reg, box);
+	    // handle_finished_box() has already printed the box contents
+            engine.trace ('... finish setbox to #%d (g? %b)', reg, !!is_global);
+            engine.eqtb.set_register (T_BOX, reg, box, is_global);
+	    engine.maybe_insert_after_assign_token ();
 	}
 
         this.scan_box (set_the_box.bind (this), true);
