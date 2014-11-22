@@ -161,7 +161,7 @@ var VoidBox = (function VoidBox_closure () {
 	other.btype = this.btype;
     };
 
-    proto.traverse = function VoidBox_traverse (x0, y0, callback) {
+    proto.traverse__SSO = function VoidBox_traverse__SSO (x0_S, y0_S, callback__SSO) {
 	throw new TexInternalError ('cannot traverse a VoidBox');
     };
 
@@ -280,7 +280,7 @@ var HBox = (function HBox_closure () {
 	this.depth_S = depth_S;
     };
 
-    proto.traverse = function HBox_traverse (x0, y0, callback) {
+    proto.traverse__SSO = function HBox_traverse__SSO (x0_S, y0_S, callback__SSO) {
 	if (this.list.length == 0)
 	    return; // ignore unglued error in this case.
 	if (this.glue_state == 0)
@@ -288,34 +288,43 @@ var HBox = (function HBox_closure () {
 
 	var gs = this.glue_state;
 	var gr = this.glue_set; // the glue set ratio
-	var x = x0;
+	var x_S = x0_S;
 
 	for (var i = 0; i < this.list.length; i++) {
 	    var item = this.list[i];
 
+	    if (item instanceof Rule) {
+		if (Rule.is_running__S (item.width_S))
+		    item.width_S = this.width_S;
+		if (Rule.is_running__S (item.height_S))
+		    item.height_S = this.height_S;
+		if (Rule.is_running__S (item.depth_S))
+		    item.depth_S = this.depth_S;
+	    }
+
 	    if (item instanceof ListBox) {
-		item.traverse (x, y0 + item.shift_amount_S, callback);
-		x += item.width_S;
+		item.traverse__SSO (x_S, y0_S + item.shift_amount_S, callback__SSO);
+		x_S += item.width_S;
 	    } else if (item instanceof Boxlike) {
-		callback (x, y0 + item.shift_amount_S, item, this);
-		x += item.width_S;
+		callback__SSO (x_S, y0_S + item.shift_amount_S, item);
+		x_S += item.width_S;
 	    } else if (item instanceof Kern) {
-		x += item.amount_S;
+		x_S += item.amount_S;
 	    } else if (item instanceof BoxGlue) {
 		var g = item.amount;
-		var dx = g.amount_S;
+		var dx_S = g.amount_S;
 
 		if (gs > 0) {
 		    if (g.stretch_order == gs - 1)
-			dx += gr * g.stretch_S;
+			dx_S += gr * g.stretch_S;
 		} else {
 		    if (g.shrink_order == -gs - 1)
-			dx += gr * g.shrink_S;
+			dx_S += gr * g.shrink_S;
 		}
 
-		x += dx;
+		x_S += dx_S;
 	    } else {
-		callback (x, y0, item, this);
+		callback__SSO (x_S, y0_S, item);
 	    }
 	}
     };
@@ -452,7 +461,7 @@ var VBox = (function VBox_closure () {
 	this.depth_S = tot_height_S - height_S;
     };
 
-    proto.traverse = function VBox_traverse (x0, y0, callback) {
+    proto.traverse__SSO = function VBox_traverse__SSO (x0_S, y0_S, callback__SSO) {
 	if (this.list.length == 0)
 	    return; // ignore unglued error in this case.
 	if (this.glue_state == 0)
@@ -460,36 +469,45 @@ var VBox = (function VBox_closure () {
 
 	var gs = this.glue_state;
 	var gr = this.glue_set; // the glue set ratio
-	var y = y0 - this.height_S;
+	var y_S = y0_S - this.height_S;
 
 	for (var i = 0; i < this.list.length; i++) {
 	    var item = this.list[i];
 
+	    if (item instanceof Rule) {
+		if (Rule.is_running__S (item.width_S))
+		    item.width_S = this.width_S;
+		if (Rule.is_running__S (item.height_S))
+		    item.height_S = this.height_S;
+		if (Rule.is_running__S (item.depth_S))
+		    item.depth_S = this.depth_S;
+	    }
+
 	    if (item instanceof ListBox) {
-		y += item.height_S;
-		item.traverse (x0 + item.shift_amount_S, y, callback);
-		y += item.depth_S;
+		y_S += item.height_S;
+		item.traverse__SSO (x0_S + item.shift_amount_S, y_S, callback__SSO);
+		y_S += item.depth_S;
 	    } else if (item instanceof Boxlike) {
-		y += item.height_S;
-		callback (x0 + item.shift_amount_S, y, item, this);
-		y += item.depth_S;
+		y_S += item.height_S;
+		callback__SSO (x0_S + item.shift_amount_S, y_S, item);
+		y_S += item.depth_S;
 	    } else if (item instanceof Kern) {
-		y += item.amount_S;
+		y_S += item.amount_S;
 	    } else if (item instanceof BoxGlue) {
 		var g = item.amount;
-		var dy = g.amount_S;
+		var dy_S = g.amount_S;
 
 		if (gs > 0) {
 		    if (g.stretch_order == gs - 1)
-			dy += gr * g.stretch_S;
+			dy_S += gr * g.stretch_S;
 		} else {
 		    if (g.shrink_order == -gs - 1)
-			dy += gr * g.shrink_S;
+			dy_S += gr * g.shrink_S;
 		}
 
-		y += dy
+		y_S += dy_S;
 	    } else {
-		callback (x0, y, item, this);
+		callback__SSO (x0_S, y_S, item);
 	    }
 	}
     };
@@ -521,17 +539,10 @@ var CanvasBox = (function CanvasBox_closure () {
 
 	// TODO, I think: record true width/height/depth of subcomponents.
 
-	srcbox.traverse (0, 0, function (x, y, item, parent) {
+	srcbox.traverse__SSO (nlib.Zero_S, nlib.Zero_S, function (x, y, item) {
 	    if (item instanceof Character) {
 		this.graphics.push ([x, y, item]);
 	    } else if (item instanceof Rule) {
-		if (Rule.is_running__S (item.width_S))
-		    item.width_S = parent.width_S;
-		if (Rule.is_running__S (item.height_S))
-		    item.height_S = parent.height_S;
-		if (Rule.is_running__S (item.depth_S))
-		    item.depth_S = parent.depth_S;
-
 		this.graphics.push ([x, y, item]);
 	    } else {
 		this.list.push (item);
@@ -578,9 +589,9 @@ var CanvasBox = (function CanvasBox_closure () {
 	return b;
     };
 
-    proto.traverse = function CanvasBox_traverse (x0, y0, callback) {
+    proto.traverse__SSO = function CanvasBox_traverse__SSO (x0_S, y0_S, callback__SSO) {
 	for (var i = 0; i < this.list.length; i++) {
-	    callback (x0, y0, this.list[i], this);
+	    callback__SSO (x0_S, y0_S, this.list[i]);
 	}
     };
 
