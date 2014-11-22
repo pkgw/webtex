@@ -4,8 +4,6 @@
 // well as the Listables Ins, Mark, Adjust, Whatsit, Penalty, Disc, Rule,
 // BoxGlue, and Kern.
 
-'use strict';
-
 var LIMTYPE_NORMAL = 0, // <- limits-style or not depending on context
     LIMTYPE_LIMITS = 1,
     LIMTYPE_NOLIMITS = 2;
@@ -424,8 +422,8 @@ var mathlib = (function mathlib_closure () {
 	    var tok = null; // T:TP 404 -- next non-blank non-relax non-call token:
 
 	    while (true) {
-		tok = this.next_x_tok_throw ();
-		if (!tok.is_space (this) && !tok.is_cmd (this, 'relax'))
+		tok = engine.next_x_tok_throw ();
+		if (!tok.is_space (engine) && !tok.is_cmd (engine, 'relax'))
 		    break;
 	    }
 
@@ -715,6 +713,40 @@ var mathlib = (function mathlib_closure () {
     register_command ('overwithdelims', function cmd_over_with_delims (engine) {
 	engine.trace ('overwithdelims');
 	handle_math_fraction (engine, 'overwithdelims', true);
+    });
+
+    // left and right delimiters
+
+    function math_left_group (eng) {
+	throw new TexRuntimeError ('\\left group must be ended with \\right');
+    }
+    math_left_group.is_left_group = true;
+
+    register_command ('left', function cmd_left (engine) {
+	// TTP 1191, "math_left_right"
+	var p = new DynDelimNode (MT_LEFT);
+	p.delimiter = ml.scan_delimiter (engine, false);
+	engine.trace ('left delimiter %U', p);
+	engine.enter_math (M_MATH, false);
+	engine.enter_group ('math-left', math_left_group);
+	engine.accum (p)
+    });
+
+    register_command ('right', function cmd_right (engine) {
+	// TTP 1191, "math_left_right"
+	var ginfo = engine.group_exit_stack.pop ();
+	if (!(ginfo[1].is_left_group))
+	    throw new TexRuntimeError ('\\right must come after \\left');
+
+	var p = new DynDelimNode (MT_RIGHT);
+	p.delimiter = ml.scan_delimiter (engine, false);
+
+	var mlist = finish_math_list (engine, p);
+	engine.unnest_eqtb ();
+
+	var n = new AtomNode (MT_INNER);
+	n.nuc = mlist;
+	engine.accum (n);
     });
 
     // Rendering of math lists into horizontal lists
@@ -1045,7 +1077,7 @@ var mathlib = (function mathlib_closure () {
 			       b]);
     }
 
-    function var_delimiter (state, delim, v) {
+    function var_delimiter__OOS (state, delim, v_S) {
 	// delim: Delimiter
 	// v: desired delimiter height
 
@@ -1097,7 +1129,7 @@ var mathlib = (function mathlib_closure () {
 			c = y;
 			w = u;
 
-			if (u >= v) {
+			if (u >= v_S) {
 			    // big enough; go with it
 			    foundit = true;
 			    s = -1;
@@ -1150,7 +1182,7 @@ var mathlib = (function mathlib_closure () {
 	    // how many pieces?
 	    var n = 0;
 	    if (u > 0) {
-		while (w < v) {
+		while (w < v_S) {
 		    w += u;
 		    n += 1;
 		    if (mid != 0)
@@ -1266,7 +1298,7 @@ var mathlib = (function mathlib_closure () {
 	    clr += Math.abs (clr) >> 2;
 	}
 
-	var y = var_delimiter (state, q.left_delim,
+	var y = var_delimiter__OOS (state, q.left_delim,
 			       x.height_S + x.depth_S + clr + drt);
 	var delta = y.depth_S - (x.height_S + x.depth_S + clr);
 	if (delta > 0)
@@ -1373,8 +1405,8 @@ var mathlib = (function mathlib_closure () {
 	else
 	    delta_S = state.sym_dimen__NN_S (state.size, SymDimens.Delim2);
 
-	x = var_delimiter (state, q.left_delim, delta_S);
-	z = var_delimiter (state, q.right_delim, delta_S);
+	x = var_delimiter__OOS (state, q.left_delim, delta_S);
+	z = var_delimiter__OOS (state, q.right_delim, delta_S);
 	q.new_hlist = [hpack_natural (state.engine, [x, v, z])];
     }
 
@@ -1455,13 +1487,39 @@ var mathlib = (function mathlib_closure () {
 	    q.new_hlist.push (x);
     }
 
+    function make_left_right (q, state, max_d_S, max_h_S) {
+	var cur_size;
+
+	if (state.style == MS_DISPLAY)
+	    cur_size = MS_TEXT;
+	else
+	    cur_size = state.style;
+
+	var delta2_S = max_d_S + state.sym_dimen__NN_S (cur_size, SymDimens.AxisHeight);
+	var delta1_S = max_h_S + max_d_S - delta2_S;
+
+	if (delta2_S > delta1_S)
+	    delta1_S = delta2_S;
+
+	var delta_S = (delta1_S / 500 >> 0) * state.engine.get_parameter__O_I ('delimiterfactor');
+	delta2_S = 2 * delta1_S - state.engine.get_parameter__O_S ('delimitershortfall');
+	if (delta_S < delta2_S)
+	    delta_S = delta2_S;
+
+	q.new_hlist = var_delimiter__OOS (state, q.delimiter, cur_size, delta_S);
+
+	if (q.ltype == MT_LEFT)
+	    return MT_OPEN;
+	return MT_CLOSE;
+    }
+
     ml.mlist_to_hlist = function mlist_to_hlist (engine, mlist, style, cramped, penalties) {
 	var state = new MathState (engine, style, cramped);
 	var i = 0;
 	var r_type = MT_OP;
 	var r = null;
-	var max_d = 0;
-	var max_h = 0;
+	var max_d_S = nlib.Zero_S;
+	var max_h_S = nlib.Zero_S;
 
 	state.update_sizes ();
 
@@ -1542,6 +1600,7 @@ var mathlib = (function mathlib_closure () {
 		break;
 	    case MT_OPEN:
 	    case MT_INNER:
+		break;
 	    case MT_UNDER:
 	    case MT_ACCENT:
 		throw new TexInternalError ('unimplemented math %o', q);
@@ -1621,8 +1680,8 @@ var mathlib = (function mathlib_closure () {
 
 	    if (check_dimensions) {
 		var z = hpack_natural (q.new_hlist);
-		max_h = Math.max (max_h, z.height_S);
-		max_d = Math.max (max_d, z.depth_S);
+		max_h_S = Math.max (max_h_S, z.height_S);
+		max_d_S = Math.max (max_d_S, z.depth_S);
 	    }
 
 	    if (remember_as_prev) {
@@ -1678,7 +1737,7 @@ var mathlib = (function mathlib_closure () {
 		break;
 	    case MT_LEFT:
 	    case MT_RIGHT:
-		t = make_left_right (q, state, max_d, max_h);
+		t = make_left_right (q, state, max_d_S, max_h_S);
 		break;
 	    case MT_STYLE:
 		state.style = q.style;
