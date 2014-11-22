@@ -446,6 +446,216 @@ var mathlib = (function mathlib_closure () {
 	return d;
     };
 
+    engine_proto.register_method ('enter_math', function Engine_enter_math (mode, is_outer) {
+	// TTP 1136: "push_math", more or less
+	this.enter_mode (mode);
+	this.trace ('<is_outer=%b>', is_outer);
+	this.nest_eqtb ();
+
+	if (is_outer)
+	    this.set_parameter (T_INT, 'fam', -1);
+    });
+
+
+    // Math commands
+
+    var MathComponentCommand = (function MathComponentCommand_closure () {
+	function MathComponentCommand (name, mathtype) {
+	    Command.call (this);
+	    this.mathtype = mathtype;
+	    this.name = name;
+	}
+
+	inherit (MathComponentCommand, Command);
+	var proto = MathComponentCommand.prototype;
+
+	proto.invoke = function MathComponentCommand_invoke (engine) {
+	    if (engine.mode () != M_MATH && engine.mode () != M_DMATH)
+		throw new TexRuntimeError ('\\%s illegal outside of math mode', this.name);
+
+	    engine.trace (this.name);
+	    var node = new AtomNode (this.mathtype);
+
+	    mathlib.scan_math (engine, function (engine, subitem) {
+		node.nuc = subitem;
+		engine.accum (node);
+	    });
+	};
+
+	return MathComponentCommand;
+    })();
+
+
+    var MathStyleCommand = (function MathStyleCommand_closure () {
+	function MathStyleCommand (name, mathstyle) {
+	    Command.call (this);
+	    this.mathstyle = mathstyle;
+	    this.name = name;
+	}
+
+	inherit (MathStyleCommand, Command);
+	var proto = MathStyleCommand.prototype;
+
+	proto.invoke = function MathStyleCommand_invoke (engine) {
+	    if (engine.mode () != M_MATH && engine.mode () != M_DMATH)
+		throw new TexRuntimeError ('\\%s illegal outside of math mode', this.name);
+	    engine.trace (this.name);
+	    engine.accum (new MathStyleNode (this.mathstyle, false));
+	};
+
+	return MathStyleCommand;
+    })();
+
+
+    register_command ('displaystyle', new MathStyleCommand ('displaystyle', MS_DISPLAY));
+    register_command ('textstyle', new MathStyleCommand ('textstyle', MS_TEXT));
+    register_command ('scriptstyle', new MathStyleCommand ('scriptstyle', MS_SCRIPT));
+    register_command ('scriptscriptstyle', new MathStyleCommand ('scriptscriptstyle', MS_SCRIPTSCRIPT));
+
+    register_command ('mathord', new MathComponentCommand ('mathord', MT_ORD));
+    register_command ('mathop', new MathComponentCommand ('mathop', MT_OP));
+    register_command ('mathbin', new MathComponentCommand ('mathbin', MT_BIN));
+    register_command ('mathrel', new MathComponentCommand ('mathrel', MT_REL));
+    register_command ('mathopen', new MathComponentCommand ('mathopen', MT_OPEN));
+    register_command ('mathclose', new MathComponentCommand ('mathclose', MT_CLOSE));
+    register_command ('mathpunct', new MathComponentCommand ('mathpunct', MT_PUNCT));
+    register_command ('mathinner', new MathComponentCommand ('mathinner', MT_INNER));
+    register_command ('underline', new MathComponentCommand ('underline', MT_UNDER));
+    register_command ('overline', new MathComponentCommand ('overline', MT_OVER));
+
+    register_command ('radical', function cmd_radical (engine) {
+	// T:TP 1162-1163
+	engine.trace ('radical');
+
+	if (engine.mode () != M_MATH && engine.mode () != M_DMATH)
+	    throw new TexRuntimeError ('\\radical may only be used in math mode');
+
+	var n = new RadicalNode ();
+	engine.accum (n);
+
+	n.left_delim = mathlib.scan_delimiter (engine, true);
+	mathlib.scan_math (engine, function (eng, subitem) {
+	    engine.trace ('... radical got: %o', subitem);
+	    n.nuc = subitem;
+	});
+    });
+
+    register_command ('mathchoice', function cmd_mathchoice (engine) {
+	// T:TP 1171-1174
+	engine.trace ('mathchoice');
+
+	if (engine.mode () != M_MATH && engine.mode () != M_DMATH)
+	    throw new TexRuntimeError ('\\mathchoice may only be used in math mode');
+
+	var mc = new StyleChoiceNode ();
+	engine.accum (mc);
+	mc._cur = 0;
+
+	function finish_one (eng) {
+	    var list = mathlib.finish_math_list (engine, null);
+	    engine.unnest_eqtb ();
+
+	    if (mc._cur == 0)
+		mc.in_display = list;
+	    else if (mc._cur == 1)
+		mc.in_text = list;
+	    else if (mc._cur == 2)
+		mc.in_script = list;
+	    else if (mc._cur == 3)
+		mc.in_scriptscript = list;
+
+	    mc._cur += 1;
+	    if (mc._cur < 4)
+		scan_one ();
+	    else
+		engine.trace ('... finished mathchoice: %o', mc);
+	}
+
+	function scan_one () {
+	    engine.enter_math (M_MATH, false);
+	    engine.enter_group ('mathchoice', finish_one);
+	    engine.scan_left_brace ();
+	}
+
+	scan_one ();
+    });
+
+
+    function _cmd_limit_switch (engine, desc, value) {
+	// T:TP 1158, 1159
+	engine.trace (desc);
+	var last = engine.get_last_listable ();
+
+	if (last == null ||
+	    !(last instanceof AtomNode) ||
+	    last.ltype != MT_OP)
+	    throw new TexRuntimeError ('\\%s must follow an operator', desc);
+
+	last.limtype = value;
+    };
+
+    register_command ('nolimits', function cmd_nolimits (engine) {
+	_cmd_limit_switch (engine, 'nolimits', LIMTYPE_NOLIMITS);
+    });
+
+    register_command ('limits', function cmd_limits (engine) {
+	_cmd_limit_switch (engine, 'limits', LIMTYPE_LIMITS);
+    });
+
+
+    register_command ('mkern', function cmd_mkern (engine) {
+	throw new TexInternalError ('must implement math_kern correctly in math.js');
+    });
+
+
+    register_command ('vcenter', function cmd_vcenter (engine) {
+	engine.trace ('vcenter');
+
+	if (engine.mode () != M_MATH && engine.mode () != M_DMATH)
+	    throw new TexRuntimeError ('\\vcenter may only be used in math mode');
+
+	// XXX this is scan_spec (TTP:645), which is duplicated in
+	// Engine._handle_box and Engine.init_align.
+
+	var is_exact, spec_S;
+
+	if (engine.scan_keyword ('to')) {
+	    is_exact = true;
+	    spec_S = engine.scan_dimen__O_S (false);
+	} else if (engine.scan_keyword ('spread')) {
+	    is_exact = false;
+	    spec_S = engine.scan_dimen__O_S (false);
+	} else {
+	    is_exact = false;
+	    spec_S = nlib.Zero_S;
+	}
+
+	engine.scan_left_brace ();
+
+	// T:TP 1070 -- XXX this is normal_paragraph
+	engine.set_parameter (T_INT, 'looseness', 0);
+	engine.set_parameter__OS ('hangindent', nlib.Zero_S);
+	engine.set_parameter (T_INT, 'hangafter', 1);
+	// TODO: clear \parshape info, which nests in the EqTb.
+
+	engine.nest_eqtb ();
+	engine.enter_mode (M_IVERT);
+	engine.enter_group ('vcenter', function (eng) {
+	    engine.end_graf ();
+	    var box = new VBox ();
+	    box.list = engine.leave_mode ();
+	    engine.unnest_eqtb ();
+	    box.set_glue__OOS (engine, is_exact, spec_S);
+
+	    var atom = new AtomNode (MT_VCENTER);
+	    atom.nuc = box;
+	    engine.accum (atom);
+	});
+
+	engine.set_prev_depth_to_ignore ();
+	engine.maybe_push_toklist ('everyvbox');
+    });
+
     // TTP 1178: fraction-type stuff
 
     function handle_math_fraction (engine, kind, has_delims) {

@@ -791,54 +791,6 @@ var GivenMathcharCommand = (function GivenMathcharCommand_closure () {
 })();
 
 
-var MathComponentCommand = (function MathComponentCommand_closure () {
-    function MathComponentCommand (name, mathtype) {
-	Command.call (this);
-	this.mathtype = mathtype;
-	this.name = name;
-    }
-
-    inherit (MathComponentCommand, Command);
-    var proto = MathComponentCommand.prototype;
-
-    proto.invoke = function MathComponentCommand_invoke (engine) {
-	if (engine.mode () != M_MATH && engine.mode () != M_DMATH)
-	    throw new TexRuntimeError ('\\%s illegal outside of math mode', this.name);
-
-	engine.trace (this.name);
-	var node = new AtomNode (this.mathtype);
-
-	mathlib.scan_math (engine, function (engine, subitem) {
-	    node.nuc = subitem;
-	    engine.accum (node);
-	});
-    };
-
-    return MathComponentCommand;
-})();
-
-
-var MathStyleCommand = (function MathStyleCommand_closure () {
-    function MathStyleCommand (name, mathstyle) {
-	Command.call (this);
-	this.mathstyle = mathstyle;
-	this.name = name;
-    }
-
-    inherit (MathStyleCommand, Command);
-    var proto = MathStyleCommand.prototype;
-
-    proto.invoke = function MathStyleCommand_invoke (engine) {
-	if (engine.mode () != M_MATH && engine.mode () != M_DMATH)
-	    throw new TexRuntimeError ('\\%s illegal outside of math mode', this.name);
-	engine.trace (this.name);
-	engine.accum (new MathStyleNode (this.mathstyle, false));
-    };
-
-    return MathStyleCommand;
-})();
-
-
 var SpecialValueCommand = (function SpecialValueCommand_closure () {
     function SpecialValueCommand (valtype, name) {
 	Command.call (this);
