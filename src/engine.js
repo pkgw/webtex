@@ -895,10 +895,11 @@ var Engine = (function Engine_closure () {
 
 	var cmd = tok.to_cmd (this);
 
-	if (cmd instanceof BeginGroupCommand)
+	if (cmd instanceof BeginGroupCommand) {
 	    this.align_state -= 1;
-	else if (cmd instanceof EndGroupCommand)
+	} else if (cmd instanceof EndGroupCommand) {
 	    this.align_state += 1;
+	}
     };
 
     proto.push_toks = function Engine_push_toks (toks, callback) {
@@ -942,7 +943,7 @@ var Engine = (function Engine_closure () {
 	    this.align_state += 1;
 	} else if (cmd instanceof EndGroupCommand) {
 	    this.align_state -= 1;
-	} else if (tok.to_cmd (this) instanceof AlignTabCommand ||
+	} else if (cmd instanceof AlignTabCommand ||
 		   tok.is_cmd (this, 'span') ||
 		   tok.is_cmd (this, 'cr') ||
 		   tok.is_cmd (this, 'crcr')) {
@@ -960,12 +961,15 @@ var Engine = (function Engine_closure () {
 		this.push (Token.new_cmd (this.commands['<endv>']));
 
 		var astate = this.align_stack[l-1];
-		if (!astate.col_is_omit) {
+		if (astate.col_is_omit) {
+		    this.trace ('align: omitting V-template');
+		} else {
+		    this.trace ('align: insert V-template = %T', astate.columns[astate.cur_col].v_tmpl);
 		    this.push_toks (astate.columns[astate.cur_col].v_tmpl);
 		}
 
 		this.align_state = 1000000;
-		astate.col_ender = tok.to_cmd (this);
+		astate.col_ender = cmd;
 		return this.next_tok ();
 	    }
 	}
@@ -1120,10 +1124,13 @@ var Engine = (function Engine_closure () {
 
 	    if (tok.is_char ()) {
 		// Undo align-state shift that we don't want here.
-		if (tok.is_cat (C_BGROUP))
+		var cmd = tok.to_cmd (this);
+
+		if (cmd instanceof BeginGroupCommand) {
 		    this.align_state--;
-		else if (tok.is_cat (C_EGROUP))
+		} else if (cmd instanceof EndGroupCommand) {
 		    this.align_state++;
+		}
 		return negfactor * tok.ord;
 	    }
 

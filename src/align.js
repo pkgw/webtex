@@ -314,19 +314,24 @@
 
     function align_begin_col (engine, tok) {
 	engine.trace ('align: begin col');
+	var astate = engine.align_stack[engine.align_stack.length - 1];
 
 	if (tok.is_cmd (engine, 'omit')) {
+	    engine.trace ('align: omitting U-template');
 	    engine.align_state = 0;
-	    engine.col_is_omit = true;
+	    astate.col_is_omit = true;
 	} else {
-	    var astate = engine.align_stack[engine.align_stack.length - 1];
 	    engine.push_back (tok);
+	    engine.trace ('align: insert U-template = %T', astate.columns[astate.cur_col].u_tmpl);
 	    engine.push_toks (astate.columns[astate.cur_col].u_tmpl, function () {
 		// TTP 324, partially:
-		if (engine.align_state > 500000)
+		if (engine.align_state > 500000) {
 		    engine.align_state = 0;
+		} else {
+		    throw new TexRuntimeError ('interwoven alignment preambles are not allowed');
+		}
 	    });
-	    engine.col_is_omit = false;
+	    astate.col_is_omit = false;
 	}
     }
 
