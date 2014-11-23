@@ -9,6 +9,9 @@ function setup_process_basic (data) {
     //
     // Rest are passed to Engine. (Include: jobname, debug_trace,
     // debug_input_lines.)
+    //
+    // We extract the dirname of inputpath and set up an FSIOLayer to load
+    // auxiliary files from that location. XXX: we override jobname.
 
     var raf = new RandomAccessFile (data.bundlepath);
     var z = new ZipReader (raf.read_range_ab.bind (raf), raf.size ());
@@ -17,7 +20,13 @@ function setup_process_basic (data) {
 
     data.iostack = new IOStack ();
     data.iostack.push (bundle);
+
+    var path = require ('path');
+    var inputbase = path.basename (data.inputpath);
+    var inputdir = path.dirname (data.inputpath);
     data.initial_linebuf = make_fs_linebuffer (data.inputpath);
+    data.jobname = inputbase;
+    data.iostack.push (new FSIOLayer ('', inputdir + '/'));
     delete data.inputpath;
 
     var dumpjson = null;
