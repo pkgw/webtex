@@ -329,7 +329,7 @@ var M_VERT = 1,  // standard vertical mode
 				  function Engine_set_prev_depth_to_ignore () {
 	var ms = this.mode_stack[0];
 
-	if (Math.abs (ms.mode) != MS_VERT)
+	if (Math.abs (ms.mode) != M_VERT)
 	    throw new TexInternalError ('cannot alter prev_depth in %s mode',
 					mode_name (ms.mode));
 
