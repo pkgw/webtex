@@ -1516,21 +1516,50 @@ var Engine = (function Engine_closure () {
     };
 
     proto.scan_tok_group = function Engine_scan_tok_group (expand) {
-	/* Assumes that a BGROUP has just been read in. Generates a list of
-	 * tokens, possibly with expansion, until an EGROUP is encountered,
-	 * accounting for nested groups of course. */
+	// Assumes that a BGROUP has just been read in. Generates a list of
+	// tokens, possibly with expansion, until an EGROUP is encountered,
+	// accounting for nested groups of course.
+	//
+	// \the\toksN is expanded once, but its contents are not expanded.
 
 	var depth = 1, toks = [], getter = null;
 
-	if (expand)
-	    getter = this.next_x_tok.bind (this);
-	else
-	    getter = this.next_tok.bind (this);
-
 	while (true) {
-	    var tok = getter ();
+	    var tok = this.next_tok ();
 	    if (tok === EOF)
 		throw tok;
+
+	    if (expand) {
+		var cmd = tok.to_cmd (this);
+
+		if (cmd.same_cmd (this.commands['the'])) {
+		    var next = this.next_x_tok_throw ();
+		    var ncmd = next.to_cmd (this);
+
+		    if (ncmd.get_valtype () == T_TOKLIST) {
+			var ntoks = ncmd.as_valref (this).get (this);
+			this.trace ('tokgroup: single-level expand toklist %o -> %T', next, ntoks);
+			if (!(ntoks.toks instanceof Array))
+			    throw new TexRuntimeError ('boo');
+			toks = toks.concat (ntoks.toks);
+			continue;
+		    }
+
+		    this.push_back (next);
+		}
+
+		if (cmd.expandable) {
+		    if (cmd.same_cmd (this.commands['noexpand'])) {
+			tok = this.next_tok ();
+			this.trace ('tokgroup: noexpand %o', tok);
+			toks.push (tok);
+			continue;
+		    }
+
+		    cmd.invoke (this);
+		    continue;
+		}
+	    }
 
 	    if (tok.is_cat (C_BGROUP))
 		depth += 1;
