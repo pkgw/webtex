@@ -153,19 +153,10 @@ var MacroCommand = (function MacroCommand_closure () {
 	    while (match_end < ntmpl && !this.tmpl[match_end].is_param ())
 		match_end += 1;
 
-	    var n_to_match = match_end - match_start, cur_match_idx = 0, depth = 0;
+	    var n_to_match = match_end - match_start, cur_match_idx = 0;
 
 	    while (cur_match_idx < n_to_match) {
 		var tok = engine.next_tok_throw ();
-
-		if (depth > 0) {
-		    if (tok.is_cat (C_BGROUP))
-			depth += 1;
-		    else if (tok.is_cat (C_EGROUP))
-			depth -= 1;
-		    expansion.push (tok);
-		    continue;
-		}
 
 		if (tok.equals (this.tmpl[match_start + cur_match_idx])) {
 		    // We're making progress on matching the delimeters.
@@ -193,6 +184,26 @@ var MacroCommand = (function MacroCommand_closure () {
 		    engine.push_toks (this.tmpl.slice (match_start + 1,
 						       match_start + cur_match_idx));
 		    cur_match_idx = 0;
+		    tok = this.tmpl[match_start];
+		}
+
+		if (tok.is_cat (C_BGROUP)) {
+		    // If the expansion accumulated an open-group, we need to
+		    // contribute at least the whole group. This inner loop is
+		    // the best implementation I could devise; there are
+		    // several corner cases that make things quite tricky.
+		    var depth = 1;
+
+		    while (depth > 0) {
+			tok = engine.next_tok_throw ();
+
+			if (tok.is_cat (C_BGROUP))
+			    depth += 1;
+			else if (tok.is_cat (C_EGROUP))
+			    depth -= 1;
+
+			expansion.push (tok);
+		    }
 		}
 	    }
 
@@ -218,7 +229,7 @@ var MacroCommand = (function MacroCommand_closure () {
 		    expansion = expansion.slice (1, expansion.length - 1);
 	    }
 
-	    param_vals[ttok.pnum] = expansion // note: don't update ttok!
+	    param_vals[ttok.pnum] = expansion; // note: don't update ttok!
 	    tidx = match_end;
 	}
 
