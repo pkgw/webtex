@@ -59,6 +59,13 @@
   src: url(./msam10.pfb) format ('type-1');
 }
 
+@font-face {
+  font-family: 'SFRM1000';
+  font-style: normal;
+  font-weight: 400;
+  src: url(./sfrm1000.pfb) format ('type-1');
+}
+
 
 @font-face {
   font-family: 'LMMathItalic7';
@@ -86,6 +93,13 @@
   font-style: normal;
   font-weight: 400;
   src: url(./msam7.pfb) format ('type-1');
+}
+
+@font-face {
+  font-family: 'SFRM0700';
+  font-style: normal;
+  font-weight: 400;
+  src: url(./sfrm0700.pfb) format ('type-1');
 }
 
 

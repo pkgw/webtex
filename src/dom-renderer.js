@@ -10,12 +10,19 @@ var DOMRenderer = (function DOMRenderer_callback () {
     var proto = DOMRenderer.prototype;
 
     proto.fontmap = {
+	// Not quite sure what's going on with the ecrm->sfrm name stuff, but
+	// as best I can tell that's what ecrm* things get mapped to.
+	'ec-lmcsc10': '28px LMRomanCaps10',
+	'ec-lmr10': '28px LMRoman10',
+	ecrm1000: '28px SFRM1000',
 	lmmi10: '28px LMMathItalic10',
 	lmsy10: '28px LMMathSymbols10',
 	lmr10: '28px LMRoman10',
 	msam10: '28px MSAM10',
-	'rm-lmr10': '28px LMRoman7',
+	'rm-lmr10': '28px LMRoman10',
 
+	'ec-lmr7': '19.6px LMRoman7',
+	ecrm0700: '19.6px SFRM0700',
 	lmmi7: '19.6px LMMathItalic7',
 	lmsy7: '19.6px LMMathSymbols7',
 	lmr7: '19.6px LMRoman7',
