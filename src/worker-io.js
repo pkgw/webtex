@@ -111,3 +111,45 @@ var RandomAccessURL = (function RandomAccessURL_closure () {
 
     return RandomAccessURL;
 }) ();
+
+
+var URLHierarchyIOLayer = (function URLHierarchyIOLayer_closure () {
+    function URLHierarchyIOLayer (virtprefix, urlprefix) {
+	this.virtprefix = virtprefix;
+	this.urlprefix = urlprefix;
+    }
+
+    var proto = URLHierarchyIOLayer.prototype;
+
+    proto.try_open_linebuffer = function URLHierarchyIOLayer_try_open_linebuffer (texfn) {
+	if (texfn.slice (0, this.virtprefix.length) != this.virtprefix)
+	    // Not within our virtual filesystem prefix.
+	    return null;
+
+	var url = this.urlprefix + texfn.slice (this.virtprefix.length);
+
+	try {
+	    // XXX: Do better. File-existence tests shouldn't load everything
+	    // in, especially when we're testing for the existence of embedded
+	    // PDFS ...
+	    var inp = fetch_url_str (url);
+	    return LineBuffer.new_static (inp.split ('\n'));
+	} catch (e) {
+	    return null; // assume nonexistent, and not some other error ...
+	}
+    };
+
+    proto.get_contents_ab = function URLHierarchyIOLayer_get_contents_ab (texfn) {
+	if (texfn.slice (0, this.virtprefix.length) != this.virtprefix)
+	    // Not within our virtual filesystem prefix.
+	    return null;
+
+	var url = this.urlprefix + texfn.slice (this.virtprefix.length);
+	global_warnf ('not implemented: URLHierachyIOLayer.get_contents_ab() for %s', texfn);
+	return null;
+    };
+
+    return URLHierarchyIOLayer;
+}) ();
+
+webtex_export ('URLHierarchyIOLayer', URLHierarchyIOLayer);

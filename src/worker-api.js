@@ -31,6 +31,13 @@ worker_api_endpoints.parse = function webtex_worker_parse (data) {
 
     data.iostack = new IOStack ();
     data.iostack.push (bundle);
+
+    if (data.allow_input_hierarchy) {
+	var i = data.inputurl.lastIndexOf ('/');
+	var pfx = data.inputurl.slice (0, i + 1);
+	data.iostack.push (new URLHierarchyIOLayer ('', pfx));
+    }
+
     var inp = fetch_url_str (data.inputurl);
     data.initial_linebuf = LineBuffer.new_static (inp.split ('\n'));
     delete data.inputurl;
