@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<!-- Derived from pdf.js test_slave.html -->
+
+<html>
+  <head>
+    <title>Webtex Testbed</title>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="chrome/style.css">
+    <style type="text/css">
+      article {
+        width: 700px;
+        margin: 0px auto;
+      }
+    </style>
+  </head>
+
+  <body>
+    <article class="webtex" id="webtex"></article>
+
+    <script type="text/javascript" src="build/browser-master-webtex.js"></script>
+    <script type="text/javascript">
+'use strict';
+
+var targdiv = document.getElementById ('webtex');
+var worker_url = 'build/worker-webtex.js';
+var inputurl = '../test/tex/latex-minimal.tex'; // note: relative to *worker's* URL
+
+var dr = new Webtex.DOMRenderer (worker_url, targdiv);
+dr.launch_parse ({
+    jobname: 'plain',
+    inputurl: inputurl,
+    bundleurl: 'latest.zip', // note: relative to *worker's* URL
+    dump_bpath: 'latex.dump.json',
+    debug_trace: false,
+    debug_input_lines: false,
+});
+</script>
+  </body>
+</html>
