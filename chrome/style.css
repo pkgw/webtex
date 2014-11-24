@@ -39,10 +39,53 @@
 }
 
 @font-face {
+  font-family: 'LMMathSymbols10';
+  font-style: normal;
+  font-weight: 400;
+  src: url(./lmsy10.pfb) format ('type-1');
+}
+
+@font-face {
+  font-family: 'LMRoman10';
+  font-style: normal;
+  font-weight: 400;
+  src: url(./lmr10.pfb) format ('type-1');
+}
+
+@font-face {
+  font-family: 'MSAM10';
+  font-style: normal;
+  font-weight: 400;
+  src: url(./msam10.pfb) format ('type-1');
+}
+
+
+@font-face {
+  font-family: 'LMMathItalic7';
+  font-style: normal;
+  font-weight: 400;
+  src: url(./lmmi7.pfb) format ('type-1');
+}
+
+@font-face {
+  font-family: 'LMMathSymbols7';
+  font-style: normal;
+  font-weight: 400;
+  src: url(./lmsy7.pfb) format ('type-1');
+}
+
+@font-face {
   font-family: 'LMRoman7';
   font-style: normal;
   font-weight: 400;
   src: url(./lmr7.pfb) format ('type-1');
+}
+
+@font-face {
+  font-family: 'MSAM7';
+  font-style: normal;
+  font-weight: 400;
+  src: url(./msam7.pfb) format ('type-1');
 }
 
 
