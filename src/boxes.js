@@ -259,7 +259,10 @@ var HBox = (function HBox_closure () {
 		this.glue_state = 1;
 
 	    // Note: here, TeX does indeed use floating-point math.
-	    this.glue_set = (1.0 * setdelta_S) / stretches_S[this.glue_state - 1];
+	    if (stretches_S[this.glue_state - 1] != 0)
+		this.glue_set = (1.0 * setdelta_S) / stretches_S[this.glue_state - 1];
+	    else
+		this.glue_set = 0.0; // what to do?
 	} else {
 	    // We're shrinking it.
 	    this.width_S = nat_width_S - setdelta_S;
@@ -273,7 +276,10 @@ var HBox = (function HBox_closure () {
 	    else
 		this.glue_state = -1;
 
-	    this.glue_set = (1.0 * setdelta_S) / shrinks_S[-this.glue_state - 1];
+	    if (shrinks_S[-this.glue_state -1] != 0)
+		this.glue_set = (1.0 * setdelta_S) / shrinks_S[-this.glue_state - 1];
+	    else
+		this.glue_set = 0.0;
 	}
 
 	this.height_S = height_S;
@@ -316,10 +322,10 @@ var HBox = (function HBox_closure () {
 
 		if (gs > 0) {
 		    if (g.stretch_order == gs - 1)
-			dx_S += gr * g.stretch_S;
+			dx_S += (gr * g.stretch_S) | 0;
 		} else {
 		    if (g.shrink_order == -gs - 1)
-			dx_S += gr * g.shrink_S;
+			dx_S += (gr * g.shrink_S) | 0;
 		}
 
 		x_S += dx_S;
@@ -418,7 +424,10 @@ var VBox = (function VBox_closure () {
 	    else
 		this.glue_state = 1;
 
-	    this.glue_set = (1.0 * setdelta_S) / stretches_S[this.glue_state - 1];
+	    if (stretches_S[this.glue_state - 1] != 0)
+		this.glue_set = (1.0 * setdelta_S) / stretches_S[this.glue_state - 1];
+	    else
+		this.glue_set = 0.0;
 	} else {
 	    // We're shrinking it.
 	    this.height_S = nat_height_S - setdelta_S;
@@ -432,7 +441,10 @@ var VBox = (function VBox_closure () {
 	    else
 		this.glue_state = -1;
 
-	    this.glue_set = (1.0 * setdelta_S) / shrinks_S[-this.glue_state - 1];
+	    if (shrinks_S[-this.glue_state - 1] != 0)
+		this.glue_set = (1.0 * setdelta_S) / shrinks_S[-this.glue_state - 1];
+	    else
+		this.glue_set = 0.0;
 	}
 
 	this.width_S = width_S;
@@ -471,6 +483,9 @@ var VBox = (function VBox_closure () {
 	var gr = this.glue_set; // the glue set ratio
 	var y_S = y0_S - this.height_S;
 
+	if (gr == null)
+	    throw new TexInternalError ('unset glue in %o', this);
+
 	for (var i = 0; i < this.list.length; i++) {
 	    var item = this.list[i];
 
@@ -499,10 +514,10 @@ var VBox = (function VBox_closure () {
 
 		if (gs > 0) {
 		    if (g.stretch_order == gs - 1)
-			dy_S += gr * g.stretch_S;
+			dy_S += (gr * g.stretch_S) | 0;
 		} else {
 		    if (g.shrink_order == -gs - 1)
-			dy_S += gr * g.shrink_S;
+			dy_S += (gr * g.shrink_S) | 0;
 		}
 
 		y_S += dy_S;
