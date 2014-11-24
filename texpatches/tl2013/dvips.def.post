@@ -1,0 +1,61 @@
+% -*- latex -*-
+%
+% We look like plain TeX to the various graphics packages, so dvips.def
+% ends up getting loaded as the graphics driver. So here we override
+% all of its settings with ones that are better for webtex.
+
+% Clear dvips settings that we don't want.
+
+\let\Ginclude@eps\@undefined
+\let\Ginclude@bmp\@undefined
+\let\oztex@include\@undefined
+\let\Ginclude@pntg\@undefined
+\let\Ginclude@pict\@undefined
+
+\let\Gin@PS@raw\@undefined
+\let\Gin@PS@restored\@undefined
+\let\Gin@PS@literal@header\@undefined
+\let\Gin@PS@file@header\@undefined
+
+{%
+\catcode`\.=11
+\catcode`\*=11
+\let\Gin@rule@.ps\@undefined
+\let\Gin@rule@.eps\@undefined
+\let\Gin@rule@.pz\@undefined
+\let\Gin@rule@.eps.Z\@undefined
+\let\Gin@rule@.ps.Z\@undefined
+\let\Gin@rule@.ps.gz\@undefined
+\let\Gin@rule@.eps.gz\@undefined
+\let\Gin@rule@*\@undefined
+\let\Gin@rule@.pcx\@undefined
+\let\Gin@rule@.bmp\@undefined
+\let\Gin@rule@.msp\@undefined
+\let\Gin@rule@.pict\@undefined
+\let\Gin@rule@.pntg\@undefined
+}
+
+% Override with our stuff.
+
+\def\Ginclude@gif#1{\special{webteximage #1}}
+\def\Ginclude@jpeg#1{\special{webteximage #1}}
+\def\Ginclude@jpg#1{\special{webteximage #1}}
+\def\Ginclude@pdf#1{\special{webteximage #1}}
+\def\Ginclude@png#1{\special{webteximage #1}}
+
+\def\Gread@pdf#1{%
+  % Make up arbitrary numbers since they don't matter for us.
+  \def\Gin@llx{0in}
+  \def\Gin@lly{0in}
+  \def\Gin@urx{2in}
+  \def\Gin@ury{2in}
+}
+
+\def\Grot@start{\special{grot-start \Grot@angle}}
+\def\Grot@end{\special{grot-end}}
+\def\Gscale@start{\special{gscale-start \Gscale@x\space \Gscale@y\space}}
+\def\Gscale@end{\special{gscale-end}}
+
+\def\Gin@extensions{.gif,.jpeg,.jpg,.pdf,.png}
+
+\@namedef{Gin@rule@.pdf}#1{{pdf}{.pdf}{#1}}
