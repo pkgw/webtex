@@ -16,6 +16,10 @@
 \global\let\@latexerr\@latex@error
 \gdef\@missingfileerror#1#2{\errmessage{input file "#1.#2" not found}}
 %
+% Force lmodern font since that's what we use in the chrome
+%
+\AtBeginDocument{\input{lmodern.sty}}
+%
 % Now put the LaTeX temporaries back how they should be.
 %
 \let\reserved@a\@filelist
