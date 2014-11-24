@@ -539,7 +539,7 @@ var Engine = (function Engine_closure () {
     proto.handle_aftergroup = function Engine_handle_aftergroup (tok) {
 	var l = this.group_exit_stack.length;
 	if (l == 0)
-	    throw new TexRuntimeError ('cannot call \\aftergroup outside of a group');
+	    return; // TTP 280: if not in a group, just ignore it.
 
 	this.group_exit_stack[l - 1][2].push (tok);
     };
