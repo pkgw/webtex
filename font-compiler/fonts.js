@@ -23,6 +23,7 @@
 // - Remove browser workarounds at end of file since we don't have 'navigator'
 // - Import needed symbols at top
 // - Export needed symbols at bottom
+// - Import FontRendererFactory in Font.get-renderer
 
 /* globals FONT_IDENTITY_MATRIX, FontType, warn, GlyphsUnicode, error, string32,
            readUint32, Stream, FontRendererFactory, shadow, stringToBytes,
@@ -34,9 +35,11 @@
 
 var _util = require ('./util.js');
 var assert = _util.assert;
+var bytesToString = _util.bytesToString;
 var FONT_IDENTITY_MATRIX = _util.FONT_IDENTITY_MATRIX;
 var FontType = _util.FontType;
 var isArray = _util.isArray;
+var shadow = _util.shadow;
 var string32 = _util.string32;
 var stringToBytes = _util.stringToBytes;
 var _stream = require ('./stream.js');
@@ -3103,6 +3106,9 @@ var Font = (function FontClosure() {
     mimetype: null,
     encoding: null,
     get renderer() {
+      var _font_renderer = require ('./font_renderer.js');
+      var FontRendererFactory = _font_renderer.FontRendererFactory;
+
       var renderer = FontRendererFactory.create(this);
       return shadow(this, 'renderer', renderer);
     },
@@ -7205,3 +7211,4 @@ var CFFCompiler = (function CFFCompilerClosure() {
 })();
 
 exports.Font = Font;
+exports.CFFParser = CFFParser;

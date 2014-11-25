@@ -20,7 +20,7 @@
 // the development in pdf.js.
 //
 // Summary of modifications for Webtex:
-//
+// - Export needed symbols at bottom
 
 'use strict';
 
@@ -4436,3 +4436,5 @@ var DingbatsGlyphsUnicode = {
   a96: 0x2775, // 0xF8E4
   '.notdef': 0x0000
 };
+
+exports.GlyphsUnicode = GlyphsUnicode;

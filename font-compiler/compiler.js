@@ -34,3 +34,4 @@ var props = {
 };
 
 var thefont = new fonts.Font (fontpath, fontdata, props);
+var rend = thefont.renderer;

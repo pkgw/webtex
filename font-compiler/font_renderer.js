@@ -20,12 +20,22 @@
 // the development in pdf.js.
 //
 // Summary of modifications for Webtex:
-//
+// - Import needed symbols at top
+// - Export needed symbols at bottom
+// - Import CFFParser in parseCff()
 
 /* globals error, bytesToString, Stream, GlyphsUnicode, CFFParser, Encodings,
            Util */
 
 'use strict';
+
+var _util = require ('./util.js');
+var bytesToString = _util.bytesToString;
+var Util = _util.Util;
+var _stream = require ('./stream.js');
+var Stream = _stream.Stream;
+var _glyphlist = require ('./glyphlist.js');
+var GlyphsUnicode = _glyphlist.GlyphsUnicode;
 
 var FontRendererFactory = (function FontRendererFactoryClosure() {
   function getLong(data, offset) {
@@ -88,6 +98,9 @@ var FontRendererFactory = (function FontRendererFactoryClosure() {
   }
 
   function parseCff(data, start, end) {
+    var _fonts = require ('./fonts.js');
+    var CFFParser = _fonts.CFFParser;
+
     var properties = {};
     var parser = new CFFParser(new Stream(data, start, end - start),
                                properties);
@@ -718,3 +731,5 @@ var FontRendererFactory = (function FontRendererFactoryClosure() {
     }
   };
 })();
+
+exports.FontRendererFactory = FontRendererFactory;

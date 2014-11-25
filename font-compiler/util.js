@@ -1596,8 +1596,11 @@ function loadJpegStream(id, imageUrl, objs) {
 }
 
 exports.assert = assert;
+exports.bytesToString = bytesToString;
 exports.FONT_IDENTITY_MATRIX = FONT_IDENTITY_MATRIX;
 exports.FontType = FontType;
 exports.isArray = isArray;
+exports.shadow = shadow;
 exports.string32 = string32;
 exports.stringToBytes = stringToBytes;
+exports.Util = Util;
