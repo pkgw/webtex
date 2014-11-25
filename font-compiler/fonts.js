@@ -20,7 +20,7 @@
 // the development in pdf.js.
 //
 // Summary of modifications for Webtex:
-//
+// - Remove browser workarounds at end of file since we don't have 'navigator'
 
 /* globals FONT_IDENTITY_MATRIX, FontType, warn, GlyphsUnicode, error, string32,
            readUint32, Stream, FontRendererFactory, shadow, stringToBytes,
@@ -7188,20 +7188,4 @@ var CFFCompiler = (function CFFCompilerClosure() {
     }
   };
   return CFFCompiler;
-})();
-
-// Workaround for seac on Windows.
-(function checkSeacSupport() {
-  if (/Windows/.test(navigator.userAgent)) {
-    SEAC_ANALYSIS_ENABLED = true;
-  }
-})();
-
-// Workaround for Private Use Area characters in Chrome on Windows
-// http://code.google.com/p/chromium/issues/detail?id=122465
-// https://github.com/mozilla/pdf.js/issues/1689
-(function checkChromeWindows() {
-  if (/Windows.*Chrome/.test(navigator.userAgent)) {
-    SKIP_PRIVATE_USE_RANGE_F000_TO_F01F = true;
-  }
 })();
