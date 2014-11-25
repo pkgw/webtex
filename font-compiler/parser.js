@@ -20,7 +20,7 @@
 // the development in pdf.js.
 //
 // Summary of modifications for Webtex:
-//
+// - Export needed symbols at bottom.
 
 /* globals Ascii85Stream, AsciiHexStream, CCITTFaxStream, Cmd, Dict, error,
            FlateStream, isArray, isCmd, isDict, isInt, isName, isNum, isRef,
@@ -899,3 +899,5 @@ var Linearization = {
     };
   }
 };
+
+exports.Lexer = Lexer;

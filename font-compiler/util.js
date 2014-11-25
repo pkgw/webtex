@@ -20,14 +20,15 @@
 // the development in pdf.js.
 //
 // Summary of modifications for Webtex:
-//
+// - Export needed symbols at bottom
+// - Make globalScope point to "global"
 
 /* globals Cmd, ColorSpace, Dict, MozBlobBuilder, Name, PDFJS, Ref, URL,
            Promise */
 
 'use strict';
 
-var globalScope = (typeof window === 'undefined') ? this : window;
+var globalScope = global;
 
 var isWorker = (typeof window === 'undefined');
 
@@ -1593,3 +1594,10 @@ function loadJpegStream(id, imageUrl, objs) {
   });
   img.src = imageUrl;
 }
+
+exports.assert = assert;
+exports.FONT_IDENTITY_MATRIX = FONT_IDENTITY_MATRIX;
+exports.FontType = FontType;
+exports.isArray = isArray;
+exports.string32 = string32;
+exports.stringToBytes = stringToBytes;

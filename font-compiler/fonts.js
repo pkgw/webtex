@@ -21,6 +21,8 @@
 //
 // Summary of modifications for Webtex:
 // - Remove browser workarounds at end of file since we don't have 'navigator'
+// - Import needed symbols at top
+// - Export needed symbols at bottom
 
 /* globals FONT_IDENTITY_MATRIX, FontType, warn, GlyphsUnicode, error, string32,
            readUint32, Stream, FontRendererFactory, shadow, stringToBytes,
@@ -29,6 +31,18 @@
            ExpertSubsetCharset, Util, DingbatsGlyphsUnicode */
 
 'use strict';
+
+var _util = require ('./util.js');
+var assert = _util.assert;
+var FONT_IDENTITY_MATRIX = _util.FONT_IDENTITY_MATRIX;
+var FontType = _util.FontType;
+var isArray = _util.isArray;
+var string32 = _util.string32;
+var stringToBytes = _util.stringToBytes;
+var _stream = require ('./stream.js');
+var Stream = _stream.Stream;
+var _parser = require ('./parser.js');
+var Lexer = _parser.Lexer;
 
 // Unicode Private Use Area
 var PRIVATE_USE_OFFSET_START = 0xE000;
@@ -7189,3 +7203,5 @@ var CFFCompiler = (function CFFCompilerClosure() {
   };
   return CFFCompiler;
 })();
+
+exports.Font = Font;

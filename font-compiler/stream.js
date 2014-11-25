@@ -20,7 +20,7 @@
 // the development in pdf.js.
 //
 // Summary of modifications for Webtex:
-//
+// - Export needed symbols at bottom
 
 /* globals bytesToString, ColorSpace, Dict, EOF, error, info, isArray,
            Jbig2Image, JpegImage, JpxImage, Lexer, PDFJS, shadow, Util, warn */
@@ -2460,3 +2460,5 @@ var NullStream = (function NullStreamClosure() {
 
   return NullStream;
 })();
+
+exports.Stream = Stream;
