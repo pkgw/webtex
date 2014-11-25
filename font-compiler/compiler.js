@@ -1,11 +1,14 @@
-if (process.argv.length < 3) {
-    console.log ('usage: node ' + process.argv[1] + ' <font.pfb>');
+if (process.argv.length < 4) {
+    console.log ('usage: node ' + process.argv[1] + ' debug <font.pfb>');
     process.exit (1);
 }
 
-var fontpath = process.argv[2];
+var output_kind = process.argv[2];
+var fontpath = process.argv[3];
 
 var fs = require ('fs');
+var util = require ('util');
+
 var fonts = require ('./fonts.js');
 var stream = require ('./stream.js');
 
@@ -35,3 +38,25 @@ var props = {
 
 var thefont = new fonts.Font (fontpath, fontdata, props);
 var rend = thefont.renderer;
+
+function for_each_glyph (callback) {
+    var delta = 2;
+
+    for (var i = 2; i < rend.glyphs.length - 1; i++) {
+	var lines = rend.getPathJsFromGlyphId (i).split ('\n');
+	lines = lines.slice (3, -1); // skip boilerplate
+	callback (i - delta, lines);
+    }
+}
+
+if (output_kind == 'debug') {
+    console.log ('var the_font = {');
+    for_each_glyph (function (index, lines) {
+	console.log (index + ': function (c) {');
+	console.log (lines.join ('\n'));
+	console.log ('},');
+    });
+    console.log ('};');
+} else {
+    console.error ('unrecognized output kind: ' + output_kind);
+}

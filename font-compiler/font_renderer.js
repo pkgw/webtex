@@ -23,6 +23,7 @@
 // - Import needed symbols at top
 // - Export needed symbols at bottom
 // - Import CFFParser in parseCff()
+// - Add CompiledFont.getPathJsFromGlyphId
 
 /* globals error, bytesToString, Stream, GlyphsUnicode, CFFParser, Encodings,
            Util */
@@ -623,6 +624,10 @@ var FontRendererFactory = (function FontRendererFactoryClosure() {
         this.compiledGlyphs[gid] = fn = this.compileGlyph(this.glyphs[gid]);
       }
       return fn;
+    },
+
+    getPathJsFromGlyphId: function (gid) {
+      return this.compileGlyph (this.glyphs[gid]);
     },
 
     compileGlyph: function (code) {

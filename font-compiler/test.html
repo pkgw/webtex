@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<!-- Derived from pdf.js test_slave.html -->
+
+<html>
+  <head>
+    <title>Webtex Font Compiler Testbed</title>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="chrome/style.css">
+  </head>
+
+  <body>
+    <p>Canvas:</p>
+    <canvas id="c" width=500 height=500></canvas>
+    <p>End of canvas.</p>
+    <script type="text/javascript" src="cmmi10.dbg.js"></script>
+    <script type="text/javascript">
+var cnv = document.getElementById ('c');
+var c = cnv.getContext ('2d');
+var size = 0.1;
+var char_id = 0x1b;
+
+// Reference point crosshair
+c.strokeStyle = 'rgba(1,1,0,1)';
+c.fillStyle = 'rgba(1,1,0,1)';
+c.moveTo (80, 400);
+c.lineTo (120, 400);
+c.stroke ();
+c.moveTo (100, 380);
+c.lineTo (100, 420);
+c.stroke ();
+
+c.fillStyle = 'rgba(0,0,0,1)';
+c.translate (100, 400);
+c.scale (size, -size);
+the_font[char_id] (c);
+c.fill ();
+</script>
+  </body>
+</html>
