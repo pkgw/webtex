@@ -15,6 +15,13 @@
  * limitations under the License.
  */
 
+// This file has been copied from Mozilla's pdf.js and slightly modified.
+// See README.md for details and information for staying in sync with
+// the development in pdf.js.
+//
+// Summary of modifications for Webtex:
+//
+
 'use strict';
 
 var GlyphsUnicode = {

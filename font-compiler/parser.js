@@ -14,6 +14,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+// This file has been copied from Mozilla's pdf.js and slightly modified.
+// See README.md for details and information for staying in sync with
+// the development in pdf.js.
+//
+// Summary of modifications for Webtex:
+//
+
 /* globals Ascii85Stream, AsciiHexStream, CCITTFaxStream, Cmd, Dict, error,
            FlateStream, isArray, isCmd, isDict, isInt, isName, isNum, isRef,
            isString, Jbig2Stream, JpegStream, JpxStream, LZWStream, Name,
