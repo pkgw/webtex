@@ -5,6 +5,7 @@ var FontMetrics = (function FontMetrics_closure () {
     // metrics for the null font, returning 0 for everything.
 
     function FontMetrics () {
+	this.effective_size = 0;
 	this.font_dimens_S = [];
 
 	for (var i = 0; i < 7; i++)
@@ -152,6 +153,7 @@ var TfmMetrics = (function TfmMetrics_closure () {
 		design_size = nlib.xn_over_d__ISI_SS (-scale_factor, design_size, 1000)[0];
 	}
 
+	this.effective_size = design_size;
 	this.fw2s__N_S = prep_fix_word_math (design_size);
 
 	// Create Scaleds out of all of the metrics.

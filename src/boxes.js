@@ -630,6 +630,7 @@ var CanvasBox = (function CanvasBox_closure () {
 		gl.push ({x: x,
 			  y: y,
 			  pfb: subitem.font.pfbname,
+			  es: subitem.font.metrics.effective_size,
 			  ggid: subitem.font.enc_idents[subitem.ord]});
 	    } else if (subitem instanceof Rule) {
 		y -= subitem.height_S;

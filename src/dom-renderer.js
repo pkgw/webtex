@@ -60,6 +60,7 @@ var DOMRenderer = (function DOMRenderer_callback () {
 		    if (q.hasOwnProperty ('ggid')) {
 			// Character.
 			var f = compiled_fonts[q.pfb];
+			var s = fontscale * q.es / 655360.
 			if (f == null) {
 			    global_warnf ('missing compiled font %o', q.pfb);
 			} else if (!f.hasOwnProperty (q.ggid)) {
@@ -69,7 +70,7 @@ var DOMRenderer = (function DOMRenderer_callback () {
 			    ctx.beginPath ();
 			    ctx.save ();
 			    ctx.translate (x, y);
-			    ctx.scale (fontscale, -fontscale);
+			    ctx.scale (s, -s);
 			    f[q.ggid] (ctx);
 			    ctx.fill ();
 			    ctx.restore ();
