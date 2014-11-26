@@ -29,6 +29,7 @@ class Bundler (object):
         # The whole font mess.
         self.map_files = set ()
         self.encoding_files = {}
+        self.pfb_files = {}
         self.encoding_data = {}
         self.charname_list = None
         self.charname_ids = None
@@ -223,7 +224,16 @@ class Bundler (object):
                 print ('warning: cannot determine encoding for font "%s"' % fontname)
                 continue
 
+            item = bits[-1]
+            if item[0] != '<':
+                print ('error: unhandled entry in font map file "%s"' % basename,
+                       file=sys.stderr)
+                print ('       "%s"' % t[:-1], file=sys.stderr)
+                sys.exit (1)
+            pfbname = item[1:]
+
             self.encoding_files[fontname] = encname
+            self.pfb_files[fontname] = pfbname
 
 
     cm_encodings = {
@@ -364,6 +374,7 @@ class Bundler (object):
     def insert_font_info (self, zip):
         data = {}
         data['font2enc'] = self.encoding_files
+        data['font2pfb'] = self.pfb_files
         data['encinfo'] = {}
 
         seen_encnames = set ()
