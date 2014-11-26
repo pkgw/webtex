@@ -77,6 +77,8 @@ class Bundler (object):
         os.rename (temp.name, zpath)
         print ('Created', zpath)
 
+        self.save_charname_ids ()
+
         lpath = os.path.join (self.destdir, 'latest.zip')
         try:
             os.unlink (lpath)
@@ -382,6 +384,27 @@ class Bundler (object):
         s = hashlib.sha1 ()
         s.update (jdata)
         self.elemshas[base] = s.digest ()
+
+
+    def save_charname_ids (self):
+        path = os.path.join (self.destdir, 'glyph-encoding.js')
+
+        unilit = lambda u: '\\u%04x' % ord (u)
+
+        with io.open (path, 'wt') as f:
+            print ('var encoded_glyph_info = {', file=f)
+
+            print ('   names: [', file=f)
+            for cn in self.charname_list:
+                print ('     \'%s\',' % cn, file=f)
+            print ('   ],', file=f)
+
+            u = ''.join (unilit (self.charname_unicodes[c]) for c in self.charname_list)
+            print ('   unicode: \'%s\',' % u, file=f)
+
+            print ('};', file=f)
+
+        print ('Created', path)
 
 
 def commandline (argv):

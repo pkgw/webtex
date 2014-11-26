@@ -36,27 +36,33 @@ var props = {
     bbox: [0, 0, 1, 1], // Seems to be needed, but doesn't matter for us
 };
 
-var thefont = new fonts.Font (fontpath, fontdata, props);
-var rend = thefont.renderer;
+var thefont = new fonts.Type1Font (fontpath, fontdata, props);
+console.log ('CSL:' + thefont.charstrings.length);
+console.log (util.inspect (thefont.charstrings));
 
-function for_each_glyph (callback) {
-    var delta = 2;
+// var thefont = new fonts.Font (fontpath, fontdata, props);
+// var rend = thefont.renderer;
+// console.log (util.inspect (thefont));
 
-    for (var i = 2; i < rend.glyphs.length - 1; i++) {
-	var lines = rend.getPathJsFromGlyphId (i).split ('\n');
-	lines = lines.slice (3, -1); // skip boilerplate
-	callback (i - delta, lines);
-    }
-}
+// function for_each_glyph (callback) {
+//     var delta = 2;
 
-if (output_kind == 'debug') {
-    console.log ('var the_font = {');
-    for_each_glyph (function (index, lines) {
-	console.log (index + ': function (c) {');
-	console.log (lines.join ('\n'));
-	console.log ('},');
-    });
-    console.log ('};');
-} else {
-    console.error ('unrecognized output kind: ' + output_kind);
-}
+//     for (var i = 2; i < rend.glyphs.length - 1; i++) {
+// 	break;
+// 	var lines = rend.getPathJsFromGlyphId (i).split ('\n');
+// 	lines = lines.slice (3, -1); // skip boilerplate
+// 	//callback (i - delta, lines);
+//     }
+// }
+
+// if (output_kind == 'debug') {
+//     console.log ('var the_font = {');
+//     for_each_glyph (function (index, lines) {
+// 	//console.log (index + ': function (c) {');
+// 	//console.log (lines.join ('\n'));
+// 	//console.log ('},');
+//     });
+//     console.log ('};');
+// } else {
+//     console.error ('unrecognized output kind: ' + output_kind);
+// }

@@ -7210,5 +7210,6 @@ var CFFCompiler = (function CFFCompilerClosure() {
   return CFFCompiler;
 })();
 
-exports.Font = Font;
 exports.CFFParser = CFFParser;
+exports.Font = Font;
+exports.Type1Font = Type1Font;
