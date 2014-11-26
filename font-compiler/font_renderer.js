@@ -733,7 +733,9 @@ var FontRendererFactory = (function FontRendererFactoryClosure() {
       } else {
         return new Type2Compiled(cff, cmap, font.fontMatrix, font.glyphNameMap);
       }
-    }
+    },
+
+    compileCharString: compileCharString,
   };
 })();
 

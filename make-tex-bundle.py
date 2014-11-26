@@ -387,22 +387,15 @@ class Bundler (object):
 
 
     def save_charname_ids (self):
-        path = os.path.join (self.destdir, 'glyph-encoding.js')
-
+        path = os.path.join (self.destdir, 'glyph-encoding.json')
+        data  = {}
         unilit = lambda u: '\\u%04x' % ord (u)
 
-        with io.open (path, 'wt') as f:
-            print ('var encoded_glyph_info = {', file=f)
+        data['names'] = self.charname_list
+        data['unicode'] = ''.join (self.charname_unicodes[c] for c in self.charname_list)
 
-            print ('   names: [', file=f)
-            for cn in self.charname_list:
-                print ('     \'%s\',' % cn, file=f)
-            print ('   ],', file=f)
-
-            u = ''.join (unilit (self.charname_unicodes[c]) for c in self.charname_list)
-            print ('   unicode: \'%s\',' % u, file=f)
-
-            print ('};', file=f)
+        with io.open (path, 'wb') as f:
+            json.dump (data, f, sort_keys=True, indent=4)
 
         print ('Created', path)
 
