@@ -126,7 +126,7 @@ var ConsoleDumpTarget = (function ConsoleDumpTarget_closure () {
 
     var proto = ConsoleDumpTarget.prototype;
 
-    proto.process = function ConsoleDumpTarget_process (box) {
+    proto.process = function ConsoleDumpTarget_process (engine, box) {
 	global_logf ('==== shipped out: ====');
 	box.traverse__SSO (nlib.Zero_S, nlib.Zero_S, function (x, y, item) {
 	    global_logf ('x=%o y=%o %o', x, y, item);
