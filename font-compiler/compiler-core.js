@@ -1,10 +1,11 @@
-if (process.argv.length < 4) {
-    console.log ('usage: node ' + process.argv[1] + ' <glyph-enc.json> <bundle.zip>');
+if (process.argv.length < 5) {
+    console.log ('usage: node ' + process.argv[1] + ' <glyph-enc.json> <bundle.zip> <fonts.txt>');
     process.exit (1);
 }
 
 var glyphpath = process.argv[2];
 var bundlepath = process.argv[3];
+var fontlistpath = process.argv[4];
 
 var warn_missing_glyphs = true;
 
@@ -30,16 +31,15 @@ var zr = new ZipReader (raf.read_range_ab.bind (raf), raf.size ());
 var bundle = new Bundle (zr);
 
 
-// Get list of PFB files to compile
+// Load list of PFB files to compile
 
-var fontinfo = bundle.get_contents_json ('wtfontdata.json');
-var pfbs = {};
+var fontlist = fs.readFileSync (fontlistpath, {encoding: 'utf-8'}).split ('\n');
+var pfbs = [];
 
-for (var item in fontinfo.font2pfb) {
-    if (!fontinfo.font2pfb.hasOwnProperty (item))
+for (var i = 0; i < fontlist.length; i++) {
+    if (!fontlist[i].length || fontlist[i][0] == '#')
 	continue;
-
-    pfbs[fontinfo.font2pfb[item]] = true;
+    pfbs.push (fontlist[i]);
 }
 
 
@@ -67,10 +67,8 @@ function for_each_glyph (font, callback) {
 
 console.log ('var compiled_fonts = {');
 
-for (var pfb in pfbs) {
-    if (!pfbs.hasOwnProperty (pfb))
-	continue;
-
+for (var i = 0; i < pfbs.length; i++) {
+    var pfb = pfbs[i];
     var data = bundle.get_contents_ab (pfb);
     var fontdata = new Stream (data, 0, data.byteLength, {});
 

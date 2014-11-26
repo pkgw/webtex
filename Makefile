@@ -96,7 +96,7 @@ generate.py font-compiler/compiler-wrapper.js $(fcjs) \
 	$(python) $^ $@
 
 $(builddir)/compiled-fonts.js: \
-$(builddir)/font-compiler.js $(builddir)/glyph-encoding.json $(builddir)/latest.zip \
+$(builddir)/font-compiler.js $(builddir)/glyph-encoding.json $(builddir)/latest.zip builtinfonts.txt \
 | $(builddir)
 	node $^ >$@
 
