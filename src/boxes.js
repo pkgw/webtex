@@ -623,10 +623,14 @@ var CanvasBox = (function CanvasBox_closure () {
 	    var subitem = q[2];
 
 	    if (subitem instanceof Character) {
+		if (subitem.font.enc_idents == null)
+		    throw new TexRuntimeError ('cannot draw character in unsupported font %s',
+					       subitem.font.ident);
+
 		gl.push ({x: x,
 			  y: y,
-			  font: subitem.font.ident,
-			  ord: subitem.ord});
+			  pfb: subitem.font.pfbname,
+			  ggid: subitem.font.enc_idents[subitem.ord]});
 	    } else if (subitem instanceof Rule) {
 		y -= subitem.height_S;
 		gl.push ({x: x,

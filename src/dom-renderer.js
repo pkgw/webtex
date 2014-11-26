@@ -9,27 +9,6 @@ var DOMRenderer = (function DOMRenderer_callback () {
 
     var proto = DOMRenderer.prototype;
 
-    proto.fontmap = {
-	// Not quite sure what's going on with the ecrm->sfrm name stuff, but
-	// as best I can tell that's what ecrm* things get mapped to.
-	'ec-lmcsc10': '28px LMRomanCaps10',
-	'ec-lmr10': '28px LMRoman10',
-	ecrm1000: '28px SFRM1000',
-	lmmi10: '28px LMMathItalic10',
-	lmsy10: '28px LMMathSymbols10',
-	lmr10: '28px LMRoman10',
-	msam10: '28px MSAM10',
-	'rm-lmr10': '28px LMRoman10',
-
-	'ec-lmr7': '19.6px LMRoman7',
-	ecrm0700: '19.6px SFRM0700',
-	lmmi7: '19.6px LMMathItalic7',
-	lmsy7: '19.6px LMMathSymbols7',
-	lmr7: '19.6px LMRoman7',
-	msam7: '19.6px MSAM7',
-	'rm-lmr7': '19.6px LMRoman7',
-    };
-
     proto.handle_render = function DOMRenderer_handle_render (data) {
 	var doc = this.container.ownerDocument;
 	var dom_stack = [this.container];
@@ -51,6 +30,7 @@ var DOMRenderer = (function DOMRenderer_callback () {
 		dom_stack[idom].appendChild (e);
 	    } else if (item.kind === 'canvas') {
 		var scale = 0.000048; // XXX should not be hardcoded!!!!!!!!
+		var fontscale = 0.03; // XXX ditto!
 
 		var e = doc.createElement ('canvas');
 		e.class = 'cbox';
@@ -77,16 +57,22 @@ var DOMRenderer = (function DOMRenderer_callback () {
 		    var x = scale * q.x;
 		    var y = scale * q.y;
 
-		    if (q.hasOwnProperty ('ord')) {
+		    if (q.hasOwnProperty ('ggid')) {
 			// Character.
-			var f = this.fontmap[q.font];
+			var f = compiled_fonts[q.pfb];
 			if (f == null) {
-			    global_warnf ('unmapped font ident %o', q.font);
-			    f = '28px LMMathItalic10';
+			    global_warnf ('missing compiled font %o', q.pfb);
+			} else if (!f.hasOwnProperty (q.ggid)) {
+			    global_warnf ('missing compiled GGID %d in font %o', q.ggid, q.pfb);
+			} else {
+			    console.log ('render %s in %s', glyph_encoding_info.names[q.ggid], q.pfb);
+			    ctx.save ();
+			    ctx.translate (x, y);
+			    ctx.scale (fontscale, -fontscale);
+			    f[q.ggid] (ctx);
+			    ctx.fill ();
+			    ctx.restore ();
 			}
-
-			ctx.font = f;
-			ctx.fillText (String.fromCharCode (q.ord), x, y);
 		    } else if (q.hasOwnProperty ('w')) {
 			// Rule.
 			ctx.fillRect (x, y, scale * q.w, scale * q.h);

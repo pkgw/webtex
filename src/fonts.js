@@ -300,9 +300,11 @@ var Font = (function Font_closure () {
 	    if (this.enc_name == null) {
 		this.enc_idents = null;
 		this.enc_unicode = null;
+		this.pfbname = null;
 	    } else {
 		this.enc_idents = engine.fontdata.encinfo[this.enc_name].idents;
 		this.enc_unicode = engine.fontdata.encinfo[this.enc_name].unicode;
+		this.pfbname = engine.fontdata.font2pfb[this.ident];
 	    }
 	}
 

@@ -108,6 +108,7 @@ masterjs = \
   src/format.js \
   src/master-object.js \
   $(builddir)/compiled-fonts.js \
+  $(builddir)/master-glyph-helper.js \
   src/dom-renderer.js
 
 
@@ -118,6 +119,10 @@ generate.py src/browser-master-wrapper.js $(masterjs) \
 
 primaries += $(builddir)/browser-master-webtex.js
 
+$(builddir)/master-glyph-helper.js: \
+generate.py src/master-glyph-helper-tmpl.js $(builddir)/glyph-encoding.json \
+| $(builddir)
+	$(python) $^ $@
 
 # Generating the "bundle" Zip file.
 #
