@@ -1,11 +1,10 @@
-if (process.argv.length < 5) {
-    console.log ('usage: node ' + process.argv[1] + ' <glyph-enc.json> debug <font.pfb>');
+if (process.argv.length < 4) {
+    console.log ('usage: node ' + process.argv[1] + ' <glyph-enc.json> <font.pfb>');
     process.exit (1);
 }
 
 var glyphpath = process.argv[2];
-var output_kind = process.argv[3];
-var fontpath = process.argv[4];
+var fontpath = process.argv[3];
 
 var fs = require ('fs');
 var util = require ('util');
@@ -73,14 +72,10 @@ function for_each_glyph (callback) {
     }
 }
 
-if (output_kind == 'debug') {
-    console.log ('var the_font = {');
-    for_each_glyph (function (gname, gid, lines) {
-	console.log (gid + ': function (c) { // ' + gname);
-	console.log (lines.join ('\n'));
-	console.log ('},');
-    });
-    console.log ('};');
-} else {
-    console.error ('unrecognized output kind: ' + output_kind);
-}
+console.log ('var the_font = {');
+for_each_glyph (function (gname, gid, lines) {
+    console.log (gid + ': function (c) { // ' + gname);
+    console.log (lines.join ('\n'));
+    console.log ('},');
+});
+console.log ('};');
