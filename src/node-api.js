@@ -37,6 +37,8 @@ function setup_process_basic (data) {
 	delete data.dumppath;
     }
 
+    data.fontdata = bundle.get_contents_json ('wtfontdata.json');
+
     var eng = new Engine (data);
 
     if (dumpjson != null)
