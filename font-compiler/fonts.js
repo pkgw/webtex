@@ -33,19 +33,19 @@
 
 'use strict';
 
-var _util = require ('./util.js');
-var assert = _util.assert;
-var bytesToString = _util.bytesToString;
-var FONT_IDENTITY_MATRIX = _util.FONT_IDENTITY_MATRIX;
-var FontType = _util.FontType;
-var isArray = _util.isArray;
-var shadow = _util.shadow;
-var string32 = _util.string32;
-var stringToBytes = _util.stringToBytes;
-var _stream = require ('./stream.js');
-var Stream = _stream.Stream;
-var _parser = require ('./parser.js');
-var Lexer = _parser.Lexer;
+// var _util = require ('./util.js');
+// var assert = _util.assert;
+// var bytesToString = _util.bytesToString;
+// var FONT_IDENTITY_MATRIX = _util.FONT_IDENTITY_MATRIX;
+// var FontType = _util.FontType;
+// var isArray = _util.isArray;
+// var shadow = _util.shadow;
+// var string32 = _util.string32;
+// var stringToBytes = _util.stringToBytes;
+// var _stream = require ('./stream.js');
+// var Stream = _stream.Stream;
+// var _parser = require ('./parser.js');
+// var Lexer = _parser.Lexer;
 
 // Unicode Private Use Area
 var PRIVATE_USE_OFFSET_START = 0xE000;

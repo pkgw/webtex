@@ -70,6 +70,36 @@ generate.py src/%-helpers-tmpl.js $(genlists) \
 primaries += $(builddir)/worker-webtex.js $(builddir)/node-webtex.js
 
 
+# The font compiler, which we need to pre-compile fonts into JavaScript
+# for math rendering because this stuff is nuts.
+
+fcjs = \
+  src/preamble.js \
+  src/format.js \
+  src/inflate.js \
+  src/jsonparse.js \
+  src/str-utils.js \
+  src/node-io.js \
+  src/readzip.js \
+  src/bundle.js \
+  font-compiler/util.js \
+  font-compiler/stream.js \
+  font-compiler/parser.js \
+  font-compiler/glyphlist.js \
+  font-compiler/fonts.js \
+  font-compiler/font_renderer.js \
+  font-compiler/compiler-core.js
+
+$(builddir)/font-compiler.js: \
+generate.py font-compiler/compiler-wrapper.js $(fcjs) \
+| $(builddir)
+	$(python) $^ $@
+
+$(builddir)/compiled-fonts.js: \
+$(builddir)/font-compiler.js $(builddir)/glyph-encoding.json $(builddir)/latest.zip \
+| $(builddir)
+	node $^ >$@
+
 # The browser master, which drives the Web Worker engine and renders the
 # output into the DOM.
 

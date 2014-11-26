@@ -30,13 +30,13 @@
 
 'use strict';
 
-var _util = require ('./util.js');
-var bytesToString = _util.bytesToString;
-var Util = _util.Util;
-var _stream = require ('./stream.js');
-var Stream = _stream.Stream;
-var _glyphlist = require ('./glyphlist.js');
-var GlyphsUnicode = _glyphlist.GlyphsUnicode;
+// var _util = require ('./util.js');
+// var bytesToString = _util.bytesToString;
+// var Util = _util.Util;
+// var _stream = require ('./stream.js');
+// var Stream = _stream.Stream;
+// var _glyphlist = require ('./glyphlist.js');
+// var GlyphsUnicode = _glyphlist.GlyphsUnicode;
 
 var FontRendererFactory = (function FontRendererFactoryClosure() {
   function getLong(data, offset) {
