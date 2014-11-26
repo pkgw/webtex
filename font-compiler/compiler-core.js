@@ -7,7 +7,7 @@ var glyphpath = process.argv[2];
 var bundlepath = process.argv[3];
 var fontlistpath = process.argv[4];
 
-var warn_missing_glyphs = true;
+var warn_missing_glyphs = false;
 
 var fs = require ('fs');
 var util = require ('util');
