@@ -4,27 +4,36 @@
 # Licensed under the MIT License
 
 from __future__ import absolute_import, division, print_function, unicode_literals
-import contextlib, hashlib, io, lzma, os.path, sys, tarfile, tempfile, urllib, zipfile
+import contextlib, hashlib, io, json, lzma, os.path, sys, tarfile, tempfile, urllib, zipfile
 
 cache_ident = 'tl2013'
 url_base = 'ftp://tug.org/historic/systems/texlive/2013/tlnet-final/archive/'
 pkg_extension = '.tar.xz'
 skip_roots = frozenset (('makeindex', 'tlpkg'))
-skip_prefixes = frozenset (('fonts/map/dvips', ))
 patch_suffixes = ['.post']
 
 
 class Bundler (object):
-    def __init__ (self, specfile, cachedir, destdir, patchdir, otherfiles):
+    def __init__ (self, specfile, mapfile, cachedir, destdir, patchdir, otherfiles):
         self.specfile = specfile
+        self.mapfile = mapfile
         self.cachedir = cachedir
         self.destdir = destdir
         self.patchdir = patchdir
         self.otherfiles = otherfiles
         self.elemshas = {}
 
+        # The whole font mess.
+        self.map_files = set ()
+        self.encoding_files = {}
+        self.encoding_data = {}
+        self.charname_list = None
+        self.charname_ids = None
+
 
     def go (self):
+        self.load_map_names ()
+
         try:
             os.mkdir (os.path.join (self.cachedir, cache_ident))
         except OSError:
@@ -44,6 +53,10 @@ class Bundler (object):
                         continue
 
                     self.load_package (zip, pkgname)
+
+                # Write out the collected font info
+                self.issue_charname_ids ()
+                self.insert_font_info (zip)
         except:
             e1, e2, e3 = sys.exc_info ()
             try:
@@ -96,10 +109,14 @@ class Bundler (object):
                     pieces = info.name.split ('/')
                     if pieces[0] in skip_roots:
                         continue
-                    for pfx in skip_prefixes:
-                        if info.name.startswith (pfx):
-                            info = None
-                            break
+
+                    # We act like dvips for the purposes of compiling font
+                    # maps and encodings. Maps for other tools have the same
+                    # filenames, so eliminate them.
+                    if (info.name.startswith ('fonts/map/')
+                        and not info.name.startswith ('fonts/map/dvips/')):
+                        continue
+
                     if info is None:
                         continue
 
@@ -115,6 +132,16 @@ class Bundler (object):
                     zip.writestr (base, contents)
                     s = hashlib.sha1 ()
                     s.update (contents)
+
+                    if base in self.map_files:
+                        self.process_map_file (base, contents)
+
+                    if base.endswith ('.enc'):
+                        # We may not have yet read in all the necessary map
+                        # files, so we may not know which encodings we need.
+                        # So we have to parse every encoding that we see just
+                        # in case.
+                        self.process_encoding_file (base, contents)
 
                     # Include any patches that may exist for this file.
                     for sfx in patch_suffixes:
@@ -151,14 +178,208 @@ class Bundler (object):
                 pass
             raise e1, e2, e3
 
+    # The font-handling mess
+
+    def load_map_names (self):
+        for line in io.open (self.mapfile, 'rt'):
+            mapname = line.split ('#', 1)[0].strip ()
+            if not len (mapname):
+                continue
+
+            self.map_files.add (mapname)
+
+
+    def process_map_file (self, basename, contents):
+        for line in contents.decode ('ascii').split ('\n'):
+            t = line.split ('%', 1)[0].strip ()
+            if not len (t):
+                continue
+
+            # Map entries can have either 3 or 5 fields, and in the latter
+            # case the third entry usually has a space and is quote-delimited.
+            # I *so* do not want to deal with this, and I think that I don't
+            # need to, so this parsing is cheesy.
+
+            bits = t.split ()
+            fontname = bits[0]
+
+            if len (bits) == 3:
+                encname = self.guess_encoding (fontname)
+            else:
+                item = bits[-2]
+                if item[0] != '<':
+                    print ('error: unhandled entry in font map file "%s"' % basename,
+                           file=sys.stderr)
+                    print ('       "%s"' % t[:-1], file=sys.stderr)
+                    sys.exit (1)
+                encname = item[1:]
+
+            if encname is None:
+                print ('warning: cannot determine encoding for font "%s"' % fontname)
+                continue
+
+            self.encoding_files[fontname] = encname
+
+
+    cm_encodings = {
+        'b': '*OT1', # original text
+        'bsy': '*OMS', # original math symbols
+        'bx': '*OT1',
+        'bxsl': '*OT1',
+        'bxti': '*OT1',
+        'csc': '*OT1',
+        'dunh': '*OT1',
+        'ex': '*OMX', # original math extension characters
+        'ff': '*OT1',
+        'fi': '*OT1',
+        'fib': '*OT1',
+        'inch': '*OT1',
+        'itt': '*OT1',
+        'mi': '*OML', # original math letters
+        'mib': '*OML',
+        'r': '*OT1',
+        'sl': '*OT1',
+        'sltt': '*OT1',
+        'ss': '*OT1',
+        'ssbx': '*OT1',
+        'ssdc': '*OT1',
+        'ssi': '*OT1',
+        'ssq': '*OT1',
+        'ssqi': '*OT1',
+        'sy': '*OMS',
+        'tcsc': '*OT1',
+        'tex': '*cmtex', # Annoying.
+        'ti': '*OT1',
+        'tt': '*OT1',
+        'u': '*OT1',
+        'vtt': '*OT1',
+    }
+
+    def guess_encoding (self, fontname):
+        while fontname[-1].isdigit ():
+            fontname = fontname[:-1]
+
+        if fontname.startswith ('cm'):
+            return self.cm_encodings.get (fontname[2:])
+
+        if fontname == 'msam':
+            return '*MSAM'
+
+        if fontname == 'msbm':
+            return '*MSBM'
+
+        return None
+
+
+    def get_encoding_tokens (self, contents):
+        # '.enc' files are parsed like PostScript and are
+        # somewhat annoying to deal with.
+
+        seen_open_bracket = False
+        ready_to_stop = False
+
+        for line in contents.decode ('ascii').split ('\n'):
+            line = line.split ('%', 1)[0].strip ()
+            if not len (line):
+                continue
+
+            if not seen_open_bracket:
+                if '[' not in line:
+                    continue
+                line = line.split ('[', 1)[1]
+                seen_open_bracket = True
+            elif ']' in line:
+                line = line.split (']', 1)[0]
+                ready_to_stop = True
+
+            for item in line.split ():
+                yield item
+
+            if ready_to_stop:
+                break
+
+
+    def process_encoding_file (self, basename, contents):
+        charnames = []
+
+        for tok in self.get_encoding_tokens (contents):
+            if tok[0] != '/':
+                print ('error: encoding file parse failure around "%s"' % tok, file=sys.stderr)
+                sys.exit (1)
+
+            charnames.append (tok[1:])
+
+        self.encoding_data[basename] = charnames
+
+
+    def get_encoding (self, encname):
+        if encname[0] == '*':
+            rv = self.encoding_data.get (encname)
+            if rv is None:
+                data = io.open ('misc/%s.enc' % (encname[1:]), 'rb').read ()
+                self.process_encoding_file (encname, data)
+                rv = self.encoding_data.get (encname)
+            return rv
+
+        rv = self.encoding_data.get (encname)
+        if rv is None:
+            print ('error: cannot find data for encoding file "%s"' % encname, file=sys.stderr)
+            sys.exit (1)
+
+        return rv
+
+
+    def issue_charname_ids (self):
+        seen_encnames = set ()
+        charnames = set ()
+
+        for encname in self.encoding_files.itervalues ():
+            if encname in seen_encnames:
+                continue
+
+            for charname in self.get_encoding (encname):
+                charnames.add (charname)
+
+            seen_encnames.add (encname)
+
+        self.charname_list = sorted (charnames)
+        self.charname_ids = {}
+
+        for idx, charname in enumerate (self.charname_list):
+            self.charname_ids[charname] = idx
+
+
+    def insert_font_info (self, zip):
+        data = {}
+        data['font2enc'] = self.encoding_files
+        data['encinfo'] = {}
+
+        seen_encnames = set ()
+
+        for encname in self.encoding_files.itervalues ():
+            if encname in seen_encnames:
+                continue
+
+            charnames = self.get_encoding (encname)
+            data['encinfo'][encname] = info = {}
+
+            info['idents'] = [self.charname_ids[x] for x in charnames]
+
+        base = 'wtfontdata.json'
+        jdata = json.dumps (data, sort_keys=True)
+        zip.writestr (base, jdata)
+        s = hashlib.sha1 ()
+        s.update (jdata)
+        self.elemshas[base] = s.digest ()
+
 
 def commandline (argv):
-    if len (sys.argv) < 5:
-        print ('usage: make-tex-bundle.py <specfile-path> <cachedir> <destdir> '
+    if len (sys.argv) < 6:
+        print ('usage: make-tex-bundle.py <specfile-path> <mapfile-path> <cachedir> <destdir> '
                '<patchdir> [otherfiles...]', file=sys.stderr)
         sys.exit (1)
 
-    b = Bundler (sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5:])
+    b = Bundler (sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5], sys.argv[6:])
     b.go ()
 
 

@@ -113,9 +113,9 @@ dump-format.js $(builddir)/node-webtex.min.js \
 	  plain.tex >$@.new && mv -f $@.new $@
 
 $(builddir)/latest.zip: \
-make-tex-bundle.py packages.txt $(bundleextras) \
+make-tex-bundle.py packages.txt mapfiles.txt $(bundleextras) \
 | $(builddir)
-	$(python) $< packages.txt texcache $(builddir) texpatches $(bundleextras)
+	$(python) $< packages.txt mapfiles.txt texcache $(builddir) texpatches $(bundleextras)
 
 ###primaries += $(builddir)/latest.zip
 

@@ -1,0 +1,8 @@
+# These are the .map files that we use to choose encoding tables to use for
+# the various fonts. The encodings are used by the renderer the choose which
+# glyphs to render when we're rendering a canvas.
+cm.map
+cmextra.map
+## latxfont.map
+lm.map
+symbols.map
