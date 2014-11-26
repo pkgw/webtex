@@ -6,12 +6,15 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 import contextlib, hashlib, io, json, lzma, os.path, sys, tarfile, tempfile, urllib, zipfile
 
+from glyphlist import glyph_to_unicode
+
 cache_ident = 'tl2013'
 url_base = 'ftp://tug.org/historic/systems/texlive/2013/tlnet-final/archive/'
 pkg_extension = '.tar.xz'
 skip_roots = frozenset (('makeindex', 'tlpkg'))
 patch_suffixes = ['.post']
 
+debug_unicode_mapping = False
 
 class Bundler (object):
     def __init__ (self, specfile, mapfile, cachedir, destdir, patchdir, otherfiles):
@@ -344,9 +347,16 @@ class Bundler (object):
 
         self.charname_list = sorted (charnames)
         self.charname_ids = {}
+        self.charname_unicodes = dict (glyph_to_unicode)
 
         for idx, charname in enumerate (self.charname_list):
             self.charname_ids[charname] = idx
+
+            u = self.charname_unicodes.get (charname)
+            if u is None:
+                if debug_unicode_mapping:
+                    print ('warning: no Unicode equivalent for glyph "%s"' % charname, file=sys.stderr)
+                self.charname_unicodes[charname] = u'\u0000'
 
 
     def insert_font_info (self, zip):
@@ -364,6 +374,7 @@ class Bundler (object):
             data['encinfo'][encname] = info = {}
 
             info['idents'] = [self.charname_ids[x] for x in charnames]
+            info['unicode'] = ''.join (self.charname_unicodes[x] for x in charnames)
 
         base = 'wtfontdata.json'
         jdata = json.dumps (data, sort_keys=True)
