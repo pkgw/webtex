@@ -19,6 +19,10 @@ var eng = webtex.setup_process_format ({
     bundlepath: 'misc/minimal-bundle-tl2013.zip',
     debug_trace: false,
     debug_input_lines: false,
+    fontdata: {
+	font2enc: {},
+	encinfo: {},
+    },
 });
 
 eng.iostack.push (new webtex.FSIOLayer ('__wtpatches__/', patchdir));

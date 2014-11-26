@@ -296,6 +296,14 @@ var Font = (function Font_closure () {
 	} else {
 	    var contents = engine.iostack.get_contents_ab (ident + '.tfm');
 	    this.metrics = new TfmMetrics (contents, scale);
+	    this.enc_name = engine.fontdata.font2enc[this.ident];
+	    if (this.enc_name == null) {
+		this.enc_idents = null;
+		this.enc_unicode = null;
+	    } else {
+		this.enc_idents = engine.fontdata.encinfo[this.enc_name].idents;
+		this.enc_unicode = engine.fontdata.encinfo[this.enc_name].unicode;
+	    }
 	}
 
 	this.dimens_S = [];

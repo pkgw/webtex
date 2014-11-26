@@ -268,6 +268,7 @@ var Engine = (function Engine_closure () {
 	 * iostack - an IOStack with TeX files (required)
 	 * debug_input_lines - print lines of input as they're read
 	 * debug_trace - print commands as they're executed
+	 * fontdata - JSON compiled information for encoding fonts
 	 * initial_linebuf - LineBuffer of the initial input (required)
 	 * jobname - the TeX job name
 	 * shiptarget - target that will receive \shipout{} data.
@@ -276,6 +277,7 @@ var Engine = (function Engine_closure () {
 	this.jobname = args.jobname || 'texput';
 	this.iostack = args.iostack;
 	this.shiptarget = args.shiptarget;
+	this.fontdata = args.fontdata;
 
 	this.inputstack = new InputStack (args.initial_linebuf, this, args);
 	this._force_end = false;
@@ -675,7 +677,7 @@ var Engine = (function Engine_closure () {
 
     proto.ship_it = function Engine_ship_it (box) {
 	this.trace ('shipping out');
-	this.shiptarget.process (box);
+	this.shiptarget.process (this, box);
     };
 
     // Input nesting and other I/O

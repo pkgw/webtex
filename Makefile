@@ -107,6 +107,7 @@ masterjs = \
   src/preamble.js \
   src/format.js \
   src/master-object.js \
+  $(builddir)/compiled-fonts.js \
   src/dom-renderer.js
 
 

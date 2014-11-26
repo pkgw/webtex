@@ -10,7 +10,7 @@ worker_ship_targets['html-render'] = (function HTMLRenderTarget_closure () {
 
     var proto = HTMLRenderTarget.prototype;
 
-    proto.process = function HTMLRenderTarget_process (box) {
+    proto.process = function HTMLRenderTarget_process (engine, box) {
 	var rendered = [];
 	var queued_text = '';
 
@@ -62,7 +62,10 @@ worker_ship_targets['html-render'] = (function HTMLRenderTarget_closure () {
 		// XXX: check start and end tags agree.
 		rendered.push ({kind: 'endtag'});
 	    } else if (item instanceof Character) {
-		queued_text += String.fromCharCode (item.ord);
+		if (item.font.enc_unicode == null)
+		    throw new TexRuntimeError ('cannot ship out character in unsupported font %s',
+					       item.font.ident);
+		queued_text += item.font.enc_unicode[item.ord];
 	    } else if (item instanceof BoxGlue) {
 		queued_text += ' ';
 	    }

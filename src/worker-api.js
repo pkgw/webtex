@@ -49,6 +49,8 @@ worker_api_endpoints.parse = function webtex_worker_parse (data) {
     if (target_name !== null)
 	data.shiptarget = new worker_ship_targets[target_name] (post_message);
 
+    data.fontdata = bundle.get_contents_json ('wtfontdata.json');
+
     var eng = new Engine (data);
     eng.restore_serialized_state (dumpjson);
 
