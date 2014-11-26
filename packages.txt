@@ -1,6 +1,7 @@
 amsfonts
 amsmath
 cm
+cm-super
 ec
 emulateapj
 epsf
