@@ -66,7 +66,6 @@ var DOMRenderer = (function DOMRenderer_callback () {
 			} else if (!f.hasOwnProperty (q.ggid)) {
 			    global_warnf ('missing compiled GGID %d in font %o', q.ggid, q.pfb);
 			} else {
-			    console.log ('render %s in %s', glyph_encoding_info.names[q.ggid], q.pfb);
 			    ctx.beginPath ();
 			    ctx.save ();
 			    ctx.translate (x, y);
