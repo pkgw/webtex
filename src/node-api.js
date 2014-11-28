@@ -46,6 +46,7 @@ function setup_process_basic (data) {
 
     return eng;
 }
+webtex_export ('setup_process_basic', setup_process_basic);
 
 
 function setup_process_format (data) {
@@ -66,7 +67,46 @@ function setup_process_format (data) {
 
     return new Engine (data);
 }
-
-
-webtex_export ('setup_process_basic', setup_process_basic);
 webtex_export ('setup_process_format', setup_process_format);
+
+
+function process_loop (data) {
+    var raf = new RandomAccessFile (data.bundlepath);
+    var z = new ZipReader (raf.read_range_ab.bind (raf), raf.size ());
+    var bundle = new Bundle (z);
+    delete data.bundlepath;
+
+    data.iostack = new IOStack ();
+    data.iostack.push (bundle);
+
+    var path = require ('path');
+    var inputbase = path.basename (data.inputpath);
+    var inputdir = path.dirname (data.inputpath);
+    data.jobname = inputbase;
+    data.iostack.push (new FSIOLayer ('', inputdir + '/'));
+
+    var dumpjson = null;
+    var dumppath = data.dumppath || null;
+
+    if (dumppath != null) {
+	dumpjson = get_fs_json (data.dumppath);
+	delete data.dumppath;
+    }
+
+    data.fontdata = bundle.get_contents_json ('wtfontdata.json');
+
+    for (var i = 0; i < 3; i++) {
+	data.initial_linebuf = make_fs_linebuffer (data.inputpath);
+
+	var eng = new Engine (data);
+
+	if (dumpjson != null)
+	    eng.restore_serialized_state (dumpjson);
+
+	eng.trace ('****** processing iteration #%d ******', i + 1);
+
+	while (eng.step () === true) {
+	}
+    }
+}
+webtex_export ('process_loop', process_loop);
