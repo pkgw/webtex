@@ -23,7 +23,7 @@ worker_api_endpoints.echo = function webtex_worker_echo (data) {
 };
 
 
-worker_api_endpoints.parse = function webtex_worker_parse (data) {
+worker_api_endpoints.parse_once = function webtex_worker_parse_once (data) {
     var rau = new RandomAccessURL (data.bundleurl);
     var z = new ZipReader (rau.read_range_ab.bind (rau), rau.size ());
     var bundle = new Bundle (z);
@@ -55,6 +55,47 @@ worker_api_endpoints.parse = function webtex_worker_parse (data) {
     eng.restore_serialized_state (dumpjson);
 
     while (eng.step () === true) {
+    }
+
+    post_message ('parse_finish', {});
+};
+
+
+worker_api_endpoints.parse_loop = function webtex_worker_parse_loop (data) {
+    var rau = new RandomAccessURL (data.bundleurl);
+    var z = new ZipReader (rau.read_range_ab.bind (rau), rau.size ());
+    var bundle = new Bundle (z);
+    delete data.bundleurl;
+
+    data.iostack = new IOStack ();
+    data.iostack.push (bundle);
+
+    if (data.allow_input_hierarchy) {
+	var i = data.inputurl.lastIndexOf ('/');
+	var pfx = data.inputurl.slice (0, i + 1);
+	data.iostack.push (new URLHierarchyIOLayer ('', pfx));
+    }
+
+    var target_name = data.ship_target_name || null;
+    var inp = fetch_url_str (data.inputurl);
+    var dumpjson = bundle.get_contents_json (data.dump_bpath);
+    delete data.inputurl;
+    delete data.dump_bpath;
+    data.fontdata = bundle.get_contents_json ('wtfontdata.json');
+
+    for (var i = 0; i < 3; i++) {
+	data.initial_linebuf = LineBuffer.new_static (inp.split ('\n'));
+
+	if (target_name !== null && i > 1)
+	    data.shiptarget = new worker_ship_targets[target_name] (post_message);
+	else
+	    data.shiptarget = {process: function () {}};
+
+	var eng = new Engine (data);
+	eng.restore_serialized_state (dumpjson);
+
+	while (eng.step () === true) {
+	}
     }
 
     post_message ('parse_finish', {});

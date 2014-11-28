@@ -94,7 +94,7 @@ var DOMRenderer = (function DOMRenderer_callback () {
 	data.jobname = data.jobname || 'texput';
 	data.ship_target_name = data.ship_target_name || 'html-render';
 
-	master.send_message ('parse', data);
+	master.send_message ('parse_loop', data);
     };
 
     return DOMRenderer;
