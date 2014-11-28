@@ -1,14 +1,16 @@
 var console = require ('console');
+var fs = require ('fs');
 var util = require ('util');
 
-if (process.argv.length < 5) {
-    console.log ('usage: node ' + process.argv[1] + ' <webtex.js> <patchdir> <fmtname>');
+if (process.argv.length < 6) {
+    console.log ('usage: node ' + process.argv[1] + ' <webtex.js> <patchdir> <fmtname> <outpath>');
     process.exit (1);
 }
 
 var webtex = require (process.argv[2]);
 var patchdir = process.argv[3];
 var fmtname = process.argv[4];
+var outpath = process.argv[5];
 
 // The way we set up initial_linebuf allows us to trigger patching of the
 // format file.
@@ -30,5 +32,12 @@ eng.iostack.push (new webtex.FSIOLayer ('__wtpatches__/', patchdir));
 while (eng.step () === true) {
 }
 
+// I used to just print the format JSON to stdout, but that was fragile
+// because the JSON output would break whenever I inserted any debugging
+// logging that got triggered.
+
 var state = eng.serialize ();
-console.log (JSON.stringify (state, null, 4));
+fs.writeFileSync (outpath, JSON.stringify (state, null, 4), {
+    encoding: 'utf8',
+    flag: 'a',
+});

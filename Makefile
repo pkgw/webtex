@@ -140,13 +140,13 @@ $(builddir)/latex.dump.json: \
 dump-format.js $(builddir)/node-webtex.min.js \
 | $(builddir)
 	node $< ./$(builddir)/node-webtex.min.js texpatches/$(texdist)/ \
-	  latex.ltx >$@.new && mv -f $@.new $@
+	  latex.ltx $@
 
 $(builddir)/plain.dump.json: \
 dump-format.js $(builddir)/node-webtex.min.js \
 | $(builddir)
 	node $< ./$(builddir)/node-webtex.min.js texpatches/$(texdist)/ \
-	  plain.tex >$@.new && mv -f $@.new $@
+	  plain.tex $@
 
 $(builddir)/latest.zip \
 $(builddir)/glyph-encoding.json: \
