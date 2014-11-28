@@ -29,8 +29,8 @@ var DOMRenderer = (function DOMRenderer_callback () {
 		idom--;
 		dom_stack[idom].appendChild (e);
 	    } else if (item.kind === 'canvas') {
-		var scale = 0.000048; // XXX should not be hardcoded!!!!!!!!
-		var fontscale = 0.03; // XXX ditto!
+		var scale = 0.000034; // XXX should not be hardcoded!!!!!!!!
+		var fontscale = 625.; // XXX ditto!
 
 		var e = doc.createElement ('canvas');
 		e.class = 'cbox';
@@ -60,7 +60,7 @@ var DOMRenderer = (function DOMRenderer_callback () {
 		    if (q.hasOwnProperty ('ggid')) {
 			// Character.
 			var f = compiled_fonts[q.pfb];
-			var s = fontscale * q.es / 655360.
+			var s = scale * fontscale * q.es / 655360.
 			if (f == null) {
 			    global_warnf ('missing compiled font %o', q.pfb);
 			} else if (!f.hasOwnProperty (q.ggid)) {
