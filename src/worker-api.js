@@ -73,5 +73,12 @@ onmessage = function webtex_worker_onmessage (event) {
     if (!worker_api_endpoints.hasOwnProperty (data._kind))
 	throw new TexInternalError ('worker: unrecognized API endpoint %o', data._kind);
 
-    worker_api_endpoints[data._kind] (data);
+    try {
+	worker_api_endpoints[data._kind] (data);
+    } catch (e) {
+	// onerror() in master doesn't provide the stack trace.
+	global_warnf ('uncaught worker exception: %o', e);
+	global_warnf (e.stack);
+	throw e;
+    }
 };
