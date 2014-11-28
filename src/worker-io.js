@@ -114,6 +114,11 @@ var RandomAccessURL = (function RandomAccessURL_closure () {
 
 
 var URLHierarchyIOLayer = (function URLHierarchyIOLayer_closure () {
+    // This should not be used in production conditions, since ever attempt to
+    // open a file will require an HTTP request. And a standard TeX run
+    // involves *many* attempts to open files. But this class can be useful in
+    // development.
+
     function URLHierarchyIOLayer (virtprefix, urlprefix) {
 	this.virtprefix = virtprefix;
 	this.urlprefix = urlprefix;
@@ -145,8 +150,13 @@ var URLHierarchyIOLayer = (function URLHierarchyIOLayer_closure () {
 	    return null;
 
 	var url = this.urlprefix + texfn.slice (this.virtprefix.length);
-	global_warnf ('not implemented: URLHierachyIOLayer.get_contents_ab() for %s', texfn);
-	return null;
+
+	try {
+	    var rau = new RandomAccessURL (url);
+	    return rau.read_range_ab (0, rau.size ());
+	} catch (e) {
+	    return null; // assume nonexistent, and not some other error ...
+	}
     };
 
     return URLHierarchyIOLayer;
