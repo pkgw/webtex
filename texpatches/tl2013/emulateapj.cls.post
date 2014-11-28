@@ -1,0 +1,20 @@
+% -*- latex -*-
+%
+%
+% Clean up the title section. We don't uppercase it and we avoid informational
+% junk.
+%
+\long\def\frontmatter@title@above{}
+\renewcommand\title[2][]{%
+  \def\@title{#2}%
+  \def\@shorttitle{#1}%
+  \let\@AF@join\@title@join
+}
+\long\def\frontmatter@abstractheading{%
+  \par
+}
+%
+%
+% Don't uppercase section names either.
+%
+\def\sec@upcase#1{#1}
