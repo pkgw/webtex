@@ -137,7 +137,7 @@ bundleextras = \
   $(builddir)/latex.dump.json
 
 $(builddir)/latex.dump.json: \
-dump-format.js $(builddir)/node-webtex.min.js \
+dump-format.js $(builddir)/node-webtex.min.js texpatches/$(texdist)/latex.ltx.post \
 | $(builddir)
 	node $< ./$(builddir)/node-webtex.min.js texpatches/$(texdist)/ \
 	  latex.ltx $@
