@@ -80,9 +80,11 @@ function process_loop (data) {
     data.iostack.push (bundle);
 
     var path = require ('path');
-    var inputbase = path.basename (data.inputpath);
+    data.jobname = path.basename (data.inputpath);
+    if (data.jobname.indexOf ('.tex', data.jobname.length - 4) !== -1)
+	data.jobname = data.jobname.slice (0, -4);
+
     var inputdir = path.dirname (data.inputpath);
-    data.jobname = inputbase;
     data.iostack.push (new FSIOLayer ('', inputdir + '/'));
 
     var dumpjson = null;
