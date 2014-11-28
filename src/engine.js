@@ -1024,8 +1024,19 @@ var Engine = (function Engine_closure () {
 	this.push_back (tok);
     };
 
+    proto.scan_next_unexpandable = function Engine_scan_next_unexpandable () {
+	// TTP 404, "get the next non-blank non-relax non-call token"
+	var tok = null;
+
+	while (true) {
+	    tok = this.next_x_tok_throw ();
+	    if (!tok.is_space (this) && !tok.is_cmd (this, 'relax'))
+		return tok;
+	}
+    }
+
     proto.chomp_spaces = function Engine_chomp_spaces () {
-	// T:TP sec. 406.
+	// TTP 406.
 	while (1) {
 	    var tok = this.next_x_tok ();
 	    if (!tok.is_space (this))
@@ -1452,20 +1463,18 @@ var Engine = (function Engine_closure () {
     };
 
     proto.scan_toks_value = function Engine_scan_toks_value () {
-	this.scan_one_optional_space ();
+	// TTP 1226, "assign_toks", minus the initial scan_optional_equals,
+	// and TTP 473, "scan_toks".
 
-	var tok = this.next_tok ();
-	if (tok === EOF)
-	    throw tok;
-
+	var tok = this.scan_next_unexpandable ();
 	var cmd = tok.to_cmd (this);
+
 	if (cmd.get_valtype () == T_TOKLIST)
+	    // Token pars and registers get handled here
 	    return cmd.as_valref (this).get (this);
 
-	// TODO: \tokpar=<toklist register or toklist param>
-	if (!tok.is_cat (C_BGROUP))
-	    throw new TexSyntaxError ('expected { in toklist assignment; got %o', tok);
-
+	this.push_back (tok);
+	this.scan_left_brace (); // will raise error if see something else.
 	return this.scan_tok_group (false);
     };
 
