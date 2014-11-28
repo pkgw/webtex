@@ -27,7 +27,7 @@ var inputurl = '../test/tex/brockton/paper.tex'; // note: relative to *worker's*
 
 var dr = new Webtex.DOMRenderer (worker_url, targdiv);
 dr.launch_parse ({
-    jobname: 'plain',
+    jobname: 'paper',
     inputurl: inputurl,
     allow_input_hierarchy: true,
     bundleurl: 'latest.zip', // note: relative to *worker's* URL
