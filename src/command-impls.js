@@ -1103,6 +1103,13 @@ register_command ('special', function cmd_special (engine) {
 	    object = new SuppressionControl (false);
 	} else if (pieces[1] == 'pop-suppress') {
 	    object = new SuppressionControl (true);
+	} else if (pieces[1] == 'start-tag') {
+	    var tag = pieces[2];
+	    // TODO: attributes!
+	    object = new StartTag (tag, {});
+	} else if (pieces[1] == 'end-tag') {
+	    var tag = pieces[2];
+	    object = new EndTag (tag);
 	} else {
 	    engine.warn ('unhandled webtex special "%s"', text);
 	}

@@ -50,6 +50,12 @@ body {
 }
 
 .webtex .cbox {
-    display: inline-block;
-    vertical-align: bottom;
+  display: inline-block;
+  vertical-align: bottom;
+}
+
+h1 {
+  /* This isn't a great long-term solution -- math won't look good
+   * since it won't get bolded */
+  font-weight: 700
 }
