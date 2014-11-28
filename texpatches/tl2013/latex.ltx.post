@@ -20,6 +20,70 @@
 %
 \AtBeginDocument{\input{lmodern.sty}}
 %
+% Modify the output routines to suppress page headers and footers.
+% Modifications indicated with "%% WT".
+%
+\def\@outputpage{%
+\begingroup           % the \endgroup is put in by \aftergroup
+  \let \protect \noexpand
+  \@resetactivechars
+  \global\let\@@if@newlist\if@newlist
+  \global\@newlistfalse
+  \@parboxrestore
+  \shipout \vbox{%
+    \set@typeset@protect
+    \aftergroup \endgroup
+    \aftergroup \set@typeset@protect
+                                % correct? or just restore by ending
+                                % the group?
+  \if@specialpage
+    \global\@specialpagefalse\@nameuse{ps@\@specialstyle}%
+  \fi
+  \if@twoside
+    \ifodd\count\z@ \let\@thehead\@oddhead \let\@thefoot\@oddfoot
+         \let\@themargin\oddsidemargin
+    \else \let\@thehead\@evenhead
+       \let\@thefoot\@evenfoot \let\@themargin\evensidemargin
+    \fi
+  \fi
+  \reset@font
+  \normalsize
+  \normalsfcodes
+  \let\label\@gobble
+  \let\index\@gobble
+  \let\glossary\@gobble
+  \baselineskip\z@skip \lineskip\z@skip \lineskiplimit\z@
+    \@begindvi
+    \vskip \topmargin
+    \moveright\@themargin \vbox {%
+      \setbox\@tempboxa \vbox to\headheight{%
+        \special{webtex push-suppress} %% WT
+        \vfil
+        \color@hbox
+          \normalcolor
+          \hb@xt@\textwidth{\@thehead}%
+        \color@endbox
+        \special{webtex pop-suppress} %% WT
+        }%                        %% 22 Feb 87
+      \dp\@tempboxa \z@
+      \box\@tempboxa
+      \vskip \headsep
+      \box\@outputbox
+      \baselineskip \footskip
+      \special{webtex push-suppress} %% WT
+      \color@hbox
+        \normalcolor
+        \hb@xt@\textwidth{\@thefoot}%
+      \color@endbox
+      \special{webtex pop-suppress} %% WT
+      }%
+    }%
+  \global\let\if@newlist\@@if@newlist
+  \global \@colht \textheight
+  \stepcounter{page}%
+  \let\firstmark\botmark
+}
+%
 % Now put the LaTeX temporaries back how they should be.
 %
 \let\reserved@a\@filelist
