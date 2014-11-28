@@ -80,7 +80,8 @@ worker_ship_targets['html-render'] = (function HTMLRenderTarget_closure () {
 					       item.font.ident);
 		this.queued_text += item.font.enc_unicode[item.ord];
 	    } else if (item instanceof BoxGlue) {
-		this.queued_text += ' ';
+		if (item.amount.is_nonzero ())
+		    this.queued_text += ' ';
 	    }
 	}
 
