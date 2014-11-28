@@ -33,6 +33,22 @@ register_command ('noindent', function cmd_noindent (engine) {
 });
 
 
+register_command ('parshape', function cmd_parshape (engine) {
+    // TTP 1248, "set_shape"
+    engine.scan_optional_equals ();
+    var n = engine.scan_int__I ();
+    engine.trace ('parshape: scanning dimens for %d lines', n);
+
+    for (var i = 0; i < n; i++) { // note: does right thing if n <= 0
+	var indent_S = engine.scan_dimen__O_S (false);
+	var width_S = engine.scan_dimen__O_S (false);
+	engine.trace ('parshape: line %d: indent=%S width=%S', i + 1, indent_S, width_S);
+    }
+
+    engine.trace ('parshape: ignoring results');
+});
+
+
 register_command ('_space_', function cmd__space_ (engine) {
     // A control-space command appends glue to the current list, using the
     // same amount that a <space token> inserts when the space factor is 1000.
