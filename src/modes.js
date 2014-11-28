@@ -103,7 +103,7 @@ var M_VERT = 1,  // standard vertical mode
 	// command and any arguments it may have.
 
 	if (this.absmode () == M_VERT) {
-	    this.push_back (Token.new_cmd (cmd));
+	    this.push_back (Token.new_cmd (cmd)); // could this mess up align_state maintenance?
 	    this.begin_graf (true);
 	    return true; // command will be rerun
 	}
@@ -120,7 +120,7 @@ var M_VERT = 1,  // standard vertical mode
 	    return false;
 
 	if (m == M_HORZ) {
-	    this.push_back (Token.new_cmd (cmd));
+	    this.push_back (Token.new_cmd (cmd)); // could this mess up align_state maintenance?
 	    this.push (Token.new_cmd (this.commands['par']));
 	    return true;
 	}
