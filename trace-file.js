@@ -15,7 +15,7 @@ var eng = webtex.setup_process_basic ({
     bundlepath: 'build/latest.zip',
     debug_trace: false,
     debug_input_lines: true,
-    shiptarget: new webtex.ConsoleDumpTarget (),
+    shiptarget: new webtex.ConsoleFlatDumpTarget (),
 });
 
 while (eng.step () === true) {

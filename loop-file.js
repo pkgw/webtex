@@ -16,5 +16,5 @@ webtex.process_loop ({
     debug_trace: false,
     debug_input_lines: false,
     //shiptarget: {process: function () {}},
-    shiptarget: new webtex.ConsoleDumpTarget (),
+    shiptarget: new webtex.ConsoleHierDumpTarget (),
 });

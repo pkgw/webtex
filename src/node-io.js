@@ -121,12 +121,12 @@ var FSIOLayer = (function FSIOLayer_closure () {
 webtex_export ('FSIOLayer', FSIOLayer);
 
 
-var ConsoleDumpTarget = (function ConsoleDumpTarget_closure () {
-    function ConsoleDumpTarget () {}
+var ConsoleFlatDumpTarget = (function ConsoleFlatDumpTarget_closure () {
+    function ConsoleFlatDumpTarget () {}
 
-    var proto = ConsoleDumpTarget.prototype;
+    var proto = ConsoleFlatDumpTarget.prototype;
 
-    proto.process = function ConsoleDumpTarget_process (engine, box) {
+    proto.process = function ConsoleFlatDumpTarget_process (engine, box) {
 	global_logf ('==== shipped out: ====');
 	box.traverse__SSO (nlib.Zero_S, nlib.Zero_S, function (x, y, item) {
 	    global_logf ('x=%o y=%o %o', x, y, item);
@@ -134,7 +134,24 @@ var ConsoleDumpTarget = (function ConsoleDumpTarget_closure () {
 	global_logf ('==== (end of shipout) ====');
     };
 
-    return ConsoleDumpTarget;
+    return ConsoleFlatDumpTarget;
 }) ();
 
-webtex_export ('ConsoleDumpTarget', ConsoleDumpTarget);
+webtex_export ('ConsoleFlatDumpTarget', ConsoleFlatDumpTarget);
+
+
+var ConsoleHierDumpTarget = (function ConsoleHierDumpTarget_closure () {
+    function ConsoleHierDumpTarget () {}
+
+    var proto = ConsoleHierDumpTarget.prototype;
+
+    proto.process = function ConsoleHierDumpTarget_process (engine, box) {
+	global_logf ('==== shipped out: ====');
+	global_logf (box.uitext ());
+	global_logf ('==== (end of shipout) ====');
+    };
+
+    return ConsoleHierDumpTarget;
+}) ();
+
+webtex_export ('ConsoleHierDumpTarget', ConsoleHierDumpTarget);
