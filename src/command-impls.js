@@ -1088,9 +1088,28 @@ register_command ('mark', function cmd_mark (engine) {
 register_command ('special', function cmd_special (engine) {
     engine.scan_left_brace ();
     var tlist = engine.scan_tok_group (true);
-    var special = new Special (tlist.toks);
-    engine.trace ('special %T', tlist);
-    engine.accum (special);
+    engine.trace ('special: %T', tlist);
+    var object = null;
+
+    // Webtex customization: we convert our processing directives
+    // into custom handling objects on the fly
+    var text = tlist.as_serializable ();
+    if (text.indexOf ('webtex ') != 0) {
+	object = new Special (tlist.toks);
+    } else {
+	var pieces = text.split (' ');
+
+	if (pieces[1] == 'push-suppress') {
+	    object = new SuppressionControl (false);
+	} else if (pieces[1] == 'pop-suppress') {
+	    object = new SuppressionControl (true);
+	} else {
+	    engine.warn ('unhandled webtex special "%s"', text);
+	}
+    }
+
+    if (object != null)
+	engine.accum (object);
 });
 
 

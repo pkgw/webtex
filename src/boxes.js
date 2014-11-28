@@ -871,3 +871,22 @@ var EndTag = (function EndTag_closure () {
 
     return EndTag;
 }) ();
+
+
+var SuppressionControl = (function SuppressionControl_closure () {
+    function SuppressionControl (is_pop) {
+	this.ltype = LT_STARTTAG; // XXX lazy should straighten this out
+	this.is_pop = !!is_pop;
+    }
+
+    inherit (SuppressionControl, Listable);
+    var proto = SuppressionControl.prototype;
+
+    proto._uisummary = function SuppressionControl__uisummary () {
+	if (this.is_pop)
+	    return 'SuppressionControl pop';
+	return 'SuppressionControl push';
+    };
+
+    return SuppressionControl;
+}) ();

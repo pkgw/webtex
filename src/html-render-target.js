@@ -6,13 +6,36 @@
 worker_ship_targets['html-render'] = (function HTMLRenderTarget_closure () {
     function HTMLRenderTarget (post_message) {
 	this.post_message = post_message;
+
+	// This is kind of a hack since all of this state is basically
+	// internal to process(), but whatever.
     }
 
     var proto = HTMLRenderTarget.prototype;
 
+    proto.clear_state = function HTMLRenderTarget_clear_state () {
+	this.rendered = [];
+	this.queued_text = '';
+	this.suppression_level = 0;
+    };
+
+    proto.finish_text = function HTMLRenderTarget_finish_text () {
+	if (this.queued_text.length) {
+	    if (this.suppression_level == 0)
+		this.rendered.push (this.queued_text);
+	    this.queued_text = '';
+	}
+    };
+
+    proto.maybe_push = function HTMLRenderTarget_maybe_push (data) {
+	this.finish_text ();
+
+	if (this.suppression_level == 0)
+	    this.rendered.push (data);
+    };
+
     proto.process = function HTMLRenderTarget_process (engine, box) {
-	var rendered = [];
-	var queued_text = '';
+	this.clear_state ();
 
 	var box_stack = [box];
 	var j_stack = [0];
@@ -35,46 +58,34 @@ worker_ship_targets['html-render'] = (function HTMLRenderTarget_closure () {
 		    j_stack.push (0);
 		    ibox++;
 		} else {
-		    if (queued_text.length) {
-			rendered.push (queued_text);
-			queued_text = '';
-		    }
-
-		    item = new CanvasBox (item);
-		    var data = item.to_render_data ();
+		    var data = new CanvasBox (item).to_render_data ();
 		    data.kind = 'canvas';
-		    rendered.push (data);
+		    this.maybe_push (data);
 		}
 	    } else if (item instanceof StartTag) {
-		if (queued_text.length) {
-		    rendered.push (queued_text);
-		    queued_text = '';
-		}
-
-		rendered.push ({kind: 'starttag',
-				name: item.name});
+		this.maybe_push ({kind: 'starttag', name: item.name});
 	    } else if (item instanceof EndTag) {
-		if (queued_text.length) {
-		    rendered.push (queued_text);
-		    queued_text = '';
-		}
-
 		// XXX: check start and end tags agree.
-		rendered.push ({kind: 'endtag'});
+		this.maybe_push ({kind: 'endtag'});
+	    } else if (item instanceof SuppressionControl) {
+		this.finish_text ();
+
+		if (item.is_pop)
+		    this.suppression_level--;
+		else
+		    this.suppression_level++;
 	    } else if (item instanceof Character) {
 		if (item.font.enc_unicode == null)
 		    throw new TexRuntimeError ('cannot ship out character in unsupported font %s',
 					       item.font.ident);
-		queued_text += item.font.enc_unicode[item.ord];
+		this.queued_text += item.font.enc_unicode[item.ord];
 	    } else if (item instanceof BoxGlue) {
-		queued_text += ' ';
+		this.queued_text += ' ';
 	    }
 	}
 
-	if (queued_text.length)
-	    rendered.push (queued_text);
-
-	this.post_message ('render', {'items': rendered});
+	this.finish_text ();
+	this.post_message ('render', {'items': this.rendered});
     };
 
     return HTMLRenderTarget;
