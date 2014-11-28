@@ -37,18 +37,14 @@
 
 % Override with our stuff.
 
-\def\Ginclude@gif#1{\special{webteximage #1}}
-\def\Ginclude@jpeg#1{\special{webteximage #1}}
-\def\Ginclude@jpg#1{\special{webteximage #1}}
-\def\Ginclude@pdf#1{\special{webteximage #1}}
-\def\Ginclude@png#1{\special{webteximage #1}}
+\def\Ginclude@webtex#1{\special{webteximage #1}}
 
-\def\Gread@pdf#1{%
+\def\Gread@webtex#1{%
   % Make up arbitrary numbers since they don't matter for us.
-  \def\Gin@llx{0in}
-  \def\Gin@lly{0in}
-  \def\Gin@urx{2in}
-  \def\Gin@ury{2in}
+  \def\Gin@llx{0}%
+  \def\Gin@lly{0}%
+  \def\Gin@urx{144}% units are bp; 144bp = 2in
+  \def\Gin@ury{144}%
 }
 
 \def\Grot@start{\special{grot-start \Grot@angle}}
@@ -56,6 +52,18 @@
 \def\Gscale@start{\special{gscale-start \Gscale@x\space \Gscale@y\space}}
 \def\Gscale@end{\special{gscale-end}}
 
-\def\Gin@extensions{.gif,.jpeg,.jpg,.pdf,.png}
+\let\Gin@extensions=\@gobble % magic hack to avoid leading comma in list
 
-\@namedef{Gin@rule@.pdf}#1{{pdf}{.pdf}{#1}}
+{%
+\def\@handleone#1{%
+  \global\expandafter\let\csname Ginclude@#1\endcsname\Ginclude@webtex
+  \global\expandafter\let\csname Gread@#1\endcsname\Gread@webtex
+  \global\edef\Gin@extensions{\Gin@extensions,.#1}
+  \global\@namedef{Gin@rule@.#1}##1{{#1}{.#1}{##1}}
+}
+\@handleone{gif}
+\@handleone{jpeg}
+\@handleone{jpg}
+\@handleone{pdf}
+\@handleone{png}
+}
