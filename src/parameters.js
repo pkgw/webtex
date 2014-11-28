@@ -194,14 +194,13 @@ var NamedParamCommand = (function parameter_wrapper () {
 		throw new TexInternalError ('illegal valtype for parameter: %s',
 					    vt_names[valtype]);
 
-	    Command.call (this);
+	    AssignmentCommand.call (this);
 	    this.name = name;
 	    this.valtype = valtype;
 	}
 
-	inherit (NamedParamCommand, Command);
+	inherit (NamedParamCommand, AssignmentCommand);
 	var proto = NamedParamCommand.prototype;
-	proto.assign_flag_mode = AFM_CONSUME;
 
 	proto.same_cmd = function NamedParamCommand_same_cmd (other) {
 	    if (other == null)
@@ -217,13 +216,6 @@ var NamedParamCommand = (function parameter_wrapper () {
 
 	proto.as_valref = function NamedParamCommand_as_valref (engine) {
 	    return new ParamValref (this.valtype, this.name);
-	};
-
-	proto.invoke = function NamedParamCommand_invoke (engine) {
-	    engine.scan_optional_equals ();
-	    var newval = engine.scan_valtype (this.valtype);
-	    engine.trace ('%s = %o', this.name, newval);
-	    this.as_valref (engine).set (engine, newval);
 	};
 
 	return NamedParamCommand;

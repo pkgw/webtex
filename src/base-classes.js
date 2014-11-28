@@ -326,6 +326,7 @@ var AssignmentCommand = (function AssignmentCommand_closure () {
 
     inherit (AssignmentCommand, Command);
     var proto = AssignmentCommand.prototype;
+    proto.assign_flag_mode = AFM_CONSUME;
 
     proto.invoke = function AssignmentCommand_invoke (engine) {
 	var as_valref = this.as_valref (engine);
