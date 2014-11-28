@@ -31,77 +31,6 @@
   src: url(./lmroman10-bolditalic.otf) format ('opentype');
 }
 
-@font-face {
-  font-family: 'LMMathItalic10';
-  font-style: normal;
-  font-weight: 400;
-  src: url(./lmmi10.pfb) format ('type-1');
-}
-
-@font-face {
-  font-family: 'LMMathSymbols10';
-  font-style: normal;
-  font-weight: 400;
-  src: url(./lmsy10.pfb) format ('type-1');
-}
-
-@font-face {
-  font-family: 'LMRoman10';
-  font-style: normal;
-  font-weight: 400;
-  src: url(./lmr10.pfb) format ('type-1');
-}
-
-@font-face {
-  font-family: 'MSAM10';
-  font-style: normal;
-  font-weight: 400;
-  src: url(./msam10.pfb) format ('type-1');
-}
-
-@font-face {
-  font-family: 'SFRM1000';
-  font-style: normal;
-  font-weight: 400;
-  src: url(./sfrm1000.pfb) format ('type-1');
-}
-
-
-@font-face {
-  font-family: 'LMMathItalic7';
-  font-style: normal;
-  font-weight: 400;
-  src: url(./lmmi7.pfb) format ('type-1');
-}
-
-@font-face {
-  font-family: 'LMMathSymbols7';
-  font-style: normal;
-  font-weight: 400;
-  src: url(./lmsy7.pfb) format ('type-1');
-}
-
-@font-face {
-  font-family: 'LMRoman7';
-  font-style: normal;
-  font-weight: 400;
-  src: url(./lmr7.pfb) format ('type-1');
-}
-
-@font-face {
-  font-family: 'MSAM7';
-  font-style: normal;
-  font-weight: 400;
-  src: url(./msam7.pfb) format ('type-1');
-}
-
-@font-face {
-  font-family: 'SFRM0700';
-  font-style: normal;
-  font-weight: 400;
-  src: url(./sfrm0700.pfb) format ('type-1');
-}
-
 
 body {
   background: #fff;
@@ -115,10 +44,9 @@ body {
   font-size: 28px;
   letter-spacing: normal;
   color: rgba(0, 0, 0, 0.8);
-  text-align: justify;
+  text-align: left;
   text-rendering: optimizelegibility;
   line-height: 1.3;
-  hyphens: auto;
 }
 
 .webtex .cbox {
