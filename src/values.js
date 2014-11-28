@@ -284,9 +284,16 @@ var Toklist = (function Toklist_closure () {
     };
 
     proto.textext = function Toklist_textext (engine, ismacro) {
-	/* TeX representation of a toklist for \message, \write, etc. */
+	/* TeX representation of a toklist for \message, etc. */
 	return this.toks.map (function (t) {
 	    return t.textext (engine, ismacro);
+	}).join ('');
+    };
+
+    proto.iotext = function Toklist_iotext (engine) {
+	/* TeX representation of a toklist for \write */
+	return this.toks.map (function (t) {
+	    return t.iotext (engine);
 	}).join ('');
     };
 

@@ -1531,10 +1531,11 @@ register_command ('immediate', function cmd_immediate (engine) {
 
 
 register_command ('write', function cmd_write (engine) {
+    // XXX should not be immediate by default!!! -> don't expand tokens now
     var streamnum = engine.scan_streamnum ();
     engine.scan_left_brace ();
     var toks = engine.scan_tok_group (true);
-    var tt = toks.textext (engine, false);
+    var tt = toks.iotext (engine, false);
 
     if (streamnum == 16) {
 	// 16 -> the log

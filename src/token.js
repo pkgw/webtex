@@ -74,6 +74,33 @@ var Token = (function Token_closure () {
     };
 
 
+    proto.iotext = function Token_iotext (engine) {
+	// This give the textualization of the token for I/O purposes; TTP
+	// 292, "show_token_list". We store macro parameters in a somewhat
+	// different way than TeX so that's done differently. See also
+	// TTP 262.
+
+	if (this.kind == TK_CHAR) {
+	    var c = String.fromCharCode (this.ord);
+	    if (this.catcode == C_PARAM)
+		c = c + c;
+	    return c;
+	}
+
+	if (this.kind == TK_CSEQ)
+	    return (texchr (engine.escapechar__I ()) +
+		    escape (texchr, this.name) + ' ');
+
+	if (this.kind == TK_PARAM)
+	    return '#' + this.pnum
+
+	if (this.kind == TK_PURECMD)
+	    throw new TexInternalError ('sholdn\'t io-format a pure-command token');
+
+	throw new TexInternalError ('not reached');
+    };
+
+
     proto.equals = function Token_equals (other) {
 	if (other === null)
 	    return false;
