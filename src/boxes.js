@@ -664,7 +664,7 @@ var CanvasBox = (function CanvasBox_closure () {
 
 	var tok = this.scan_next_unexpandable ();
 	var cmd = tok.to_cmd (this);
-	if (!cmd.boxlike)
+	if (typeof cmd.start_box !== 'function')
 	    throw new TexRuntimeError ('expected boxlike command but got %o', tok);
 
         this.boxop_stack.unshift ([callback, is_assignment]);
@@ -740,69 +740,101 @@ var CanvasBox = (function CanvasBox_closure () {
 	engine.enter_group (bt_names[boxtype], leave_box_construction);
     }
 
-    // Basic box construction.
+    // Commands that yield boxes.
 
-    register_command ('hbox', (function HboxCommand_closure () {
-	function HboxCommand () { Command.call (this); }
-	inherit (HboxCommand, Command);
-	var proto = HboxCommand.prototype;
-	proto.name = 'hbox';
-	proto.boxlike = true;
+    var BoxValuedCommand = (function BoxValuedCommand_closure () {
+	function BoxValuedCommand () { Command.call (this); }
+	inherit (BoxValuedCommand, Command);
+	var proto = BoxValuedCommand.prototype;
 
-	proto.invoke = function HboxCommand_invoke (engine) {
-	    engine.trace ('hbox (for accumulation)');
+	proto.invoke = function BoxValuedCommand_invoke (engine) {
+	    engine.trace ('%s: accumulate', this.name);
 	    scan_box_for_accum (engine, this);
 	};
 
-	proto.start_box = function HboxCommand_start_box (engine) {
-	    enter_box_construction (engine, BT_HBOX, M_RHORZ, false);
+	proto.start_box = function BoxValuedCommand_start_box (engine) {
+	    throw new TexRuntimeError ('unimplemented start_box() for %o', this);
 	};
 
-	return HboxCommand;
-    }) ());
+	return BoxValuedCommand;
+    }) ();
 
+    function register_box_command (name, start_box) {
+	var cmd = new BoxValuedCommand ();
+	cmd.name = name;
+	cmd.start_box = start_box.bind (cmd);
+	register_command (name, cmd);
+    }
 
-    register_command ('vbox', (function VboxCommand_closure () {
-	function VboxCommand () { Command.call (this); }
-	inherit (VboxCommand, Command);
-	var proto = VboxCommand.prototype;
-	proto.name = 'vbox';
-	proto.boxlike = true;
+    register_box_command ('hbox', function hbox_start_box (engine) {
+	enter_box_construction (engine, BT_HBOX, M_RHORZ, false);
+    });
 
-	proto.invoke = function VboxCommand_invoke (engine) {
-	    engine.trace ('vbox (for accumulation)');
-	    scan_box_for_accum (engine, this);
-	};
-
-	proto.start_box = function VboxCommand_start_box (engine) {
+    register_box_command ('vbox', function vbox_start_box (engine) {
 	    enter_box_construction (engine, BT_VBOX, M_IVERT, false);
-	};
+    });
 
-	return VboxCommand;
-    }) ());
-
-
-    register_command ('vtop', (function VtopCommand_closure () {
-	function VtopCommand () { Command.call (this); }
-	inherit (VtopCommand, Command);
-	var proto = VtopCommand.prototype;
-	proto.name = 'vtop';
-	proto.boxlike = true;
-
-	proto.invoke = function VtopCommand_invoke (engine) {
-	    engine.trace ('vtop (for accumulation)');
-	    scan_box_for_accum (engine, this);
-	};
-
-	proto.start_box = function VtopCommand_start_box (engine) {
+    register_box_command ('vtop', function vtop_start_box (engine) {
 	    enter_box_construction (engine, BT_VBOX, M_IVERT, true);
-	};
+    });
 
-	return VtopCommand;
-    }) ());
+    register_box_command ('copy', function copy_start_box (engine) {
+	var reg = engine.scan_char_code__I ();
+	var box = engine.get_register (T_BOX, reg);
+	engine.trace ('copy box %d', reg);
+	handle_finished_box (engine, box.clone ());
+    });
+
+    register_box_command ('box', function box_start_box (engine) {
+	var reg = engine.scan_char_code__I ();
+	var box = engine.get_register (T_BOX, reg);
+	engine.trace ('fetch box %d', reg);
+	engine.set_register (T_BOX, reg, new VoidBox ());
+	handle_finished_box (engine, box);
+    });
+
+    register_box_command ('vsplit', function vsplit_start_box (engine) {
+	var reg = engine.scan_char_code__I ();
+	var box = engine.get_register (T_BOX, reg);
+
+	if (!engine.scan_keyword ('to'))
+	    throw new TexRuntimeError ('expected keyword "to"');
+
+	var depth_S = engine.scan_dimen__O_S (false);
+	engine.trace ('vsplit box %d to %S [fake impl]', reg, depth_S);
+
+	// TODO: use splitmaxdepth, splittopskip, etc. See TeXBook p. 124, T:TP~977.
+
+	if (box.btype == BT_VOID) {
+	    handle_finished_box (engine, new VoidBox ());
+	} else if (box.btype == BT_HBOX) {
+	    throw new TexRuntimeError ('cannot \\vsplit an hbox');
+	} else {
+	    engine.set_register (T_BOX, reg, new VoidBox ());
+	    handle_finished_box (engine, box);
+	}
+    });
+
+    register_box_command ('lastbox', function lastbox_start_box (engine) {
+	var m = engine.mode ();
+
+	if (m == M_VERT) {
+	    throw new TexRuntimeError ('cannot use \\lastbox in vertical mode');
+	} else if (Math.abs (m) == M_DMATH) {
+	    handle_finished_box (engine, new VoidBox ());
+	} else {
+	    var last = engine.get_last_listable ();
+	    if (last == null || last.ltype != LT_BOX || last.btype == BT_VOID) {
+		handle_finished_box (engine, new VoidBox ());
+	    } else {
+		engine.pop_last_listable ();
+		handle_finished_box (engine, last);
+	    }
+	}
+    });
 
 
-    // Box registers and other manipulations.
+    // Setbox.
 
     register_command ('setbox', function cmd_setbox (engine) {
 	var reg = engine.scan_char_code__I ();
@@ -824,124 +856,6 @@ var CanvasBox = (function CanvasBox_closure () {
 
         engine.scan_box (set_the_box, true);
     });
-
-
-    register_command ('copy', (function CopyCommand_closure () {
-	function CopyCommand () { Command.call (this); }
-	inherit (CopyCommand, Command);
-	var proto = CopyCommand.prototype;
-	proto.name = 'copy';
-	proto.boxlike = true;
-
-	proto.invoke = function CopyCommand_invoke (engine) {
-	    scan_box_for_accum (engine, this);
-	};
-
-	proto.start_box = function CopyCommand_start_box (engine) {
-	    var reg = engine.scan_char_code__I ();
-	    var box = engine.get_register (T_BOX, reg);
-	    engine.trace ('copy box %d', reg);
-	    handle_finished_box (engine, box.clone ());
-	};
-
-	return CopyCommand;
-    }) ());
-
-
-    register_command ('box', (function BoxCommand_closure () {
-	function BoxCommand () { Command.call (this); }
-	inherit (BoxCommand, Command);
-	var proto = BoxCommand.prototype;
-	proto.name = 'box';
-	proto.boxlike = true;
-
-	proto.invoke = function BoxCommand_invoke (engine) {
-	    scan_box_for_accum (engine, this);
-	};
-
-	proto.start_box = function BoxCommand_start_box (engine) {
-	    var reg = engine.scan_char_code__I ();
-	    var box = engine.get_register (T_BOX, reg);
-	    engine.trace ('fetch box %d', reg);
-	    engine.set_register (T_BOX, reg, new VoidBox ());
-	    handle_finished_box (engine, box);
-	};
-
-	return BoxCommand;
-    }) ());
-
-
-    register_command ('vsplit', (function VsplitCommand_closure () {
-	function VsplitCommand () { Command.call (this); }
-	inherit (VsplitCommand, Command);
-	var proto = VsplitCommand.prototype;
-	proto.name = 'vsplit';
-	proto.boxlike = true;
-
-	proto.invoke = function VsplitCommand_invoke (engine) {
-	    scan_box_for_accum (engine, this);
-	};
-
-	proto.start_box = function VsplitCommand_start_box (engine) {
-	    var reg = engine.scan_char_code__I ();
-	    var box = engine.get_register (T_BOX, reg);
-
-	    if (!engine.scan_keyword ('to'))
-		throw new TexRuntimeError ('expected keyword "to"');
-
-	    var depth_S = engine.scan_dimen__O_S (false);
-	    engine.trace ('vsplit box %d to %S [fake impl]', reg, depth_S);
-
-	    // TODO: use splitmaxdepth, splittopskip, etc. See TeXBook p. 124, T:TP~977.
-
-	    if (box.btype == BT_VOID) {
-		handle_finished_box (engine, new VoidBox ());
-		return;
-	    }
-
-	    if (box.btype == BT_HBOX)
-		throw new TexRuntimeError ('cannot \\vsplit an hbox');
-
-	    engine.set_register (T_BOX, reg, new VoidBox ());
-	    handle_finished_box (engine, box);
-	};
-
-	return VsplitCommand;
-    }) ());
-
-
-    register_command ('lastbox', (function LastboxCommand_closure () {
-	function LastboxCommand () { Command.call (this); }
-	inherit (LastboxCommand, Command);
-	var proto = LastboxCommand.prototype;
-	proto.name = 'lastbox';
-	proto.boxlike = true;
-
-	proto.invoke = function LastboxCommand_invoke (engine) {
-	    scan_box_for_accum (engine, this);
-	};
-
-	proto.start_box = function LastboxCommand_start_box (engine) {
-	    var m = engine.mode ();
-	    if (m == M_VERT)
-		throw new TexRuntimeError ('cannot use \\lastbox in vertical mode');
-	    if (m == M_MATH || m == M_DMATH) {
-		handle_finished_box (engine, new VoidBox ());
-		return;
-	    }
-
-	    var last = engine.get_last_listable ();
-	    if (last == null || last.ltype != LT_BOX || last.btype == BT_VOID) {
-		handle_finished_box (engine, new VoidBox ());
-		return;
-	    }
-
-	    engine.pop_last_listable ();
-	    handle_finished_box (engine, last);
-	};
-
-	return LastboxCommand;
-    }) ());
 
 
     // Box conditionals.
