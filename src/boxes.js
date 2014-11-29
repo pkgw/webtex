@@ -846,7 +846,7 @@ var StartTag = (function StartTag_closure () {
     var proto = StartTag.prototype;
 
     proto._uisummary = function StartTag__uisummary () {
-	return 'StartTag ' + this.name + ' ' + this.attrs;
+	return format ('StartTag %s %j', this.name, this.attrs);
     };
 
     return StartTag;
@@ -866,7 +866,7 @@ var EndTag = (function EndTag_closure () {
     var proto = EndTag.prototype;
 
     proto._uisummary = function EndTag__uisummary () {
-	return 'EndTag ' + this.name;
+	return format ('EndTag %s', this.name);
     };
 
     return EndTag;
