@@ -6,3 +6,12 @@
 
 % To be determined: is it wise and/or necessary to return the output routine
 % to the LaTeX standard, rather than ltxgrid's complex one?
+
+% Proper HTML tags for figure captions:
+
+\let\@@webtex@orig@makecaption\@makecaption %
+\long\def\@makecaption#1#2{% Don't know a better way to patch this.
+  \special{webtex start-tag figcaption}%
+  \@@webtex@orig@makecaption{#1}{#2}%
+  \special{webtex end-tag figcaption}%
+}%
