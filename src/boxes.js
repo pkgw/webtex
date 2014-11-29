@@ -885,112 +885,52 @@ var CanvasBox = (function CanvasBox_closure () {
 
     // Box properties.
 
-    register_command ('wd', (function WdCommand_closure () {
-	function WdCommand () { Command.call (this); }
-	inherit (WdCommand, Command);
-	var proto = WdCommand.prototype;
-	proto.name = 'wd';
+    var BoxDimenValref = (function BoxDimenValref_closure () {
+	function BoxDimenValref (reg, propname_S) {
+	    if (!(reg >= 0 && reg <= 255))
+		throw new TexInternalError ('illegal box register %o', reg);
 
-	proto.invoke = function WdCommand_invoke (engine) {
-	    // NOTE: you can't e.g. do \advance\wd0 so implementing as a settable
-	    // Valref is not so important.
-	    var reg = engine.scan_char_code__I ();
-	    engine.scan_optional_equals ();
-	    var width_S = engine.scan_dimen__O_S (false);
-	    var box = engine.get_register (T_BOX, reg);
+	    Valref.call (this, T_DIMEN);
+	    this.reg = reg;
+	    this.propname_S = propname_S;
+	}
 
-	    if (box.btype == BT_VOID) {
-		engine.trace ('\\wd%d = %S -- noop on void box', reg, width_S);
-	    } else {
-		engine.trace ('\\wd%d = %S', reg, width_S);
-		box.width_S = width_S;
-	    }
+	inherit (BoxDimenValref, Valref);
+	var proto = BoxDimenValref.prototype;
+
+	proto.get = function BoxDimenValref_get (engine) {
+	    var box = engine.get_register (T_BOX, this.reg);
+	    return Value.ensure_boxed (T_DIMEN, box[this.propname_S]);
 	};
 
-	proto.get_valtype = function WdCommand_get_valtype () {
-	    return T_DIMEN;
+	proto.set = function BoxDimenValref_set (engine, value_S) {
+	    value_S = Value.ensure_unboxed (T_DIMEN, value_S);
+	    var box = engine.get_register (T_BOX, this.reg);
+
+	    if (box.btype == BT_VOID)
+		engine.trace ('setting %s of box #%d to %S: noop -- void box',
+			      this.propname_S, this.reg, value_S);
+	    else
+		box[this.propname_S] = value_S;
 	};
 
-	proto.as_valref = function WdCommand_as_valref (engine) {
-	    var reg = engine.scan_char_code__I ();
-	    var box = engine.get_register (T_BOX, reg);
-	    return new ConstantValref (T_DIMEN, box.width_S);
-	};
+	return BoxDimenValref;
+    }) ();
 
-	return WdCommand;
-    }) ());
+    register_assignment_command ('wd', T_DIMEN, function wd_as_valref (engine) {
+	var reg = engine.scan_char_code__I ();
+	return new BoxDimenValref (reg, 'width_S');
+    });
 
+    register_assignment_command ('ht', T_DIMEN, function ht_as_valref (engine) {
+	var reg = engine.scan_char_code__I ();
+	return new BoxDimenValref (reg, 'height_S');
+    });
 
-    register_command ('ht', (function HtCommand_closure () {
-	function HtCommand () { Command.call (this); }
-	inherit (HtCommand, Command);
-	var proto = HtCommand.prototype;
-	proto.name = 'ht';
-
-	proto.invoke = function HtCommand_invoke (engine) {
-	    // NOTE: you can't e.g. do \advance\ht0 so implementing as a settable
-	    // Valref is not so important.
-	    var reg = engine.scan_char_code__I ();
-	    engine.scan_optional_equals ();
-	    var height_S = engine.scan_dimen__O_S (false);
-	    var box = engine.get_register (T_BOX, reg);
-
-	    if (box.btype == BT_VOID) {
-		engine.trace ('\\ht%d = %S -- noop on void box', reg, height_S);
-	    } else {
-		engine.trace ('\\ht%d = %S', reg, height_S);
-		box.height_S = height_S;
-	    }
-	};
-
-	proto.get_valtype = function HtCommand_get_valtype () {
-	    return T_DIMEN;
-	};
-
-	proto.as_valref = function HtCommand_as_valref (engine) {
-	    var reg = engine.scan_char_code__I ();
-	    var box = engine.get_register (T_BOX, reg);
-	    return new ConstantValref (T_DIMEN, box.height_S);
-	};
-
-	return HtCommand;
-    }) ());
-
-
-    register_command ('dp', (function DpCommand_closure () {
-	function DpCommand () { Command.call (this); }
-	inherit (DpCommand, Command);
-	var proto = DpCommand.prototype;
-	proto.name = 'dp';
-
-	proto.invoke = function DpCommand_invoke (engine) {
-	    // NOTE: you can't e.g. do \advance\dp0 so implementing as a settable
-	    // Valref is not so important.
-	    var reg = engine.scan_char_code__I ();
-	    engine.scan_optional_equals ();
-	    var depth_S = engine.scan_dimen__O_S (false);
-	    var box = engine.get_register (T_BOX, reg);
-
-	    if (box.btype == BT_VOID) {
-		engine.trace ('\\dp%d = %S -- noop on void box', reg, depth_S);
-	    } else {
-		engine.trace ('\\dp%d = %S', reg, depth_S);
-		box.depth_S = depth_S;
-	    }
-	};
-
-	proto.get_valtype = function DpCommand_get_valtype () {
-	    return T_DIMEN;
-	};
-
-	proto.as_valref = function DpCommand_as_valref (engine) {
-	    var reg = engine.scan_char_code__I ();
-	    var box = engine.get_register (T_BOX, reg);
-	    return new ConstantValref (T_DIMEN, box.depth_S);
-	};
-
-	return DpCommand;
-    }) ());
+    register_assignment_command ('dp', T_DIMEN, function dp_as_valref (engine) {
+	var reg = engine.scan_char_code__I ();
+	return new BoxDimenValref (reg, 'depth_S');
+    });
 
 
     // Unboxing.
