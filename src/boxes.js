@@ -890,3 +890,23 @@ var SuppressionControl = (function SuppressionControl_closure () {
 
     return SuppressionControl;
 }) ();
+
+
+var Image = (function Image_closure () {
+    function Image (attrs) {
+	this.ltype = LT_STARTTAG; // XXX lazy should straighten this out
+	this.src = attrs.src;
+
+	if (this.src == null)
+	    throw new TexRuntimeError ('cannot create Image without "src" attribute');
+    }
+
+    inherit (Image, Listable);
+    var proto = Image.prototype;
+
+    proto._uisummary = function Image__uisummary () {
+	return format ('Image src=%s', this.src);
+    };
+
+    return Image;
+}) ();

@@ -1155,13 +1155,15 @@ register_command ('special', function cmd_special (engine) {
 	} else if (pieces[1] == 'end-tag') {
 	    var tag = pieces[2];
 	    object = new EndTag (tag);
+	} else if (pieces[1] == 'image') {
+	    object = new Image (parse_tag_attrs (engine, tlist.toks));
 	} else {
 	    engine.warn ('unhandled webtex special "%s"', text);
+	    return;
 	}
     }
 
-    if (object != null)
-	engine.accum (object);
+    engine.accum (object);
 });
 
 

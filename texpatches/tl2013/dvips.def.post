@@ -37,7 +37,7 @@
 
 % Override with our stuff.
 
-\def\Ginclude@webtex#1{\special{webteximage #1}}
+\def\Ginclude@webtex#1{\special{webtex image {src} {#1}}}
 
 \def\Gread@webtex#1{%
   % Make up arbitrary numbers since they don't matter for us.
@@ -60,7 +60,11 @@
   \global\expandafter\let\csname Gread@#1\endcsname\Gread@webtex
   \global\edef\Gin@extensions{\Gin@extensions,.#1}
   \global\@namedef{Gin@rule@.#1}##1{{#1}{.#1}{##1}}
-}
+}%
+%
+% src/dom-renderer.js also needs to be updated if you want to support
+% new image formats.
+%
 \@handleone{gif}
 \@handleone{jpeg}
 \@handleone{jpg}

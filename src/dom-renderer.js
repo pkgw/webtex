@@ -9,6 +9,55 @@ var DOMRenderer = (function DOMRenderer_callback () {
 
     var proto = DOMRenderer.prototype;
 
+    var extension_to_mime = {
+	// texpatches/*/dvips.def.post also needs to be updated to support new
+	// image formats.
+	gif: 'image/gif',
+	jpeg: 'image/jpeg',
+	jpg: 'image/jpeg',
+	png: 'image/png',
+    };
+
+    function create_image (doc, item) {
+	// This "image" may be a PS, PDF, PNG, JPG, or whatever, so we can't
+	// just blindly make an <img> tag for it.
+
+	var ext = item.name.split ('.').pop ();
+
+	if (ext == 'pdf') {
+	    // TODO.
+	    var elem = doc.createElement ('p');
+	    elem.appendChild (doc.createTextNode ('[PDF images not yet supported]'));
+	    elem.className = 'wt-alert';
+	    return elem;
+	}
+
+	if (ext == 'ps' || ext == 'eps') {
+	    // TODO.
+	    var elem = doc.createElement ('p');
+	    elem.appendChild (doc.createTextNode ('[PostScript images not yet supported]'));
+	    elem.className = 'wt-alert';
+	    return elem;
+	}
+
+	// Default case for images that we actually can make an <img> tag for.
+	// ArrayBuffer-to-string code from
+	// http://jsperf.com/tobase64-implementations ; join('')-based
+	// approaches are faster in some browsers (this is all very
+	// Google-able).
+
+	var elem = doc.createElement ('img');
+
+	var bytes = new Uint8Array (item.data);
+	var binary = '';
+	var len = item.data.byteLength;
+	for (var i = 0; i < len; i++)
+	    binary += String.fromCharCode (bytes[i]);
+
+	elem.src = 'data:' + extension_to_mime[ext] + ';base64,' + window.btoa (binary);
+	return elem;
+    }
+
     proto.handle_render = function DOMRenderer_handle_render (data) {
 	var doc = this.container.ownerDocument;
 	var dom_stack = [this.container];
@@ -88,6 +137,10 @@ var DOMRenderer = (function DOMRenderer_callback () {
 			global_warnf ('unhandled CanvasBox graphic %j', q);
 		    }
 		}
+	    } else if (item.kind === 'image') {
+		global_logf ('XXX %j', item);
+		global_logf ('YYY %o', item.data.byteLength);
+		dom_stack[idom].appendChild (create_image (doc, item));
 	    } else {
 		global_warnf ('unhandled rendered-HTML item %j', item);
 	    }
