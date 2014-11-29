@@ -81,8 +81,8 @@ var M_VERT = 1,  // standard vertical mode
     // Mode changes.
 
     engine_proto.register_method ('enter_mode', function Engine_enter_mode (mode) {
-	this.trace ('<enter %s mode>', mode_name (mode));
 	this.mode_stack.unshift (new ModeState (mode));
+	this.trace ('<enter %s mode newdepth=%d>', mode_name (mode), this.mode_stack.length);
     });
 
     engine_proto.register_method ('leave_mode', function Engine_leave_mode (mode) {
@@ -90,9 +90,10 @@ var M_VERT = 1,  // standard vertical mode
 	    throw new TexInternalError ('cannot leave the outer vertical mode');
 
 	var old_state = this.mode_stack.shift ();
-	this.trace ('<leave %s mode: %d items>',
+	this.trace ('<leave %s mode nitems=%d newdepth=%d>',
 		    mode_name (old_state.mode),
-		    old_state.list.length);
+		    old_state.list.length,
+		    this.mode_stack.length);
 	return old_state.list;
     });
 
