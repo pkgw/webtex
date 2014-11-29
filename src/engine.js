@@ -260,7 +260,6 @@ var EquivTable = (function EquivTable_closure () {
 
 var Engine = (function Engine_closure () {
     var AF_GLOBAL = 1 << 0;
-    var BO_SETBOX = 0;
 
     function Engine (args) {
 	/* Possible properties of args:
@@ -302,7 +301,6 @@ var Engine = (function Engine_closure () {
 	this._fonts = {};
 
 	this.group_exit_stack = [];
-	this.boxop_stack = [];
 
 	this.assign_flags = 0;
 	this.after_assign_token = null;
@@ -768,8 +766,6 @@ var Engine = (function Engine_closure () {
 	    throw new TexRuntimeError ('can only serialize Engine in topmost eqtb');
 	if (this.group_exit_stack.length > 0)
 	    throw new TexRuntimeError ('can only serialize Engine without open groups');
-	if (this.boxop_stack.length > 0)
-	    throw new TexRuntimeError ('can only serialize Engine without open boxops');
 	if (this.assign_flags != 0)
 	    throw new TexRuntimeError ('cannot serialize Engine with active assignment flags');
 	if (this.after_assign_token != null)
@@ -1615,128 +1611,6 @@ var Engine = (function Engine_closure () {
 	if (snum < 0 || snum > 15)
 	    return 16; // NOTE: our little convention
 	return snum;
-    };
-
-
-    // Text box construction
-
-    proto.scan_box = function Engine_scan_box (callback, is_assignment) {
-	var tok = null; // T:TP 404 -- next non-blank non-relax non-call token:
-
-	while (true) {
-	    tok = this.next_x_tok_throw ();
-	    if (!tok.is_space (this) && !tok.is_cmd (this, 'relax'))
-		break;
-	}
-
-	// TODO: deal with leader_flag and hrule stuff; should accept:
-	// \box, \copy, \lastbox, \vsplit, \hbox, \vbox, \vtop
-
-	var cmd = tok.to_cmd (this);
-	if (!cmd.boxlike)
-	    throw new TexRuntimeError ('expected boxlike command but got %o', tok);
-
-        this.boxop_stack.push ([callback, is_assignment]);
-	cmd.start_box (this);
-    };
-
-    proto.scan_box_for_accum = function Engine_scan_box_for_accum (cmd) {
-	function accum_box (engine, box) {
-	    if (engine.absmode () == M_DMATH) {
-		engine.trace ('... accumulate the finished box (math)');
-		var ord = new AtomNode (MT_ORD);
-		ord.nuc = box;
-		engine.accum (ord);
-	    } else if (engine.absmode () == M_VERT) {
-		engine.trace ('... accumulate the finished box (vertical)');
-		engine.accum_to_vlist (box);
-	    } else {
-		engine.trace ('... accumulate the finished box (non-math)');
-		engine.accum (box);
-	    }
-	}
-
-	this.boxop_stack.push ([accum_box, false]);
-	cmd.start_box (this);
-    };
-
-    proto.handle_setbox = function Engine_handle_setbox (reg) {
-        // We just scanned "\setbox NN =". We'll now expect a box-construction
-        // expression. The TeX design is such that rather than trying to read
-        // in the whole box at once, we instead remember that we were doing a
-        // setbox operation.
-	//
-	// We have to remember the global-ness of the assignment operation
-	// since the callback may be called somewhere much later in the
-	// processing.
-
-	var is_global = this._global_flag ();
-
-        function set_the_box (engine, box) {
-	    // handle_finished_box() has already printed the box contents
-            engine.trace ('... finish setbox to #%d (g? %b)', reg, !!is_global);
-            engine.eqtb.set_register (T_BOX, reg, box, is_global);
-	    engine.maybe_insert_after_assign_token ();
-	}
-
-        this.scan_box (set_the_box.bind (this), true);
-    };
-
-    proto.handle_finished_box = function Engine_handle_finished_box (box) {
-	var t = this.boxop_stack.pop ();
-	var boxop = t[0], isassignment = t[1];
-
-	if (isassignment && this.after_assign_token != null) {
-	    // This is an assignment expression. TODO: afterassign token
-	    // in boxes gets inserted at beginning of box token list,
-	    // before every[hv]box token lists (TeXbook p. 279)
-	    throw new TexRuntimeError ('afterassignment for boxes');
-	}
-
-	this.trace ('finished: %U', box);
-
-	if (box.btype == BT_VBOX)
-	    this.end_graf (); // in case we were in the middle of one. Noop if not.
-	boxop (this, box);
-    };
-
-    proto._handle_box = function Engine__handle_box (boxtype, newmode, is_vtop) {
-	var is_exact, spec_S;
-
-	if (this.scan_keyword ('to')) {
-	    is_exact = true;
-	    spec_S = this.scan_dimen__O_S (false);
-	} else if (this.scan_keyword ('spread')) {
-	    is_exact = false;
-	    spec_S = this.scan_dimen__O_S (false);
-	} else {
-	    is_exact = false;
-	    spec_S = nlib.Zero_S;
-	}
-
-	function finish_box (engine) {
-	    this.trace ('finish_box is_exact=%b spec=%S', is_exact, spec_S);
-	    this.unnest_eqtb ();
-	    var box = ListBox.create (boxtype);
-	    box.list = this.leave_mode ();
-	    box.set_glue__OOS (this, is_exact, spec_S);
-	    if (is_vtop)
-		box.adjust_as_vtop ();
-	    engine.handle_finished_box (box);
-	}
-
-	this.scan_left_brace ();
-	this.enter_mode (newmode);
-	this.nest_eqtb ();
-	this.enter_group (bt_names[boxtype], finish_box.bind (this));
-    };
-
-    proto.handle_hbox = function Engine_handle_hbox () {
-	this._handle_box (BT_HBOX, M_RHORZ, false);
-    };
-
-    proto.handle_vbox = function Engine_handle_vbox (is_vtop) {
-	this._handle_box (BT_VBOX, M_IVERT, is_vtop);
     };
 
 

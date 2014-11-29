@@ -625,6 +625,121 @@ var CanvasBox = (function CanvasBox_closure () {
 
 
 (function boxes_closure () {
+    engine_proto.register_state ({
+	engine_init: function (engine) {
+	    engine.boxop_stack = [];
+	},
+	is_clean: function (engine) {
+	    return engine.boxop_stack.length == 0;
+	},
+    });
+
+
+    function accum_box (engine, box) {
+	// Accumulate some box into the current list. Both math and vertical
+	// modes have wrinkles.
+
+	if (engine.absmode () == M_DMATH) {
+	    engine.trace ('... accumulate the finished box (math)');
+	    var ord = new AtomNode (MT_ORD);
+	    ord.nuc = box;
+	    engine.accum (ord);
+	} else if (engine.absmode () == M_VERT) {
+	    engine.trace ('... accumulate the finished box (vertical)');
+	    engine.accum_to_vlist (box);
+	} else {
+	    engine.trace ('... accumulate the finished box (non-math)');
+	    engine.accum (box);
+	}
+    }
+
+    engine_proto.register_method ('scan_box', function Engine_scan_box (callback, is_assignment) {
+	// Scan in some kind of box value. This can resolve itself
+	// instantaneously (if the box value is something like \box123) or
+	// much, much later (if the box value is something like
+	// \vbox{.......}).
+	//
+	// TODO: deal with leader_flag and hrule stuff; should accept: \box,
+	// \copy, \lastbox, \vsplit, \hbox, \vbox, \vtop
+
+	var tok = this.scan_next_unexpandable ();
+	var cmd = tok.to_cmd (this);
+	if (!cmd.boxlike)
+	    throw new TexRuntimeError ('expected boxlike command but got %o', tok);
+
+        this.boxop_stack.unshift ([callback, is_assignment]);
+	cmd.start_box (this);
+    });
+
+    function scan_box_for_accum (engine, cmd) {
+	// This version is for when a box-like command appears unadorned,
+	// rather than as the argument to a separate command. In that case,
+	// the relevant token/command has already been read in.
+	engine.boxop_stack.unshift ([accum_box, false]);
+	cmd.start_box (engine);
+    }
+
+    function handle_finished_box (engine, box) {
+	// A start_box() function on a command should eventually cause
+	// handle_finished_box() to be called. This can happen
+	// instantaneously (if it's e.g. \hcopy{}) or much later, after
+	// some large group has ended (e.g. \hbox{....}).
+
+	var t = engine.boxop_stack.shift ();
+	var boxop = t[0], isassignment = t[1];
+
+	if (isassignment && engine.after_assign_token != null) {
+	    // Engine is an assignment expression. TODO: afterassign token in
+	    // boxes gets inserted at beginning of box token list, before
+	    // every[hv]box token lists (TeXbook p. 279)
+	    throw new TexRuntimeError ('afterassignment for boxes');
+	}
+
+	engine.trace ('finished: %U', box);
+
+	if (box.btype == BT_VBOX)
+	    engine.end_graf (); // in case we were in the middle of one. Noop if not.
+
+	boxop (engine, box);
+    }
+
+    function enter_box_construction (engine, boxtype, newmode, is_vtop) {
+	// This starts the construction of an \hbox-type box, where we need to
+	// enter a sub-group and potentially do a lot of processing. This
+	// should be called inside a start_box() handler, since we will call
+	// handle_finished_box when the box is finally finished being
+	// constructed.
+
+	var is_exact, spec_S;
+
+	if (engine.scan_keyword ('to')) {
+	    is_exact = true;
+	    spec_S = engine.scan_dimen__O_S (false);
+	} else if (engine.scan_keyword ('spread')) {
+	    is_exact = false;
+	    spec_S = engine.scan_dimen__O_S (false);
+	} else {
+	    is_exact = false;
+	    spec_S = nlib.Zero_S;
+	}
+
+	function leave_box_construction (engine) {
+	    engine.trace ('leave_box_construction is_exact=%b spec=%S', is_exact, spec_S);
+	    engine.unnest_eqtb ();
+	    var box = ListBox.create (boxtype);
+	    box.list = engine.leave_mode ();
+	    box.set_glue__OOS (engine, is_exact, spec_S);
+	    if (is_vtop)
+		box.adjust_as_vtop ();
+	    handle_finished_box (engine, box);
+	}
+
+	engine.scan_left_brace ();
+	engine.enter_mode (newmode);
+	engine.nest_eqtb ();
+	engine.enter_group (bt_names[boxtype], leave_box_construction);
+    }
+
     // Basic box construction.
 
     register_command ('hbox', (function HboxCommand_closure () {
@@ -636,11 +751,11 @@ var CanvasBox = (function CanvasBox_closure () {
 
 	proto.invoke = function HboxCommand_invoke (engine) {
 	    engine.trace ('hbox (for accumulation)');
-	    engine.scan_box_for_accum (this);
+	    scan_box_for_accum (engine, this);
 	};
 
 	proto.start_box = function HboxCommand_start_box (engine) {
-	    engine.handle_hbox ();
+	    enter_box_construction (engine, BT_HBOX, M_RHORZ, false);
 	};
 
 	return HboxCommand;
@@ -656,11 +771,11 @@ var CanvasBox = (function CanvasBox_closure () {
 
 	proto.invoke = function VboxCommand_invoke (engine) {
 	    engine.trace ('vbox (for accumulation)');
-	    engine.scan_box_for_accum (this);
+	    scan_box_for_accum (engine, this);
 	};
 
 	proto.start_box = function VboxCommand_start_box (engine) {
-	    engine.handle_vbox (false);
+	    enter_box_construction (engine, BT_VBOX, M_IVERT, false);
 	};
 
 	return VboxCommand;
@@ -676,11 +791,11 @@ var CanvasBox = (function CanvasBox_closure () {
 
 	proto.invoke = function VtopCommand_invoke (engine) {
 	    engine.trace ('vtop (for accumulation)');
-	    engine.scan_box_for_accum (this);
+	    scan_box_for_accum (engine, this);
 	};
 
 	proto.start_box = function VtopCommand_start_box (engine) {
-	    engine.handle_vbox (true);
+	    enter_box_construction (engine, BT_VBOX, M_IVERT, true);
 	};
 
 	return VtopCommand;
@@ -693,7 +808,21 @@ var CanvasBox = (function CanvasBox_closure () {
 	var reg = engine.scan_char_code__I ();
 	engine.scan_optional_equals ();
 	engine.trace ('setbox: queue #%d = ...', reg);
-	engine.handle_setbox (reg);
+
+	// We have to remember the global-ness of the assignment operation
+	// since the callback may be called somewhere much later in the
+	// processing.
+
+	var is_global = !!engine._global_flag ();
+
+        function set_the_box (engine, box) {
+	    // handle_finished_box() has already printed the box contents
+            engine.trace ('... finish setbox to #%d (g? %b)', reg, is_global);
+            engine.eqtb.set_register (T_BOX, reg, box, is_global);
+	    engine.maybe_insert_after_assign_token ();
+	}
+
+        engine.scan_box (set_the_box, true);
     });
 
 
@@ -705,14 +834,14 @@ var CanvasBox = (function CanvasBox_closure () {
 	proto.boxlike = true;
 
 	proto.invoke = function CopyCommand_invoke (engine) {
-	    engine.scan_box_for_accum (this);
+	    scan_box_for_accum (engine, this);
 	};
 
 	proto.start_box = function CopyCommand_start_box (engine) {
 	    var reg = engine.scan_char_code__I ();
 	    var box = engine.get_register (T_BOX, reg);
 	    engine.trace ('copy box %d', reg);
-	    engine.handle_finished_box (box.clone ());
+	    handle_finished_box (engine, box.clone ());
 	};
 
 	return CopyCommand;
@@ -727,7 +856,7 @@ var CanvasBox = (function CanvasBox_closure () {
 	proto.boxlike = true;
 
 	proto.invoke = function BoxCommand_invoke (engine) {
-	    engine.scan_box_for_accum (this);
+	    scan_box_for_accum (engine, this);
 	};
 
 	proto.start_box = function BoxCommand_start_box (engine) {
@@ -735,7 +864,7 @@ var CanvasBox = (function CanvasBox_closure () {
 	    var box = engine.get_register (T_BOX, reg);
 	    engine.trace ('fetch box %d', reg);
 	    engine.set_register (T_BOX, reg, new VoidBox ());
-	    engine.handle_finished_box (box);
+	    handle_finished_box (engine, box);
 	};
 
 	return BoxCommand;
@@ -750,7 +879,7 @@ var CanvasBox = (function CanvasBox_closure () {
 	proto.boxlike = true;
 
 	proto.invoke = function VsplitCommand_invoke (engine) {
-	    engine.scan_box_for_accum (this);
+	    scan_box_for_accum (engine, this);
 	};
 
 	proto.start_box = function VsplitCommand_start_box (engine) {
@@ -766,7 +895,7 @@ var CanvasBox = (function CanvasBox_closure () {
 	    // TODO: use splitmaxdepth, splittopskip, etc. See TeXBook p. 124, T:TP~977.
 
 	    if (box.btype == BT_VOID) {
-		engine.handle_finished_box (new VoidBox ());
+		handle_finished_box (engine, new VoidBox ());
 		return;
 	    }
 
@@ -774,7 +903,7 @@ var CanvasBox = (function CanvasBox_closure () {
 		throw new TexRuntimeError ('cannot \\vsplit an hbox');
 
 	    engine.set_register (T_BOX, reg, new VoidBox ());
-	    engine.handle_finished_box (box);
+	    handle_finished_box (engine, box);
 	};
 
 	return VsplitCommand;
@@ -789,7 +918,7 @@ var CanvasBox = (function CanvasBox_closure () {
 	proto.boxlike = true;
 
 	proto.invoke = function LastboxCommand_invoke (engine) {
-	    engine.scan_box_for_accum (this);
+	    scan_box_for_accum (engine, this);
 	};
 
 	proto.start_box = function LastboxCommand_start_box (engine) {
@@ -797,18 +926,18 @@ var CanvasBox = (function CanvasBox_closure () {
 	    if (m == M_VERT)
 		throw new TexRuntimeError ('cannot use \\lastbox in vertical mode');
 	    if (m == M_MATH || m == M_DMATH) {
-		engine.handle_finished_box (new VoidBox ());
+		handle_finished_box (engine, new VoidBox ());
 		return;
 	    }
 
 	    var last = engine.get_last_listable ();
 	    if (last == null || last.ltype != LT_BOX || last.btype == BT_VOID) {
-		engine.handle_finished_box (new VoidBox ());
+		handle_finished_box (engine, new VoidBox ());
 		return;
 	    }
 
 	    engine.pop_last_listable ();
-	    engine.handle_finished_box (last);
+	    handle_finished_box (engine, last);
 	};
 
 	return LastboxCommand;
