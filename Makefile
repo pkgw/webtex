@@ -125,14 +125,8 @@ generate.py src/master-glyph-helper-tmpl.js $(builddir)/glyph-encoding.json \
 | $(builddir)
 	$(python) $^ $@
 
+
 # Generating the "bundle" Zip file.
-#
-# We can't use $^ in the dump-format.js rules because it converts
-# "./build/..." to "build/...", which breaks Node.js's explicit-module-path
-# system.
-#
-# We do not hook up latest.zip to $(primaries) because it's annoying to always
-# be rebuilding it.
 
 bundleextras = \
   $(builddir)/latex.dump.json
@@ -140,21 +134,17 @@ bundleextras = \
 $(builddir)/latex.dump.json: \
 dump-format.js $(builddir)/node-webtex.min.js texpatches/$(texdist)/latex.ltx.post \
 | $(builddir)
-	node $< ./$(builddir)/node-webtex.min.js texpatches/$(texdist)/ \
-	  latex.ltx $@
+	node $< $(builddir)/node-webtex.min.js texpatches/$(texdist)/ latex.ltx $@
 
 $(builddir)/plain.dump.json: \
 dump-format.js $(builddir)/node-webtex.min.js \
 | $(builddir)
-	node $< ./$(builddir)/node-webtex.min.js texpatches/$(texdist)/ \
-	  plain.tex $@
+	node $< $(builddir)/node-webtex.min.js texpatches/$(texdist)/ plain.tex $@
 
 $(builddir)/latest.zip $(builddir)/glyph-encoding.json: \
 make-tex-bundle.py packages.txt mapfiles.txt $(bundleextras) \
 | $(builddir)
 	$(python) $< packages.txt mapfiles.txt texcache $(builddir) texpatches $(bundleextras)
-
-###primaries += $(builddir)/latest.zip
 
 
 # Our internal copy of PDF.js. TODO: figure out if we can avoid bundling this

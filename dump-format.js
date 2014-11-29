@@ -1,5 +1,6 @@
 var console = require ('console');
 var fs = require ('fs');
+var path = require ('path');
 var util = require ('util');
 
 if (process.argv.length < 6) {
@@ -7,7 +8,7 @@ if (process.argv.length < 6) {
     process.exit (1);
 }
 
-var webtex = require (process.argv[2]);
+var webtex = require (path.resolve (process.argv[2]));
 var patchdir = process.argv[3];
 var fmtname = process.argv[4];
 var outpath = process.argv[5];
@@ -39,5 +40,5 @@ while (eng.step () === true) {
 var state = eng.serialize ();
 fs.writeFileSync (outpath, JSON.stringify (state, null, 4), {
     encoding: 'utf8',
-    flag: 'a',
+    flag: 'w',
 });
