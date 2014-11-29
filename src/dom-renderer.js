@@ -18,19 +18,34 @@ var DOMRenderer = (function DOMRenderer_callback () {
 	png: 'image/png',
     };
 
+    function create_pdf_image (doc, item) {
+	var bytes = new Uint8Array (item.data);
+	var canvas = doc.createElement ('canvas');
+
+	PDFJS.getDocument (bytes).then (function (pdf) {
+	    pdf.getPage (1).then (function (page) {
+		var scale = 1.5;
+		var viewport = page.getViewport (scale);
+
+		var context = canvas.getContext ('2d');
+		canvas.height = viewport.height;
+		canvas.width = viewport.width;
+
+		page.render ({canvasContext: context, viewport: viewport});
+	    });
+	});
+
+	return canvas;
+    }
+
     function create_image (doc, item) {
 	// This "image" may be a PS, PDF, PNG, JPG, or whatever, so we can't
 	// just blindly make an <img> tag for it.
 
 	var ext = item.name.split ('.').pop ();
 
-	if (ext == 'pdf') {
-	    // TODO.
-	    var elem = doc.createElement ('p');
-	    elem.appendChild (doc.createTextNode ('[PDF images not yet supported]'));
-	    elem.className = 'wt-alert';
-	    return elem;
-	}
+	if (ext == 'pdf')
+	    return create_pdf_image (doc, item);
 
 	if (ext == 'ps' || ext == 'eps') {
 	    // TODO.
@@ -138,8 +153,6 @@ var DOMRenderer = (function DOMRenderer_callback () {
 		    }
 		}
 	    } else if (item.kind === 'image') {
-		global_logf ('XXX %j', item);
-		global_logf ('YYY %o', item.data.byteLength);
 		dom_stack[idom].appendChild (create_image (doc, item));
 	    } else {
 		global_warnf ('unhandled rendered-HTML item %j', item);

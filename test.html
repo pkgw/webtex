@@ -3,7 +3,7 @@
 
 <html>
   <head>
-    <title>Webtex Testbed: brockton</title>
+    <title>Webtex Testbed</title>
     <meta charset="utf-8">
     <link rel="stylesheet" href="chrome/style.css">
     <style type="text/css">
@@ -26,11 +26,12 @@
 
 var targdiv = document.getElementById ('webtex');
 var worker_url = 'build/worker-webtex.js';
-var inputurl = '../test/tex/brockton/paper.tex'; // note: relative to *worker's* URL
+var inputurl = '../' + window.location.search.slice (1); // note: relative to *worker's* URL
+console.log ('parsing ' + inputurl + ' from worker ' + worker_url);
 
 var dr = new Webtex.DOMRenderer (worker_url, targdiv);
 dr.launch_parse ({
-    jobname: 'paper',
+    jobname: 'plain',
     inputurl: inputurl,
     allow_input_hierarchy: true,
     bundleurl: 'latest.zip', // note: relative to *worker's* URL

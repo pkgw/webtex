@@ -2,6 +2,7 @@ builddir = build
 python = python
 minify = java -jar yuicompressor-2.4.8.jar
 texdist = tl2013
+pdfjsversion = 1.0.712
 
 default: all
 
@@ -148,13 +149,31 @@ dump-format.js $(builddir)/node-webtex.min.js \
 	node $< ./$(builddir)/node-webtex.min.js texpatches/$(texdist)/ \
 	  plain.tex $@
 
-$(builddir)/latest.zip \
-$(builddir)/glyph-encoding.json: \
+$(builddir)/latest.zip $(builddir)/glyph-encoding.json: \
 make-tex-bundle.py packages.txt mapfiles.txt $(bundleextras) \
 | $(builddir)
 	$(python) $< packages.txt mapfiles.txt texcache $(builddir) texpatches $(bundleextras)
 
 ###primaries += $(builddir)/latest.zip
+
+
+# Our internal copy of PDF.js. TODO: figure out if we can avoid bundling this
+# or what.
+
+pdfjs_unzip_stamp = $(builddir)/pdfjs/build/pdf.js
+
+$(builddir)/pdfjs-$(pdfjsversion)-dist.zip: \
+| $(builddir)
+	curl -L https://github.com/mozilla/pdf.js/releases/download/v$(pdfjsversion)/pdfjs-$(pdfjsversion)-dist.zip >$@
+
+$(pdfjs_unzip_stamp): \
+$(builddir)/pdfjs-$(pdfjsversion)-dist.zip \
+| $(builddir)
+	rm -rf $(builddir)/pdfjs
+	mkdir -p $(builddir)/pdfjs
+	cd $(builddir)/pdfjs && unzip -q -DD ../pdfjs-$(pdfjsversion)-dist.zip
+
+primaries += $(pdfjs_unzip_stamp)
 
 
 # Testing
