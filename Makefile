@@ -177,6 +177,12 @@ fattest: $(builddir)/node-webtex.js # actually debuggable
 	@cd test && ./run-all-tests.sh ../$<
 
 
+# Utility
+
+server:
+	node misc/testing-server.js &
+
+
 # Generic helpers
 
 all: $(primaries)
@@ -190,4 +196,4 @@ $(builddir):
 clean:
 	-rm -rf $(builddir)
 
-.PHONY: all clean default fattest test
+.PHONY: all clean default fattest server test
