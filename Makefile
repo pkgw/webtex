@@ -1,8 +1,8 @@
 builddir = build
 python = python
-minify = java -jar yuicompressor-2.4.8.jar
 texdist = tl2013
 pdfjsversion = 1.0.712
+yuiversion = 2.4.8
 
 default: all
 
@@ -132,14 +132,14 @@ bundleextras = \
   $(builddir)/latex.dump.json
 
 $(builddir)/latex.dump.json: \
-dump-format.js $(builddir)/node-webtex.min.js texpatches/$(texdist)/latex.ltx.post \
+dump-format.js $(builddir)/node-webtex.js texpatches/$(texdist)/latex.ltx.post \
 | $(builddir)
-	node $< $(builddir)/node-webtex.min.js texpatches/$(texdist)/ latex.ltx $@
+	node $< $(builddir)/node-webtex.js texpatches/$(texdist)/ latex.ltx $@
 
 $(builddir)/plain.dump.json: \
-dump-format.js $(builddir)/node-webtex.min.js \
+dump-format.js $(builddir)/node-webtex.js \
 | $(builddir)
-	node $< $(builddir)/node-webtex.min.js texpatches/$(texdist)/ plain.tex $@
+	node $< $(builddir)/node-webtex.js texpatches/$(texdist)/ plain.tex $@
 
 $(builddir)/latest.zip $(builddir)/glyph-encoding.json: \
 make-tex-bundle.py packages.txt mapfiles.txt $(bundleextras) \
@@ -166,14 +166,23 @@ $(builddir)/pdfjs-$(pdfjsversion)-dist.zip \
 primaries += $(pdfjs_unzip_stamp)
 
 
+# Minifying. Not something I've explored much so far.
+
+minify = java -jar build/yuicompressor-$(yuiversion).jar
+
+$(builddir)/yuicompressor-$(yuiversion).jar: \
+| $(builddir)
+	curl -L https://github.com/yui/yuicompressor/releases/download/v$(yuiversion)/yuicompressor-$(yuiversion).jar >$@
+
+%.min.js: %.js build/yuicompressor-$(yuiversion).jar
+	$(minify) $< >$@.new && mv -f $@.new $@
+
+
 # Testing
 #
 # TODO: this test suite is currently a joke.
 
-test: $(builddir)/node-webtex.min.js
-	@cd test && ./run-all-tests.sh ../$<
-
-fattest: $(builddir)/node-webtex.js # actually debuggable
+test: $(builddir)/node-webtex.js
 	@cd test && ./run-all-tests.sh ../$<
 
 
@@ -187,13 +196,10 @@ server:
 
 all: $(primaries)
 
-%.min.js: %.js
-	$(minify) $< >$@.new && mv -f $@.new $@
-
 $(builddir):
 	mkdir -p $(builddir)
 
 clean:
 	-rm -rf $(builddir)
 
-.PHONY: all clean default fattest server test
+.PHONY: all clean default server test

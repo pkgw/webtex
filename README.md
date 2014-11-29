@@ -10,8 +10,8 @@ Requirements
 * node.js
 * `curl`
 * Python version 2.7
-* the Node.js `yargs` module for the `webtex` console program
-
+* the Node.js `yargs` module, for the `webtex` console program (optional)
+* Java, for minification with YUI Compressor (optional)
 
 The font compiler
 -----------------
