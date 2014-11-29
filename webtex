@@ -1,0 +1,69 @@
+#! /usr/bin/env node
+// -*- js -*-
+
+var console = require ('console');
+var path = require ('path');
+var util = require ('util');
+
+var yargs = require ('yargs')
+    .usage ('Process a (La)TeX file using Webtex.')
+    .example ('webtex test/tex/latex-minimal.tex', 'process a small test file')
+    .demand (1, 'error: the input (La)TeX file name is required')
+    .options ('m', {alias: 'module', default: 'build/node-webtex.js'})
+    .describe ('m', 'path to the built Webtex Node.js module')
+    .options ('b', {alias: 'bundle', default: 'build/latest.zip'})
+    .describe ('b', 'path to the LaTeX bundle to use')
+    .options ('d', {alias: 'dumpfile', default: 'latex.dump.json'})
+    .describe ('d', 'name of the dumped engine state in the bundle')
+    .options ('n', {alias: 'num-iters', default: 1})
+    .describe ('n', 'number of times to iterate the engine')
+    .options ('T', {alias: 'target', default: 'flat'})
+    .describe ('T', 'destination for shipped-out boxes: flat|hier|null')
+    .boolean ('t')
+    .options ('t', {alias: 'trace'})
+    .describe ('t', 'trace EVERYTHING that the engine does')
+    .boolean ('s')
+    .options ('s', {alias: 'show-inputs'})
+    .describe ('s', 'show the inputs being fed to the engine');
+var argv = yargs.argv;
+
+if (argv._.length != 1) {
+    console.error ('error: exactly one input file must be specified');
+    process.exit (1);
+}
+var inputpath = argv._[0];
+
+var webtex = require (path.resolve (argv.module));
+
+
+// Higher-level arg processing
+
+var shiptarget;
+if (argv.target == 'flat')
+    shiptarget = new webtex.ConsoleFlatDumpTarget ();
+else if (argv.target == 'hier')
+    shiptarget = new webtex.ConsoleHierDumpTarget ();
+else if (argv.target == 'null')
+    shiptarget = {process: function () {}};
+else {
+    console.error ('error: unrecognized shipout target "' + argv.target + '"');
+    process.exit (1);
+}
+
+var jobname = inputpath;
+if (jobname.slice (-4) == '.tex')
+    jobname = jobname.slice (-4);
+
+
+// Ready to go.
+
+webtex.process_loop ({
+    jobname: jobname,
+    inputpath: inputpath,
+    dumpfile: argv.dumpfile,
+    bundlepath: argv.bundle,
+    debug_trace: argv.trace,
+    debug_input_lines: argv.showInputs,
+    shiptarget: shiptarget,
+    niters: argv.numIters,
+});

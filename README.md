@@ -4,6 +4,14 @@ webtex
 An essentially-complete LaTeX engine in JavaScript, rendered in your browser.
 Revolutionizing scientific communication since 2014.
 
+Requirements
+------------
+
+* node.js
+* `curl`
+* Python version 2.7
+* the Node.js `yargs` module for the `webtex` console program
+
 
 The font compiler
 -----------------

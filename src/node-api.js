@@ -88,20 +88,19 @@ function process_loop (data) {
     data.iostack.push (new FSIOLayer ('', inputdir + '/'));
 
     var dumpjson = null;
-    var dumppath = data.dumppath || null;
-
-    if (dumppath != null) {
-	dumpjson = get_fs_json (data.dumppath);
-	delete data.dumppath;
+    if (data.dumpfile != null) {
+	dumpjson = bundle.get_contents_json (data.dumpfile);
+	delete data.dumpfile;
     }
 
     data.fontdata = bundle.get_contents_json ('wtfontdata.json');
 
-    for (var i = 0; i < 3; i++) {
+    var niters = data.niters || 1;
+
+    for (var i = 0; i < niters; i++) {
 	data.initial_linebuf = make_fs_linebuffer (data.inputpath);
 
 	var eng = new Engine (data);
-
 	if (dumpjson != null)
 	    eng.restore_serialized_state (dumpjson);
 
