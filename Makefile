@@ -29,6 +29,7 @@ sharedjs = \
   src/fonts.js \
   src/listables.js \
   src/boxes.js \
+  src/inserts.js \
   src/math.js \
   src/align.js \
   src/valrefs.js \
