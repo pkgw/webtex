@@ -27,6 +27,7 @@ sharedjs = \
   src/parameters.js \
   src/conditionals.js \
   src/fonts.js \
+  src/listables.js \
   src/boxes.js \
   src/math.js \
   src/align.js \

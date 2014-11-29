@@ -1,39 +1,6 @@
-// Box-related data types = things that can go in lists = Listables.
+// Horizontal and vertical boxes, and the many things that can be done with them.
 //
-// The standard TeX Listables are Box (hbox and vbox), Rule, Insert, Mark,
-// Adjust, Ligature, Disc(retionary linebreak), Whatsit, Math, BoxGlue, Kern,
-// Penalty, Unset. Then there are the math "noads" but those are defined in
-// math.js.
-//
-// We separate Whatsits into IO and Specials and add our own items.
-
-
-var Boxlike = (function Boxlike_closure () {
-    // A box-like listable has width, height, depth.
-    function Boxlike () {
-	this.width_S = nlib.Zero_S;
-	this.height_S = nlib.Zero_S;
-	this.depth_S = nlib.Zero_S;
-	this.shift_amount_S = nlib.Zero_S; // positive is down (right) in H (V) box
-    }
-
-    inherit (Boxlike, Listable);
-    var proto = Boxlike.prototype;
-
-    proto._uishape = function Boxlike__uishape () {
-	return format ('w=%S h=%S d=%S', this.width_S, this.height_S, this.depth_S);
-    };
-
-    proto._copyto = function Boxlike__copyto (other) {
-	other.width_S = this.width_S;
-	other.height_S = this.height_S;
-	other.depth_S = this.depth_S;
-	other.shift_amount_S = this.shift_amount_S;
-    };
-
-    return Boxlike;
-}) ();
-
+// There's a lot of redundant code here that would be nice to coalesce.
 
 var ListBox = (function ListBox_closure () {
     function ListBox (btype) {
@@ -538,6 +505,12 @@ var CanvasBox = (function CanvasBox_closure () {
     // the HTML chrome doesn't have to try to guess which kerns, etc., are
     // important for layout; if kerning and box-shifting matters in the UI
     // presentation, the relevant effects should be encapulated in a CanvasBox.
+    //
+    // XXX: However, this approach kind of breaks because many fancy effects
+    // are achieved by constructing math boxes that are then poked and
+    // prodded, so we can't just cram everything into a CanvasBox and call it
+    // a day. Currently we only create temporary CanvasBoxes on shipout, which
+    // could be done in a one big function rather than via a class.
 
     function CanvasBox (srcbox) {
 	if (!(srcbox instanceof HBox || srcbox instanceof VBox))
@@ -651,262 +624,451 @@ var CanvasBox = (function CanvasBox_closure () {
 }) ();
 
 
-var Rule = (function Rule_closure () {
-    var running_S = -0x40000000; // "running" rule dimension
+(function boxes_closure () {
+    // Basic box construction.
 
-    function Rule () {
-	Boxlike.call (this);
-	this.ltype = LT_RULE;
-	this.width_S = running_S;
-	this.depth_S = running_S;
-	this.height_S = running_S;
-    }
+    register_command ('hbox', (function HboxCommand_closure () {
+	function HboxCommand () { Command.call (this); }
+	inherit (HboxCommand, Command);
+	var proto = HboxCommand.prototype;
+	proto.name = 'hbox';
+	proto.boxlike = true;
 
-    inherit (Rule, Boxlike);
-    var proto = Rule.prototype;
+	proto.invoke = function HboxCommand_invoke (engine) {
+	    engine.trace ('hbox (for accumulation)');
+	    engine.scan_box_for_accum (this);
+	};
 
-    proto._uisummary = function Rule__uisummary () {
-	return 'Rule ' + this._uishape ();
+	proto.start_box = function HboxCommand_start_box (engine) {
+	    engine.handle_hbox ();
+	};
+
+	return HboxCommand;
+    }) ());
+
+
+    register_command ('vbox', (function VboxCommand_closure () {
+	function VboxCommand () { Command.call (this); }
+	inherit (VboxCommand, Command);
+	var proto = VboxCommand.prototype;
+	proto.name = 'vbox';
+	proto.boxlike = true;
+
+	proto.invoke = function VboxCommand_invoke (engine) {
+	    engine.trace ('vbox (for accumulation)');
+	    engine.scan_box_for_accum (this);
+	};
+
+	proto.start_box = function VboxCommand_start_box (engine) {
+	    engine.handle_vbox (false);
+	};
+
+	return VboxCommand;
+    }) ());
+
+
+    register_command ('vtop', (function VtopCommand_closure () {
+	function VtopCommand () { Command.call (this); }
+	inherit (VtopCommand, Command);
+	var proto = VtopCommand.prototype;
+	proto.name = 'vtop';
+	proto.boxlike = true;
+
+	proto.invoke = function VtopCommand_invoke (engine) {
+	    engine.trace ('vtop (for accumulation)');
+	    engine.scan_box_for_accum (this);
+	};
+
+	proto.start_box = function VtopCommand_start_box (engine) {
+	    engine.handle_vbox (true);
+	};
+
+	return VtopCommand;
+    }) ());
+
+
+    // Box registers and other manipulations.
+
+    register_command ('setbox', function cmd_setbox (engine) {
+	var reg = engine.scan_char_code__I ();
+	engine.scan_optional_equals ();
+	engine.trace ('setbox: queue #%d = ...', reg);
+	engine.handle_setbox (reg);
+    });
+
+
+    register_command ('copy', (function CopyCommand_closure () {
+	function CopyCommand () { Command.call (this); }
+	inherit (CopyCommand, Command);
+	var proto = CopyCommand.prototype;
+	proto.name = 'copy';
+	proto.boxlike = true;
+
+	proto.invoke = function CopyCommand_invoke (engine) {
+	    engine.scan_box_for_accum (this);
+	};
+
+	proto.start_box = function CopyCommand_start_box (engine) {
+	    var reg = engine.scan_char_code__I ();
+	    var box = engine.get_register (T_BOX, reg);
+	    engine.trace ('copy box %d', reg);
+	    engine.handle_finished_box (box.clone ());
+	};
+
+	return CopyCommand;
+    }) ());
+
+
+    register_command ('box', (function BoxCommand_closure () {
+	function BoxCommand () { Command.call (this); }
+	inherit (BoxCommand, Command);
+	var proto = BoxCommand.prototype;
+	proto.name = 'box';
+	proto.boxlike = true;
+
+	proto.invoke = function BoxCommand_invoke (engine) {
+	    engine.scan_box_for_accum (this);
+	};
+
+	proto.start_box = function BoxCommand_start_box (engine) {
+	    var reg = engine.scan_char_code__I ();
+	    var box = engine.get_register (T_BOX, reg);
+	    engine.trace ('fetch box %d', reg);
+	    engine.set_register (T_BOX, reg, new VoidBox ());
+	    engine.handle_finished_box (box);
+	};
+
+	return BoxCommand;
+    }) ());
+
+
+    register_command ('vsplit', (function VsplitCommand_closure () {
+	function VsplitCommand () { Command.call (this); }
+	inherit (VsplitCommand, Command);
+	var proto = VsplitCommand.prototype;
+	proto.name = 'vsplit';
+	proto.boxlike = true;
+
+	proto.invoke = function VsplitCommand_invoke (engine) {
+	    engine.scan_box_for_accum (this);
+	};
+
+	proto.start_box = function VsplitCommand_start_box (engine) {
+	    var reg = engine.scan_char_code__I ();
+	    var box = engine.get_register (T_BOX, reg);
+
+	    if (!engine.scan_keyword ('to'))
+		throw new TexRuntimeError ('expected keyword "to"');
+
+	    var depth_S = engine.scan_dimen__O_S (false);
+	    engine.trace ('vsplit box %d to %S [fake impl]', reg, depth_S);
+
+	    // TODO: use splitmaxdepth, splittopskip, etc. See TeXBook p. 124, T:TP~977.
+
+	    if (box.btype == BT_VOID) {
+		engine.handle_finished_box (new VoidBox ());
+		return;
+	    }
+
+	    if (box.btype == BT_HBOX)
+		throw new TexRuntimeError ('cannot \\vsplit an hbox');
+
+	    engine.set_register (T_BOX, reg, new VoidBox ());
+	    engine.handle_finished_box (box);
+	};
+
+	return VsplitCommand;
+    }) ());
+
+
+    register_command ('lastbox', (function LastboxCommand_closure () {
+	function LastboxCommand () { Command.call (this); }
+	inherit (LastboxCommand, Command);
+	var proto = LastboxCommand.prototype;
+	proto.name = 'lastbox';
+	proto.boxlike = true;
+
+	proto.invoke = function LastboxCommand_invoke (engine) {
+	    engine.scan_box_for_accum (this);
+	};
+
+	proto.start_box = function LastboxCommand_start_box (engine) {
+	    var m = engine.mode ();
+	    if (m == M_VERT)
+		throw new TexRuntimeError ('cannot use \\lastbox in vertical mode');
+	    if (m == M_MATH || m == M_DMATH) {
+		engine.handle_finished_box (new VoidBox ());
+		return;
+	    }
+
+	    var last = engine.get_last_listable ();
+	    if (last == null || last.ltype != LT_BOX || last.btype == BT_VOID) {
+		engine.handle_finished_box (new VoidBox ());
+		return;
+	    }
+
+	    engine.pop_last_listable ();
+	    engine.handle_finished_box (last);
+	};
+
+	return LastboxCommand;
+    }) ());
+
+
+    // Box conditionals.
+
+    function if_boxtype (engine, wanttype) {
+	engine.start_parsing_condition ();
+	var reg = engine.scan_char_code__I ();
+	engine.done_parsing_condition ();
+	var btype = engine.get_register (T_BOX, reg).btype;
+	var result = (btype == wanttype);
+	engine.trace ('if%s %s => %b', bt_names[wanttype], bt_names[btype], result);
+	engine.handle_if (result);
     };
 
-    proto._uishape = function Rule__uishape () {
-	var w = '(running)', h = '(running)', d = '(running)';
+    register_command ('ifvoid', function cmd_ifvoid (engine) {
+	if_boxtype (engine, BT_VOID);
+    });
 
-	if (this.width_S != running_S)
-	    w = format ('%S', this.width_S);
-	if (this.height_S != running_S)
-	    h = format ('%S', this.height_S);
-	if (this.depth_S != running_S)
-	    d = format ('%S', this.depth_S);
+    register_command ('ifhbox', function cmd_ifhbox (engine) {
+	if_boxtype (engine, BT_HBOX);
+    });
 
-	return format ('w=%s h=%s d=%s', w, h, d);
+    register_command ('ifvbox', function cmd_ifvbox (engine) {
+	if_boxtype (engine, BT_VBOX);
+    });
+
+
+    // Box properties.
+
+    register_command ('wd', (function WdCommand_closure () {
+	function WdCommand () { Command.call (this); }
+	inherit (WdCommand, Command);
+	var proto = WdCommand.prototype;
+	proto.name = 'wd';
+
+	proto.invoke = function WdCommand_invoke (engine) {
+	    // NOTE: you can't e.g. do \advance\wd0 so implementing as a settable
+	    // Valref is not so important.
+	    var reg = engine.scan_char_code__I ();
+	    engine.scan_optional_equals ();
+	    var width_S = engine.scan_dimen__O_S (false);
+	    var box = engine.get_register (T_BOX, reg);
+
+	    if (box.btype == BT_VOID) {
+		engine.trace ('\\wd%d = %S -- noop on void box', reg, width_S);
+	    } else {
+		engine.trace ('\\wd%d = %S', reg, width_S);
+		box.width_S = width_S;
+	    }
+	};
+
+	proto.get_valtype = function WdCommand_get_valtype () {
+	    return T_DIMEN;
+	};
+
+	proto.as_valref = function WdCommand_as_valref (engine) {
+	    var reg = engine.scan_char_code__I ();
+	    var box = engine.get_register (T_BOX, reg);
+	    return new ConstantValref (T_DIMEN, box.width_S);
+	};
+
+	return WdCommand;
+    }) ());
+
+
+    register_command ('ht', (function HtCommand_closure () {
+	function HtCommand () { Command.call (this); }
+	inherit (HtCommand, Command);
+	var proto = HtCommand.prototype;
+	proto.name = 'ht';
+
+	proto.invoke = function HtCommand_invoke (engine) {
+	    // NOTE: you can't e.g. do \advance\ht0 so implementing as a settable
+	    // Valref is not so important.
+	    var reg = engine.scan_char_code__I ();
+	    engine.scan_optional_equals ();
+	    var height_S = engine.scan_dimen__O_S (false);
+	    var box = engine.get_register (T_BOX, reg);
+
+	    if (box.btype == BT_VOID) {
+		engine.trace ('\\ht%d = %S -- noop on void box', reg, height_S);
+	    } else {
+		engine.trace ('\\ht%d = %S', reg, height_S);
+		box.height_S = height_S;
+	    }
+	};
+
+	proto.get_valtype = function HtCommand_get_valtype () {
+	    return T_DIMEN;
+	};
+
+	proto.as_valref = function HtCommand_as_valref (engine) {
+	    var reg = engine.scan_char_code__I ();
+	    var box = engine.get_register (T_BOX, reg);
+	    return new ConstantValref (T_DIMEN, box.height_S);
+	};
+
+	return HtCommand;
+    }) ());
+
+
+    register_command ('dp', (function DpCommand_closure () {
+	function DpCommand () { Command.call (this); }
+	inherit (DpCommand, Command);
+	var proto = DpCommand.prototype;
+	proto.name = 'dp';
+
+	proto.invoke = function DpCommand_invoke (engine) {
+	    // NOTE: you can't e.g. do \advance\dp0 so implementing as a settable
+	    // Valref is not so important.
+	    var reg = engine.scan_char_code__I ();
+	    engine.scan_optional_equals ();
+	    var depth_S = engine.scan_dimen__O_S (false);
+	    var box = engine.get_register (T_BOX, reg);
+
+	    if (box.btype == BT_VOID) {
+		engine.trace ('\\dp%d = %S -- noop on void box', reg, depth_S);
+	    } else {
+		engine.trace ('\\dp%d = %S', reg, depth_S);
+		box.depth_S = depth_S;
+	    }
+	};
+
+	proto.get_valtype = function DpCommand_get_valtype () {
+	    return T_DIMEN;
+	};
+
+	proto.as_valref = function DpCommand_as_valref (engine) {
+	    var reg = engine.scan_char_code__I ();
+	    var box = engine.get_register (T_BOX, reg);
+	    return new ConstantValref (T_DIMEN, box.depth_S);
+	};
+
+	return DpCommand;
+    }) ());
+
+
+    // Unboxing.
+
+    register_command ('unhbox', function cmd_unhbox (engine) {
+	if (engine.ensure_horizontal (this))
+	    return; // this command will be reread after new paragraph is started.
+
+	var reg = engine.scan_char_code__I ();
+	var box = engine.get_register (T_BOX, reg);
+
+	if (box.btype == BT_VOID) {
+	    engine.trace ('unhbox %d (but void)', reg);
+	    return;
+	}
+
+	if (box.btype != BT_HBOX)
+	    throw new TexRuntimeError ('trying to unhbox non-hbox reg %d: %U', reg, box);
+
+	engine.trace ('unhbox %d (non-void) -> %U', reg, box);
+	engine.set_register (T_BOX, reg, new VoidBox ());
+	engine.accum_list (box.list);
+    });
+
+
+    register_command ('unvbox', function cmd_unvbox (engine) {
+	if (engine.ensure_vertical (this))
+	    return; // command will be reread after this graf is finished.
+
+	var reg = engine.scan_char_code__I ();
+	var box = engine.get_register (T_BOX, reg);
+
+	if (box.btype == BT_VOID) {
+	    engine.trace ('unvbox %d (but void)', reg);
+	    return;
+	}
+
+	if (box.btype != BT_VBOX)
+	    throw new TexRuntimeError ('trying to unvbox non-vbox reg %d: %U', reg, box);
+
+	engine.trace ('unvbox %d (non-void)', reg);
+	engine.set_register (T_BOX, reg, new VoidBox ());
+	engine.accum_list (box.list);
+    });
+
+
+    register_command ('unhcopy', function cmd_unhcopy (engine) {
+	if (engine.ensure_horizontal (this))
+	    return; // this command will be reread after new paragraph is started.
+
+	var reg = engine.scan_char_code__I ();
+	var box = engine.get_register (T_BOX, reg);
+
+	if (box.btype == BT_VOID)
+	    return;
+
+	if (box.btype != BT_HBOX)
+	    throw new TexRuntimeError ('trying to unhcopy a non-hbox');
+
+	engine.trace ('unhcopy %d', reg);
+	engine.accum_list (box.list.slice ());
+    });
+
+
+    register_command ('unvcopy', function cmd_unvcopy (engine) {
+	if (engine.ensure_vertical (this))
+	    return; // command will be reread after this graf is finished.
+
+	var reg = engine.scan_char_code__I ();
+	var box = engine.get_register (T_BOX, reg);
+
+	if (box.btype == BT_VOID)
+	    return;
+
+	if (box.btype != BT_VBOX)
+	    throw new TexRuntimeError ('trying to unvcopy a non-vbox');
+
+	engine.trace ('unvcopy %d', reg);
+	engine.accum_list (box.list.slice ());
+    });
+
+
+    // Shifting boxes. Sign conventions: TTP 185.
+
+    function shift_a_box (engine, desc, negate) {
+	var amount_S = engine.scan_dimen__O_S (false);
+	engine.trace ('%s next box by %S ...', desc, amount_S);
+
+	function shift_the_box (engine, box) {
+	    engine.trace ('... finish %s', desc);
+	    if (negate)
+		amount_S *= -1;
+	    box.shift_amount_S = box.shift_amount_S + amount_S;
+	    engine.accum (box);
+	}
+
+	engine.scan_box (shift_the_box, false);
     };
 
-    Rule.is_running__S = function Rule__is_running__S (amount_S) {
-	// Note: classmethod: call Rule.is_running__S()
-	return amount_S == running_S;
-    };
+    register_command ('lower', function cmd_lower (engine) {
+	shift_a_box (engine, 'lower', false);
+    });
 
-    return Rule;
-}) ();
+    register_command ('raise', function cmd_raise (engine) {
+	shift_a_box (engine, 'raise', true);
+    });
 
+    register_command ('moveright', function cmd_moveright (engine) {
+	shift_a_box (engine, 'moveright', false);
+    });
 
-var Character = (function Character_closure () {
-    function Character (font, ord) {
-	if (!(font instanceof Font))
-	    throw new TexInternalError ('Character needs font; got %o', font);
-	if (!(ord >= 0 && ord < 256))
-	    throw new TexInternalError ('Character needs ord; got %o', ord);
+    register_command ('moveleft', function cmd_moveleft (engine) {
+	shift_a_box (engine, 'moveleft', true);
+    });
 
-	Boxlike.call (this);
-	this.ltype = LT_CHARACTER;
-	this.font = font;
-	this.ord = ord;
-    }
+    // Diagnostics.
 
-    inherit (Character, Boxlike);
-    var proto = Character.prototype;
+    register_command ('showbox', function cmd_showbox (engine) {
+	var reg = engine.scan_register_num__I ();
+	var box = engine.get_register (T_BOX, reg);
+	engine.trace ('showbox %d = %U', reg, box);
+    });
 
-    proto._uisummary = function Character__uisummary () {
-	return 'Character ' + this._uishape () + ' ord=' +
-	    escchr (this.ord) + ' font=' + this.font;
-    };
-
-    return Character;
-}) ();
-
-
-var MathDelim = (function MathDelim_closure () {
-    function MathDelim (width_S, is_after) {
-	Boxlike.call (this);
-	this.ltype = LT_MATH;
-	this.width_S = width_S;
-	this.is_after = is_after;
-    }
-
-    inherit (MathDelim, Boxlike);
-    var proto = MathDelim.prototype;
-
-    proto._uisummary = function MathDelim__uisummary () {
-	return format ('MathDelim w=%S', this.width_S);
-    };
-
-    return MathDelim;
-}) ();
-
-
-var Mark = (function Mark_closure () {
-    function Mark (toks) {
-	if (!(toks instanceof Array))
-	    throw new TexInternalError ('Mark needs Token array; got %o', toks);
-
-	this.ltype = LT_MARK;
-	this.toks = toks;
-    }
-
-    inherit (Mark, Listable);
-    var proto = Mark.prototype;
-
-    proto._uisummary = function Mark__uisummary () {
-	return 'Mark ' + new Toklist (this.toks).as_serializable ();
-    };
-
-    return Mark;
-}) ();
-
-
-var Kern = (function Kern_closure () {
-    function Kern (amount_S) {
-	this.ltype = LT_KERN;
-	this.amount_S = amount_S;
-
-	if (typeof this.amount_S !== 'number')
-	    throw new TexInternalError ('QQQ %o', amount_S);
-    }
-
-    inherit (Kern, Listable);
-    var proto = Kern.prototype;
-
-    proto._uisummary = function Kern__uisummary () {
-	return format ('Kern %S', this.amount_S);
-    };
-
-    return Kern;
-}) ();
-
-
-var Special = (function Special_closure () {
-    function Special (toks) {
-	if (!(toks instanceof Array))
-	    throw new TexInternalError ('Special needs Token array; got %o', toks);
-
-	this.ltype = LT_SPECIAL;
-	this.toks = toks;
-    }
-
-    inherit (Special, Listable);
-    var proto = Special.prototype;
-
-    proto._uisummary = function Special__uisummary () {
-	return 'Special ' + new Toklist (this.toks).as_serializable ();
-    };
-
-    return Special;
-}) ();
-
-
-var Penalty = (function Penalty_closure () {
-    function Penalty (amount) {
-	this.ltype = LT_PENALTY;
-	this.amount = nlib.maybe_unbox__O_I (amount);
-    }
-
-    inherit (Penalty, Listable);
-    var proto = Penalty.prototype;
-
-    proto._uisummary = function Penalty__uisummary () {
-	return 'Penalty ' + this.amount;
-    };
-
-    return Penalty;
-}) ();
-
-
-var BoxGlue = (function BoxGlue_closure () {
-    function BoxGlue (amount) {
-	if (!(amount instanceof Glue))
-	    throw new TexInternalError ('BoxGlue needs glue; got %o', amount);
-
-	this.ltype = LT_GLUE;
-	this.amount = amount;
-    }
-
-    inherit (BoxGlue, Listable);
-    var proto = BoxGlue.prototype;
-
-    proto._uisummary = function BoxGlue__uisummary () {
-	return 'BoxGlue ' + this.amount;
-    };
-
-    return BoxGlue;
-}) ();
-
-
-var StartTag = (function StartTag_closure () {
-    function StartTag (name, attrs) {
-	if (typeof (name) != 'string')
-	    throw new TexInternalError ('StartTag needs string; got %o', name);
-
-	this.ltype = LT_STARTTAG;
-	this.name = name;
-	this.attrs = attrs;
-    }
-
-    inherit (StartTag, Listable);
-    var proto = StartTag.prototype;
-
-    proto._uisummary = function StartTag__uisummary () {
-	return format ('StartTag %s %j', this.name, this.attrs);
-    };
-
-    return StartTag;
-}) ();
-
-
-var EndTag = (function EndTag_closure () {
-    function EndTag (name) {
-	if (typeof (name) != 'string')
-	    throw new TexInternalError ('StartTag needs string; got %o', name);
-
-	this.ltype = LT_ENDTAG;
-	this.name = name;
-    }
-
-    inherit (EndTag, Listable);
-    var proto = EndTag.prototype;
-
-    proto._uisummary = function EndTag__uisummary () {
-	return format ('EndTag %s', this.name);
-    };
-
-    return EndTag;
-}) ();
-
-
-var SuppressionControl = (function SuppressionControl_closure () {
-    function SuppressionControl (is_pop) {
-	this.ltype = LT_STARTTAG; // XXX lazy should straighten this out
-	this.is_pop = !!is_pop;
-    }
-
-    inherit (SuppressionControl, Listable);
-    var proto = SuppressionControl.prototype;
-
-    proto._uisummary = function SuppressionControl__uisummary () {
-	if (this.is_pop)
-	    return 'SuppressionControl pop';
-	return 'SuppressionControl push';
-    };
-
-    return SuppressionControl;
-}) ();
-
-
-var Image = (function Image_closure () {
-    function Image (attrs) {
-	this.ltype = LT_STARTTAG; // XXX lazy should straighten this out
-	this.src = attrs.src;
-
-	if (this.src == null)
-	    throw new TexRuntimeError ('cannot create Image without "src" attribute');
-    }
-
-    inherit (Image, Listable);
-    var proto = Image.prototype;
-
-    proto._uisummary = function Image__uisummary () {
-	return format ('Image src=%s', this.src);
-    };
-
-    return Image;
 }) ();
