@@ -21,9 +21,13 @@ var DOMRenderer = (function DOMRenderer_callback () {
     function create_pdf_image (doc, item) {
 	var bytes = new Uint8Array (item.data);
 	var canvas = doc.createElement ('canvas');
+	canvas.height = canvas.width = 200; // arbitrary non-zero default
 
 	PDFJS.getDocument (bytes).then (function (pdf) {
 	    pdf.getPage (1).then (function (page) {
+		// Samples all seem to use a scale of 1.5; I have no idea
+		// where it comes from, but it does seem to generally give
+		// good results.
 		var scale = 1.5;
 		var viewport = page.getViewport (scale);
 
