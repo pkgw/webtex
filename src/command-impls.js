@@ -1085,6 +1085,52 @@ register_command ('mark', function cmd_mark (engine) {
 });
 
 
+function parse_tag_attrs (engine, toklist) {
+    // The toklist is something like "webtex start-tag a {href} {/url/} {name}
+    // {foo}". We just look for pairs of brace-delimited spans and textify
+    // them.
+
+    var attrs = {};
+    var curname = null;
+
+    for (var i = 0; i < toklist.length; i++) {
+	var tok = toklist[i];
+
+	if (!tok.is_cat (C_BGROUP))
+	    continue;
+
+	for (var j = i + 1, depth = 1; j < toklist.length; j++) {
+	    tok = toklist[j];
+	    if (tok.is_cat (C_BGROUP))
+		depth++;
+	    else if (tok.is_cat (C_EGROUP)) {
+		depth--;
+		if (depth == 0)
+		    break;
+	    }
+	}
+
+	if (j == toklist.length)
+	    throw new TexRuntimeError ('unfinished tag attribute in %T', toklist);
+
+	var value = new Toklist (toklist.slice (i + 1, j)).iotext (engine);
+
+	if (curname == null) {
+	    curname = value;
+	} else {
+	    attrs[curname] = value;
+	    curname = null;
+	}
+
+	i = j;
+    }
+
+    if (curname != null)
+	throw new TexRuntimeError ('incomplete tag attribute in %T', toklist);
+
+    return attrs;
+}
+
 register_command ('special', function cmd_special (engine) {
     engine.scan_left_brace ();
     var tlist = engine.scan_tok_group (true);
@@ -1105,8 +1151,7 @@ register_command ('special', function cmd_special (engine) {
 	    object = new SuppressionControl (true);
 	} else if (pieces[1] == 'start-tag') {
 	    var tag = pieces[2];
-	    // TODO: attributes!
-	    object = new StartTag (tag, {});
+	    object = new StartTag (tag, parse_tag_attrs (engine, tlist.toks));
 	} else if (pieces[1] == 'end-tag') {
 	    var tag = pieces[2];
 	    object = new EndTag (tag);
@@ -1561,7 +1606,7 @@ register_command ('write', function cmd_write (engine) {
     var streamnum = engine.scan_streamnum ();
     engine.scan_left_brace ();
     var toks = engine.scan_tok_group (true);
-    var tt = toks.iotext (engine, false);
+    var tt = toks.iotext (engine);
 
     if (streamnum == 16) {
 	// 16 -> the log

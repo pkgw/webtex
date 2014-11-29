@@ -20,8 +20,15 @@ var DOMRenderer = (function DOMRenderer_callback () {
 	    if (typeof item == 'string') {
 		dom_stack[idom].appendChild (doc.createTextNode (item));
 	    } else if (item.kind === 'starttag') {
-		// XXX: no attributes
-		dom_stack.push (doc.createElement (item.name));
+		var elem = doc.createElement (item.name);
+
+		for (var aname in item.attrs) {
+		    if (!item.attrs.hasOwnProperty (aname))
+			continue;
+		    elem.setAttribute (aname, item.attrs[aname]);
+		}
+
+		dom_stack.push (elem);
 		idom++;
 	    } else if (item.kind === 'endtag') {
 		// XXX: check start and end tags agree.

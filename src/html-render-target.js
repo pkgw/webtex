@@ -63,7 +63,11 @@ worker_ship_targets['html-render'] = (function HTMLRenderTarget_closure () {
 		    this.maybe_push (data);
 		}
 	    } else if (item instanceof StartTag) {
-		this.maybe_push ({kind: 'starttag', name: item.name});
+		this.maybe_push ({
+		    kind: 'starttag',
+		    name: item.name,
+		    attrs: item.attrs,
+		});
 	    } else if (item instanceof EndTag) {
 		// XXX: check start and end tags agree.
 		this.maybe_push ({kind: 'endtag'});
