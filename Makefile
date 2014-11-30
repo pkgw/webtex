@@ -32,6 +32,7 @@ sharedjs = \
   src/inserts.js \
   src/math.js \
   src/align.js \
+  src/page-builder.js \
   src/valrefs.js \
   src/token.js \
   src/linebuffer.js \

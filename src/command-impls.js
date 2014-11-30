@@ -802,18 +802,6 @@ register_command ('unskip', function cmd_unskip (engine) {
 });
 
 
-register_command ('shipout', function cmd_shipout (engine) {
-    function ship_it_good (engine, box) {
-	// Note: any box type (void, hbox, vbox) is OK to ship out.
-	engine.set_register (T_BOX, 255, new VoidBox ());
-	engine.ship_it (box);
-    };
-
-    engine.trace ('shipout');
-    engine.scan_box (ship_it_good, false);
-});
-
-
 // "Special registers" with single global values:
 //
 // ints: \deadcycles, \insertpenalties.
@@ -1254,7 +1242,33 @@ register_command ('ifeof', function cmd_ifeof (engine) {
 
 register_command ('end', function cmd_end (engine) {
     engine.trace ('end');
-    engine.handle_end ();
+
+    // See the TeXBook end of Ch. 23 (p. 264). Terminate if main vertical
+    // list is empty and \deadcycles=0. Otherwise insert '\line{} \vfill
+    // \penalty-'10000000000' into the main vertical list and reread the
+    // \end. \line{} is \hbox to\hsize{}.
+
+    if (engine.get_cur_list ().length == 0 &&
+	engine.get_special_value (T_INT, 'deadcycles') == 0) {
+	engine.trace ('... completely done');
+	engine._force_end = true;
+    } else {
+	engine.trace ('... forcing page build');
+
+	var hb = new HBox ();
+	hb.width_S = engine.get_parameter__O_S ('hsize');
+	engine.accum (hb);
+
+	var g = new Glue ();
+	g.stretch_S = nlib.scale__I_S (1);
+	g.stretch_order = 2;
+	engine.accum (new BoxGlue (g));
+
+	engine.accum (new Penalty (-1073741824));
+
+	engine.push (Token.new_cmd (engine.commands['end']));
+	engine.run_page_builder ();
+    }
 });
 
 register_command ('dump', function cmd_dump (engine) {

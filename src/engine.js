@@ -609,74 +609,6 @@ var Engine = (function Engine_closure () {
 	// TODO: clear \parshape info, which nests in the EqTb.
     };
 
-    // List-building.
-
-    proto.run_page_builder = function Engine_run_page_builder () {
-	// Real TeX pays attention to the height of the page-in-progress and
-	// decides to break with a bunch of complex logic. We don't need any
-	// of that because the whole point is that computer monitors don't
-	// need pagination! So in Webtex the page builder has to be explicitly
-	// called.
-	if (this.mode () != M_VERT)
-	    throw new TexInternalError ('tried to build page outside of vertical mode');
-	if (this.mode_stack.length != 1)
-	    throw new TexInternalError ('vertical mode is not deepest?')
-
-	if (this._running_output)
-	    return; // T:TP 994.
-
-	// Hacky version of \outputpenalty setting -- TeXBook p. 125. We should
-	// preserve the penalty for the next batch of output, but since (I think)
-	// we don't need it for anything, we just pop it off the list.
-
-	var list = this.get_cur_list ();
-	var l = list.length;
-
-	if (l > 0 && list[l-1].ltype == LT_PENALTY) {
-	    this.set_parameter (T_INT, 'outputpenalty', list[l-1].amount);
-	    list.pop ();
-	} else {
-	    this.set_parameter (T_INT, 'outputpenalty', 10000);
-	}
-
-	// See TeXBook p. 125.
-
-	var vbox = new VBox ();
-	vbox.list = list;
-	vbox.set_glue__OOS (this, false, nlib.Zero_S);
-	this.set_register (T_BOX, 255, vbox);
-	this.reset_cur_list ();
-	this._running_output = true;
-
-	function finish_output (eng) {
-	    this.end_graf ();
-	    this.unnest_eqtb ();
-	    this._running_output = false;
-	    // TODO: deal with held-over insertions, etc. T:TP 1026.
-	};
-
-	var outtl = this.get_parameter (T_TOKLIST, 'output');
-	this.trace ('*output -> %T', outtl);
-	this.trace ('*box255 = %U', vbox);
-	this.nest_eqtb ();
-	this.enter_group ('output routine', finish_output.bind (this));
-	this.push (Token.new_cmd (this.commands['<end-group>']));
-	this.push_toks (outtl.toks);
-
-	// Not happy about this recursion but other functions really want the
-	// page builder to operate atomically.
-
-	while (this._running_output) {
-	    var rv = this.step ();
-	    if (rv === EOF)
-		throw new TexRuntimeError ('EOF inside output routine??');
-	}
-    };
-
-    proto.ship_it = function Engine_ship_it (box) {
-	this.trace ('shipping out');
-	this.shiptarget.process (this, box);
-    };
 
     // Input nesting and other I/O
 
@@ -698,35 +630,6 @@ var Engine = (function Engine_closure () {
 
     proto.handle_endinput = function Engine_handle_endinput () {
 	this.inputstack.pop_current_linebuf ();
-    };
-
-    proto.handle_end = function Engine_handle_end () {
-	// See the TeXBook end of Ch. 23 (p. 264). Terminate if main vertical
-	// list is empty and \deadcycles=0. Otherwise insert '\line{} \vfill
-	// \penalty-'10000000000' into the main vertical list and reread the
-	// \end. \line{} is \hbox to\hsize{}.
-
-	if (this.get_cur_list ().length == 0 &&
-	    this.get_special_value (T_INT, 'deadcycles') == 0) {
-	    this.trace ('... completely done');
-	    this._force_end = true;
-	} else {
-	    this.trace ('... forcing page build');
-
-	    var hb = new HBox ();
-	    hb.width_S = this.get_parameter__O_S ('hsize');
-	    this.accum (hb);
-
-	    var g = new Glue ();
-	    g.stretch_S = nlib.scale__I_S (1);
-	    g.stretch_order = 2;
-	    this.accum (new BoxGlue (g));
-
-	    this.accum (new Penalty (-1073741824));
-
-	    this.push (Token.new_cmd (this.commands['end']));
-	    this.run_page_builder ();
-	}
     };
 
     proto.infile = function Engine_infile (num) {
