@@ -87,18 +87,18 @@
 % Hook up floats to trigger <figure> tags
 %
 \def\@floatboxreset{%
-  \reset@font
-  \normalsize
-  \@setminipage
-  \special{webtex start-tag figure}
+  \reset@font%
+  \normalsize%
+  \@setminipage%
+  \special{webtex start-tag figure}%
 }
 \def\@endfloatbox{%
-  \par\vskip\z@skip
-  \@minipagefalse
-  \special{webtex end-tag figure}
-  \outer@nobreak
-  \egroup
-  \color@endbox
+  \par\vskip\z@skip%
+  \@minipagefalse%
+  \special{webtex end-tag figure}%
+  \outer@nobreak%
+  \egroup%
+  \color@endbox%
 }
 
 %
