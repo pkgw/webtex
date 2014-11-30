@@ -12,16 +12,34 @@ genlists = \
   commands.txt \
   namedparams.txt
 
+# Non-TeX-specific low-level utilities
 sharedjs = \
   src/preamble.js \
   src/format.js \
   src/inflate.js \
   src/jsonparse.js \
+  src/readzip.js
+
+# Basic classes, constants
+sharedjs += \
   src/constants.js \
   src/str-utils.js \
   src/numerics.js \
   src/base-classes.js \
   src/values.js \
+  src/valrefs.js \
+  src/token.js
+
+# I/O infrastructure
+sharedjs += \
+  src/linebuffer.js \
+  src/ordsource.js \
+  src/inputstack.js \
+  src/iostack.js \
+  src/bundle.js
+
+# High-level features
+sharedjs += \
   src/modes.js \
   src/registers.js \
   src/parameters.js \
@@ -33,18 +51,10 @@ sharedjs = \
   src/math.js \
   src/align.js \
   src/page-builder.js \
-  src/valrefs.js \
-  src/token.js \
-  src/linebuffer.js \
-  src/ordsource.js \
-  src/inputstack.js \
-  src/iostack.js \
   src/command-classes.js \
   src/command-impls.js \
   $(builddir)/engine-helpers.js \
-  src/engine.js \
-  src/readzip.js \
-  src/bundle.js
+  src/engine.js
 
 workerjs = \
   src/html-render-target.js \
