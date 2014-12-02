@@ -64,7 +64,7 @@ var Insertion = (function Insertion_closure () {
     function begin_insert_or_adjust (engine, is_adjust) {
 	// TTP 1097-1099, "begin_insert_or_adjust"
 
-	if (engine.absmode () == M_VERT)
+	if (is_adjust && engine.absmode () == M_VERT)
 	    throw new TexRuntimeError ('\\vadjust may not be used in vertical mode');
 
 	if (is_adjust) {
