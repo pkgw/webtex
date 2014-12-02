@@ -25,6 +25,7 @@
 	this.trace ('defused page builder!');
 	var vbox = new VBox ();
 	vbox.list = this.get_cur_list ();
+	vbox.expand_adjustments ();
 	vbox.set_glue__OOS (this, false, nlib.Zero_S);
 	this.reset_cur_list ();
 	this.shiptarget.process (this, vbox);

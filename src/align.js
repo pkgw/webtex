@@ -380,6 +380,7 @@
 		b.set_glue__OOS (engine, false, nlib.Zero_S);
 		w_S = b.height_S;
 	    } else {
+		// TODO: deal with adjustments. cf "cur_tail"
 		b = new HBox ();
 		b.list = engine.leave_mode ();
 		b.set_glue__OOS (engine, false, nlib.Zero_S);

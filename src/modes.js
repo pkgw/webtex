@@ -199,16 +199,6 @@ var M_VERT = 1,  // standard vertical mode
 	    ms.list.push (new BoxGlue (g));
 	}
 
-	// Webtex-specific hack: if the item is a vadjust or an insert, insert
-	// its contents directly.
-
-	if ((item instanceof Adjustment) || (item instanceof Insertion)) {
-	    this.trace ('expanding insert or adjustment');
-	    Array.prototype.push.apply (ms.list, item.list);
-	}
-
-	// End of Webtex-specific hack.
-
 	ms.list.push (item);
 	ms.prev_depth_S = item.depth_S;
     });

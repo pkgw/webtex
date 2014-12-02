@@ -3,6 +3,19 @@
 // linebreak!
 
 (function paragraphs_closure () {
+    engine_proto.register_state ({
+	engine_init: function (engine) {
+	    // This is TeX's adjust_{head,tail}, which are used to pull
+	    // inserts, marks, and vadjusts out of hlists. I'm not at all
+	    // happy about using a global for this but it's not very obvious
+	    // how all of the pieces fit together within TeX.
+	    engine.pending_adjustments = [];
+	},
+	is_clean: function (engine) {
+	    return engine.pending_adjustments.length == 0;
+	},
+    });
+
     engine_proto.register_method ('normal_paragraph', function Engine_normal_paragraph () {
 	// TTP 1070, "normal_paragraph"
 	this.set_parameter (T_INT, 'looseness', 0);
@@ -45,32 +58,44 @@
 	this.maybe_push_toklist ('everypar');
     });
 
+    engine_proto.register_method ('line_break', function Engine_line_break (list) {
+	// We don't run the linebreaking algorithm. Instead we think of this
+	// "paragraph" as one giant wide line. That makes it appropriate to
+	// insert a \rightskip at the end of the line.
+
+	list.push (new Penalty (10000));
+	list.push (new BoxGlue (this.get_parameter (T_GLUE, 'parfillskip')));
+	list.push (new BoxGlue (this.get_parameter (T_GLUE, 'rightskip')));
+	list.push (new EndTag ('p')); // webtex special!
+
+	var hbox = new HBox ();
+	hbox.list = list;
+	hbox.set_glue__OOS (this, false, nlib.Zero_S, this.pending_adjustments);
+	// skip: interline glue and penalties
+
+	// TTP 888:
+	this.accum_to_vlist (hbox);
+
+	if (this.pending_adjustments.length) {
+	    this.accum_list (this.pending_adjustments);
+	    this.pending_adjustments = [];
+	}
+    });
+
     engine_proto.register_method ('end_graf', function Engine_end_graf () {
 	// TTP 1096.
 	if (this.mode () != M_HORZ)
 	    return;
 
-	this.handle_un_listify (LT_GLUE);
 	var list = this.leave_mode ();
 	if (!list.length)
 	    return;
 
-	list.push (new Penalty (10000));
-	list.push (new BoxGlue (this.get_parameter (T_GLUE, 'parfillskip')));
-	// We don't run the linebreaking algorithm. Instead we think of this
-	// "paragraph" as one giant wide line. That makes it appropriate to
-	// insert a \rightskip at the end of the line.
-	list.push (new BoxGlue (this.get_parameter (T_GLUE, 'rightskip')));
-	list.push (new EndTag ('p')); // webtex special!
-	var hbox = new HBox ();
-	hbox.list = list;
-	hbox.set_glue__OOS (this, false, nlib.Zero_S);
-	// skip: interline glue and penalties
-	this.accum (hbox);
-	if (this.mode () == M_VERT)
-	    this.run_page_builder ();
-
+	this.line_break (list);
 	this.normal_paragraph ();
+
+	if (this.mode () == M_VERT)
+	    this.run_page_builder (); // webtex special
     });
 
     register_command ('par', function cmd_par (engine) {

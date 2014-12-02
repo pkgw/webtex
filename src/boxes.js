@@ -154,8 +154,8 @@ var HBox = (function HBox_closure () {
 	return b;
     };
 
-    proto.set_glue__OOS = function HBox_set_glue__OOS (engine, is_exact, spec_S) {
-	// T:TP 649
+    proto.set_glue__OOS = function HBox_set_glue__OOS (engine, is_exact, spec_S, adjustments) {
+	// TTP 649, "hpack".
 	//
 	// TTP 653: "The code here implicitly uses the fact that running
 	// dimensions are indicated by [running_S], which will be ignored in
@@ -181,6 +181,13 @@ var HBox = (function HBox_closure () {
 		nat_width_S += g.amount_S;
 		stretches_S[g.stretch_order] += g.stretch_S;
 		shrinks_S[g.shrink_order] += g.shrink_S;
+	    } else if (adjustments != null) {
+		if ((item instanceof Adjustment) ||
+		    (item instanceof Insertion) ||
+		    (item instanceof Mark)) {
+		    adjustments.push (item);
+		    this.list.splice (i, 1); // XXX inefficient
+		}
 	    }
 	}
 
@@ -494,6 +501,30 @@ var VBox = (function VBox_closure () {
 	}
     };
 
+    proto.expand_adjustments = function VBox_expand_adjustments () {
+	// This is a Webtex output hack. We don't do any page building
+	// or \output routine handling, which means that we need to
+	// manually pull out the contents of \vadjusts, etc, to get them
+	// to be processed on the MVL.
+
+	var newlist = [];
+
+	for (var i = 0; i < this.list.length; i++) {
+	    var item = this.list[i];
+
+	    if ((item instanceof Adjustment) ||
+		(item instanceof Insertion)) {
+		Array.prototype.push.apply (newlist, item.list);
+	    } else if (item instanceof Mark) {
+		global_warnf ('discarding mark tokens: %T', item.toks);
+	    } else {
+		newlist.push (item);
+	    }
+	}
+
+	this.list = newlist;
+    };
+
     return VBox;
 }) ();
 
@@ -647,6 +678,10 @@ var CanvasBox = (function CanvasBox_closure () {
 	} else if (engine.absmode () == M_VERT) {
 	    engine.trace ('... accumulate the finished box (vertical)');
 	    engine.accum_to_vlist (box);
+	    if (engine.pending_adjustments.length) {
+		engine.accum_list (engine.pending_adjustments);
+		engine.pending_adjustments = [];
+	    }
 	} else {
 	    engine.trace ('... accumulate the finished box (non-math)');
 	    engine.accum (box);
@@ -730,7 +765,7 @@ var CanvasBox = (function CanvasBox_closure () {
 	    engine.unnest_eqtb ();
 	    var box = ListBox.create (boxtype);
 	    box.list = engine.leave_mode ();
-	    box.set_glue__OOS (engine, is_exact, spec_S);
+	    box.set_glue__OOS (engine, is_exact, spec_S, engine.pending_adjustments);
 	    if (is_vtop)
 		box.adjust_as_vtop ();
 	    handle_finished_box (engine, box);
