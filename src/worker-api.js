@@ -3,6 +3,10 @@
 //
 // If we raise an exception, the parent's "onerror" handler will be called.
 
+// This hasn't been registered since it's in the generic part of the codebase:
+worker_ship_targets['html-render'] = HTMLRenderTarget;
+
+
 function post_message (kind, data) {
     // Obviously this function doesn't do a whole lot right now, but I want to
     // have a central dispatcher in case our API gets more elaborate. Also,

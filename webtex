@@ -43,6 +43,8 @@ if (argv.target == 'flat')
     shiptarget = new webtex.ConsoleFlatDumpTarget ();
 else if (argv.target == 'hier')
     shiptarget = new webtex.ConsoleHierDumpTarget ();
+else if (argv.target == 'chrome')
+    shiptarget = new webtex.ChromeJsonDumpTarget (null);
 else if (argv.target == 'null')
     shiptarget = {process: function () {}};
 else {
@@ -67,3 +69,5 @@ webtex.process_loop ({
     shiptarget: shiptarget,
     niters: argv.numIters,
 });
+
+shiptarget.finish ();

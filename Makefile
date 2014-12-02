@@ -55,10 +55,10 @@ sharedjs += \
   src/command-classes.js \
   src/command-impls.js \
   $(builddir)/engine-helpers.js \
-  src/engine.js
+  src/engine.js \
+  src/html-render-target.js
 
 workerjs = \
-  src/html-render-target.js \
   src/worker-io.js \
   src/worker-api.js
 

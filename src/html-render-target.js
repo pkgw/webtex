@@ -1,9 +1,11 @@
-// "Render" a TeX ListBox to a flattened list of HTML tags, and send it off to
-// the main thread to be built into the DOM. Note that we need to do the
-// rendering here since we can't convey object-oriented-y data across the Web
-// Worker message passing system.
+// This "renders" a TeX ListBox to a flattened list of HTML tags.
+//
+// In the browser worker context, we can't pass DOM-type objects between a
+// Worker and a main thread. So we have to convert things to a quickie
+// JSON-type representation; in which case this class can also be used from
+// Node.js to say precompile files.
 
-worker_ship_targets['html-render'] = (function HTMLRenderTarget_closure () {
+var HTMLRenderTarget = (function HTMLRenderTarget_closure () {
     function HTMLRenderTarget (post_message) {
 	this.post_message = post_message;
 
@@ -118,3 +120,5 @@ worker_ship_targets['html-render'] = (function HTMLRenderTarget_closure () {
 
     return HTMLRenderTarget;
 }) ();
+
+webtex_export ('HTMLRenderTarget', HTMLRenderTarget);

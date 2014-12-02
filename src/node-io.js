@@ -134,6 +134,9 @@ var ConsoleFlatDumpTarget = (function ConsoleFlatDumpTarget_closure () {
 	global_logf ('==== (end of shipout) ====');
     };
 
+    proto.finish = function ConsoleFlatDumpTarget_finish (engine) {
+    };
+
     return ConsoleFlatDumpTarget;
 }) ();
 
@@ -151,7 +154,57 @@ var ConsoleHierDumpTarget = (function ConsoleHierDumpTarget_closure () {
 	global_logf ('==== (end of shipout) ====');
     };
 
+    proto.finish = function ConsoleHierDumpTarget_finish (engine) {
+    };
+
     return ConsoleHierDumpTarget;
 }) ();
 
 webtex_export ('ConsoleHierDumpTarget', ConsoleHierDumpTarget);
+
+
+var ChromeJsonDumpTarget = (function ChromeJsonDumpTarget_closure () {
+    function ChromeJsonDumpTarget (filename) {
+	this.filename = filename;
+
+	if (filename == null) {
+	    this.stream = process.stdout;
+	} else {
+	    this.stream = fs.createWriteStream (filename, {
+		flags: 'w',
+		encoding: 'utf8'
+	    });
+	}
+
+	this.subtarget = new HTMLRenderTarget (this.fake_post_message.bind (this));
+	this.stream.write ('[\n');
+    }
+
+    var proto = ChromeJsonDumpTarget.prototype;
+
+    proto.fake_post_message = function ChromeJsonDumpTarget_fake_post_message (kind, data) {
+	// TODO: convert arraybuffers into base64 since otherwise they're
+	// obscenely verbose.
+
+	for (var i = 0; i < data.items.length; i++) {
+	    this.stream.write (JSON.stringify (data.items[i]));
+	    this.stream.write (',\n');
+	}
+    };
+
+    proto.process = function ChromeJsonDumpTarget_process (engine, box) {
+	this.subtarget.process (engine, box);
+    };
+
+    proto.finish = function ChromeJsonDumpTarget_finish (engine) {
+	this.stream.write (']');
+
+	if (this.filename != null)
+	    // We're not allowed to call end() on stdout.
+	    this.stream.end ();
+    };
+
+    return ChromeJsonDumpTarget;
+}) ();
+
+webtex_export ('ChromeJsonDumpTarget', ChromeJsonDumpTarget);
