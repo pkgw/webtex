@@ -22,6 +22,14 @@
 	if (this._running_output)
 	    return; // TTP 994.
 
+	this.trace ('defused page builder!');
+	var vbox = new VBox ();
+	vbox.list = this.get_cur_list ();
+	vbox.set_glue__OOS (this, false, nlib.Zero_S);
+	this.reset_cur_list ();
+	this.shiptarget.process (this, vbox);
+	return;
+
 	// Hacky version of \outputpenalty setting -- TeXBook p. 125. We should
 	// preserve the penalty for the next batch of output, but since (I think)
 	// we don't need it for anything, we just pop it off the list.
@@ -71,6 +79,8 @@
     });
 
     register_command ('shipout', function cmd_shipout (engine) {
+	throw new TexRuntimeError ('\\shipout shouldn\'t be called with defused page builder');
+
 	function ship_it_good (engine, box) {
 	    // Note: any box type (void, hbox, vbox) is OK to ship out.
 	    engine.trace ('shipping out');
