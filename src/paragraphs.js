@@ -72,6 +72,8 @@
 	hbox.list = list;
 	hbox.set_glue__OOS (this, false, nlib.Zero_S, this.pending_adjustments);
 	// skip: interline glue and penalties
+	// Pretend that linebreaking was just fine:
+	hbox.width_S = this.get_parameter__O_S ('hsize');
 
 	// TTP 888:
 	this.accum_to_vlist (hbox);
