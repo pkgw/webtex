@@ -124,8 +124,11 @@ var format = (function format_wrapper () {
                     break;
                 case 'S':
 		    if (typeof arg !== 'number')
-			throw new Error ('format %S expected number but got ' + arg);
-		    arg = nlib.to_texstr__S_O (arg);
+			arg = '!!non-num!!';
+		    else if (isNaN (arg))
+			arg = '!!NaN!!';
+		    else
+			arg = nlib.to_texstr__S_O (arg);
                     break;
 		case 'T':
 		    if (arg instanceof Array)
