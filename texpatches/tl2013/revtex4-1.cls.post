@@ -1,0 +1,16 @@
+% -*- latex -*-
+
+% Blugggh: hacks to drop floats, etc, in the MVL immediately, because
+% otherwise we'd need to implement a complex output routine infrastructure
+% just to get them to appear.
+
+
+
+% Proper HTML tags for figure captions:
+
+\let\@@webtex@orig@makecaption\@makecaption %
+\long\def\@makecaption#1#2{% Don't know a better way to patch this.
+  \special{webtex start-tag figcaption}%
+  \@@webtex@orig@makecaption{#1}{#2}%
+  \special{webtex end-tag figcaption}%
+}%

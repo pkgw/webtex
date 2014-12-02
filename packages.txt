@@ -19,6 +19,8 @@ microtype
 natbib
 oberdiek
 plain
+revtex
 revtex4
+textcase
 tools
 url

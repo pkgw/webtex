@@ -1,0 +1,24 @@
+% -*- latex -*-
+%
+% Futz with the "float" infrastructure to just emit the immediately. This way
+% we can avoid firing up the output routines, which are especially hairy in
+% ltxgrid.
+%
+\def\end@@float#1{%
+ \minipagefootnote@here
+ \@endfloatbox
+ #1%
+ \@ifnum{\@floatpenalty <\z@}{%
+  \@ifnum{\@floatpenalty <-\@Mii}{%
+    % We're in vmode
+    \box\@currbox
+    \@cons\@freelist\@currbox
+  }{%
+   \vadjust{%
+     \box\@currbox
+     \@cons\@freelist\@currbox
+   }%
+   \@Esphack
+  }%
+ }{}%
+}%
