@@ -133,17 +133,7 @@ var M_VERT = 1,  // standard vertical mode
     // Manipulation and interrogation of the current list.
 
     engine_proto.register_method ('accum', function Engine_accum (item) {
-	// XXX: this is not a good approximation to TeX. We need to
-	// implement package() and extraction of Vadjusts from hlists
-	// and stuff like that.
-
 	var ms = this.mode_stack[0];
-
-	if (Math.abs (ms.mode) == M_VERT) {
-	    this.accum_to_vlist (item);
-	    return;
-	}
-
 	ms.list.push (item);
 
 	// spacefactor management. TeXBook p. 76.
@@ -177,16 +167,19 @@ var M_VERT = 1,  // standard vertical mode
 	Array.prototype.push.apply (this.mode_stack[0].list, list);
     });
 
-    engine_proto.register_method ('accum_to_vlist', function Engine_accum_to_vlist (item) {
+    engine_proto.register_method ('accum_to_vlist', function Engine_accum_to_vlist (box) {
 	// TTP 679 "append_to_vlist". This function is needed to add the
 	// baselineskip glue, which we need for things like alignments and
 	// some aspects of equations.
+
+	if (!(box instanceof ListBox))
+	    throw new TexInternalError ('accum_to_vlist should get boxes only; got %o', box);
 
 	var ms = this.mode_stack[0];
 
 	if (ms.prev_depth_S > ignore_depth_S) {
 	    var bs = this.get_parameter (T_GLUE, 'baselineskip');
-	    var d_S = bs.amount_S - ms.prev_depth_S - item.height_S;
+	    var d_S = bs.amount_S - ms.prev_depth_S - box.height_S;
 	    var g;
 
 	    if (d_S < this.get_parameter (T_DIMEN, 'lineskiplimit'))
@@ -199,8 +192,8 @@ var M_VERT = 1,  // standard vertical mode
 	    ms.list.push (new BoxGlue (g));
 	}
 
-	ms.list.push (item);
-	ms.prev_depth_S = item.depth_S;
+	ms.list.push (box);
+	ms.prev_depth_S = box.depth_S;
     });
 
     engine_proto.register_method ('get_last_listable', function Engine_get_last_listable () {
