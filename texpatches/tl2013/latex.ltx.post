@@ -55,7 +55,25 @@
   \egroup%
   \color@endbox%
 }
-
+%
+%
+% Prevent parboxes from putting everything inside a math
+% shift, which causes us to try to canvas-ize it all with
+% results of sadness.
+%
+\long\def\@iiiparbox#1#2[#3]#4#5{%
+  \leavevmode
+  \@pboxswfalse
+  \setlength\@tempdima{#4}%
+  \@begin@tempboxa\vbox{\hsize\@tempdima\@parboxrestore#5\@@par}%
+    \ifx\relax#2\else
+      \setlength\@tempdimb{#2}%
+      \edef\@parboxto{to\the\@tempdimb}%
+    \fi
+    \vbox
+    \@parboxto{\let\hss\vss\let\unhbox\unvbox
+       \csname bm@#3\endcsname}%
+  \@end@tempboxa}
 %
 % Now put the LaTeX temporaries back how they should be.
 %
