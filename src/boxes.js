@@ -696,10 +696,6 @@ var CanvasBox = (function CanvasBox_closure () {
 	}
 
 	engine.trace ('finished: %U', box);
-
-	if (box.btype == BT_VBOX)
-	    engine.end_graf (); // in case we were in the middle of one. Noop if not.
-
 	boxop (engine, box);
     }
 
@@ -724,7 +720,12 @@ var CanvasBox = (function CanvasBox_closure () {
 	}
 
 	function leave_box_construction (engine) {
+	    // TTP 1085, 1086
 	    engine.trace ('leave_box_construction is_exact=%b spec=%S', is_exact, spec_S);
+
+	    if (boxtype == BT_VBOX)
+		engine.end_graf (); // in case we were in the middle of one. Noop if not.
+
 	    engine.unnest_eqtb ();
 	    var box = ListBox.create (boxtype);
 	    box.list = engine.leave_mode ();
