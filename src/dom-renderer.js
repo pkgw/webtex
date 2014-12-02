@@ -5,6 +5,15 @@ var DOMRenderer = (function DOMRenderer_callback () {
     function DOMRenderer (worker_url, container) {
 	this.worker_url = worker_url;
 	this.container = container;
+
+	// pdf.js seems to only be able to handle one simultaneous
+	// page.render() call, perhaps because that goes to a single worker
+	// object that gets confused. So we have to add some structure to
+	// serialize our render() calls.
+
+	this.queued_pdf_renders = [];
+	this.pdf_render_interval_id = null;
+	this.pdf_render_is_waiting = false;
     }
 
     var proto = DOMRenderer.prototype;
@@ -18,38 +27,74 @@ var DOMRenderer = (function DOMRenderer_callback () {
 	png: 'image/png',
     };
 
-    function create_pdf_image (doc, item) {
+    function check_pdf_rendering () {
+	if (this.pdf_render_is_waiting)
+	    return;
+
+	if (!this.queued_pdf_renders.length) {
+	    window.clearInterval (this.pdf_render_interval_id);
+	    this.pdf_render_interval_id = null;
+	    return;
+	}
+
+	var info = this.queued_pdf_renders.shift ();
+	var page = info.page, canvas = info.canvas;
+
+	// Samples all seem to use a scale of 1.5; I have no idea where it
+	// comes from, but it does seem to generally give good results.
+	//
+	// TODO: enforce a maximum width.
+
+	var scale = 1.5;
+	var viewport = page.getViewport (scale);
+
+	var context = canvas.getContext ('2d');
+	canvas.height = viewport.height;
+	canvas.width = viewport.width;
+
+	var hack = page.render ({canvasContext: context, viewport: viewport});
+	var old_callback = hack.internalRenderTask.callback;
+	var js_is_lame = this;
+
+	this.pdf_render_is_waiting = true;
+
+	hack.internalRenderTask.callback = function (err) {
+	    js_is_lame.pdf_render_is_waiting = false;
+	    old_callback.call (this, err);
+	};
+    };
+
+    proto.create_pdf_image = function DOMRenderer_create_pdf_image (doc, item) {
 	var bytes = new Uint8Array (item.data);
 	var canvas = doc.createElement ('canvas');
 	canvas.height = canvas.width = 200; // arbitrary non-zero default
 
+	var js_is_lame = this;
+
 	PDFJS.getDocument (bytes).then (function (pdf) {
-	    pdf.getPage (1).then (function (page) {
-		// Samples all seem to use a scale of 1.5; I have no idea
-		// where it comes from, but it does seem to generally give
-		// good results.
-		var scale = 1.5;
-		var viewport = page.getViewport (scale);
-
-		var context = canvas.getContext ('2d');
-		canvas.height = viewport.height;
-		canvas.width = viewport.width;
-
-		page.render ({canvasContext: context, viewport: viewport});
+	    return pdf.getPage (1);
+	}).then (function (page) {
+	    js_is_lame.queued_pdf_renders.push ({
+		page: page,
+		canvas: canvas
 	    });
+
+	    if (js_is_lame.pdf_render_interval_id === null)
+		js_is_lame.pdf_render_interval_id =
+		   window.setInterval (check_pdf_rendering.bind (js_is_lame), 250);
 	});
 
 	return canvas;
-    }
+    };
 
-    function create_image (doc, item) {
+    proto.create_image = function DOMRenderer_create_image (doc, item) {
 	// This "image" may be a PS, PDF, PNG, JPG, or whatever, so we can't
 	// just blindly make an <img> tag for it.
 
 	var ext = item.name.split ('.').pop ();
 
 	if (ext == 'pdf')
-	    return create_pdf_image (doc, item);
+	    return this.create_pdf_image (doc, item);
 
 	if (ext == 'ps' || ext == 'eps') {
 	    // TODO.
@@ -75,7 +120,7 @@ var DOMRenderer = (function DOMRenderer_callback () {
 
 	elem.src = 'data:' + extension_to_mime[ext] + ';base64,' + window.btoa (binary);
 	return elem;
-    }
+    };
 
     proto.handle_render = function DOMRenderer_handle_render (data) {
 	var doc = this.container.ownerDocument;
@@ -157,7 +202,7 @@ var DOMRenderer = (function DOMRenderer_callback () {
 		    }
 		}
 	    } else if (item.kind === 'image') {
-		dom_stack[idom].appendChild (create_image (doc, item));
+		dom_stack[idom].appendChild (this.create_image (doc, item));
 	    } else {
 		global_warnf ('unhandled rendered-HTML item %j', item);
 	    }
