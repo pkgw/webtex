@@ -646,13 +646,7 @@ var mathlib = (function mathlib_closure () {
 	}
 
 	engine.scan_left_brace ();
-
-	// T:TP 1070 -- XXX this is normal_paragraph
-	engine.set_parameter (T_INT, 'looseness', 0);
-	engine.set_parameter__OS ('hangindent', nlib.Zero_S);
-	engine.set_parameter (T_INT, 'hangafter', 1);
-	// TODO: clear \parshape info, which nests in the EqTb.
-
+	engine.normal_paragraph ();
 	engine.nest_eqtb ();
 	engine.enter_mode (M_IVERT);
 	engine.enter_group ('vcenter', function (eng) {

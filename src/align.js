@@ -255,13 +255,9 @@
 		    align_peek (engine);
 		}.bind (engine));
 
-		if (engine.mode () == M_IVERT) {
-		    // T:TP 1070: normal_paragraph
-		    engine.set_parameter (T_INT, 'looseness', 0);
-		    engine.set_parameter__OS ('hangindent', nlib.Zero_S);
-		    engine.set_parameter (T_INT, 'hangafter', 1);
-		    // TODO: clear \parshape info, which nests in the EqTb.
-		}
+		if (engine.mode () == M_IVERT)
+		    engine.normal_paragraph ();
+
 		return;
 	    } else if (tok.to_cmd (engine) instanceof EndGroupCommand) {
 		finish_align (engine);
@@ -306,14 +302,8 @@
 
 	if (mode == M_RHORZ)
 	    engine.set_spacefactor (1000);
-	else {
-	    // T:TP 1070: normal_paragraph
-	    engine.set_parameter (T_INT, 'looseness', 0);
-	    engine.set_parameter__OS ('hangindent', nlib.Zero_S);
-	    engine.set_parameter (T_INT, 'hangafter', 1);
-	    // TODO: clear \parshape info, which nests in the EqTb.
-	    // XXX: ignoring ignore_depth
-	}
+	else
+	    engine.normal_paragraph ();
 
 	var astate = engine.align_stack[engine.align_stack.length - 1];
 	astate.cur_span_col = astate.cur_col;

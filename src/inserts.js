@@ -78,12 +78,7 @@ var Insertion = (function Insertion_closure () {
 
 	engine.nest_eqtb ();
 	engine.scan_left_brace ();
-
-	// TTP 1070, "normal_paragraph" (TODO: collect copies into a real function)
-	engine.set_parameter (T_INT, 'looseness', 0);
-	engine.set_parameter__OS ('hangindent', nlib.Zero_S);
-	engine.set_parameter (T_INT, 'hangafter', 1);
-
+	engine.normal_paragraph ();
 	engine.enter_mode (M_IVERT);
 	engine.enter_group ('vadjust', function (eng) {
 	    // TTP 1100

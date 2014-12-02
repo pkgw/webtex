@@ -3,8 +3,16 @@
 // linebreak!
 
 (function paragraphs_closure () {
+    engine_proto.register_method ('normal_paragraph', function Engine_normal_paragraph () {
+	// TTP 1070, "normal_paragraph"
+	this.set_parameter (T_INT, 'looseness', 0);
+	this.set_parameter__OS ('hangindent', nlib.Zero_S);
+	this.set_parameter (T_INT, 'hangafter', 1);
+	// XXX: ignoring \parshape settings
+    });
+
     engine_proto.register_method ('begin_graf', function Engine_begin_graf (indent) {
-	// T:TP 1091. Due to our different page-builder approach,
+	// TTP 1091. Due to our different page-builder approach,
 	// we run it unconditionally at the top of the function,
 	// before doing the stuff to start the next paragraph.
 	this.trace ('@ new paragraph - maybe run page builder');
@@ -38,7 +46,7 @@
     });
 
     engine_proto.register_method ('end_graf', function Engine_end_graf () {
-	// T:TP 1070, 1096.
+	// TTP 1096.
 	if (this.mode () != M_HORZ)
 	    return;
 
@@ -62,22 +70,16 @@
 	if (this.mode () == M_VERT)
 	    this.run_page_builder ();
 
-	this.set_parameter (T_INT, 'looseness', 0);
-	this.set_parameter__OS ('hangindent', nlib.Zero_S);
-	this.set_parameter (T_INT, 'hangafter', 1);
-	// TODO: clear \parshape info, which nests in the EqTb.
+	this.normal_paragraph ();
     });
 
     register_command ('par', function cmd_par (engine) {
 	var m = engine.mode ();
 
 	if (m == M_VERT || m == M_IVERT) {
-	    // T:TP 1070
+	    // TTP 1070
 	    engine.trace ('par: vertical -> reset params');
-	    engine.set_parameter (T_INT, 'looseness', 0);
-	    engine.set_parameter__OS ('hangindent', nlib.Zero_S);
-	    engine.set_parameter (T_INT, 'hangafter', 1);
-	    // TODO: clear \parshape info, which nests in the EqTb.
+	    engine.normal_paragraph ();
 	} else if (m == M_RHORZ) {
 	    engine.trace ('par: rhorz -> noop');
 	} else if (m == M_HORZ) {
