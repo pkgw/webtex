@@ -12,9 +12,9 @@
     });
 
     engine_proto.register_method ('begin_graf', function Engine_begin_graf (indent) {
-	// TTP 1091. Due to our different page-builder approach,
-	// we run it unconditionally at the top of the function,
-	// before doing the stuff to start the next paragraph.
+	// TTP 1091. Due to our different page-builder approach, we run it
+	// unconditionally at the top of the function, before doing the stuff
+	// to start the next paragraph.
 	this.trace ('@ new paragraph - maybe run page builder');
 	if (this.mode () == M_VERT)
 	    this.run_page_builder ();

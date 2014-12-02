@@ -637,7 +637,7 @@ var CanvasBox = (function CanvasBox_closure () {
 
     function accum_box (engine, box) {
 	// Accumulate some box into the current list. Both math and vertical
-	// modes have wrinkles.
+	// modes have wrinkles. TTP 1076.
 
 	if (engine.absmode () == M_DMATH) {
 	    engine.trace ('... accumulate the finished box (math)');
@@ -650,6 +650,7 @@ var CanvasBox = (function CanvasBox_closure () {
 	} else {
 	    engine.trace ('... accumulate the finished box (non-math)');
 	    engine.accum (box);
+	    engine.set_spacefactor (1000);
 	}
     }
 
@@ -704,7 +705,7 @@ var CanvasBox = (function CanvasBox_closure () {
 	// enter a sub-group and potentially do a lot of processing. This
 	// should be called inside a start_box() handler, since we will call
 	// handle_finished_box when the box is finally finished being
-	// constructed.
+	// constructed. TTP 1083.
 
 	var is_exact, spec_S;
 
@@ -735,9 +736,20 @@ var CanvasBox = (function CanvasBox_closure () {
 	    handle_finished_box (engine, box);
 	}
 
+	engine.nest_eqtb (); // scan_spec does these two automagically
 	engine.scan_left_brace ();
-	engine.enter_mode (newmode);
-	engine.nest_eqtb ();
+
+	if (boxtype == BT_VBOX) {
+	    engine.normal_paragraph ();
+	    engine.enter_mode (newmode);
+	    engine.set_prev_depth_to_ignore ();
+	    engine.maybe_push_toklist ('everyvbox');
+	} else {
+	    engine.enter_mode (newmode);
+	    engine.set_spacefactor (1000);
+	    engine.maybe_push_toklist ('everyhbox');
+	}
+
 	engine.enter_group (bt_names[boxtype], leave_box_construction);
     }
 
