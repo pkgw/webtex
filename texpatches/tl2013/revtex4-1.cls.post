@@ -4,13 +4,34 @@
 % otherwise we'd need to implement a complex output routine infrastructure
 % just to get them to appear.
 
+\def\@xfloat#1[#2]{%
+  \@xfloat@LaTeX{#1}[#2]
+}
 
+\def\end@@float#1{%
+ \minipagefootnote@here
+ \@endfloatbox
+ #1%
+ \@ifnum{\@floatpenalty <\z@}{%
+  \@ifnum{\@floatpenalty <-\@Mii}{%
+    % We're in vmode
+    \unvbox\@currbox
+    \@cons\@freelist\@currbox
+  }{%
+   \vadjust{%
+     \unvbox\@currbox
+     \@cons\@freelist\@currbox
+   }
+   \@Esphack
+  }%
+ }{}%
+}%
 
 % Proper HTML tags for figure captions:
 
-\let\@@webtex@orig@makecaption\@makecaption %
-\long\def\@makecaption#1#2{% Don't know a better way to patch this.
+\def\@make@capt@title#1#2{%
   \special{webtex start-tag figcaption}%
-  \@@webtex@orig@makecaption{#1}{#2}%
+ \@ifx@empty\float@link{\@firstofone}{\expandafter\href\expandafter{\float@link}}%
+  {#1}\@caption@fignum@sep#2%
   \special{webtex end-tag figcaption}%
 }%

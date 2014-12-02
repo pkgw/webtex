@@ -28,11 +28,11 @@
   \ifnum\@floatpenalty <\z@
     \ifnum\@floatpenalty <-\@Mii
       % We're in vmode
-      \box\@currbox
+      \unvbox\@currbox
       \@cons\@freelist\@currbox
     \else
       \vadjust{%
-        \box\@currbox
+        \unvbox\@currbox
         \@cons\@freelist\@currbox
       }\@Esphack
     \fi
