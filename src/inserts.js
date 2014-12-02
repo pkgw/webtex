@@ -76,7 +76,6 @@ var Insertion = (function Insertion_closure () {
 	    engine.trace ('insert %d', num);
 	}
 
-	engine.trace ('vadjust');
 	engine.nest_eqtb ();
 	engine.scan_left_brace ();
 
@@ -98,6 +97,7 @@ var Insertion = (function Insertion_closure () {
 	    var vb = new VBox ();
 	    vb.list = engine.leave_mode ();
 	    vb.set_glue__OOS (engine, false, nlib.Zero_S);
+	    engine.trace ('finished insert/vadjust: %U', vb);
 
 	    if (is_adjust)
 		engine.accum (new Adjustment (vb));
