@@ -8,8 +8,14 @@ lmr10.pfb
 msam10.pfb
 sfrm1000.pfb
 
+lmmi8.pfb
+lmsy8.pfb
+lmr8.pfb
+
 lmmi7.pfb
 lmsy7.pfb
 lmr7.pfb
 msam7.pfb
 sfrm0700.pfb
+
+lmr6.pfb
