@@ -47,6 +47,7 @@ sharedjs += \
   src/fonts.js \
   src/listables.js \
   src/boxes.js \
+  src/paragraphs.js \
   src/inserts.js \
   src/math.js \
   src/align.js \
