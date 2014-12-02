@@ -375,24 +375,28 @@
 
 
     register_command ('ifhmode', function cmd_ifhmode (engine) {
-	engine.trace ('ifhmode');
-	engine.handle_if (engine.absmode () == M_HORZ);
+	var result = (engine.absmode () == M_HORZ);
+	engine.trace ('ifhmode => %b', result);
+	engine.handle_if (result);
     });
 
 
     register_command ('ifvmode', function cmd_ifvmode (engine) {
-	engine.trace ('ifvmode');
-	engine.handle_if (engine.absmode () == M_VERT);
+	var result = (engine.absmode () == M_VERT);
+	engine.trace ('ifvmode => %b', result);
+	engine.handle_if (result);
     });
 
 
     register_command ('ifmmode', function cmd_ifmmode (engine) {
-	engine.trace ('ifmmode');
-	engine.handle_if (engine.absmode () == M_DMATH);
+	var result = (engine.absmode () == M_DMATH);
+	engine.trace ('ifmmode => %b', result);
+	engine.handle_if (result);
     });
 
     register_command ('ifinner', function cmd_ifinner (engine) {
-	engine.trace ('ifinner');
-	engine.handle_if (engine.mode () < 0);
+	var result = (engine.mode () < 0);
+	engine.trace ('ifinner => %b', result);
+	engine.handle_if (result);
     });
 }) ();
