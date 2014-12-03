@@ -182,7 +182,8 @@ var ChromeJsonDumpTarget = (function ChromeJsonDumpTarget_closure () {
 	}
 
 	this.subtarget = new HTMLRenderTarget (this.fake_post_message.bind (this));
-	this.stream.write ('[\n');
+	this.stream.write ('[');
+	this.cur_separator = '';
     }
 
     var proto = ChromeJsonDumpTarget.prototype;
@@ -197,8 +198,9 @@ var ChromeJsonDumpTarget = (function ChromeJsonDumpTarget_closure () {
 
     proto.fake_post_message = function ChromeJsonDumpTarget_fake_post_message (kind, data) {
 	for (var i = 0; i < data.items.length; i++) {
+	    this.stream.write (this.cur_separator);
+	    this.cur_separator = ',\n';
 	    this.stream.write (JSON.stringify (data.items[i], replacer));
-	    this.stream.write (',\n');
 	}
     };
 
