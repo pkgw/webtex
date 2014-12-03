@@ -32,13 +32,10 @@ function make_fs_linebuffer (path) {
 
 
 function get_fs_json (path) {
+    // Because we have a blocking I/O model, our JSONStreamParser isn't useful
+    // here.
     var fs = require ('fs');
-
-    var jp = new JSONStreamParser ();
-    jp.onError = function (err) { throw err; };
-    jp.onValue = function (value) { jp._last_value = value; };
-    jp.write (fs.readFileSync (path, {encoding: 'utf-8'}));
-    return jp._last_value;
+    return JSON.parse (fs.readFileSync (path, {encoding: 'utf-8'}));
 }
 
 
@@ -190,12 +187,17 @@ var ChromeJsonDumpTarget = (function ChromeJsonDumpTarget_closure () {
 
     var proto = ChromeJsonDumpTarget.prototype;
 
-    proto.fake_post_message = function ChromeJsonDumpTarget_fake_post_message (kind, data) {
-	// TODO: convert arraybuffers into base64 since otherwise they're
-	// obscenely verbose.
+    function replacer (key, val) {
+	if (!(val instanceof ArrayBuffer))
+	    return val;
 
+	return {jsonenc: 'ab',
+		val: arraybuffer_to_base64 (val)};
+    }
+
+    proto.fake_post_message = function ChromeJsonDumpTarget_fake_post_message (kind, data) {
 	for (var i = 0; i < data.items.length; i++) {
-	    this.stream.write (JSON.stringify (data.items[i]));
+	    this.stream.write (JSON.stringify (data.items[i], replacer));
 	    this.stream.write (',\n');
 	}
     };
