@@ -23,6 +23,8 @@ var HTMLRenderTarget = (function HTMLRenderTarget_closure () {
 
     proto.finish_text = function HTMLRenderTarget_finish_text () {
 	if (this.queued_text.length) {
+	    // I'd like to drop all-space strings, but we need them for
+	    // constructions like "$x$ $y$".
 	    if (this.suppression_level == 0)
 		this.rendered.push (this.queued_text);
 	    this.queued_text = '';
