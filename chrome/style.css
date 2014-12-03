@@ -1,8 +1,3 @@
-/* We need to have all of the Type1 fonts available for math rendering,
- * but the main body text looks a lot better using the OpenType version
- * of Latin Modern Roman rather than Type1.
- */
-
 @font-face {
   font-family: 'Latin Modern Roman';
   font-style: normal;
