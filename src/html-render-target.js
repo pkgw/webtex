@@ -127,6 +127,50 @@ var HTMLRenderTarget = (function HTMLRenderTarget_closure () {
 		    this.suppression_level--;
 		else
 		    this.suppression_level++;
+	    } else if (item instanceof CanvasControl) {
+		this.finish_text ();
+
+		if (item.is_pop) {
+		    engine.warn ('unmatched CanvasControl (1)');
+		    continue;
+		}
+
+		// Coast through items in the current box until we find the
+		// paired CanvasControl-pop. We ignore suppression_level here.
+		// Right thing to do??
+
+		var canvas_level = 1;
+		var list = box_stack[0].list;
+		var j_start = j_stack[0] + 1;
+		var j_end = j_start;
+
+		while (canvas_level > 0 && j_end < list.length) {
+		    if (list[j_end] instanceof CanvasControl) {
+			if (list[j_end].is_pop)
+			    canvas_level--;
+			else
+			    canvas_level++;
+		    }
+
+		    j_end++;
+		}
+
+		if (canvas_level > 0)
+		    engine.warn ('unmatched CanvasControl (2)');
+
+		j_stack[0] = j_end;
+
+		// XXX: we're losing the glue setting of the outer box. We
+		// could preserve it with clone(), but then we'd need to go
+		// through and recalculate the width and height correctly,
+		// which seems like a hassle. And I have trouble seeing when
+		// it'd matter.
+
+		var subbox = ListBox.create (box_stack[0].btype);
+		subbox.list = list.slice (j_start, j_end - 1);
+		subbox.set_glue__OOS (engine, false, nlib.Zero_S);
+		global_warnf ('canvasizing: %U', subbox);
+		this.maybe_push (render_box_as_canvas (subbox));
 	    } else if (item instanceof Image) {
 		// Because the image may be sitting in a source Zip file and
 		// may be something that needs fancy handling (e.g. a PDF), we

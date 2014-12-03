@@ -723,11 +723,6 @@
 	    }
 	}
 
-	// XXX: insert specials bracketing the list to tell the HTML renderer
-	// to process it all as a big canvas. We can't stuff it all into a
-	// single box because various packages (e.g. amsmath) poke around
-	// inside displays after constructing them.
-
 	// TTP 812
 	if (engine.mode () == M_DMATH) {
 	    // TTP 1206. XXX: there's some monkeying with prevdepth that I
@@ -750,7 +745,9 @@
 
 	    engine.accum (new Penalty (engine.get_parameter__O_I ('predisplaypenalty')));
 	    engine.accum (new BoxGlue (engine.get_parameter (T_GLUE, 'abovedisplayskip')));
+	    engine.accum (new CanvasControl (false)); // webtex special
 	    engine.accum_list (list);
+	    engine.accum (new CanvasControl (true)); // webtex special
 	    engine.accum (new Penalty (engine.get_parameter__O_I ('postdisplaypenalty')));
 	    engine.accum (new BoxGlue (engine.get_parameter (T_GLUE, 'belowdisplayskip')));
 	    mathlib.resume_after_display (engine);

@@ -276,6 +276,29 @@ var SuppressionControl = (function SuppressionControl_closure () {
 }) ();
 
 
+var CanvasControl = (function CanvasControl_closure () {
+    // Items of this kind demarcate spans that should be rendered as canvases.
+    // This is needed because, e.g., math aligns come as series of hboxes
+    // whose relative positions are quite important.
+
+    function CanvasControl (is_pop) {
+	this.ltype = LT_STARTTAG; // XXX lazy should straighten this out
+	this.is_pop = !!is_pop;
+    }
+
+    inherit (CanvasControl, Listable);
+    var proto = CanvasControl.prototype;
+
+    proto._uisummary = function CanvasControl__uisummary () {
+	if (this.is_pop)
+	    return 'CanvasControl pop';
+	return 'CanvasControl push';
+    };
+
+    return CanvasControl;
+}) ();
+
+
 var Image = (function Image_closure () {
     function Image (attrs) {
 	this.ltype = LT_STARTTAG; // XXX lazy should straighten this out
