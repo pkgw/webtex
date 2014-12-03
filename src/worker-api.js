@@ -4,7 +4,7 @@
 // If we raise an exception, the parent's "onerror" handler will be called.
 
 // This hasn't been registered since it's in the generic part of the codebase:
-worker_ship_targets['html-render'] = HTMLRenderTarget;
+worker_ship_targets['html'] = HTMLTranslateTarget;
 
 
 function post_message (kind, data) {

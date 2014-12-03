@@ -211,7 +211,7 @@ var DOMRenderer = (function DOMRenderer_callback () {
 	master.handle_render = this.handle_render.bind (this);
 
 	data.jobname = data.jobname || 'texput';
-	data.ship_target_name = data.ship_target_name || 'html-render';
+	data.ship_target_name = data.ship_target_name || 'html';
 
 	master.send_message ('parse_loop', data);
     };

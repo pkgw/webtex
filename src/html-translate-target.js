@@ -1,19 +1,25 @@
-// This "renders" a TeX ListBox to a flattened list of HTML tags.
+// This "translates" a TeX ListBox to a flattened JSON-type representation of
+// HTML tags and some higher-level constructs.
 //
-// In the browser worker context, we can't pass DOM-type objects between a
-// Worker and a main thread. So we have to convert things to a quickie
-// JSON-type representation; in which case this class can also be used from
-// Node.js to say precompile files.
+// When run inside the browser, this code runs inside the web worker, and the
+// master thread then uses the JSON to build actual DOM objects using the
+// DOMRenderer.
+//
+// But we can also run in the Node.js version, in which case the flattened
+// representation can just be saved as JSON. Precisely this is done by the
+// ChromeJsonDumpTarget in node-io.js. There is, however, some awkward
+// encapsulation-breaking in this object's API that needs to be worked around
+// in this situation.
 
-var HTMLRenderTarget = (function HTMLRenderTarget_closure () {
-    function HTMLRenderTarget (post_message) {
+var HTMLTranslateTarget = (function HTMLTranslateTarget_closure () {
+    function HTMLTranslateTarget (post_message) {
 	this.post_message = post_message;
 
 	// This is kind of a hack since all of this state is basically
 	// internal to process(), but whatever.
     }
 
-    var proto = HTMLRenderTarget.prototype;
+    var proto = HTMLTranslateTarget.prototype;
 
     function render_box_as_canvas (srcbox) {
 	if (!(srcbox instanceof HBox || srcbox instanceof VBox))
@@ -56,30 +62,30 @@ var HTMLRenderTarget = (function HTMLRenderTarget_closure () {
 	return data;
     }
 
-    proto.clear_state = function HTMLRenderTarget_clear_state () {
-	this.rendered = [];
+    proto.clear_state = function HTMLTranslateTarget_clear_state () {
+	this.translated = [];
 	this.queued_text = '';
 	this.suppression_level = 0;
     };
 
-    proto.finish_text = function HTMLRenderTarget_finish_text () {
+    proto.finish_text = function HTMLTranslateTarget_finish_text () {
 	if (this.queued_text.length) {
 	    // I'd like to drop all-space strings, but we need them for
 	    // constructions like "$x$ $y$".
 	    if (this.suppression_level == 0)
-		this.rendered.push (this.queued_text);
+		this.translated.push (this.queued_text);
 	    this.queued_text = '';
 	}
     };
 
-    proto.maybe_push = function HTMLRenderTarget_maybe_push (data) {
+    proto.maybe_push = function HTMLTranslateTarget_maybe_push (data) {
 	this.finish_text ();
 
 	if (this.suppression_level == 0)
-	    this.rendered.push (data);
+	    this.translated.push (data);
     };
 
-    proto.process = function HTMLRenderTarget_process (engine, box) {
+    proto.process = function HTMLTranslateTarget_process (engine, box) {
 	this.clear_state ();
 
 	var box_stack = [box];
@@ -198,10 +204,10 @@ var HTMLRenderTarget = (function HTMLRenderTarget_closure () {
 	}
 
 	this.finish_text ();
-	this.post_message ('render', {'items': this.rendered});
+	this.post_message ('render', {'items': this.translated});
     };
 
-    return HTMLRenderTarget;
+    return HTMLTranslateTarget;
 }) ();
 
-webtex_export ('HTMLRenderTarget', HTMLRenderTarget);
+webtex_export ('HTMLTranslateTarget', HTMLTranslateTarget);

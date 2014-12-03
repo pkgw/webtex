@@ -181,7 +181,7 @@ var ChromeJsonDumpTarget = (function ChromeJsonDumpTarget_closure () {
 	    });
 	}
 
-	this.subtarget = new HTMLRenderTarget (this.fake_post_message.bind (this));
+	this.subtarget = new HTMLTranslateTarget (this.fake_post_message.bind (this));
 	this.stream.write ('[');
 	this.cur_separator = '';
     }
