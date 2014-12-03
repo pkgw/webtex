@@ -19,6 +19,18 @@ function arraybuffer_to_base64 (arraybuf) {
 }
 
 
+function base64_to_arraybuffer (base64str) {
+    var binary = window.atob (base64str);
+    var len = binary.length;
+    var bytes = new Uint8Array (len);
+
+    for (var i = 0; i < len; i++)
+	bytes[i] = binary.charCodeAt (i);
+
+    return bytes.buffer;
+}
+
+
 function fetch_url_str (url) {
     var req = new XMLHttpRequest ();
     req.open ('GET', url, false);
@@ -30,6 +42,31 @@ function fetch_url_str (url) {
 
     return req.responseText;
 }
+
+
+var fetch_url_json_with_enc = (function () {
+    function reviver (key, val) {
+	if (!key.hasOwnProperty ('jsonenc'))
+	    return val;
+
+	if (key.jsonenc == 'ab')
+	    return base64_to_arraybuffer (key.val);
+
+	global_warnf ('unhandled encoding type %s', key.jsonenc);
+	return val;
+    }
+
+    function fetch_url_json_with_enc (url) {
+	// OMG this should so not be synchronous, but I am a bad, lazy person.
+	// The Internet tells me that I can rely on JSON.parse() pretty much
+	// universally.
+
+	var text = fetch_url_str (url);
+	return JSON.parse (text, reviver);
+    }
+
+    return fetch_url_json_with_enc;
+}) ();
 
 
 var RandomAccessURL = (function RandomAccessURL_closure () {

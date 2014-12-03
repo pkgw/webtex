@@ -106,6 +106,20 @@ worker_api_endpoints.parse_loop = function webtex_worker_parse_loop (data) {
 };
 
 
+worker_api_endpoints.feed_pre_parsed = function webtex_worker_feed_pre_parsed (data) {
+    if (typeof data.jsonurl != 'string')
+	throw new TexInternalError ('need a string "jsonurl" parameter');
+
+    // I want to send the data incrementally, but we need to be careful about
+    // working in groups without trailing open tags or anything. To be dealt
+    // with later.
+
+    var data = fetch_url_json_with_enc (data.jsonurl);
+    post_message ('render', {'items': data});
+    post_message ('parse_finish', {});
+};
+
+
 onmessage = function webtex_worker_onmessage (event) {
     var data = event.data;
 

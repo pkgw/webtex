@@ -209,6 +209,12 @@ var DOMRenderer = (function DOMRenderer_callback () {
 	master.send_message ('parse_loop', data);
     };
 
+    proto.launch_feed_pre_parsed = function DOMRenderer_launch_feed_pre_parsed (data) {
+	var master = new Master (this.worker_url);
+	master.handle_render = this.handle_render.bind (this);
+	master.send_message ('feed_pre_parsed', data);
+    };
+
     return DOMRenderer;
 }) ();
 
