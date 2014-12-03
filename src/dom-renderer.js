@@ -112,6 +112,61 @@ var DOMRenderer = (function DOMRenderer_callback () {
 	return elem;
     };
 
+    proto.create_canvas = function DOMRenderer_create_canvas (doc, item) {
+	var scale = 0.000034; // XXX should not be hardcoded!!!!!!!!
+	var fontscale = 625.; // XXX ditto!
+
+	var e = doc.createElement ('canvas');
+	e.class = 'cbox';
+
+	// Note: widths and heights are integers, so for best results with
+	// small boxes we need to nudge things and adjust accordingly.
+	e.width = Math.ceil (scale * item.w);
+	e.height = Math.ceil (scale * (item.h + item.d));
+
+	// If we have a depth, must offset relative to the text baseline.
+	if (item.d != 0) {
+	    e.style.position = 'relative';
+	    e.style.bottom = (-scale * item.d).toFixed (3) + 'px';
+	}
+
+	var ctx = e.getContext ('2d');
+	ctx.fillStyle = 'rgba(0,0,0,0.8)';
+	//ctx.strokeRect (0, 0, e.width, e.height); // XXX debugging
+
+	for (var j = 0; j < item.gl.length; j++) {
+	    var q = item.gl[j];
+	    var x = scale * q.x;
+	    var y = scale * q.y;
+
+	    if (q.hasOwnProperty ('ggid')) {
+		// Character.
+		var f = compiled_fonts[q.pfb];
+		var s = scale * fontscale * q.es / 655360.
+		    if (f == null) {
+			global_warnf ('missing compiled font %o', q.pfb);
+		    } else if (!f.hasOwnProperty (q.ggid)) {
+			global_warnf ('missing compiled GGID %d in font %o', q.ggid, q.pfb);
+		    } else {
+			ctx.beginPath ();
+			ctx.save ();
+			ctx.translate (x, y);
+			ctx.scale (s, -s);
+			f[q.ggid] (ctx);
+			ctx.fill ();
+			ctx.restore ();
+		    }
+	    } else if (q.hasOwnProperty ('w')) {
+		// Rule.
+		ctx.fillRect (x, y, scale * q.w, scale * q.h);
+	    } else {
+		global_warnf ('unhandled CanvasBox graphic %j', q);
+	    }
+	}
+
+	return e;
+    };
+
     proto.handle_render = function DOMRenderer_handle_render (data) {
 	var doc = this.container.ownerDocument;
 	var dom_stack = [this.container];
@@ -139,58 +194,7 @@ var DOMRenderer = (function DOMRenderer_callback () {
 		idom--;
 		dom_stack[idom].appendChild (e);
 	    } else if (item.kind === 'canvas') {
-		var scale = 0.000034; // XXX should not be hardcoded!!!!!!!!
-		var fontscale = 625.; // XXX ditto!
-
-		var e = doc.createElement ('canvas');
-		e.class = 'cbox';
-
-		// Note: widths and heights are integers, so for best results
-		// with small boxes we need to nudge things and adjust
-		// accordingly.
-		e.width = Math.ceil (scale * item.w);
-		e.height = Math.ceil (scale * (item.h + item.d));
-		dom_stack[idom].appendChild (e);
-
-		// If we have a depth, must offset relative to the text baseline.
-		if (item.d != 0) {
-		    e.style.position = 'relative';
-		    e.style.bottom = (-scale * item.d).toFixed (3) + 'px';
-		}
-
-		var ctx = e.getContext ('2d');
-		ctx.fillStyle = 'rgba(0,0,0,0.8)';
-		//ctx.strokeRect (0, 0, e.width, e.height); // XXX debugging
-
-		for (var j = 0; j < item.gl.length; j++) {
-		    var q = item.gl[j];
-		    var x = scale * q.x;
-		    var y = scale * q.y;
-
-		    if (q.hasOwnProperty ('ggid')) {
-			// Character.
-			var f = compiled_fonts[q.pfb];
-			var s = scale * fontscale * q.es / 655360.
-			if (f == null) {
-			    global_warnf ('missing compiled font %o', q.pfb);
-			} else if (!f.hasOwnProperty (q.ggid)) {
-			    global_warnf ('missing compiled GGID %d in font %o', q.ggid, q.pfb);
-			} else {
-			    ctx.beginPath ();
-			    ctx.save ();
-			    ctx.translate (x, y);
-			    ctx.scale (s, -s);
-			    f[q.ggid] (ctx);
-			    ctx.fill ();
-			    ctx.restore ();
-			}
-		    } else if (q.hasOwnProperty ('w')) {
-			// Rule.
-			ctx.fillRect (x, y, scale * q.w, scale * q.h);
-		    } else {
-			global_warnf ('unhandled CanvasBox graphic %j', q);
-		    }
-		}
+		dom_stack[idom].appendChild (this.create_canvas (doc, item));
 	    } else if (item.kind === 'image') {
 		dom_stack[idom].appendChild (this.create_image (doc, item));
 	    } else {
