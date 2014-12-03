@@ -6,6 +6,8 @@ var DOMRenderer = (function DOMRenderer_callback () {
 	this.worker_url = worker_url;
 	this.container = container;
 
+	this.dom_stack = [this.container];
+
 	// pdf.js seems to only be able to handle one simultaneous
 	// page.render() call, perhaps because that goes to a single worker
 	// object that gets confused. So we have to add some structure to
@@ -169,7 +171,7 @@ var DOMRenderer = (function DOMRenderer_callback () {
 
     proto.handle_render = function DOMRenderer_handle_render (data) {
 	var doc = this.container.ownerDocument;
-	var dom_stack = [this.container];
+	var dom_stack = this.dom_stack;
 
 	for (var i = 0; i < data.items.length; i++) {
 	    var item = data.items[i];
