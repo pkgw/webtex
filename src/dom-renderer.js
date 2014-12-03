@@ -1,5 +1,6 @@
 // A class that uses a Master object to drive a TeX engine that renders a
-// given file to HTML and inserts the results into the specific DOM container.
+// given file to HTML and inserts the results into the specified DOM
+// container.
 
 var DOMRenderer = (function DOMRenderer_callback () {
     function DOMRenderer (worker_url, container) {
@@ -138,7 +139,9 @@ var DOMRenderer = (function DOMRenderer_callback () {
 	// If we have a depth, must offset relative to the text baseline. Note
 	// that you can actually perceive the difference if you don't round
 	// the pixel offsets (e.g., -1.666px becomes -1 rather than -2 in
-	// $1\pm2$, and this is noticeable).
+	// $1\pm2$, and this is noticeable). We should increase the size by
+	// another CSS pixel and offset the coordinate system by the
+	// difference.
 	if (item.d != 0) {
 	    e.style.position = 'relative';
 	    e.style.bottom = Math.round (-scale * item.d).toFixed () + 'px';
