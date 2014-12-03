@@ -5,8 +5,9 @@
 function arraybuffer_to_base64 (arraybuf) {
     // This code from http://jsperf.com/tobase64-implementations ;
     // join('')-based approaches are faster in some browsers (this is all very
-    // Google-able). Note that this relies on the "window" object, so the
-    // Node.js implementation works differently.
+    // Google-able). Note that this relies on the "window" or "self" object
+    // (abstracted as globalScope), so the Node.js implementation works
+    // differently.
 
     var bytes = new Uint8Array (arraybuf);
     var binary = '';
@@ -15,12 +16,12 @@ function arraybuffer_to_base64 (arraybuf) {
     for (var i = 0; i < len; i++)
 	binary += String.fromCharCode (bytes[i]);
 
-    return window.btoa (binary);
+    return globalScope.btoa (binary);
 }
 
 
 function base64_to_arraybuffer (base64str) {
-    var binary = window.atob (base64str);
+    var binary = globalScope.atob (base64str);
     var len = binary.length;
     var bytes = new Uint8Array (len);
 
@@ -46,14 +47,14 @@ function fetch_url_str (url) {
 
 var fetch_url_json_with_enc = (function () {
     function reviver (key, val) {
-	if (!key.hasOwnProperty ('jsonenc'))
+	if (!val.hasOwnProperty ('jsonenc'))
 	    return val;
 
-	if (key.jsonenc == 'ab')
-	    return base64_to_arraybuffer (key.val);
+	if (val.jsonenc == 'ab')
+	    return base64_to_arraybuffer (val.val);
 
-	global_warnf ('unhandled encoding type %s', key.jsonenc);
-	return val;
+	global_warnf ('unhandled encoding type %s', val.jsonenc);
+	return val.val;
     }
 
     function fetch_url_json_with_enc (url) {
