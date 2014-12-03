@@ -119,21 +119,29 @@ var DOMRenderer = (function DOMRenderer_callback () {
     };
 
     proto.create_canvas = function DOMRenderer_create_canvas (doc, item) {
-	var scale = 0.000034; // XXX should not be hardcoded!!!!!!!!
-	var fontscale = 625.; // XXX ditto!
-
 	var e = doc.createElement ('canvas');
 	e.class = 'cbox';
+
+	// XXX assuming a universal 20px font size. It looks like we should be
+	// able to use getComputedStyle to get the actual font size of the
+	// canvas' container, but when I try this I get "16px" back, not 20px,
+	// and 20px is definitely closer to what we want. To be investigated.
+	var html_m_width = 20;
+	var scale = 1.0 * html_m_width / item.mw;
+	var fontscale = 625.; // XXX I don't know where this comes from!
 
 	// Note: widths and heights are integers, so for best results with
 	// small boxes we need to nudge things and adjust accordingly.
 	e.width = Math.ceil (scale * item.w);
 	e.height = Math.ceil (scale * (item.h + item.d));
 
-	// If we have a depth, must offset relative to the text baseline.
+	// If we have a depth, must offset relative to the text baseline. Note
+	// that you can actually perceive the difference if you don't round
+	// the pixel offsets (e.g., -1.666px becomes -1 rather than -2 in
+	// $1\pm2$, and this is noticeable).
 	if (item.d != 0) {
 	    e.style.position = 'relative';
-	    e.style.bottom = (-scale * item.d).toFixed (3) + 'px';
+	    e.style.bottom = Math.round (-scale * item.d).toFixed () + 'px';
 	}
 
 	var ctx = e.getContext ('2d');

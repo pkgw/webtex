@@ -21,7 +21,7 @@ var HTMLTranslateTarget = (function HTMLTranslateTarget_closure () {
 
     var proto = HTMLTranslateTarget.prototype;
 
-    function render_box_as_canvas (srcbox) {
+    function render_box_as_canvas (srcbox, last_font) {
 	if (!(srcbox instanceof HBox || srcbox instanceof VBox))
 	    throw new TexInternalError ('canvas source should be HBox or ' +
 					'VBox; got %o', srcbox);
@@ -37,6 +37,14 @@ var HTMLTranslateTarget = (function HTMLTranslateTarget_closure () {
 	    d: srcbox.depth_S,
 	    gl: gl
 	};
+
+	// We need to export this information so that the HTML and
+	// LaTeX font sizes agree.
+
+	if (last_font == null)
+	    data.mw = 655200; // ~10pt
+	else
+	    data.mw = last_font.get_dimen__N_S (6); // em width
 
 	// nonzero initial Y makes coordinates relative to box's top-left.
 	srcbox.traverse__SSO (nlib.Zero_S, srcbox.height_S, function (x_S, y_S, item) {
@@ -90,6 +98,7 @@ var HTMLTranslateTarget = (function HTMLTranslateTarget_closure () {
 
 	var box_stack = [box];
 	var j_stack = [0];
+	var last_font = null;
 
 	while (box_stack.length) {
 	    if (j_stack[0] >= box_stack[0].list.length) {
@@ -103,7 +112,7 @@ var HTMLTranslateTarget = (function HTMLTranslateTarget_closure () {
 
 	    if (item instanceof ListBox) {
 		if (item.render_as_canvas) {
-		    this.maybe_push (render_box_as_canvas (item));
+		    this.maybe_push (render_box_as_canvas (item, last_font));
 		} else {
 		    // Recurse into this box.
 		    box_stack.unshift (item);
@@ -114,6 +123,7 @@ var HTMLTranslateTarget = (function HTMLTranslateTarget_closure () {
 		    throw new TexRuntimeError ('cannot ship out character in unsupported font %s',
 					       item.font.ident);
 		this.queued_text += item.font.enc_unicode[item.ord];
+		last_font = item.font;
 	    } else if (item instanceof BoxGlue) {
 		if (item.amount.is_nonzero ())
 		    this.queued_text += ' ';
@@ -175,8 +185,7 @@ var HTMLTranslateTarget = (function HTMLTranslateTarget_closure () {
 		var subbox = ListBox.create (box_stack[0].btype);
 		subbox.list = list.slice (j_start, j_end - 1);
 		subbox.set_glue__OOS (engine, false, nlib.Zero_S);
-		global_warnf ('canvasizing: %U', subbox);
-		this.maybe_push (render_box_as_canvas (subbox));
+		this.maybe_push (render_box_as_canvas (subbox, last_font));
 	    } else if (item instanceof Image) {
 		// Because the image may be sitting in a source Zip file and
 		// may be something that needs fancy handling (e.g. a PDF), we
