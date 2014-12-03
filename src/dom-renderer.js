@@ -170,13 +170,12 @@ var DOMRenderer = (function DOMRenderer_callback () {
     proto.handle_render = function DOMRenderer_handle_render (data) {
 	var doc = this.container.ownerDocument;
 	var dom_stack = [this.container];
-	var idom = 0;
 
 	for (var i = 0; i < data.items.length; i++) {
 	    var item = data.items[i];
 
 	    if (typeof item == 'string') {
-		dom_stack[idom].appendChild (doc.createTextNode (item));
+		dom_stack[0].appendChild (doc.createTextNode (item));
 	    } else if (item.kind === 'starttag') {
 		var elem = doc.createElement (item.name);
 
@@ -186,17 +185,19 @@ var DOMRenderer = (function DOMRenderer_callback () {
 		    elem.setAttribute (aname, item.attrs[aname]);
 		}
 
-		dom_stack.push (elem);
-		idom++;
+		dom_stack.unshift (elem);
 	    } else if (item.kind === 'endtag') {
 		// XXX: check start and end tags agree.
-		var e = dom_stack.pop ();
-		idom--;
-		dom_stack[idom].appendChild (e);
+		if (dom_stack.length < 2)
+		    global_warnf ('unbalanced end tag in HTML output')
+		else {
+		    var e = dom_stack.shift ();
+		    dom_stack[0].appendChild (e);
+		}
 	    } else if (item.kind === 'canvas') {
-		dom_stack[idom].appendChild (this.create_canvas (doc, item));
+		dom_stack[0].appendChild (this.create_canvas (doc, item));
 	    } else if (item.kind === 'image') {
-		dom_stack[idom].appendChild (this.create_image (doc, item));
+		dom_stack[0].appendChild (this.create_image (doc, item));
 	    } else {
 		global_warnf ('unhandled rendered-HTML item %j', item);
 	    }
