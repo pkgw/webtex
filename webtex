@@ -46,7 +46,7 @@ else if (argv.target == 'hier')
 else if (argv.target == 'chrome')
     shiptarget = new webtex.ChromeJsonDumpTarget (null);
 else if (argv.target == 'null')
-    shiptarget = {process: function () {}};
+    shiptarget = {process: function () {}, finish: function () {}};
 else {
     console.error ('error: unrecognized shipout target "' + argv.target + '"');
     process.exit (1);
