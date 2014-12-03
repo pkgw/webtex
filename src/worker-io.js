@@ -2,6 +2,23 @@
 // this needs to be synchronous; I've convinced myself that it's the only way
 // to successfully implement the engine.
 
+function arraybuffer_to_base64 (arraybuf) {
+    // This code from http://jsperf.com/tobase64-implementations ;
+    // join('')-based approaches are faster in some browsers (this is all very
+    // Google-able). Note that this relies on the "window" object, so the
+    // Node.js implementation works differently.
+
+    var bytes = new Uint8Array (arraybuf);
+    var binary = '';
+    var len = arraybuf.byteLength;
+
+    for (var i = 0; i < len; i++)
+	binary += String.fromCharCode (bytes[i]);
+
+    return window.btoa (binary);
+}
+
+
 function fetch_url_str (url) {
     var req = new XMLHttpRequest ();
     req.open ('GET', url, false);

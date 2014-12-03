@@ -105,20 +105,10 @@ var DOMRenderer = (function DOMRenderer_callback () {
 	}
 
 	// Default case for images that we actually can make an <img> tag for.
-	// ArrayBuffer-to-string code from
-	// http://jsperf.com/tobase64-implementations ; join('')-based
-	// approaches are faster in some browsers (this is all very
-	// Google-able).
 
 	var elem = doc.createElement ('img');
-
-	var bytes = new Uint8Array (item.data);
-	var binary = '';
-	var len = item.data.byteLength;
-	for (var i = 0; i < len; i++)
-	    binary += String.fromCharCode (bytes[i]);
-
-	elem.src = 'data:' + extension_to_mime[ext] + ';base64,' + window.btoa (binary);
+	elem.src = ['data:', extension_to_mime[ext], ';base64,',
+		    arraybuffer_to_base64 (item.data)].join ('');
 	return elem;
     };
 

@@ -15,6 +15,14 @@ function buffer_to_arraybuffer (buf) {
 }
 
 
+function arraybuffer_to_base64 (arraybuf) {
+    // ArrayBuffer to Buffer:
+    var buf = new Buffer (new Uint8Array (arraybuf));
+    // Buffer to base64:
+    return buf.toString ('base64');
+}
+
+
 function make_fs_linebuffer (path) {
     // XXX UTF-8 assumption of course not wise
     var fs = require ('fs');
