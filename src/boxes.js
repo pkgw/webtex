@@ -501,7 +501,7 @@ var VBox = (function VBox_closure () {
 	}
     };
 
-    proto.expand_adjustments = function VBox_expand_adjustments () {
+    proto.expand_adjustments = function VBox_expand_adjustments (engine) {
 	// This is a Webtex output hack. We don't do any page building
 	// or \output routine handling, which means that we need to
 	// manually pull out the contents of \vadjusts, etc, to get them
@@ -516,7 +516,7 @@ var VBox = (function VBox_closure () {
 		(item instanceof Insertion)) {
 		Array.prototype.push.apply (newlist, item.list);
 	    } else if (item instanceof Mark) {
-		global_warnf ('discarding mark tokens: %T', item.toks);
+		engine.warn ('discarding mark tokens: %T', item.toks);
 	    } else {
 		newlist.push (item);
 	    }
