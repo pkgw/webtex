@@ -57,5 +57,9 @@ body {
 h1 {
   /* This isn't a great long-term solution -- math won't look good
    * since it won't get bolded */
-  font-weight: 700
+  font-weight: 700;
+}
+
+h2 {
+  font-size: 24px;
 }

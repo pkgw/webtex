@@ -36,3 +36,27 @@
    \special{webtex end-tag figcaption}%
  \end{minipage}\par
  }
+%
+%
+% <h2>..<h4> tags for sections
+%
+\def\section{%
+    \if@firstsection\@firstsectionfalse
+      \maketitle\setcounter{footnote}{\thefront@matter@foot@note}%
+      \let\footnotetext=\old@foot@note@text
+      \let\footnotemark=\old@foot@note@mark
+    \fi
+    \def\webtex@@endsection{\special{webtex end-tag h2}}%
+    \@startsection{section}{1}{\z@}{9pt plus 2pt minus 1pt}{4pt}{%
+      \special{webtex start-tag h2}\aftergroup\webtex@@endsection}}
+
+\def\subsection{%
+  \def\webtex@@endsection{\special{webtex end-tag h3}}%
+  \@startsection{subsection}{2}{\z@}{9pt plus 1pt minus 1pt}{4pt}%
+  {\special{webtex start-tag h3}\aftergroup\webtex@@endsection}}
+
+\def\subsubsection{%
+  \def\webtex@@endsection{\special{webtex end-tag h4}}%
+  \@startsection{subsubsection}{3}{\z@}%
+  {2ex plus 1ex minus .2ex}{1ex plus .2ex}%
+  {\special{webtex start-tag h4}\aftergroup\webtex@@endsection}}
