@@ -18,7 +18,7 @@ sharedjs = \
   src/format.js \
   src/inflate.js \
   src/jsonparse.js \
-  src/readzip.js
+  src/zipreader.js
 
 # Basic classes, constants
 sharedjs += \
@@ -95,7 +95,7 @@ fcjs = \
   src/jsonparse.js \
   src/str-utils.js \
   src/node-io.js \
-  src/readzip.js \
+  src/zipreader.js \
   src/bundle.js \
   font-compiler/util.js \
   font-compiler/stream.js \
