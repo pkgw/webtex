@@ -16,6 +16,7 @@ var DOMRenderer = (function DOMRenderer_callback () {
 	this.queued_pdf_renders = [];
 	this.pdf_render_interval_id = null;
 	this.pdf_render_is_waiting = false;
+	this.max_img_width = 700; // XXX total hack hardcoding
     }
 
     var proto = DOMRenderer.prototype;
@@ -44,11 +45,14 @@ var DOMRenderer = (function DOMRenderer_callback () {
 
 	// Samples all seem to use a scale of 1.5; I have no idea where it
 	// comes from, but it does seem to generally give good results.
-	//
-	// TODO: enforce a maximum width.
 
 	var scale = 1.5;
 	var viewport = page.getViewport (scale);
+
+	if (viewport.width > this.max_img_width) {
+	    scale *= (1.0 * this.max_img_width / viewport.width);
+	    viewport = page.getViewport (scale);
+	}
 
 	var context = canvas.getContext ('2d');
 	canvas.height = viewport.height;
