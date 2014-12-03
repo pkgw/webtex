@@ -43,24 +43,21 @@ var HTMLRenderTarget = (function HTMLRenderTarget_closure () {
 
 	var box_stack = [box];
 	var j_stack = [0];
-	var ibox = 0;
 
 	while (box_stack.length) {
-	    if (j_stack[ibox] >= box_stack[ibox].list.length) {
-		box_stack.pop ();
-		j_stack.pop ();
-		ibox--;
+	    if (j_stack[0] >= box_stack[0].list.length) {
+		box_stack.shift ();
+		j_stack.shift ();
 		continue;
 	    }
 
-	    var item = box_stack[ibox].list[j_stack[ibox]];
-	    j_stack[ibox]++; // This item is dealt with.
+	    var item = box_stack[0].list[j_stack[0]];
+	    j_stack[0]++; // This item is dealt with.
 
 	    if (item instanceof ListBox) {
 		if (!item.render_as_canvas) {
-		    box_stack.push (item);
-		    j_stack.push (0);
-		    ibox++;
+		    box_stack.unshift (item);
+		    j_stack.unshift (0);
 		} else {
 		    var data = new CanvasBox (item).to_render_data ();
 		    data.kind = 'canvas';
