@@ -15,6 +15,47 @@ var HTMLRenderTarget = (function HTMLRenderTarget_closure () {
 
     var proto = HTMLRenderTarget.prototype;
 
+    function render_box_as_canvas (srcbox) {
+	if (!(srcbox instanceof HBox || srcbox instanceof VBox))
+	    throw new TexInternalError ('canvas source should be HBox or ' +
+					'VBox; got %o', srcbox);
+
+	// TODO, I think: record true width/height/depth of subcomponents.
+	// Otherwise we might overflow our <canvas> element.
+
+	var gl = []; // "graphics list"
+	var data = {
+	    kind: 'canvas',
+	    w: srcbox.width_S,
+	    h: srcbox.height_S,
+	    d: srcbox.depth_S,
+	    gl: gl
+	};
+
+	// nonzero initial Y makes coordinates relative to box's top-left.
+	srcbox.traverse__SSO (nlib.Zero_S, srcbox.height_S, function (x_S, y_S, item) {
+	    if (item instanceof Character) {
+		if (item.font.enc_idents == null)
+		    throw new TexRuntimeError ('cannot draw character in unsupported font %s',
+					       item.font.ident);
+
+		gl.push ({x: x_S,
+			  y: y_S,
+			  pfb: item.font.pfbname,
+			  es: item.font.metrics.effective_size,
+			  ggid: item.font.enc_idents[item.ord]});
+	    } else if (item instanceof Rule) {
+		y_S -= item.height_S; // output coordinates are rulebox's top-left too.
+		gl.push ({x: x_S,
+			  y: y_S,
+			  w: item.width_S,
+			  h: item.height_S + item.depth_S});
+	    }
+	});
+
+	return data;
+    }
+
     proto.clear_state = function HTMLRenderTarget_clear_state () {
 	this.rendered = [];
 	this.queued_text = '';
@@ -55,13 +96,12 @@ var HTMLRenderTarget = (function HTMLRenderTarget_closure () {
 	    j_stack[0]++; // This item is dealt with.
 
 	    if (item instanceof ListBox) {
-		if (!item.render_as_canvas) {
+		if (item.render_as_canvas) {
+		    this.maybe_push (render_box_as_canvas (item));
+		} else {
+		    // Recurse into this box.
 		    box_stack.unshift (item);
 		    j_stack.unshift (0);
-		} else {
-		    var data = new CanvasBox (item).to_render_data ();
-		    data.kind = 'canvas';
-		    this.maybe_push (data);
 		}
 	    } else if (item instanceof Character) {
 		if (item.font.enc_unicode == null)
