@@ -1,3 +1,6 @@
+// Copyright 2014 Peter Williams and collaborators.
+// Licensed under the MIT license. See LICENSE.md for details.
+
 // Global preamble included at the top of the wrappers in all Webtex flavors
 // (Node.js, browser master, browser worker).
 //

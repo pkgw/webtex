@@ -1,3 +1,6 @@
+// Copyright 2014 Peter Williams and collaborators.
+// Licensed under the MIT license. See LICENSE.md for details.
+
 // An individual token manipulated in the TeX engine. These may be generated
 // directly by parsing an input file, or synthesized for various reasons as
 // the engine runs.

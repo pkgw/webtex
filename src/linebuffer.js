@@ -1,3 +1,8 @@
+// Copyright 2014 Peter Williams and collaborators.
+// Licensed under the MIT license. See LICENSE.md for details.
+
+// A simple buffered reader for lines of text.
+
 var LineBuffer = (function LineBuffer_closure () {
     function LineBuffer () {
 	this.cachedlines = [];

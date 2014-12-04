@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 # -*- mode: python; coding: utf-8 -*-
-# Copyright 2014 Peter Williams
-# Licensed under the MIT License
+# Copyright 2014 Peter Williams and collaborators.
+# Licensed under the MIT License. See LICENSE.md for details.
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 import contextlib, hashlib, io, json, lzma, os.path, sys, tarfile, tempfile, urllib, zipfile

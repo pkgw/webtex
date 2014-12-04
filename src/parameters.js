@@ -1,3 +1,6 @@
+// Copyright 2014 Peter Williams and collaborators.
+// Licensed under the MIT license. See LICENSE.md for details.
+
 // TeX's named parameters. These have various types and participate in the
 // nesting state system.
 //

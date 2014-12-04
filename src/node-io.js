@@ -1,3 +1,6 @@
+// Copyright 2014 Peter Williams and collaborators.
+// Licensed under the MIT license. See LICENSE.md for details.
+
 // I/O backend for the Node.js version. **Everything is synchronous**, because
 // that's the only way I can figure out how to get the TeX engine to run
 // reliably. Trust me, I'm not happy about it either, but there really seems

@@ -1,3 +1,6 @@
+// Copyright 2014 Peter Williams and collaborators.
+// Licensed under the MIT license. See LICENSE.md for details.
+
 // Paragraphs -- essentially, constructing vertical lists from horizontal
 // lists. This is a lot easier than what TeX has to do since we don't need to
 // linebreak!

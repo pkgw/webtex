@@ -1,3 +1,6 @@
+// Copyright 2007-2013, Alexandru Marasteanu; 2014, Peter Williams and collaborators.
+// Licensed under the 3-clause BSD license. See LICENSE.md for details.
+
 // This is loosely based on sprintf.js from
 // https://github.com/alexei/sprintf.js, copied under the license shown below.
 // This version removes a lot of features, adapts the coding style, and adds
@@ -23,10 +26,8 @@
 // string that may contain percent signs.)
 //
 //
-// Original copyright and license:
-//
-// Copyright (c) 2007-2013, Alexandru Marasteanu <hello [at) alexei (dot] ro>
-// All rights reserved.
+// Original copyright line was "2007-2013, Alexandru Marasteanu <hello [at)
+// alexei (dot] ro> All rights reserved."
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:

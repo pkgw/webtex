@@ -1,3 +1,6 @@
+// Copyright 2014 Peter Williams and collaborators.
+// Licensed under the MIT license. See LICENSE.md for details.
+
 // I/O for the Worker thread. The whole reason that we use Web Workers is that
 // this needs to be synchronous; I've convinced myself that it's the only way
 // to successfully implement the engine.

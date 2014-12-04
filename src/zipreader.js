@@ -1,3 +1,6 @@
+// Copyright 2014 Peter Williams and collaborators.
+// Licensed under the MIT license. See LICENSE.md for details.
+
 /* Streaming random access to the zip file format. Based on previous work
  *
  *   - zip.js by Gildas Lormeau (BSD license)
@@ -20,8 +23,6 @@
  * here. I don't think this will come back to bite me in the ass but we'll
  * see ...
  */
-
-'use strict';
 
 var ZipReader = (function ZipReader_closure () {
     var ZIP_EOCDR_MAGIC = 0x06054b50;

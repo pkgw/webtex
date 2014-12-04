@@ -1,4 +1,7 @@
-'use strict';
+// Copyright 2014 Peter Williams and collaborators.
+// Licensed under the MIT license. See LICENSE.md for details.
+
+// The zipped-up "bundle" of all TeX resource files.
 
 var Bundle = (function Bundle_closure () {
     function Bundle (zipreader) {

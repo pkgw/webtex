@@ -1,5 +1,7 @@
 #! /bin/bash
-#
+# Copyright 2014 Peter Williams and collaborators.
+# Licensed under the MIT license. See LICENSE.md for details.
+
 # Have TeX prepare a page and dump the resulting box.
 #
 # $1 - a file containing TeX commands. It will be wrapped in some

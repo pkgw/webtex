@@ -1,3 +1,6 @@
+// Copyright 2014 Peter Williams and collaborators.
+// Licensed under the MIT license. See LICENSE.md for details.
+
 // Horizontal and vertical boxes, and the many things that can be done with them.
 //
 // There's a lot of redundant code here that would be nice to coalesce.

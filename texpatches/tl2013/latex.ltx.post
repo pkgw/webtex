@@ -1,4 +1,7 @@
 % -*- latex -*-
+% Copyright 2014 Peter Williams and collaborators.
+% Licensed under the MIT license. See LICENSE.md for details.
+
 \makeatletter
 %
 % LaTeX ends with \let\reserved@a\@filelist, which we're about to clobber,

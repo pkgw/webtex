@@ -1,3 +1,6 @@
+// Copyright 2014 Peter Williams and collaborators.
+// Licensed under the MIT license. See LICENSE.md for details.
+
 // TeX's stack of modes or its "semantic nest". This mainly contains the
 // current mode setting (vertical, horizontal, math) and the current "list"
 // that is being built.

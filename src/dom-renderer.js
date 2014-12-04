@@ -1,3 +1,6 @@
+// Copyright 2014 Peter Williams and collaborators.
+// Licensed under the MIT license. See LICENSE.md for details.
+
 // A class that uses a Master object to drive a TeX engine that renders a
 // given file to HTML and inserts the results into the specified DOM
 // container.

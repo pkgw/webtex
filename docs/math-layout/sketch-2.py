@@ -1,3 +1,6 @@
+# Copyright 2014 Peter Williams and collaborators.
+# Licensed under the MIT license. See LICENSE.md for details.
+
 """Second-pass of math layout transcription.
 
 Here we clean up the structure in self-contained ways.

@@ -1,4 +1,9 @@
-'use strict;'
+// Copyright 2014 Peter Williams and collaborators.
+// Licensed under the MIT license. See LICENSE.md for details.
+
+// Various commands. TODO: now that we have register_command(), these
+// should be relocated into topic-specific files, and this file should
+// eventually disappear.
 
 // Text layout.
 

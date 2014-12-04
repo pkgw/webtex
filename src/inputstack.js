@@ -1,3 +1,6 @@
+// Copyright 2014 Peter Williams and collaborators.
+// Licensed under the MIT license. See LICENSE.md for details.
+
 // Managing input to the TeX engine. The input comes from a stack of streams
 // of tokens.
 //

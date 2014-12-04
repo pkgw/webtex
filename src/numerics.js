@@ -1,3 +1,6 @@
+// Copyright 2014 Peter Williams and collaborators.
+// Licensed under the MIT license. See LICENSE.md for details.
+
 // TeX-internal math support. There are certain limitations on integer math,
 // and then there are fixed-point "scaled" values.
 //

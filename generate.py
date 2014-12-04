@@ -1,4 +1,7 @@
 #! /usr/bin/env python
+# -*- mode: python; coding: utf-8 -*-
+# Copyright 2014 Peter Williams and collaborators.
+# Licensed under the MIT license. See LICENSE.md for details.
 
 """Generate various code fragments from tables and other resources."""
 

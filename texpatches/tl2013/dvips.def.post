@@ -1,5 +1,7 @@
 % -*- latex -*-
-%
+% Copyright 2014 Peter Williams and collaborators.
+% Licensed under the MIT license. See LICENSE.md for details.
+
 % We look like plain TeX to the various graphics packages, so dvips.def
 % ends up getting loaded as the graphics driver. So here we override
 % all of its settings with ones that are better for webtex.

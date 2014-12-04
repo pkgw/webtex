@@ -1,3 +1,6 @@
+// Copyright 2011-2012, Tim Caswell; 2014, Peter Williams and collaborators.
+// Licensed under the MIT license. See LICENSE.md for details.
+
 /* A modified version of jsonparser.js from
  * https://github.com/creationix/jsonparse, by Tim Caswell. Original licensing
  * information reproduced below.
@@ -13,7 +16,7 @@
 This is a streaming JSON parser. For a simpler, sax-based version see this
 gist: https://gist.github.com/1821394
 
-The MIT License (MIT) Copyright (c) 2011-2012 Tim Caswell
+Original copyright line was "2011-2012 Tim Caswell"
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

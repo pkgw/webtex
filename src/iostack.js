@@ -1,5 +1,7 @@
-// TODO: we need checkpointing of output file state in case we have to rerun a
-// chunk of input tokens. I think.
+// Copyright 2014 Peter Williams and collaborators.
+// Licensed under the MIT license. See LICENSE.md for details.
+
+// Stack of virtual filesystems where we find files that TeX looks for.
 
 var OutputFile = (function OutputFile_closure () {
     function OutputFile () {

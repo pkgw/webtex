@@ -1,4 +1,8 @@
-'use strict';
+// Copyright 2014 Peter Williams and collaborators.
+// Licensed under the MIT license. See LICENSE.md for details.
+
+// A source of ordinals that are then tokenized. Mainly exists
+// to implement decoding of ^^J-type escape.
 
 var OrdSource = (function OrdSource_closure () {
     var map = Array.prototype.map;

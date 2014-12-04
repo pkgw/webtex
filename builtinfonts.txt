@@ -1,3 +1,5 @@
+# This file is dedicated to the public domain.
+
 # This should be phased out. There are just too damn many fonts for us to
 # pre-compile.
 

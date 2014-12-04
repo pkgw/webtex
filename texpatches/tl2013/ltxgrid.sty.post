@@ -1,5 +1,7 @@
 % -*- latex -*-
-%
+% Copyright 2014 Peter Williams and collaborators.
+% Licensed under the MIT license. See LICENSE.md for details.
+
 % Futz with the "float" infrastructure to just emit the immediately. This way
 % we can avoid firing up the output routines, which are especially hairy in
 % ltxgrid.

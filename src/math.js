@@ -1,8 +1,11 @@
-// Math-related data types.
+// Copyright 2014 Peter Williams and collaborators.
+// Licensed under the MIT license. See LICENSE.md for details.
+
+// Math layout.
 //
-// These correspond to "noads" in TeX. Math lists can contain these Nodes as
-// well as the Listables Ins, Mark, Adjust, Whatsit, Penalty, Disc, Rule,
-// BoxGlue, and Kern.
+// The listables correspond to "noads" in TeX. Math lists can contain these
+// Nodes as well as the Listables Ins, Mark, Adjust, Whatsit, Penalty, Disc,
+// Rule, BoxGlue, and Kern.
 
 var LIMTYPE_NORMAL = 0, // <- limits-style or not depending on context
     LIMTYPE_LIMITS = 1,

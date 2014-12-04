@@ -1,3 +1,6 @@
+// Copyright 2014 Peter Williams and collaborators.
+// Licensed under the MIT license. See LICENSE.md for details.
+
 // Base classes for some of the key TeX data types.
 
 var Value = (function Value_closure () {

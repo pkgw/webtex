@@ -1,3 +1,8 @@
+// Copyright 2014 Peter Williams and collaborators.
+// Licensed under the MIT license. See LICENSE.md for details.
+
+// The engine that holds all TeX state and drives processing.
+
 var EquivTable = (function EquivTable_closure () {
     function EquivTable (parent) {
 	this.parent = parent;

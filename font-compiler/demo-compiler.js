@@ -1,3 +1,6 @@
+// Copyright 2014 Peter Williams and collaborators.
+// Licensed under the MIT license. See LICENSE.md for details.
+
 if (process.argv.length < 4) {
     console.log ('usage: node ' + process.argv[1] + ' <glyph-enc.json> <font.pfb>');
     process.exit (1);

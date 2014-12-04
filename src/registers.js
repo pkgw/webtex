@@ -1,3 +1,6 @@
+// Copyright 2014 Peter Williams and collaborators.
+// Licensed under the MIT license. See LICENSE.md for details.
+
 // Tex's registers. There are different sets of registers that can hold ints,
 // dimens, glues, muglues, toklists, and boxes.
 

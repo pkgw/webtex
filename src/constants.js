@@ -1,4 +1,8 @@
-'use strict';
+// Copyright 2014 Peter Williams and collaborators.
+// Licensed under the MIT license. See LICENSE.md for details.
+
+// TODO: Many of these can probably be removed. Mindless emulation
+// of how TeX does things.
 
 // Value types
 

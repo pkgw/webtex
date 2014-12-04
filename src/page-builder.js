@@ -1,3 +1,6 @@
+// Copyright 2014 Peter Williams and collaborators.
+// Licensed under the MIT license. See LICENSE.md for details.
+
 // The page builder
 //
 // We "defuse" it and just ship out the main vertical list as it gets built.

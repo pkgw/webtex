@@ -1,3 +1,5 @@
+# This file is dedicated to the public domain.
+
 # Special named variables. Their values are managed in the equivalents table,
 # and they have special primitive control sequences for doing things with
 # their values.

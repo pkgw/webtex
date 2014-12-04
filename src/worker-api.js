@@ -1,3 +1,6 @@
+// Copyright 2014 Peter Williams and collaborators.
+// Licensed under the MIT license. See LICENSE.md for details.
+
 // Communication between us, the Web Worker, and the main browser thread. In
 // particular, this file defines the "onmessage" handler.
 //

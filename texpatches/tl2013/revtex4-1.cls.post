@@ -1,4 +1,6 @@
 % -*- latex -*-
+% Copyright 2014 Peter Williams and collaborators.
+% Licensed under the MIT license. See LICENSE.md for details.
 
 % Blugggh: hacks to drop floats, etc, in the MVL immediately, because
 % otherwise we'd need to implement a complex output routine infrastructure

@@ -1,3 +1,6 @@
+# Copyright 2014 Peter Williams and collaborators.
+# Licensed under the MIT license. See LICENSE.md for details.
+
 """First-pass transcription of how math layout works in TeX. The key routine
 is mlist_to_hlist(). This code doesn't run, but it transcribes "TeX: The
 Program" as closely as possible in a sort of pseudo-Python.
