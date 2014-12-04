@@ -31,7 +31,7 @@
     <div class="navbar navbar-default navbar-fixed-top" role="navigation">
       <div class="container">
 	<div class="navbar-header">
-          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" 
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
 		  data-target="#navbar" aria-expanded="false" aria-controls="navbar">
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
@@ -55,15 +55,15 @@
         <div class="row">
         </div>
       </div>
-      
+
       <div class="jumbotron">
 	<p class="lead">Science should look better on screens than on
 	  paper.</p>
 	<h1>Webtex.</h1>
-	<p class="text-center"><small><i>(very much in beta!)</i></small></p>
-	<p class="text-center">Sample: 
-	  <a class="btn btn-primary btn-lg" href="http://iopscience.iop.org/2041-8205/767/2/L30/article">Journal HTML</a>
+	<p class="text-center"><small><i>(a work in progress!)</i></small></p>
+	<p class="text-center">One article, 3 ways:
 	  <a class="btn btn-primary btn-lg" href="http://iopscience.iop.org/2041-8205/767/2/L30/pdf/2041-8205_767_2_L30.pdf">PDF</a>
+	  <a class="btn btn-primary btn-lg" href="http://iopscience.iop.org/2041-8205/767/2/L30/article">Journal HTML</a>
 	  <a class="btn btn-primary btn-lg" href="http://newton.cx/~peter/webtex/preparsed-demo.html">Webtex</a>
 	</p>
       </div>
@@ -76,9 +76,9 @@
 	be inked onto little rectangular pieces of paper!</p>
 
 	<p>Good typography isn’t the only thing but it matters more than you
-	think. Computer screens are infinitely tall and there are no trees to
-	save. High quality web design looks very different than a typical
-	printed page —
+	might think. Computer screens are infinitely tall and come with no
+	trees to save, so high quality web design looks very different than a
+	typical printed page —
 	<a href="https://medium.com/starts-with-a-bang/the-stars-beyond-42feb99f6d66">like
 	this</a>. Online scientific articles are harder to typeset than some
 	things because they contain math, but they’re not <i>that</i> hard.
@@ -118,6 +118,30 @@
 
       <p>(<i>Well, that’s the dream. It’s not done yet!</i>)</p>
 
+      <h2>A quick demo</h2>
+
+      <p>Here you can compare three renditions of the same article: the PDF
+	and HTML versions provided by the journal, and the version produced by
+	processing the
+	corresponding <a href="http://arxiv.org/format/1301.2321v2">files on
+	Arxiv</a> with Webtex:</p>
+
+      <p class="text-center">
+	<a class="btn btn-primary" href="http://iopscience.iop.org/2041-8205/767/2/L30/pdf/2041-8205_767_2_L30.pdf">PDF</a>
+	<a class="btn btn-primary" href="http://iopscience.iop.org/2041-8205/767/2/L30/article">Journal HTML</a>
+	<a class="btn btn-primary" href="http://newton.cx/~peter/webtex/preparsed-demo.html">Webtex</a>
+      </p>
+
+      <p>The Webtex version could be better in lots of ways (especially the
+	references and the figures), but I think it’s pretty good. And a lot
+	of the possible improvements are matters of CSS tweaking and
+	JavaScript hacks.</p>
+
+      <p>(Here I’ve pre-compiled the LaTeX source into an intermediate format
+	that can be rendered quickly, since the processing is still very slow.
+	But it’s possible to point your browser at a Zip file of LaTeX sources
+	and get identical results.)</p>
+
       <h2>What’s next?</h2>
 
       <p>The sky’s the limit. On my mind:</p>
@@ -125,7 +149,7 @@
       <ul>
 	<li>A command-line tool to compile a LaTeX file into a single HTML
 	  file that you can just copy around.</li>
-	<li>A browser plug-in so that you can click on
+	<li>Being able to click on
 	  any <a href="http://arxiv.org/">arxiv.org</a> preprint and read a
 	  sensible Webtex version, not someone's badly-formatted PDF with
 	  stupid green boxes around all the links.</li>
@@ -140,8 +164,8 @@
 
       <ul>
 	 <li>Webtex’s TeX implementation is buggy and incomplete.</li>
-	 <li>Its rendering of articles could be so much better. Figures and
-	   references are especially ham-handed at the moment.</li>
+	 <li>There’s infinite room for improvement and creativity in its
+	   graphic design.</li>
 	 <li>Each LaTeX document class needs manual patching to be rendered
 	   correctly. It’s too bad but that’s just how it is. I’ve only
 	   done <tt>emulateapj</tt> and even that isn’t done right.</li>
@@ -151,11 +175,11 @@
 	   than any other part of the language.</li>
       </ul>
 
-      <p>I haven’t yet polished things so that you can just download the code,
-	build a distribution, and go ahead and see what happens when you try
-	compiling your favorite document.
-	But <a href="https://github.com/pkgw/webtex/">the source code is on
-	GitHub</a> and it’s ready for action. Go ahead
+      <p>I haven’t yet polished things so that you can just build your own
+	distribution and try compiling your own favorite document. That’s
+	coming soon, but in the
+	meantime <a href="https://github.com/pkgw/webtex/">the source code is
+	on GitHub</a> and it’s ready for action. Go ahead
 	and <a href="https://github.com/pkgw/webtex/issues">file
 	issues.</a></p>
 
