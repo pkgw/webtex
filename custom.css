@@ -12,3 +12,12 @@ body {
   background-color: #D7D7D7;
   padding: 24px 60px;
 }
+
+footer {
+  margin: 4em 1em 2em 1em;
+  font-size: smaller;
+}
+
+h2 {
+  margin-top: 2em;
+}
