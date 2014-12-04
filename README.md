@@ -3,7 +3,7 @@ webtex
 
 An essentially-complete LaTeX engine in JavaScript, rendered in your browser.
 Revolutionizing scientific communication since 2014. See the public website at
-[http://pkgw.github.io/webtex/].
+http://pkgw.github.io/webtex/.
 
 
 Requirements
