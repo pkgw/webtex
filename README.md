@@ -2,7 +2,8 @@ webtex
 ======
 
 An essentially-complete LaTeX engine in JavaScript, rendered in your browser.
-Revolutionizing scientific communication since 2014.
+Revolutionizing scientific communication since 2014. See the public website at
+[http://pkgw.github.io/webtex/].
 
 
 Requirements
@@ -21,5 +22,5 @@ would upload to a website, you need:
 Other information
 -----------------
 
-* (Open-source license information)[LICENSE.md]
-* (Credits)[CREDITS.md]
+* [Open-source license information](LICENSE.md)
+* [Credits](CREDITS.md)
