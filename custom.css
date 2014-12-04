@@ -1,0 +1,14 @@
+body {
+  font-size: 20px;
+}
+
+@media (min-width: 768px) {
+  .container {
+    max-width: 730px;
+  }
+}
+
+.jumbotron {
+  background-color: #D7D7D7;
+  padding: 24px 60px;
+}

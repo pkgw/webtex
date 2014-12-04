@@ -3,39 +3,96 @@
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
-    <title>Webtex by pkgw</title>
-
-    <link rel="stylesheet" href="stylesheets/styles.css">
-    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Webtex: For Science</title>
+    <link rel="stylesheet" href="bootstrap.min.css">
+    <link rel="stylesheet" href="custom.css">
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
     <!--[if lt IE 9]>
     <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
     <![endif]-->
+    <script type="text/javascript">
+	var _gaq = _gaq || [];
+	_gaq.push(['_setAccount', 'UA-26313513-1']);
+	_gaq.push(['_gat._forceSSL']);
+	_gaq.push(['_trackPageview']);
+	(function () {
+	  var ga = document.createElement('script');
+	  ga.type = 'text/javascript';
+	  ga.async = true;
+	  ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+	  var s = document.getElementsByTagName('script')[0];
+	  s.parentNode.insertBefore(ga, s);
+	})();
+    </script>
   </head>
   <body>
-    <div class="wrapper">
-      <header>
-        <h1>Webtex</h1>
-        <p>Complete LaTeX engine implemented fully in JavaScript.</p>
-
-        <p class="view"><a href="https://github.com/pkgw/webtex">View the Project on GitHub <small>pkgw/webtex</small></a></p>
-
-
-        <ul>
-          <li><a href="https://github.com/pkgw/webtex/zipball/master">Download <strong>ZIP File</strong></a></li>
-          <li><a href="https://github.com/pkgw/webtex/tarball/master">Download <strong>TAR Ball</strong></a></li>
-          <li><a href="https://github.com/pkgw/webtex">View On <strong>GitHub</strong></a></li>
-        </ul>
-      </header>
-      <section>
-        <p>Placeholder.</p>
-      </section>
-      <footer>
-        <p>This project is maintained by <a href="https://github.com/pkgw">pkgw</a></p>
-        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
-      </footer>
+    <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+      <div class="container">
+	<div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" 
+		  data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="#">Webtex</a>
+	</div>
+	<div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li class="active"><a href="#">Home</a></li>
+          </ul>
+          <ul class="nav navbar-nav navbar-right">
+            <li><a href="https://github.com/pkgw/webtex/">Fork the code!</a></li>
+          </ul>
+	</div>
+      </div>
     </div>
-    <script src="javascripts/scale.fix.js"></script>
-    
+
+    <div class="container">
+      <div class="page-header" id="banner">
+      </div>
+
+
+      <div class="jumbotron">
+	<p class="lead">Science should look better on screens than on
+	  paper.</p>
+	<h1>Webtex.</h1>
+	<p class="text-center">Sample: 
+	  <a class="btn btn-primary btn-lg" href="http://iopscience.iop.org/2041-8205/767/2/L30/article">Journal HTML</a>
+	  <a class="btn btn-primary btn-lg" href="http://iopscience.iop.org/2041-8205/767/2/L30/pdf/2041-8205_767_2_L30.pdf">PDF</a>
+	  <a class="btn btn-primary btn-lg" href="http://newton.cx/~peter/webtex/preparsed-demo.html">Webtex</a>
+	</p>
+      </div>
+
+      <p>Reading scientific articles on computers is painful when it should be
+	a pleasure. Journals’ “electronic” articles are often atrocious, and
+	PDF versions are usually in tiny fonts in multiple columns — because
+	they’re meant to be printed on little pieces of paper! Computer
+	screens are infinitely tall and there are no trees to save. Good Web
+	typography looks very different than a typical printed page —
+	<a href="https://medium.com/starts-with-a-bang/the-stars-beyond-42feb99f6d66">like
+	this</a>.</p>
+	
+      <p>Online scientific articles are harder to make than some things
+	because they contain math. But they’re not <i>that</i> hard. It’s just
+	that the journals don’t really care.</p>
+
+      <p>Webtex cares.</p>
+
+      <h2>Leveraging 35 years of LaTeX.</h2>
+
+      <p>LaTeX is the <i>lingua franca</i> of scholarly communication for
+	physical scientists. It’s old and it’s weird, but it’s also the only
+	way to typeset equations that look good, and there are nearly a
+	million articles written in LaTeX
+	on <a href="http://arxiv.org/">arxiv.org</a>. A LaTeX file also
+	contains all the information you need to create a beautiful
+	electronic article.</p>
+    </div>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
   </body>
 </html>
