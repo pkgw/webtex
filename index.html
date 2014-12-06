@@ -1,212 +1,144 @@
-<!doctype html>
-<html>
-  <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="chrome=1">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>Webtex: For Science.</title>
-    <link rel="stylesheet" href="bootstrap.min.css">
-    <link rel="stylesheet" href="custom.css">
-    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
-    <!--[if lt IE 9]>
-    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-    <![endif]-->
-    <script type="text/javascript">
-	var _gaq = _gaq || [];
-	_gaq.push(['_setAccount', 'UA-26313513-1']);
-	_gaq.push(['_gat._forceSSL']);
-	_gaq.push(['_trackPageview']);
-	(function () {
-	  var ga = document.createElement('script');
-	  ga.type = 'text/javascript';
-	  ga.async = true;
-	  ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-	  var s = document.getElementsByTagName('script')[0];
-	  s.parentNode.insertBefore(ga, s);
-	})();
-    </script>
-  </head>
-  <body>
-    <div class="navbar navbar-default navbar-fixed-top" role="navigation">
-      <div class="container">
-	<div class="navbar-header">
-          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
-		  data-target="#navbar" aria-expanded="false" aria-controls="navbar">
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-          </button>
-          <a class="navbar-brand" href="#">Webtex</a>
-	</div>
-	<div id="navbar" class="navbar-collapse collapse">
-          <ul class="nav navbar-nav">
-            <li class="active"><a href="#">Home</a></li>
-          </ul>
-          <ul class="nav navbar-nav navbar-right">
-            <li><a href="https://github.com/pkgw/webtex/">Fork the code!</a></li>
-          </ul>
-	</div>
-      </div>
-    </div>
+---
+title: For Science.
+---
 
-    <div class="container">
-      <div class="page-header" id="banner">
-        <div class="row">
-        </div>
-      </div>
+<div class="jumbotron">
+  <p class="lead">Science should look better on screens than on
+    paper.</p>
+  <h1>Webtex.</h1>
+  <p class="text-center"><small><i>(a work in progress!)</i></small></p>
+  <p class="text-center">One article, 3 ways:
+    <a class="btn btn-primary btn-lg" href="http://iopscience.iop.org/2041-8205/767/2/L30/pdf/2041-8205_767_2_L30.pdf">PDF</a>
+    <a class="btn btn-primary btn-lg" href="http://iopscience.iop.org/2041-8205/767/2/L30/article">Journal HTML</a>
+    <a class="btn btn-primary btn-lg" href="http://newton.cx/~peter/webtex/preparsed-demo.html">Webtex</a>
+  </p>
+</div>
 
-      <div class="jumbotron">
-	<p class="lead">Science should look better on screens than on
-	  paper.</p>
-	<h1>Webtex.</h1>
-	<p class="text-center"><small><i>(a work in progress!)</i></small></p>
-	<p class="text-center">One article, 3 ways:
-	  <a class="btn btn-primary btn-lg" href="http://iopscience.iop.org/2041-8205/767/2/L30/pdf/2041-8205_767_2_L30.pdf">PDF</a>
-	  <a class="btn btn-primary btn-lg" href="http://iopscience.iop.org/2041-8205/767/2/L30/article">Journal HTML</a>
-	  <a class="btn btn-primary btn-lg" href="http://newton.cx/~peter/webtex/preparsed-demo.html">Webtex</a>
-	</p>
-      </div>
+<p>Formal scientific communication has barely evolved since the 19th
+  century. It should be <i>better</i> and <i>more pleasant</i> to read a
+  scientific article on a computer screen than in print, but journals’
+  “electronic” articles are generally atrocious. PDF versions are
+  usually in tiny fonts in multiple columns — because they’re meant to
+  be inked onto little rectangular pieces of paper!</p>
 
-      <p>Formal scientific communication has barely evolved since the 19th
-	century. It should be <i>better</i> and <i>more pleasant</i> to read a
-	scientific article on a computer screen than in print, but journals’
-	“electronic” articles are generally atrocious. PDF versions are
-	usually in tiny fonts in multiple columns — because they’re meant to
-	be inked onto little rectangular pieces of paper!</p>
+<p>Good typography isn’t the only thing but it matters more than you
+  might think. Computer screens are infinitely tall and come with no
+  trees to save, so high quality web design looks very different than a
+  typical printed page —
+  <a href="https://medium.com/starts-with-a-bang/the-stars-beyond-42feb99f6d66">like
+    this</a>. Online scientific articles are harder to typeset than some
+  things because they contain math, but they’re not <i>that</i> hard.
+  It’s just that the journals don’t really care.</p>
 
-	<p>Good typography isn’t the only thing but it matters more than you
-	might think. Computer screens are infinitely tall and come with no
-	trees to save, so high quality web design looks very different than a
-	typical printed page —
-	<a href="https://medium.com/starts-with-a-bang/the-stars-beyond-42feb99f6d66">like
-	this</a>. Online scientific articles are harder to typeset than some
-	things because they contain math, but they’re not <i>that</i> hard.
-	It’s just that the journals don’t really care.</p>
+<p>Webtex cares.</p>
 
-      <p>Webtex cares.</p>
+<h2>Leveraging 35 years of LaTeX.</h2>
 
-      <h2>Leveraging 35 years of LaTeX.</h2>
+<p>LaTeX is the <i>lingua franca</i> of scholarly communication for
+  physical scientists. It’s old and it’s weird, but it’s also the only
+  way that professional scientists know how to typeset equations that
+  look good, and there’s an important cultural heritage of nearly a
+  million articles written in LaTeX
+  on <a href="http://arxiv.org/">arxiv.org</a>. LaTeX can
+  produce <a href="http://mirrors.ctan.org/macros/latex/contrib/microtype/microtype.pdf">beautiful
+    printed documents</a> <i>and</i> contains more than enough information
+  to create a beautiful electronic articles too. We don’t need a new way
+  to write articles.</p>
 
-      <p>LaTeX is the <i>lingua franca</i> of scholarly communication for
-	physical scientists. It’s old and it’s weird, but it’s also the only
-	way that professional scientists know how to typeset equations that
-	look good, and there’s an important cultural heritage of nearly a
-	million articles written in LaTeX
-	on <a href="http://arxiv.org/">arxiv.org</a>. LaTeX can
-	produce <a href="http://mirrors.ctan.org/macros/latex/contrib/microtype/microtype.pdf">beautiful
-	printed documents</a> <i>and</i> contains more than enough information
-	to create a beautiful electronic articles too. We don’t need a new way
-	to write articles.</p>
+<p>But we do need a new way to process
+  them. <a href="http://www.latex2html.org/">Latex2HTML</a> looks
+  like <i>garbage</i>. You really need to muck with the TeX engine
+  itself. (Because, like the PDF format, it too can’t get over its
+  fascination with cramming things onto <i>pages</i>.)</p>
 
-      <p>But we do need a new way to process
-	them. <a href="http://www.latex2html.org/">Latex2HTML</a> looks
-	like <i>garbage</i>. You really need to muck with the TeX engine
-	itself. (Because, like the PDF format, it too can’t get over its
-	fascination with cramming things onto <i>pages</i>.)</p>
+<p>As long as we’re going to update TeX … let’s truly bring it into the
+  21st century. Get rid of the installation headaches, the logorrhea,
+  the random files left on your disk, and the 70s-vintage error
+  handling. <a href="https://github.com/pkgw/webtex/">Reimplement the
+    whole thing in JavaScript</a>, the <i>lingua franca</i> of web
+  programming, and have it spit out HTML, the <i>lingua franca</i> of
+  web presentation, so that you can embed professional-quality
+  mathematical typography <i>anywhere</i> there's a CPU.</p>
 
-      <p>As long as we’re going to update TeX … let’s truly bring it into the
-	21st century. Get rid of the installation headaches, the logorrhea,
-	the random files left on your disk, and the 70s-vintage error
-	handling. <a href="https://github.com/pkgw/webtex/">Reimplement the
-	whole thing in JavaScript</a>, the <i>lingua franca</i> of web
-	programming, and have it spit out HTML, the <i>lingua franca</i> of
-	web presentation, so that you can embed professional-quality
-	mathematical typography <i>anywhere</i> there's a CPU.</p>
+<p>That’s Webtex.</p>
 
-      <p>That’s Webtex.</p>
+<p>(<i>Well, that’s the dream. It’s not done yet!</i>)</p>
 
-      <p>(<i>Well, that’s the dream. It’s not done yet!</i>)</p>
+<h2>A quick demo</h2>
 
-      <h2>A quick demo</h2>
+<p>Here you can compare three renditions of the same article: the PDF
+  and HTML versions provided by the journal, and the version produced by
+  processing the
+  corresponding <a href="http://arxiv.org/format/1301.2321v2">files on
+    Arxiv</a> with Webtex:</p>
 
-      <p>Here you can compare three renditions of the same article: the PDF
-	and HTML versions provided by the journal, and the version produced by
-	processing the
-	corresponding <a href="http://arxiv.org/format/1301.2321v2">files on
-	Arxiv</a> with Webtex:</p>
-
-      <p><b>I’m told that the demo fails on Safari, sorry
-      :-( <a href="https://github.com/pkgw/webtex/">JS hackers with Macs,
+<p><b>I’m told that the demo fails on Safari, sorry
+    :-( <a href="https://github.com/pkgw/webtex/">JS hackers with Macs,
       inquire within!</a></b></p>
 
-      <p class="text-center">
-	<a class="btn btn-primary" href="http://iopscience.iop.org/2041-8205/767/2/L30/pdf/2041-8205_767_2_L30.pdf">PDF</a>
-	<a class="btn btn-primary" href="http://iopscience.iop.org/2041-8205/767/2/L30/article">Journal HTML</a>
-	<a class="btn btn-primary" href="http://newton.cx/~peter/webtex/preparsed-demo.html">Webtex</a>
-      </p>
+<p class="text-center">
+  <a class="btn btn-primary" href="http://iopscience.iop.org/2041-8205/767/2/L30/pdf/2041-8205_767_2_L30.pdf">PDF</a>
+  <a class="btn btn-primary" href="http://iopscience.iop.org/2041-8205/767/2/L30/article">Journal HTML</a>
+  <a class="btn btn-primary" href="http://newton.cx/~peter/webtex/preparsed-demo.html">Webtex</a>
+</p>
 
-      <p>The Webtex version could be better in lots of ways (especially the
-	references and the figures), but I think it’s pretty good. And a lot
-	of the possible improvements are matters of CSS tweaking and
-	JavaScript hacks.</p>
+<p>The Webtex version could be better in lots of ways (especially the
+  references and the figures), but I think it’s pretty good. And a lot
+  of the possible improvements are matters of CSS tweaking and
+  JavaScript hacks.</p>
 
-      <p>(Here I’ve pre-compiled the LaTeX source into an intermediate format
-	that can be rendered quickly, since the processing is still very slow.
-	But it’s possible to point your browser at a Zip file of LaTeX sources
-	and get identical results.)</p>
+<p>(Here I’ve pre-compiled the LaTeX source into an intermediate format
+  that can be rendered quickly, since the processing is still very slow.
+  But it’s possible to point your browser at a Zip file of LaTeX sources
+  and get identical results.)</p>
 
-      <h2>What’s next?</h2>
+<h2>What’s next?</h2>
 
-      <p>The sky’s the limit. On my mind:</p>
+<p>The sky’s the limit. On my mind:</p>
 
-      <ul>
-	<li>A command-line tool to compile a LaTeX file into a single HTML
-	  file that you can just copy around.</li>
-	<li>Being able to click on
-	  any <a href="http://arxiv.org/">arxiv.org</a> preprint and read a
-	  sensible Webtex version, not someone's badly-formatted PDF with
-	  stupid green boxes around all the links.</li>
-	<li>Shaming the journals into providing electronic articles that
-	  you actually want to read.</li>
-	<li>A brighter world where scientific results live and breathe online
-	  instead of being trapped in a file format intended for our weak,
-	  corporeal world.</li>
-      </ul>
+<ul>
+  <li>A command-line tool to compile a LaTeX file into a single HTML
+    file that you can just copy around.</li>
+  <li>Being able to click on
+    any <a href="http://arxiv.org/">arxiv.org</a> preprint and read a
+    sensible Webtex version, not someone's badly-formatted PDF with
+    stupid green boxes around all the links.</li>
+  <li>Shaming the journals into providing electronic articles that
+    you actually want to read.</li>
+  <li>A brighter world where scientific results live and breathe online
+    instead of being trapped in a file format intended for our weak,
+    corporeal world.</li>
+</ul>
 
-      <p>More prosaically:</p>
+<p>More prosaically:</p>
 
-      <ul>
-	 <li>Webtex’s TeX implementation is buggy and incomplete.</li>
-	 <li>There’s infinite room for improvement and creativity in its
-	   graphic design.</li>
-	 <li>Each LaTeX document class needs manual patching to be rendered
-	   correctly. It’s too bad but that’s just how it is. I’ve only
-	   done <tt>emulateapj</tt> and even that isn’t done right.</li>
-	 <li>Webtex is <i>excruciatingly</i> slow.</li>
-	 <li>I have no idea what to do about tables. The gap between LaTeX’s
-	   document format and what you’d want to do on a screen is much larger
-	   than any other part of the language.</li>
-      </ul>
+<ul>
+  <li>Webtex’s TeX implementation is buggy and incomplete.</li>
+  <li>There’s infinite room for improvement and creativity in its
+    graphic design.</li>
+  <li>Each LaTeX document class needs manual patching to be rendered
+    correctly. It’s too bad but that’s just how it is. I’ve only
+    done <tt>emulateapj</tt> and even that isn’t done right.</li>
+  <li>Webtex is <i>excruciatingly</i> slow.</li>
+  <li>I have no idea what to do about tables. The gap between LaTeX’s
+    document format and what you’d want to do on a screen is much larger
+    than any other part of the language.</li>
+</ul>
 
-      <p>I haven’t yet polished things so that you can just build your own
-	distribution and try compiling your own favorite document. That’s
-	coming soon, but in the
-	meantime <a href="https://github.com/pkgw/webtex/">the source code is
-	on GitHub</a> and it’s ready for action. Go ahead
-	and <a href="https://github.com/pkgw/webtex/issues">file
-	issues.</a></p>
+<p>I haven’t yet polished things so that you can just build your own
+  distribution and try compiling your own favorite document. That’s
+  coming soon, but in the
+  meantime <a href="https://github.com/pkgw/webtex/">the source code is
+    on GitHub</a> and it’s ready for action. Go ahead
+  and <a href="https://github.com/pkgw/webtex/issues">file
+    issues.</a></p>
 
-      <p class="text-center"><a class="btn btn-primary"
-      href="https://github.com/pkgw/webtex/">Scope out the code</a></p>
+<p class="text-center"><a class="btn btn-primary"
+			  href="https://github.com/pkgw/webtex/">Scope out the code</a></p>
 
-      <h2>Who’s behind all this?</h2>
+<h2>Who’s behind all this?</h2>
 
-      <p>One day, a cast of thousands. Today,
-	that’s <a href="http://newton.cx/~peter/">Peter K. G. Williams</a>,
-	also known as <a href="https://twitter.com/pkgw">@pkgw</a>. Say
-	hi.</p>
-
-      <footer>
-        <div class="row">
-          <div class="col-lg-12">
-            <p>Copyright 2014 Peter Williams and collaborators.</p>
-          </div>
-        </div>
-      </footer>
-    </div>
-
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
-  </body>
-</html>
+<p>One day, a cast of thousands. Today,
+  that’s <a href="http://newton.cx/~peter/">Peter K. G. Williams</a>,
+  also known as <a href="https://twitter.com/pkgw">@pkgw</a>. Say
+  hi.</p>

@@ -1,0 +1,12 @@
+destination: ./_site
+exclude:
+  - notes.md
+timezone: America/New_York
+encoding: utf-8
+
+defaults:
+  -
+    scope:
+      path: ""
+    values:
+      layout: "default"
