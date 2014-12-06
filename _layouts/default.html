@@ -5,8 +5,8 @@
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>Webtex — {{ page.title }}</title>
-    <link rel="stylesheet" href="bootstrap.min.css">
-    <link rel="stylesheet" href="custom.css">
+    <link rel="stylesheet" href="/bootstrap.min.css">
+    <link rel="stylesheet" href="/custom.css">
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
     <!--[if lt IE 9]>
     <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -41,7 +41,17 @@
 	</div>
 	<div id="navbar" class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
-            <li class="active"><a href="#">Home</a></li>
+	    {% for item in site.data.headernav %}
+	      {% assign active = nil %}
+	      {% assign href = item.url | replace: 'index.html', '' %}
+	      {% if page.url == item.url %}
+	        {% assign active = 'active' %}
+	        {% assign href = '#' %}
+	      {% endif %}
+	      <li class="{% if forloop.first %}first{% endif %} {{ active }} {% if forloop.last %}last{% endif %}">
+		<a class="{{ active }}" href="{{ href }}">{{ item.text }}</a> <!-- {{ page.url + "foo" }} -->
+	      </li>
+	    {% endfor %}
           </ul>
           <ul class="nav navbar-nav navbar-right">
             <li><a href="https://github.com/pkgw/webtex/">Fork the code!</a></li>
