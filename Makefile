@@ -143,7 +143,8 @@ generate.py src/master-glyph-helper-tmpl.js $(builddir)/glyph-encoding.json \
 	$(python) $^ $@
 
 
-# Generating the "bundle" Zip file.
+# Generating the "bundle" Zip file. TODO: Feeling indecisive about the naming
+# scheme and whatnot.
 
 bundleextras = \
   $(builddir)/latex.dump.json
@@ -183,6 +184,32 @@ $(builddir)/pdfjs-$(pdfjsversion)-dist.zip \
 primaries += $(pdfjs_unzip_stamp)
 
 
+# A distribution. This is a zip file of everything that you need to upload to
+# a server to enable a site with Webtex parsing and display. This kind of rule
+# is where Make reeeeallly gets limited.
+
+$(builddir)/distrib.zip: \
+$(builddir)/worker-webtex.js \
+$(builddir)/browser-master-webtex.js \
+$(pdfjs_unzip_stamp) \
+$(builddir)/latest.zip \
+Makefile \
+| $(builddir)
+	@w=`mktemp -d $(builddir)/distrib.XXXXXXXX`; \
+	dstem=distrib-$(texdist)-`date +%Y%m%d`.zip ; \
+	rm -f $(builddir)/$$dstem $@ ; \
+	cp $(builddir)/worker-webtex.js $(builddir)/browser-master-webtex.js \
+	   chrome/* $(builddir)/pdfjs/build/pdf*.js \
+	   $(builddir)/pdfjs/web/compatibility.js $$w ; \
+	cp build/latest.zip $$w/bundle.zip ; \
+	(cd $$w && zip ../$$dstem *) ; \
+	(cd $(builddir) && ln -s $$dstem `basename $@`) ; \
+	rm -rf $$w ; \
+	echo Created $(builddir)/$$dstem
+
+distrib: $(builddir)/distrib.zip
+
+
 # Minifying. Not something I've explored much so far.
 
 minify = java -jar build/yuicompressor-$(yuiversion).jar
@@ -219,4 +246,4 @@ $(builddir):
 clean:
 	-rm -rf $(builddir)
 
-.PHONY: all clean default server test
+.PHONY: all clean default distrib server test
