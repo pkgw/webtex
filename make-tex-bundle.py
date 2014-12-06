@@ -4,11 +4,12 @@
 # Licensed under the MIT License. See LICENSE.md for details.
 
 from __future__ import absolute_import, division, print_function, unicode_literals
-import contextlib, hashlib, io, json, lzma, os.path, sys, tarfile, tempfile, urllib, zipfile
+import contextlib, hashlib, io, json, lzma, os.path, sys, tarfile, tempfile
+import time, urllib, zipfile
 
 from glyphlist import glyph_to_unicode
 
-cache_ident = 'tl2013'
+distribution = 'tl2013'
 url_base = 'ftp://tug.org/historic/systems/texlive/2013/tlnet-final/archive/'
 pkg_extension = '.tar.xz'
 skip_roots = frozenset (('makeindex', 'tlpkg'))
@@ -39,7 +40,7 @@ class Bundler (object):
         self.load_map_names ()
 
         try:
-            os.mkdir (os.path.join (self.cachedir, cache_ident))
+            os.mkdir (os.path.join (self.cachedir, distribution))
         except OSError:
             pass # live dangerously by not checking that it's EEXIST. Whatever.
 
@@ -73,7 +74,9 @@ class Bundler (object):
         for name in sorted (self.elemshas.iterkeys ()):
             s.update (name)
             s.update (self.elemshas[name])
-        zbase = s.hexdigest () + '.zip'
+        zbase = '-'.join ([distribution,
+                           time.strftime ('%Y%m%d'),
+                           s.hexdigest () + '.zip'])
         zpath = os.path.join (self.destdir, zbase)
         os.rename (temp.name, zpath)
         print ('Created', zpath)
@@ -151,7 +154,7 @@ class Bundler (object):
 
                     # Include any patches that may exist for this file.
                     for sfx in patch_suffixes:
-                        p = os.path.join (self.patchdir, cache_ident, base + sfx)
+                        p = os.path.join (self.patchdir, distribution, base + sfx)
                         if not os.path.exists (p):
                             continue
 
@@ -165,7 +168,7 @@ class Bundler (object):
 
 
     def get_package (self, pkgname):
-        cachepath = os.path.join (self.cachedir, cache_ident,
+        cachepath = os.path.join (self.cachedir, distribution,
                                   pkgname + pkg_extension)
         if os.path.exists (cachepath):
             return cachepath
