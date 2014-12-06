@@ -114,10 +114,11 @@ integral to achieving the goals of Webtex: outputing a series of HTML tags is
 
 The Webtex chrome is currently the least-polished part of the system, but is
 also the easiest to improve in some ways. The modern tech industry spends
-billions of dollars a year on making polished websites happen. Not trying
-brag, look at how nice this site looks — I put it together in two days using
-[Bootstrap](http://getbootstrap.com/) and [Jekyll](http://jekyllrb.com/)! Pros
-could do better, but I think the results are pretty good for an amateur.
+billions of dollars a year on making polished websites happen. Not trying to
+brag, but look at how nice this site looks — I put it together in two days
+using [Bootstrap](http://getbootstrap.com/) and
+[Jekyll](http://jekyllrb.com/)! Pros could do better, but I think the results
+are pretty good for an amateur.
 
 That being said, the chrome can get non-trivial. Here’s a simple test case:
 modern LaTeX documents have PDF figures, so you simply can’t do Webtex without
