@@ -1,2 +1,5 @@
 - url: /index.html
   text: Home
+
+- url: /how/index.html
+  text: How it Works
