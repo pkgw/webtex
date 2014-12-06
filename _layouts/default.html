@@ -4,7 +4,7 @@
 {% else %}
   {% assign toppath = '..' %}
 {% endif %}
-
+<!-- {{page.url}} -->
 <html>
   <head>
     <meta charset="utf-8">
@@ -49,13 +49,14 @@
           <ul class="nav navbar-nav">
 	    {% for item in site.data.headernav %}
 	      {% assign active = nil %}
-	      {% assign href = item.url | replace: 'index.html', '' %}
-	      {% if page.url == item.url %}
+	      {% assign href = toppath | append: item.path %}
+	      {% assign cmpurl = item.path | append: 'index.html' %}
+	      {% if page.url == cmpurl %}
 	        {% assign active = 'active' %}
 	        {% assign href = '#' %}
 	      {% endif %}
-	      <li class="{% if forloop.first %}first{% endif %} {{ active }} {% if forloop.last %}last{% endif %}">
-		<a class="{{ active }}" href="{{ href }}">{{ item.text }}</a> <!-- {{ page.url + "foo" }} -->
+	      <li class="{% if forloop.first %}first{% endif %} {{active}} {% if forloop.last %}last{% endif %}">
+		<a class="{{active}}" href="{{href}}">{{ item.text }}</a>
 	      </li>
 	    {% endfor %}
           </ul>

@@ -1,5 +1,5 @@
-- url: /index.html
+- path: /
   text: Home
 
-- url: /how/index.html
+- path: /how/
   text: How it Works
