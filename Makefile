@@ -180,6 +180,18 @@ Makefile \
 distrib: $(builddir)/distrib.zip
 
 
+# Files for the demos in the release
+
+$(builddir)/brockton.zip: \
+| $(builddir)
+	zip -j $@ demo/brockton/*
+
+$(builddir)/brockton.json: \
+webtex \
+$(builddir)/node-webtex.js \
+| $(builddir)
+	./webtex -n3 -T chrome demo/brockton/paper.tex >$@.new && mv -f $@.new $@
+
 # Minifying. Not something I've explored much so far.
 
 minify = java -jar build/yuicompressor-$(yuiversion).jar
