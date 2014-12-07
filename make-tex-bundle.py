@@ -13,6 +13,7 @@ distribution = 'tl2013'
 url_base = 'ftp://tug.org/historic/systems/texlive/2013/tlnet-final/archive/'
 pkg_extension = '.tar.xz'
 skip_roots = frozenset (('makeindex', 'tlpkg'))
+skip_extensions = frozenset (('.afm', '.afm.gz', '.aft', '.mf', '.otf', '.pfm'))
 patch_suffixes = ['.post']
 
 debug_unicode_mapping = False
@@ -126,10 +127,15 @@ class Bundler (object):
                         and not info.name.startswith ('fonts/map/dvips/')):
                         continue
 
+                    base = pieces[-1]
+                    for ext in skip_extensions:
+                        if base.endswith (ext):
+                            info = None
+                            break;
+
                     if info is None:
                         continue
 
-                    base = pieces[-1]
                     if base in self.elemshas:
                         print ('error: duplicated file name "%s" (this one in '
                                'package %s)' % (base, pkgname), file=sys.stderr)
