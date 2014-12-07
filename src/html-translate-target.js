@@ -20,11 +20,40 @@ var HTMLTranslateTarget = (function HTMLTranslateTarget_closure () {
 
 	// This is kind of a hack since all of this state is basically
 	// internal to process(), but whatever.
+	this.shipped_fonts = {};
     }
 
     var proto = HTMLTranslateTarget.prototype;
 
-    function render_box_as_canvas (srcbox, last_font) {
+    proto.process_font = function HTMLTranslateTarget_process_font (engine, font) {
+	if (this.suppression_level != 0)
+	    // Don't register and ship out fonts that we might not actually
+	    // need.
+	    return -1;
+
+	var id = this.shipped_fonts[font.pfbname];
+	if (id != null)
+	    return id;
+
+	// We're using a font that the recipient hasn't been told about yet.
+	// Give it an ID number and ship out the font data. If something
+	// busted has happened, data will be null! That's for the chrome to
+	// deal with.
+
+	id = Object.keys (this.shipped_fonts).length;
+	this.shipped_fonts[font.pfbname] = id;
+	this.translated.push ({
+	    kind: 'fontdata',
+	    ident: id,
+	    pfbname: font.pfbname,
+	    data: engine.iostack.get_contents_ab (font.pfbname),
+	});
+	return id;
+    }
+
+    proto.render_box_as_canvas =
+	function HTMLTranslateTarget_render_box_as_canvas (engine, srcbox, last_font)
+    {
 	if (!(srcbox instanceof HBox || srcbox instanceof VBox))
 	    throw new TexInternalError ('canvas source should be HBox or ' +
 					'VBox; got %o', srcbox);
@@ -58,7 +87,7 @@ var HTMLTranslateTarget = (function HTMLTranslateTarget_closure () {
 
 		gl.push ({x: x_S,
 			  y: y_S,
-			  pfb: item.font.pfbname,
+			  fid: this.process_font (engine, item.font),
 			  es: item.font.metrics.effective_size,
 			  ggid: item.font.enc_idents[item.ord]});
 	    } else if (item instanceof Rule) {
@@ -68,7 +97,7 @@ var HTMLTranslateTarget = (function HTMLTranslateTarget_closure () {
 			  w: item.width_S,
 			  h: item.height_S + item.depth_S});
 	    }
-	});
+	}.bind (this));
 
 	return data;
     }
@@ -115,7 +144,7 @@ var HTMLTranslateTarget = (function HTMLTranslateTarget_closure () {
 
 	    if (item instanceof ListBox) {
 		if (item.render_as_canvas) {
-		    this.maybe_push (render_box_as_canvas (item, last_font));
+		    this.maybe_push (this.render_box_as_canvas (engine, item, last_font));
 		} else {
 		    // Recurse into this box.
 		    box_stack.unshift (item);
@@ -188,7 +217,7 @@ var HTMLTranslateTarget = (function HTMLTranslateTarget_closure () {
 		var subbox = ListBox.create (box_stack[0].btype);
 		subbox.list = list.slice (j_start, j_end - 1);
 		subbox.set_glue__OOS (engine, false, nlib.Zero_S);
-		this.maybe_push (render_box_as_canvas (subbox, last_font));
+		this.maybe_push (this.render_box_as_canvas (engine, subbox, last_font));
 	    } else if (item instanceof Image) {
 		// Because the image may be sitting in a source Zip file and
 		// may be something that needs fancy handling (e.g. a PDF), we

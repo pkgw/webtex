@@ -127,6 +127,7 @@ masterjs = \
   src/master-object.js \
   $(builddir)/compiled-fonts.js \
   $(builddir)/master-glyph-helper.js \
+  src/type1-font.js \
   src/dom-renderer.js
 
 

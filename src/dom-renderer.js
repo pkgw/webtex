@@ -11,6 +11,7 @@ var DOMRenderer = (function DOMRenderer_callback () {
 	this.container = container;
 
 	this.dom_stack = [this.container];
+	this.fonts = {};
 
 	// pdf.js seems to only be able to handle one simultaneous
 	// page.render() call, perhaps because that goes to a single worker
@@ -24,6 +25,22 @@ var DOMRenderer = (function DOMRenderer_callback () {
     }
 
     var proto = DOMRenderer.prototype;
+
+    proto.process_fontdata = function DOMRenderer_process_fontdata (item) {
+	if (this.fonts[item.ident] != null) {
+	    global_warnf ('backend trying to re-register font ID %o (%o)',
+			  item.ident, item.pfbname);
+	    return;
+	}
+
+	if (item.data == null) {
+	    global_warnf ('font %o needed but data not available', item.pfbname);
+	    // TODO: register a null noop font so that we don't crash.
+	    return;
+	}
+
+	this.fonts[item.ident] = new Type1Font (item.pfbname, item.data);
+    };
 
     var extension_to_mime = {
 	// texpatches/*/dvips.def.post also needs to be updated to support new
@@ -161,21 +178,20 @@ var DOMRenderer = (function DOMRenderer_callback () {
 
 	    if (q.hasOwnProperty ('ggid')) {
 		// Character.
-		var f = compiled_fonts[q.pfb];
-		var s = scale * fontscale * q.es / 655360.
-		    if (f == null) {
-			global_warnf ('missing compiled font %o', q.pfb);
-		    } else if (!f.hasOwnProperty (q.ggid)) {
-			global_warnf ('missing compiled GGID %d in font %o', q.ggid, q.pfb);
-		    } else {
-			ctx.beginPath ();
-			ctx.save ();
-			ctx.translate (x, y);
-			ctx.scale (s, -s);
-			f[q.ggid] (ctx);
-			ctx.fill ();
-			ctx.restore ();
-		    }
+		var f = this.fonts[q.fid];
+		var s = scale * fontscale * q.es / 655360.;
+
+		if (f == null) {
+		    global_warnf ('missing fontid %o', q.fid);
+		} else {
+		    ctx.beginPath ();
+		    ctx.save ();
+		    ctx.translate (x, y);
+		    ctx.scale (s, -s);
+		    f.trace (ctx, q.ggid);
+		    ctx.fill ();
+		    ctx.restore ();
+		}
 	    } else if (q.hasOwnProperty ('w')) {
 		// Rule.
 		ctx.fillRect (x, y, scale * q.w, scale * q.h);
@@ -218,6 +234,8 @@ var DOMRenderer = (function DOMRenderer_callback () {
 		dom_stack[0].appendChild (this.create_canvas (doc, item));
 	    } else if (item.kind === 'image') {
 		dom_stack[0].appendChild (this.create_image (doc, item));
+	    } else if (item.kind === 'fontdata') {
+		this.process_fontdata (item);
 	    } else {
 		global_warnf ('unhandled rendered-HTML item %j', item);
 	    }
