@@ -118,22 +118,6 @@ var Type1Font = (function Type1Font_closure () {
     })();
 
 
-    // Loading of the compiled mapping between glyph names and our "global
-    // glyph identifiers".
-
-    var glyph_name_to_id = {};
-    var glyph_id_to_unicode = null;
-
-    function parse_glyph_encoding_info (jsonobj) {
-	for (var i = 0; i < jsonobj.names.length; i++)
-	    glyph_name_to_id[jsonobj.names[i]] = i;
-
-	glyph_id_to_unicode = jsonobj.unicode;
-    }
-
-    webtex_export ('parse_glyph_encoding_info', parse_glyph_encoding_info);
-
-
     function parse_type1_charstrings (name, file, properties) {
 	// Some bad generators embed pfb file as is, we have to strip 6-byte
 	// headers. Also, length1 and length2 might be off by 6 bytes as well.
@@ -1094,11 +1078,21 @@ var Type1Font = (function Type1Font_closure () {
     // This Type1Font class is new and specific to Webtex, and doesn't have
     // anything in common with the Type1Font in pdf.js's fonts.js.
 
+    var glyph_name_to_id = {};
+
     var Type1Font = (function Type1Font_closure () {
 	function Type1Font (pfbname, data) {
 	    this.pfbname = pfbname;
 	    this.compiled = {};
 	    this.ggid_to_cs = {};
+
+	    // Build the global glyphname-to-ggid table if needed.
+	    if (glyph_name_to_id['a'] == null) {
+		var names = glyph_encoding_info.names;
+
+		for (var i = 0; i < names.length; i++)
+		    glyph_name_to_id[names[i]] = i;
+	    }
 
 	    var stream = new Stream (data, 0, data.byteLength, {});
 	    var props = {
