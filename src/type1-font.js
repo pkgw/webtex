@@ -14,6 +14,12 @@
 
 // This file is derived from stream.js, fonts.js, parser.js, and
 // font_renderer.js in Mozilla's pdf.js.
+//
+// My purposes are much narrower than those of pdf.js, so a lot of this code
+// is not really needed, and the style is fairly different than the one used
+// in the rest of Webtex. But I'd like to maintain straightforward
+// comparability with pdf.js. If this turns out to be a performance
+// bottleneck, it might be worth tightening things up.
 
 var Type1Font = (function Type1Font_closure () {
     function isSpace (ch) {
@@ -21,6 +27,10 @@ var Type1Font = (function Type1Font_closure () {
 	return (ch === 0x20 || ch === 0x09 || ch === 0x0D || ch === 0x0A);
     }
 
+
+    // pdf.js's internal Stream class has a ton of features that we don't need
+    // for our one use case. Used methods are: getByte, getBytes,
+    // makeSubStream, peekBytes, pos, skip
 
     var Stream = (function StreamClosure() {
 	function Stream(arrayBuffer, start, length, dict) {
@@ -1080,9 +1090,15 @@ var Type1Font = (function Type1Font_closure () {
 	parse(code);
     }
 
+
+    // This Type1Font class is new and specific to Webtex, and doesn't have
+    // anything in common with the Type1Font in pdf.js's fonts.js.
+
     var Type1Font = (function Type1Font_closure () {
 	function Type1Font (pfbname, data) {
 	    this.pfbname = pfbname;
+	    this.compiled = {};
+	    this.ggid_to_cs = {};
 
 	    var stream = new Stream (data, 0, data.byteLength, {});
 	    var props = {
@@ -1093,12 +1109,10 @@ var Type1Font = (function Type1Font_closure () {
 		bbox: [0, 0, 1, 1], // arbitrary
 	    };
 
-	    this.charstrings = parse_type1_charstrings (pfbname, stream, props);
-	    this.compiled = {};
-	    this.ggid_to_cs = {};
+	    var charstrings = parse_type1_charstrings (pfbname, stream, props);
 
-	    for (var i = 0; i < this.charstrings.length; i++) {
-		var gname = this.charstrings[i].glyphName;
+	    for (var i = 0; i < charstrings.length; i++) {
+		var gname = charstrings[i].glyphName;
 		if (gname == '.notdef' || gname == '.null')
 		    continue;
 
@@ -1108,7 +1122,7 @@ var Type1Font = (function Type1Font_closure () {
 		    continue;
 		}
 
-		this.ggid_to_cs[ggid] = this.charstrings[i];
+		this.ggid_to_cs[ggid] = charstrings[i].charstring;
 	    }
 	}
 
@@ -1125,13 +1139,10 @@ var Type1Font = (function Type1Font_closure () {
 		    return;
 		}
 
-		global_logf ('compile %s glyph %o %o', this.pfbname,
-			     gglyphid, glyph_id_to_unicode[gglyphid]);
 		var js = [];
-		compileCharString (cs.charstring, js);
+		compileCharString (cs, js);
 		js.unshift ('function render (c) {');
 		js.push ('} ; render');
-		global_logf ('QQQQ %s', js.join ('\n'));
 		compiled = eval (js.join ('\n'));
 		this.compiled[gglyphid] = compiled;
 	    }
