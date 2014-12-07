@@ -455,13 +455,11 @@ var Type1Font = (function Type1Font_closure () {
 			properties.fontMatrix = matrix;
 			break;
 		    case 'Encoding':
+			// PKGW modified to not record encoding info: we don't care.
 			var encodingArg = this.getToken();
-			var encoding;
 			if (!/^\d+$/.test(encodingArg)) {
 			    // encoding name is specified
-			    encoding = Encodings[encodingArg];
 			} else {
-			    encoding = [];
 			    var size = parseInt(encodingArg, 10) | 0;
 			    this.getToken(); // read in 'array'
 
@@ -480,11 +478,9 @@ var Type1Font = (function Type1Font_closure () {
 				var index = this.readInt();
 				this.getToken(); // read in '/'
 				var glyph = this.getToken();
-				encoding[index] = glyph;
 				this.getToken(); // read the in 'put'
 			    }
 			}
-			properties.builtInEncoding = encoding;
 			break;
 		    case 'FontBBox':
 			var fontBBox = this.readNumberArray();
@@ -808,7 +804,7 @@ var Type1Font = (function Type1Font_closure () {
     })();
 
 
-    function compileCharString(code, js, font) {
+    function compileCharString(code, js) {
 	var stack = [];
 	var x = 0, y = 0;
 	var stems = 0;
@@ -882,12 +878,7 @@ var Type1Font = (function Type1Font_closure () {
 		    }
 		    break;
 		case 10: // callsubr
-		    n = stack.pop() + font.subrsBias;
-		    subrCode = font.subrs[n];
-		    if (subrCode) {
-			parse(subrCode);
-		    }
-		    break;
+		    throw new TexRuntimeError ('callsubr not supported');
 		case 11: // return
 		    return;
 		case 12:
@@ -945,22 +936,8 @@ var Type1Font = (function Type1Font_closure () {
 		    }
 		    break;
 		case 14: // endchar
-		    if (stack.length >= 4) {
-			var achar = stack.pop();
-			var bchar = stack.pop();
-			y = stack.pop();
-			x = stack.pop();
-			js.push('c.save();');
-			js.push('c.translate('+ x + ',' + y + ');');
-			var gid = lookupCmap(font.cmap, String.fromCharCode(
-                            font.glyphNameMap[Encodings.StandardEncoding[achar]]));
-			compileCharString(font.glyphs[gid], js, font);
-			js.push('c.restore();');
-
-			gid = lookupCmap(font.cmap, String.fromCharCode(
-                            font.glyphNameMap[Encodings.StandardEncoding[bchar]]));
-			compileCharString(font.glyphs[gid], js, font);
-		    }
+		    if (stack.length >= 4)
+			throw new TexRuntimeError ('endchar not supported');
 		    return;
 		case 18: // hstemhm
 		    stems += stack.length >> 1;
@@ -1040,11 +1017,7 @@ var Type1Font = (function Type1Font_closure () {
 		    i += 2;
 		    break;
 		case 29: // callgsubr
-		    n = stack.pop() + font.gsubrsBias;
-		    subrCode = font.gsubrs[n];
-		    if (subrCode) {
-			parse(subrCode);
-		    }
+		    throw new TexRuntimeError ('callgsubr not supported');
 		    break;
 		case 30: // vhcurveto
 		    while (stack.length > 0) {
@@ -1155,7 +1128,7 @@ var Type1Font = (function Type1Font_closure () {
 		global_logf ('compile %s glyph %o %o', this.pfbname,
 			     gglyphid, glyph_id_to_unicode[gglyphid]);
 		var js = [];
-		compileCharString (cs.charstring, js, undefined);
+		compileCharString (cs.charstring, js);
 		js.unshift ('function render (c) {');
 		js.push ('} ; render');
 		global_logf ('QQQQ %s', js.join ('\n'));
