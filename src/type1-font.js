@@ -1112,7 +1112,9 @@ var Type1Font = (function Type1Font_closure () {
 
 		var ggid = glyph_name_to_id[gname];
 		if (ggid == null) {
-		    global_warnf ('no global ID for glyph %o', gname);
+		    // This happens frequently -- some fonts have glyphs that
+		    // just aren't used in the encodings we use.
+		    //global_warnf ('no global ID for glyph %o', gname);
 		    continue;
 		}
 
