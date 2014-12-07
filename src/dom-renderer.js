@@ -141,7 +141,7 @@ var DOMRenderer = (function DOMRenderer_callback () {
 
     proto.create_canvas = function DOMRenderer_create_canvas (doc, item) {
 	var e = doc.createElement ('canvas');
-	e.class = 'cbox';
+	e.className = 'cbox';
 
 	// XXX assuming a universal 20px font size. It looks like we should be
 	// able to use getComputedStyle to get the actual font size of the

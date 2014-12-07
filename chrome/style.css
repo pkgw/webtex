@@ -49,7 +49,7 @@ body {
 
 .webtex .cbox {
   display: inline-block;
-  vertical-align: bottom;
+  vertical-align: baseline;
 }
 
 h1 {
