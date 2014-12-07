@@ -28,7 +28,7 @@
 
 var targdiv = document.getElementById ('webtex');
 var worker_url = 'build/worker-webtex.js';
-var inputurl = '../test/tex/brockton/paper.tex'; // note: relative to *worker's* URL
+var inputurl = '../demo/brockton/paper.tex'; // note: relative to *worker's* URL
 
 var dr = new Webtex.DOMRenderer (worker_url, targdiv);
 dr.launch_parse ({
