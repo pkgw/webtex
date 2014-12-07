@@ -12,10 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// This file is derived from stream.js, fonts.js, and font_renderer.js in
-// Mozilla's pdf.js.
+// This file is derived from stream.js, fonts.js, parser.js, and
+// font_renderer.js in Mozilla's pdf.js.
 
 var Type1Font = (function Type1Font_closure () {
+    function isSpace (ch) {
+	// Space is one of the following characters: SPACE, TAB, CR or LF.
+	return (ch === 0x20 || ch === 0x09 || ch === 0x0D || ch === 0x0A);
+    }
+
+
     var Stream = (function StreamClosure() {
 	function Stream(arrayBuffer, start, length, dict) {
 	    this.bytes = (arrayBuffer instanceof Uint8Array ?
@@ -101,11 +107,21 @@ var Type1Font = (function Type1Font_closure () {
 	return Stream;
     })();
 
-    function isSpace(ch) {
-	// This comes from parser.js
-	// Space is one of the following characters: SPACE, TAB, CR or LF.
-	return (ch === 0x20 || ch === 0x09 || ch === 0x0D || ch === 0x0A);
+
+    // Loading of the compiled mapping between glyph names and our "global
+    // glyph identifiers".
+
+    var glyph_name_to_id = {};
+    var glyph_id_to_unicode = null;
+
+    function parse_glyph_encoding_info (jsonobj) {
+	for (var i = 0; i < jsonobj.names.length; i++)
+	    glyph_name_to_id[jsonobj.names[i]] = i;
+
+	glyph_id_to_unicode = jsonobj.unicode;
     }
+
+    webtex_export ('parse_glyph_encoding_info', parse_glyph_encoding_info);
 
 
     function parse_type1_charstrings (name, file, properties) {
@@ -1090,4 +1106,68 @@ var Type1Font = (function Type1Font_closure () {
 	}
 	parse(code);
     }
+
+    var Type1Font = (function Type1Font_closure () {
+	function Type1Font (pfbname, data) {
+	    this.pfbname = pfbname;
+
+	    var stream = new Stream (data, 0, data.byteLength, {});
+	    var props = {
+		loadedName: pfbname,
+		type: 'Type1',
+		differences: [],
+		defaultEncoding: [],
+		bbox: [0, 0, 1, 1], // arbitrary
+	    };
+
+	    this.charstrings = parse_type1_charstrings (pfbname, stream, props);
+	    this.compiled = {};
+	    this.ggid_to_cs = {};
+
+	    for (var i = 0; i < this.charstrings.length; i++) {
+		var gname = this.charstrings[i].glyphName;
+		if (gname == '.notdef' || gname == '.null')
+		    continue;
+
+		var ggid = glyph_name_to_id[gname];
+		if (ggid == null) {
+		    global_warnf ('no global ID for glyph %o', gname);
+		    continue;
+		}
+
+		this.ggid_to_cs[ggid] = this.charstrings[i];
+	    }
+	}
+
+	var proto = Type1Font.prototype;
+
+	proto.trace = function Type1Font_trace (context2d, gglyphid) {
+	    var compiled = this.compiled[gglyphid];
+
+	    if (compiled == null) {
+		var cs = this.ggid_to_cs[gglyphid];
+		if (cs == null) {
+		    global_warnf ('font %s missing expected data for glyphid %o',
+				  this.pfbname, gglyphid);
+		    return;
+		}
+
+		global_logf ('compile %s glyph %o %o', this.pfbname,
+			     gglyphid, glyph_id_to_unicode[gglyphid]);
+		var js = [];
+		compileCharString (cs.charstring, js, undefined);
+		js.unshift ('function render (c) {');
+		js.push ('} ; render');
+		global_logf ('QQQQ %s', js.join ('\n'));
+		compiled = eval (js.join ('\n'));
+		this.compiled[gglyphid] = compiled;
+	    }
+
+	    compiled (context2d);
+	};
+
+	return Type1Font;
+    }) ();
+
+    return Type1Font;
 }) ();

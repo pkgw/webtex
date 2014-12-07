@@ -26,15 +26,24 @@
     <script type="text/javascript">
 'use strict';
 
-var targdiv = document.getElementById ('webtex');
-var worker_url = 'build/worker-webtex.js';
-var jsonurl = '../' + window.location.search.slice (1); // note: relative to *worker's* URL
-console.log ('loading ' + jsonurl + ' from worker ' + worker_url);
+// XXX
+var glyphurl = 'build/glyph-encoding.json';
+var req = new XMLHttpRequest ();
+req.open ('GET', glyphurl, true);
+req.onload = function () {
+    Webtex.parse_glyph_encoding_info (JSON.parse (req.responseText)); // errors!!!!!
 
-var dr = new Webtex.DOMRenderer (worker_url, targdiv);
-dr.launch_feed_pre_parsed ({
-    jsonurl: jsonurl,
-});
+    var targdiv = document.getElementById ('webtex');
+    var worker_url = 'build/worker-webtex.js';
+    var jsonurl = '../' + window.location.search.slice (1); // note: relative to *worker's* URL
+    console.log ('loading ' + jsonurl + ' from worker ' + worker_url);
+
+    var dr = new Webtex.DOMRenderer (worker_url, targdiv);
+    dr.launch_feed_pre_parsed ({
+        jsonurl: jsonurl,
+    });
+};
+req.send (null);
 </script>
   </body>
 </html>
