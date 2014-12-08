@@ -89,8 +89,32 @@ generate.py src/%-helpers-tmpl.js $(genlists) \
 primaries += $(builddir)/worker-webtex.js $(builddir)/node-webtex.js
 
 
+# Generating the "bundle" Zip file. TODO: Feeling indecisive about the naming
+# scheme and whatnot.
+
+bundleextras = \
+  $(builddir)/latex.dump.json
+
+$(builddir)/latex.dump.json: \
+dump-format.js $(builddir)/node-webtex.js texpatches/$(texdist)/latex.ltx.post \
+| $(builddir)
+	node $< $(builddir)/node-webtex.js texpatches/$(texdist)/ latex.ltx $@
+
+$(builddir)/plain.dump.json: \
+dump-format.js $(builddir)/node-webtex.js \
+| $(builddir)
+	node $< $(builddir)/node-webtex.js texpatches/$(texdist)/ plain.tex $@
+
+$(builddir)/latest.zip $(builddir)/glyph-encoding.json: \
+make-tex-bundle.py packages.txt mapfiles.txt $(bundleextras) \
+| $(builddir)
+	$(python) $< packages.txt mapfiles.txt texcache $(builddir) texpatches $(bundleextras)
+
+
 # The browser master, which drives the Web Worker engine and renders the
-# output into the DOM.
+# output into the DOM. This can only be built after the bundle, because the
+# master file embeds the list of glyph identifiers, which is generated as font
+# files in the bundle are processed.
 
 masterjs = \
   src/preamble.js \
@@ -112,28 +136,6 @@ $(builddir)/master-glyph-helper.js: \
 generate.py src/master-glyph-helper-tmpl.js $(builddir)/glyph-encoding.json \
 | $(builddir)
 	$(python) $^ $@
-
-
-# Generating the "bundle" Zip file. TODO: Feeling indecisive about the naming
-# scheme and whatnot.
-
-bundleextras = \
-  $(builddir)/latex.dump.json
-
-$(builddir)/latex.dump.json: \
-dump-format.js $(builddir)/node-webtex.js texpatches/$(texdist)/latex.ltx.post \
-| $(builddir)
-	node $< $(builddir)/node-webtex.js texpatches/$(texdist)/ latex.ltx $@
-
-$(builddir)/plain.dump.json: \
-dump-format.js $(builddir)/node-webtex.js \
-| $(builddir)
-	node $< $(builddir)/node-webtex.js texpatches/$(texdist)/ plain.tex $@
-
-$(builddir)/latest.zip $(builddir)/glyph-encoding.json: \
-make-tex-bundle.py packages.txt mapfiles.txt $(bundleextras) \
-| $(builddir)
-	$(python) $< packages.txt mapfiles.txt texcache $(builddir) texpatches $(bundleextras)
 
 
 # Our internal copy of PDF.js. TODO: figure out if we can avoid bundling this
