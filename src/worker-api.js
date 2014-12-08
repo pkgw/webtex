@@ -99,7 +99,51 @@ worker_api_endpoints.parse_loop = function webtex_worker_parse_loop (data) {
 	if (target_name !== null && i > 1)
 	    data.shiptarget = new worker_ship_targets[target_name] (post_message);
 	else
-	    data.shiptarget = {process: function () {}};
+	    data.shiptarget = new ShipTarget ();
+
+	var eng = new Engine (data);
+	eng.restore_serialized_state (dumpjson);
+
+	while (eng.step () === true) {
+	}
+    }
+
+    post_message ('parse_finish', {});
+};
+
+
+worker_api_endpoints.parse_archive_loop = function webtex_worker_parse_archive_loop (data) {
+    data.iostack = new IOStack ();
+
+    var rau = new RandomAccessURL (data.bundleurl);
+    var z = new ZipReader (rau.read_range_ab.bind (rau), rau.size ());
+    var bundle = new Bundle (z);
+    delete data.bundleurl;
+    data.iostack.push (bundle);
+
+    rau = new RandomAccessURL (data.archiveurl);
+    z = new ZipReader (rau.read_range_ab.bind (rau), rau.size ());
+    var archive = new DocumentArchive (z);
+    delete data.archiveurl;
+    data.iostack.push (archive);
+
+    var target_name = data.ship_target_name || null;
+
+    var dumpjson = bundle.get_contents_json (data.dump_bpath);
+    delete data.dump_bpath;
+
+    data.fontdata = bundle.get_contents_json ('wtfontdata.json');
+
+    var niters = data.niters || 1;
+    delete data.niters;
+
+    for (var i = 0; i < niters; i++) {
+	archive.setup_initial_input (data);
+
+	if (target_name !== null && i == niters - 1)
+	    data.shiptarget = new worker_ship_targets[target_name] (post_message);
+	else
+	    data.shiptarget = new ShipTarget ();
 
 	var eng = new Engine (data);
 	eng.restore_serialized_state (dumpjson);
