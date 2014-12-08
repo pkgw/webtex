@@ -129,48 +129,6 @@ var FSIOLayer = (function FSIOLayer_closure () {
 webtex_export ('FSIOLayer', FSIOLayer);
 
 
-var ConsoleFlatDumpTarget = (function ConsoleFlatDumpTarget_closure () {
-    function ConsoleFlatDumpTarget () {}
-
-    var proto = ConsoleFlatDumpTarget.prototype;
-
-    proto.process = function ConsoleFlatDumpTarget_process (engine, box) {
-	global_logf ('==== shipped out: ====');
-	box.traverse__SSO (nlib.Zero_S, nlib.Zero_S, function (x, y, item) {
-	    global_logf ('x=%o y=%o %o', x, y, item);
-	});
-	global_logf ('==== (end of shipout) ====');
-    };
-
-    proto.finish = function ConsoleFlatDumpTarget_finish (engine) {
-    };
-
-    return ConsoleFlatDumpTarget;
-}) ();
-
-webtex_export ('ConsoleFlatDumpTarget', ConsoleFlatDumpTarget);
-
-
-var ConsoleHierDumpTarget = (function ConsoleHierDumpTarget_closure () {
-    function ConsoleHierDumpTarget () {}
-
-    var proto = ConsoleHierDumpTarget.prototype;
-
-    proto.process = function ConsoleHierDumpTarget_process (engine, box) {
-	global_logf ('==== shipped out: ====');
-	global_logf (box.uitext ());
-	global_logf ('==== (end of shipout) ====');
-    };
-
-    proto.finish = function ConsoleHierDumpTarget_finish (engine) {
-    };
-
-    return ConsoleHierDumpTarget;
-}) ();
-
-webtex_export ('ConsoleHierDumpTarget', ConsoleHierDumpTarget);
-
-
 var ChromeJsonDumpTarget = (function ChromeJsonDumpTarget_closure () {
     function ChromeJsonDumpTarget (filename) {
 	this.filename = filename;
@@ -189,6 +147,7 @@ var ChromeJsonDumpTarget = (function ChromeJsonDumpTarget_closure () {
 	this.cur_separator = '';
     }
 
+    inherit (ChromeJsonDumpTarget, ShipTarget);
     var proto = ChromeJsonDumpTarget.prototype;
 
     function replacer (key, val) {

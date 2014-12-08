@@ -59,6 +59,7 @@ sharedjs += \
   src/command-impls.js \
   $(builddir)/engine-helpers.js \
   src/engine.js \
+  src/ship-target.js \
   src/html-translate-target.js
 
 workerjs = \

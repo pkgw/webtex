@@ -17,12 +17,10 @@
 var HTMLTranslateTarget = (function HTMLTranslateTarget_closure () {
     function HTMLTranslateTarget (post_message) {
 	this.post_message = post_message;
-
-	// This is kind of a hack since all of this state is basically
-	// internal to process(), but whatever.
 	this.shipped_fonts = {};
     }
 
+    inherit (HTMLTranslateTarget, ShipTarget);
     var proto = HTMLTranslateTarget.prototype;
 
     proto.process_font = function HTMLTranslateTarget_process_font (engine, font) {
