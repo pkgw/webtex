@@ -9,6 +9,12 @@ http://pkgw.github.io/webtex/.
 Requirements
 ------------
 
+To install a personal copy of Webtex that you can run on your own documents,
+see [these instructions](http://pkgw.github.io/webtex/install/). You’ll need
+to download [the latest Webtex “distrib” Zip
+file](https://github.com/pkgw/webtex/releases/latest) and install
+[node.js](http://nodejs.org/download).
+
 To help develop Webtex and/or rebuild the JavaScript files that you
 would upload to a website, you need:
 
