@@ -30,7 +30,7 @@ The whole reason that this is a feasible project is that the design of
 scientific papers is *very constrained*. For instance, look at [these amazing
 examples of modern TeX
 design](http://tex.stackexchange.com/questions/1319/showcase-of-beautiful-typography-done-in-tex-friends).
-There’s no we we can build a generic system to turn all of these into HTML!
+There’s no way we can build a generic system to turn all of these into HTML!
 But scientific articles are pretty much all the same: Title. Abstract.
 Sectioning. Footnotes. Figures. References. Tables. Equations. *Sometimes*
 enumerated lists. There is a very finite set of features that we need to
