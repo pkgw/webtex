@@ -252,6 +252,16 @@ var DOMRenderer = (function DOMRenderer_callback () {
 	master.send_message ('parse_loop', data);
     };
 
+    proto.launch_parse_archive = function DOMRenderer_launch_parse_archive (data) {
+	var master = new Master (this.worker_url);
+	master.handle_render = this.handle_render.bind (this);
+
+	data.jobname = data.jobname || 'texput';
+	data.ship_target_name = data.ship_target_name || 'html';
+
+	master.send_message ('parse_archive_loop', data);
+    };
+
     proto.launch_feed_pre_parsed = function DOMRenderer_launch_feed_pre_parsed (data) {
 	var master = new Master (this.worker_url);
 	master.handle_render = this.handle_render.bind (this);

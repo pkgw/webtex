@@ -1,0 +1,42 @@
+<!-- This file is dedicated to the public domain. -->
+<!doctype html>
+<html>
+  <head>
+    <title>Webtex Demo: Parse and Render</title>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="http://webtex.newton.cx/latest/style.css">
+    <style type="text/css">
+      article {
+        width: 700px;
+        margin: 0px auto;
+      }
+    </style>
+  </head>
+
+  <body>
+    <article class="webtex" id="webtex"></article>
+
+    <script type="text/javascript" src="compatibility.js"></script>
+    <script type="text/javascript" src="pdf.js"></script>
+    <script type="text/javascript" src="browser-master-webtex.js"></script>
+    <script type="text/javascript">
+'use strict';
+
+var targdiv = document.getElementById ('webtex');
+var workerurl = 'worker-webtex.js';
+var bundleurl = 'http://webtex.newton.cx/bundles/@BUNDLE@';
+var archiveurl = window.location.search.slice (1);
+
+console.log ('parsing ' + archiveurl);
+var dr = new Webtex.DOMRenderer (workerurl, targdiv);
+dr.launch_parse_archive ({
+    archiveurl: archiveurl,
+    bundleurl: bundleurl,
+    dump_bpath: 'latex.dump.json',
+    niters: 3,
+    debug_trace: false,
+    debug_input_lines: false,
+});
+</script>
+  </body>
+</html>

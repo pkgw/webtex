@@ -191,6 +191,7 @@ $(builddir)/brockton.zip \
 $(builddir)/brockton.json \
 demo/drivers/local-server.js \
 $(builddir)/render-preparsed.html \
+$(builddir)/parse-and-render.html \
 Makefile \
 | $(builddir)
 	@w=`mktemp -d $(builddir)/distrib.XXXXXXXX`; \
@@ -199,7 +200,8 @@ Makefile \
 	cp $(builddir)/worker-webtex.js $(builddir)/browser-master-webtex.js \
 	   $(builddir)/pdfjs/build/pdf*.js $(builddir)/pdfjs/web/compatibility.js \
 	   $(builddir)/brockton.zip $(builddir)/brockton.json \
-	   $(builddir)/render-preparsed.html demo/drivers/local-server.js $$w ; \
+	   $(builddir)/render-preparsed.html $(builddir)/parse-and-render.html \
+	   demo/drivers/local-server.js $$w ; \
 	(cd $$w && zip ../$$dstem *) ; \
 	(cd $(builddir) && ln -s $$dstem `basename $@`) ; \
 	rm -rf $$w ; \
