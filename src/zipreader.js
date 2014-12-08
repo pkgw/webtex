@@ -31,7 +31,7 @@ var ZipReader = (function ZipReader_closure () {
 
     function ZipReader (readfunc, zipsize) {
 	if (zipsize < 22)
-	    throw new TexRuntimeError ('ill-formed Zip stream: only %d bytes',
+	    throw new TexRuntimeError ('ill-formed Zip stream: only %o bytes',
 				       zipsize);
 
 	this.readfunc = readfunc;

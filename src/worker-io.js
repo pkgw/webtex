@@ -127,7 +127,8 @@ var RandomAccessURL = (function RandomAccessURL_closure () {
 	    data = req_data_as_arraybuffer (req);
 	} else {
 	    throw new TexRuntimeError ('cannot fetch URL %s (ofs=%d len=%d): ' +
-				       'got status %o', offset, length, req.status);
+				       'got status %o', this.url, offset, length,
+				       req.status);
 	}
 
 	if (resp_ofs > offset)
