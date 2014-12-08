@@ -3,3 +3,6 @@
 
 - path: /how/
   text: How it Works
+
+- path: /install/
+  text: Installation
