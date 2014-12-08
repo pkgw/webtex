@@ -23,13 +23,13 @@ temporary local server with `node local-server.js &` in this directory. (This
 command should print “listening on port 17395” and not give any error
 messages.) You can then test out two versions of Webtex:
 
-* Load up [http://localhost:17395/render-preparsed.html?brockton.json] to
+* Load up http://localhost:17395/render-preparsed.html?brockton.json to
   render a pre-parsed version of the “brockton” demo. If you get ahold of
   other pre-parsed `.json` files, you can view them by replacing the
   `brockton.json` part of that web address with something different as
   appropriate.
 
-* Load up [http://localhost:17395/parse-and-render.html?brockton.zip] to parse
+* Load up http://localhost:17395/parse-and-render.html?brockton.zip to parse
   the original LaTeX document stored in the `brockton.zip` archive and render
   it. This is *insanely* slow for several reasons, including the fact that the
   Webtex “bundle” is accessed over the internet in a super-slow way by
@@ -38,11 +38,12 @@ messages.) You can then test out two versions of Webtex:
   `parse-and-render.html` file to use the local version. Webtex will then be
   merely excruciatingly slow.
 
-* Take your favorite LaTeX document and its files and put them into a Zip file
-  called `myfile.zip` in this directory, then load up
-  [http://localhost:17395/parse-and-render.html?myfile.zip]. This will not
-  only be insanely slow, it will probably not work, because Webtex still has
-  many missing features.
+* Take your favorite LaTeX document and its dependent files (figures, `bbl`
+  file, etc.) and put them into a Zip file called `myfile.zip` in this
+  directory, then load up
+  http://localhost:17395/parse-and-render.html?myfile.zip. This will not only
+  be insanely slow, it will probably not work, because Webtex still has many
+  missing features.
 
 
 Upload to the internet
