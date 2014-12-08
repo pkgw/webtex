@@ -99,9 +99,18 @@ function process_loop (data) {
     data.fontdata = bundle.get_contents_json ('wtfontdata.json');
 
     var niters = data.niters || 1;
+    var orig_shiptarget = data.shiptarget;
 
     for (var i = 0; i < niters; i++) {
 	data.initial_linebuf = make_fs_linebuffer (data.inputpath);
+
+	// For now, only ship out the results of the final iteration. You
+	// could imagine shipping out as we go and replacing preliminary
+	// output on subsequent passes.
+	if (i == niters - 1)
+	    data.shiptarget = orig_shiptarget;
+	else
+	    data.shiptarget = new ShipTarget (); // noop
 
 	var eng = new Engine (data);
 	if (dumpjson != null)
