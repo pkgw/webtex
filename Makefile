@@ -39,7 +39,8 @@ sharedjs += \
   src/ordsource.js \
   src/inputstack.js \
   src/iostack.js \
-  src/bundle.js
+  src/bundle.js \
+  src/document-archive.js
 
 # High-level features
 sharedjs += \
