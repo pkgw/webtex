@@ -201,7 +201,7 @@ Makefile \
 	   $(builddir)/pdfjs/build/pdf*.js $(builddir)/pdfjs/web/compatibility.js \
 	   $(builddir)/brockton.zip $(builddir)/brockton.json \
 	   $(builddir)/render-preparsed.html $(builddir)/parse-and-render.html \
-	   demo/drivers/local-server.js $$w ; \
+	   demo/drivers/local-server.js demo/drivers/README.md $$w ; \
 	(cd $$w && zip ../$$dstem *) ; \
 	(cd $(builddir) && ln -s $$dstem `basename $@`) ; \
 	rm -rf $$w ; \
