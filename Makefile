@@ -155,33 +155,7 @@ $(builddir)/pdfjs-$(pdfjsversion)-dist.zip \
 primaries += $(pdfjs_unzip_stamp)
 
 
-# A distribution. This is a zip file of everything that you need to upload to
-# a server to enable a site with Webtex parsing and display. This kind of rule
-# is where Make reeeeallly gets limited.
-
-$(builddir)/distrib.zip: \
-$(builddir)/worker-webtex.js \
-$(builddir)/browser-master-webtex.js \
-$(pdfjs_unzip_stamp) \
-$(builddir)/latest.zip \
-Makefile \
-| $(builddir)
-	@w=`mktemp -d $(builddir)/distrib.XXXXXXXX`; \
-	dstem=distrib-$(texdist)-`date +%Y%m%d`.zip ; \
-	rm -f $(builddir)/$$dstem $@ ; \
-	cp $(builddir)/worker-webtex.js $(builddir)/browser-master-webtex.js \
-	   chrome/* $(builddir)/pdfjs/build/pdf*.js \
-	   $(builddir)/pdfjs/web/compatibility.js $$w ; \
-	cp build/latest.zip $$w/bundle.zip ; \
-	(cd $$w && zip ../$$dstem *) ; \
-	(cd $(builddir) && ln -s $$dstem `basename $@`) ; \
-	rm -rf $$w ; \
-	echo Created $(builddir)/$$dstem
-
-distrib: $(builddir)/distrib.zip
-
-
-# Files for the demos in the release
+# Files for the demos in the distribution.
 
 $(builddir)/brockton.zip: \
 | $(builddir)
@@ -192,6 +166,44 @@ webtex \
 $(builddir)/node-webtex.js \
 | $(builddir)
 	./webtex -n3 -T chrome demo/brockton/paper.tex >$@.new && mv -f $@.new $@
+
+$(builddir)/%.html: \
+demo/drivers/%.html.in \
+$(builddir)/latest.zip \
+| $(builddir)
+	sed -e "s/@BUNDLE@/`readlink $(builddir)/latest.zip`/g" $< >$@.new \
+	 && mv -f $@.new $@
+
+
+# A distribution. You can unzip this and run your own copy of Webtex, either
+# on a local machine with a localhost HTTP server, or by copying to your own
+# server. The demo files reference a bundle on webtex.newton.cx rather than
+# including their own copy.
+
+$(builddir)/distrib.zip: \
+$(builddir)/worker-webtex.js \
+$(builddir)/browser-master-webtex.js \
+$(pdfjs_unzip_stamp) \
+$(builddir)/brockton.zip \
+$(builddir)/brockton.json \
+demo/drivers/local-server.js \
+$(builddir)/render-preparsed.html \
+Makefile \
+| $(builddir)
+	@w=`mktemp -d $(builddir)/distrib.XXXXXXXX`; \
+	dstem=distrib-$(texdist)-`date +%Y%m%d`.zip ; \
+	rm -f $(builddir)/$$dstem $@ ; \
+	cp $(builddir)/worker-webtex.js $(builddir)/browser-master-webtex.js \
+	   $(builddir)/pdfjs/build/pdf*.js $(builddir)/pdfjs/web/compatibility.js \
+	   $(builddir)/brockton.zip $(builddir)/brockton.json \
+	   $(builddir)/render-preparsed.html demo/drivers/local-server.js $$w ; \
+	(cd $$w && zip ../$$dstem *) ; \
+	(cd $(builddir) && ln -s $$dstem `basename $@`) ; \
+	rm -rf $$w ; \
+	echo Created $(builddir)/$$dstem
+
+distrib: $(builddir)/distrib.zip
+
 
 # Minifying. Not something I've explored much so far.
 

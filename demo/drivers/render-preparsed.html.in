@@ -1,0 +1,33 @@
+<!-- This file is dedicated to the public domain. -->
+<!doctype html>
+<html>
+  <head>
+    <title>Webtex Demo: Render Preparsed File</title>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="http://webtex.newton.cx/latest/style.css">
+    <style type="text/css">
+      article {
+        width: 700px;
+        margin: 0px auto;
+      }
+    </style>
+  </head>
+
+  <body>
+    <article class="webtex" id="webtex"></article>
+
+    <script type="text/javascript" src="compatibility.js"></script>
+    <script type="text/javascript" src="pdf.js"></script>
+    <script type="text/javascript" src="browser-master-webtex.js"></script>
+    <script type="text/javascript">
+'use strict';
+
+var targdiv = document.getElementById ('webtex');
+var worker_url = 'worker-webtex.js';
+var jsonurl = window.location.search.slice (1);
+console.log ('loading ' + jsonurl);
+var dr = new Webtex.DOMRenderer (worker_url, targdiv);
+dr.launch_feed_pre_parsed ({jsonurl: jsonurl});
+</script>
+  </body>
+</html>
