@@ -6,7 +6,10 @@
 //
 // If we raise an exception, the parent's "onerror" handler will be called.
 
-// This hasn't been registered since it's in the generic part of the codebase:
+// These haven't been registered since they're in the generic part of the codebase:
+worker_ship_targets['null'] = ShipTarget;
+worker_ship_targets['flatdump'] = ConsoleFlatDumpTarget;
+worker_ship_targets['hierdump'] = ConsoleHierDumpTarget;
 worker_ship_targets['html'] = HTMLTranslateTarget;
 
 
