@@ -101,7 +101,7 @@ dump-format.js $(builddir)/node-webtex.js \
 | $(builddir)
 	node $< $(builddir)/node-webtex.js texpatches/$(texdist)/ plain.tex $@
 
-$(builddir)/latest.zip $(builddir)/glyph-encoding.json: \
+$(builddir)/newest-bundle.zip $(builddir)/glyph-encoding.json: \
 make-tex-bundle.py packages.txt mapfiles.txt $(bundleextras) \
 | $(builddir)
 	$(python) $< packages.txt mapfiles.txt texcache $(builddir) texpatches $(bundleextras)
@@ -185,9 +185,9 @@ $(builddir)/node-webtex.js \
 
 $(builddir)/%.html: \
 demo/drivers/%.html.in \
-$(builddir)/latest.zip \
+$(builddir)/newest-bundle.zip \
 | $(builddir)
-	sed -e "s/@BUNDLE@/`readlink $(builddir)/latest.zip`/g" $< >$@.new \
+	sed -e "s/@BUNDLE@/`readlink $(builddir)/newest-bundle.zip`/g" $< >$@.new \
 	 && mv -f $@.new $@
 
 

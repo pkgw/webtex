@@ -84,7 +84,7 @@ class Bundler (object):
 
         self.save_charname_ids ()
 
-        lpath = os.path.join (self.destdir, 'latest.zip')
+        lpath = os.path.join (self.destdir, 'newest-bundle.zip')
         try:
             os.unlink (lpath)
         except OSError:
