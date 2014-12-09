@@ -27,7 +27,7 @@
 'use strict';
 
 var targdiv = document.getElementById ('webtex');
-var worker_url = 'worker-webtex.js';
+var worker_url = 'webtex-backend.js';
 var jsonurl = window.location.search.slice (1);
 console.log ('loading ' + jsonurl);
 var dr = new Webtex.DOMRenderer (worker_url, targdiv);

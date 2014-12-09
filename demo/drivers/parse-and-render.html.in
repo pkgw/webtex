@@ -27,7 +27,7 @@
 'use strict';
 
 var targdiv = document.getElementById ('webtex');
-var workerurl = 'worker-webtex.js';
+var workerurl = 'webtex-backend.js';
 var bundleurl = 'http://webtex.newton.cx/bundles/@BUNDLE@';
 var archiveurl = window.location.search.slice (1);
 
