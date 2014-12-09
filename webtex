@@ -9,7 +9,7 @@ var util = require ('util');
 
 var yargs = require ('yargs')
     .usage ('Process a (La)TeX file using Webtex.')
-    .example ('webtex test/tex/latex-minimal.tex', 'process a small test file')
+    .example ('webtex demo/basic/minimalmath.tex', 'process a small test file')
     .demand (1, 'error: the input (La)TeX file name is required')
     .options ('m', {alias: 'module', default: 'build/node-webtex.js'})
     .describe ('m', 'path to the built Webtex Node.js module')
@@ -20,7 +20,7 @@ var yargs = require ('yargs')
     .options ('n', {alias: 'num-iters', default: 1})
     .describe ('n', 'number of times to iterate the engine')
     .options ('T', {alias: 'target', default: 'flat'})
-    .describe ('T', 'destination for shipped-out boxes: flat|hier|null')
+    .describe ('T', 'destination for shipped-out boxes: flat|hier|chrome|null')
     .boolean ('t')
     .options ('t', {alias: 'trace'})
     .describe ('t', 'trace EVERYTHING that the engine does')
@@ -48,7 +48,7 @@ else if (argv.target == 'hier')
 else if (argv.target == 'chrome')
     shiptarget = new webtex.ChromeJsonDumpTarget (null);
 else if (argv.target == 'null')
-    shiptarget = {process: function () {}, finish: function () {}};
+    shiptarget = new webtex.ShipTarget ();
 else {
     console.error ('error: unrecognized shipout target "' + argv.target + '"');
     process.exit (1);
