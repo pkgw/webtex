@@ -58,7 +58,7 @@ sharedjs += \
   src/page-builder.js \
   src/command-classes.js \
   src/command-impls.js \
-  $(builddir)/engine-helpers.js \
+  $(builddir)/intermediates/engine-helpers.js \
   src/engine.js \
   src/ship-target.js \
   src/html-translate-target.js
@@ -79,12 +79,12 @@ generate.py src/worker-wrapper.js $(sharedjs) $(workerjs) \
 
 $(builddir)/node-webtex.js: \
 generate.py src/node-wrapper.js $(preamble) $(sharedjs) $(nodejs) \
-| $(builddir)
+| $(builddir)/intermediates
 	$(python) $^ $@
 
-$(builddir)/%-helpers.js: \
+$(builddir)/intermediates/%-helpers.js: \
 generate.py src/%-helpers-tmpl.js $(genlists) \
-| $(builddir)
+| $(builddir)/intermediates
 	$(python) $< src/$*-helpers-tmpl.js $@
 
 primaries += $(builddir)/worker-webtex.js $(builddir)/node-webtex.js
@@ -121,7 +121,7 @@ masterjs = \
   src/preamble.js \
   src/format.js \
   src/master-object.js \
-  $(builddir)/master-glyph-helper.js \
+  $(builddir)/intermediates/master-glyph-helper.js \
   src/type1-font.js \
   src/dom-renderer.js
 
@@ -133,9 +133,9 @@ generate.py src/browser-master-wrapper.js $(masterjs) \
 
 primaries += $(builddir)/browser-master-webtex.js
 
-$(builddir)/master-glyph-helper.js: \
+$(builddir)/intermediates/master-glyph-helper.js: \
 generate.py src/master-glyph-helper-tmpl.js $(builddir)/glyph-encoding.json \
-| $(builddir)
+| $(builddir)/intermediates
 	$(python) $^ $@
 
 
@@ -241,7 +241,10 @@ server:
 all: $(primaries)
 
 $(builddir):
-	mkdir -p $(builddir)
+	mkdir -p $@
+
+$(builddir)/intermediates:
+	mkdir -p $@
 
 clean:
 	-rm -rf $(builddir)
