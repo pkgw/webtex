@@ -85,8 +85,9 @@ dev-scripts/preprocess.py src/node-wrapper.js $(preamble) $(sharedjs) $(nodejs) 
 primaries += $(builddir)/node-webtex.js
 
 
-# Here we build the bundle and those .dump.json files that it requires. TODO:
-# Feeling dissatisfied with the naming scheme.
+# Here we build the bundle and those .dump.json files that it requires. To
+# force a rebuild of the bundle, use "touch data/packages.txt" so that
+# make-bundle.py can move away the old bundle file for tidiness.
 
 bundleextras = \
   $(builddir)/latex.dump.json
@@ -101,10 +102,10 @@ dev-scripts/dump-format.js $(builddir)/node-webtex.js \
 | $(builddir)
 	node $< $(builddir)/node-webtex.js texpatches/$(texdist)/ plain.tex $@
 
-$(builddir)/dev/newest-bundle.zip $(builddir)/dev/glyph-encoding.json: \
+$(builddir)/dev/dev-bundle.zip $(builddir)/glyph-encoding.json: \
 dev-scripts/make-bundle.py data/packages.txt data/mapfiles.txt $(bundleextras) \
-| $(builddir)/dev
-	$(python) $< data/packages.txt data/mapfiles.txt texcache $(builddir)/dev texpatches $(bundleextras)
+| $(builddir)/dev $(builddir)/old-bundles
+	$(python) $< data/packages.txt data/mapfiles.txt texcache $(builddir) texpatches $(bundleextras)
 
 
 # Next up is the browser version of Webtex. This is split into two parts: the
@@ -151,7 +152,7 @@ primaries += $(builddir)/dev/webtex-frontend.js
 devfiles += $(builddir)/dev/webtex-frontend.js
 
 $(builddir)/intermediates/frontend-glyph-helper.js: \
-dev-scripts/preprocess.py src/frontend-glyph-helper-tmpl.js $(builddir)/dev/glyph-encoding.json \
+dev-scripts/preprocess.py src/frontend-glyph-helper-tmpl.js $(builddir)/glyph-encoding.json \
 | $(builddir)/intermediates
 	$(python) $^ $@
 
@@ -208,9 +209,9 @@ devfiles += $(patsubst data/frontend/%,$(builddir)/dev/%,$(wildcard data/fronten
 
 $(builddir)/dev/%.html: \
 demo/drivers/%.html.in \
-$(builddir)/dev/newest-bundle.zip \
+$(builddir)/dev/dev-bundle.zip \
 | $(builddir)
-	sed -e "s|@BUNDLE@|newest-bundle.zip|g" \
+	sed -e "s|@BUNDLE@|dev-bundle.zip|g" \
 	    -e "s|@CHROME@|.|g" $< >$@.new \
 	 && mv -f $@.new $@
 
@@ -241,9 +242,10 @@ devfiles += $(builddir)/dev/brockton.zip $(builddir)/dev/brockton.json
 
 $(builddir)/intermediates/distrib-%.html: \
 demo/drivers/%.html.in \
-$(builddir)/dev/newest-bundle.zip \
+$(builddir)/dev/dev-bundle.zip \
 | $(builddir)/intermediates
-	sed -e "s|@BUNDLE@|http://webtex.newton.cx/bundles/`readlink $(builddir)/dev/newest-bundle.zip`|g" \
+	zbase=$$(basename $$(readlink $(builddir)/dev/dev-bundle.zip)) ; \
+	sed -e "s|@BUNDLE@|http://webtex.newton.cx/bundles/$zbase|g" \
 	    -e "s|@CHROME@|http://webtex.newton.cx/latest|g" $< >$@.new \
 	 && mv -f $@.new $@
 
@@ -315,6 +317,9 @@ $(builddir)/intermediates:
 	mkdir -p $@
 
 $(builddir)/dev:
+	mkdir -p $@
+
+$(builddir)/old-bundles:
 	mkdir -p $@
 
 clean:

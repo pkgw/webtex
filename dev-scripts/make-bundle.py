@@ -75,21 +75,27 @@ class Bundler (object):
         for name in sorted (self.elemshas.iterkeys ()):
             s.update (name)
             s.update (self.elemshas[name])
-        zbase = '-'.join ([distribution,
-                           time.strftime ('%Y%m%d'),
-                           s.hexdigest () + '.zip'])
+        zbase = distribution + '-' + s.hexdigest () + '.zip'
         zpath = os.path.join (self.destdir, zbase)
         os.rename (temp.name, zpath)
         print ('Created', zpath)
 
         self.save_charname_ids ()
 
-        lpath = os.path.join (self.destdir, 'newest-bundle.zip')
+        lpath = os.path.join (self.destdir, 'dev', 'dev-bundle.zip')
+        try:
+            prevbase = os.path.basename (os.readlink (lpath))
+            prev = os.path.join (self.destdir, prevbase)
+            archive = os.path.join (self.destdir, 'old-bundles', prevbase)
+            os.rename (prev, archive)
+        except OSError:
+            pass
+
         try:
             os.unlink (lpath)
         except OSError:
             pass # more living dangerously
-        os.symlink (zbase, lpath)
+        os.symlink (os.path.join (os.path.pardir, zbase), lpath)
         print ('Linked', lpath)
 
 
