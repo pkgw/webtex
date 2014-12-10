@@ -4,7 +4,7 @@
   <head>
     <title>Webtex Demo: Parse and Render</title>
     <meta charset="utf-8">
-    <link rel="stylesheet" href="http://webtex.newton.cx/latest/style.css">
+    <link rel="stylesheet" href="@CHROME@/style.css">
     <style type="text/css">
       article {
         width: 700px;
@@ -28,7 +28,7 @@
 
 var targdiv = document.getElementById ('webtex');
 var workerurl = 'webtex-backend.js';
-var bundleurl = 'http://webtex.newton.cx/bundles/@BUNDLE@';
+var bundleurl = '@BUNDLE@';
 var archiveurl = window.location.search.slice (1);
 
 console.log ('parsing ' + archiveurl);

@@ -4,7 +4,7 @@
   <head>
     <title>Webtex Demo: Render Preparsed File</title>
     <meta charset="utf-8">
-    <link rel="stylesheet" href="http://webtex.newton.cx/latest/style.css">
+    <link rel="stylesheet" href="@CHROME@/style.css">
     <style type="text/css">
       article {
         width: 700px;

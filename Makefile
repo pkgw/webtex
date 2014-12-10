@@ -101,10 +101,10 @@ dump-format.js $(builddir)/node-webtex.js \
 | $(builddir)
 	node $< $(builddir)/node-webtex.js texpatches/$(texdist)/ plain.tex $@
 
-$(builddir)/newest-bundle.zip $(builddir)/glyph-encoding.json: \
+$(builddir)/dev/newest-bundle.zip $(builddir)/dev/glyph-encoding.json: \
 make-tex-bundle.py packages.txt mapfiles.txt $(bundleextras) \
-| $(builddir)
-	$(python) $< packages.txt mapfiles.txt texcache $(builddir) texpatches $(bundleextras)
+| $(builddir)/dev
+	$(python) $< packages.txt mapfiles.txt texcache $(builddir)/dev texpatches $(bundleextras)
 
 
 # Next up is the browser version of Webtex. This is split into two parts: the
@@ -118,13 +118,13 @@ backendjs = \
   src/browser-io.js \
   src/backend-api.js
 
-$(builddir)/webtex-backend.js: \
+$(builddir)/dev/webtex-backend.js: \
 generate.py src/backend-wrapper.js $(sharedjs) $(backendjs) \
-| $(builddir)
+| $(builddir)/dev
 	$(python) $^ $@
 
-primaries += $(builddir)/webtex-backend.js
-
+primaries += $(builddir)/dev/webtex-backend.js
+devfiles += $(builddir)/dev/webtex-backend.js
 
 # The frontend, which drives the backend and renders its output into the DOM.
 # This can only be built after the bundle, because the frontend code embeds
@@ -141,15 +141,16 @@ frontendjs = \
   src/type1-font.js \
   src/dom-renderer.js
 
-$(builddir)/webtex-frontend.js: \
+$(builddir)/dev/webtex-frontend.js: \
 generate.py src/frontend-wrapper.js $(frontendjs) \
-| $(builddir)
+| $(builddir)/dev
 	$(python) $^ $@
 
-primaries += $(builddir)/webtex-frontend.js
+primaries += $(builddir)/dev/webtex-frontend.js
+devfiles += $(builddir)/dev/webtex-frontend.js
 
 $(builddir)/intermediates/frontend-glyph-helper.js: \
-generate.py src/frontend-glyph-helper-tmpl.js $(builddir)/glyph-encoding.json \
+generate.py src/frontend-glyph-helper-tmpl.js $(builddir)/dev/glyph-encoding.json \
 | $(builddir)/intermediates
 	$(python) $^ $@
 
@@ -170,27 +171,80 @@ $(builddir)/pdfjs-$(pdfjsversion)-dist.zip \
 	mkdir -p $(builddir)/pdfjs
 	cd $(builddir)/pdfjs && unzip -q -DD ../pdfjs-$(pdfjsversion)-dist.zip
 
+$(builddir)/dev/compatibility.js: \
+$(pdfjs_unzip_stamp) \
+| $(builddir)/dev
+	cd $(builddir)/dev && ln -s ../pdfjs/web/compatibility.js
+
+$(builddir)/dev/pdf.js: \
+$(pdfjs_unzip_stamp) \
+| $(builddir)/dev
+	cd $(builddir)/dev && ln -s ../pdfjs/build/pdf.js
+
+$(builddir)/dev/pdf.worker.js: \
+$(pdfjs_unzip_stamp) \
+| $(builddir)/dev
+	cd $(builddir)/dev && ln -s ../pdfjs/build/pdf.worker.js
+
 primaries += $(pdfjs_unzip_stamp)
+devfiles += \
+  $(builddir)/dev/compatibility.js \
+  $(builddir)/dev/pdf.js \
+  $(builddir)/dev/pdf.worker.js
+
+
+# Here we link the chrome data files into the dev directory
+
+$(builddir)/dev/%: chrome/% \
+| $(builddir)/dev
+	cp $^ $@
+
+devfiles += $(patsubst chrome/%,$(builddir)/dev/%,$(wildcard chrome/*))
+
+
+# These rules produce HTML drivers for the local development environment
+
+$(builddir)/dev/%.html: \
+demo/drivers/%.html.in \
+$(builddir)/dev/newest-bundle.zip \
+| $(builddir)
+	sed -e "s|@BUNDLE@|newest-bundle.zip|g" \
+	    -e "s|@CHROME@|.|g" $< >$@.new \
+	 && mv -f $@.new $@
+
+devfiles += $(patsubst demo/drivers/%.in,$(builddir)/dev/%,$(wildcard demo/drivers/*.in))
 
 
 # These rules produce demo files for the installable distribution.
 
-$(builddir)/brockton.zip: \
-| $(builddir)
+$(builddir)/dev/brockton.zip: \
+| $(builddir)/dev
 	zip -j $@ demo/brockton/*
 
-$(builddir)/brockton.json: \
+$(builddir)/dev/brockton.json: \
 webtex \
 $(builddir)/node-webtex.js \
-| $(builddir)
+| $(builddir)/dev
 	./webtex -n3 -T chrome demo/brockton/paper.tex >$@.new && mv -f $@.new $@
 
 $(builddir)/%.html: \
 demo/drivers/%.html.in \
-$(builddir)/newest-bundle.zip \
+$(builddir)/dev/newest-bundle.zip \
 | $(builddir)
-	sed -e "s/@BUNDLE@/`readlink $(builddir)/newest-bundle.zip`/g" $< >$@.new \
+	sed -e "s/@BUNDLE@/`readlink $(builddir)/dev/newest-bundle.zip`/g" $< >$@.new \
 	 && mv -f $@.new $@
+
+
+# These rules produce HTML drivers that will be included in the distribution Zip.
+
+$(builddir)/intermediates/distrib-%.html: \
+demo/drivers/%.html.in \
+$(builddir)/dev/newest-bundle.zip \
+| $(builddir)/intermediates
+	sed -e "s|@BUNDLE@|`readlink $(builddir)/dev/newest-bundle.zip`|g" \
+	    -e "s|@CHROME@|.|g" $< >$@.new \
+	 && mv -f $@.new $@
+
 
 
 # Finally, the rule to generate an installable distribution. You can unzip
@@ -246,12 +300,14 @@ test:
 # Utility
 
 server:
-	node misc/testing-server.js &
+	node misc/testing-server.js $(builddir)/dev &
 
 
 # Generic helpers
 
 all: $(primaries)
+
+dev: $(devfiles)
 
 $(builddir):
 	mkdir -p $@
@@ -259,7 +315,10 @@ $(builddir):
 $(builddir)/intermediates:
 	mkdir -p $@
 
+$(builddir)/dev:
+	mkdir -p $@
+
 clean:
 	-rm -rf $(builddir)
 
-.PHONY: all clean default distrib server test
+.PHONY: all clean default dev distrib server test
