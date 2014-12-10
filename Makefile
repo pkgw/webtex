@@ -102,7 +102,7 @@ dump-format.js $(builddir)/node-webtex.js \
 	node $< $(builddir)/node-webtex.js texpatches/$(texdist)/ plain.tex $@
 
 $(builddir)/dev/newest-bundle.zip $(builddir)/dev/glyph-encoding.json: \
-make-tex-bundle.py packages.txt mapfiles.txt $(bundleextras) \
+dev-scripts/make-bundle.py packages.txt mapfiles.txt $(bundleextras) \
 | $(builddir)/dev
 	$(python) $< packages.txt mapfiles.txt texcache $(builddir)/dev texpatches $(bundleextras)
 
