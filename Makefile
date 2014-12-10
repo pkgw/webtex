@@ -193,13 +193,13 @@ devfiles += \
   $(builddir)/dev/pdf.worker.js
 
 
-# Here we link the chrome data files into the dev directory
+# Here we copy the chrome data files into the dev directory
 
-$(builddir)/dev/%: chrome/% \
+$(builddir)/dev/%: data/frontend/% \
 | $(builddir)/dev
 	cp $^ $@
 
-devfiles += $(patsubst chrome/%,$(builddir)/dev/%,$(wildcard chrome/*))
+devfiles += $(patsubst data/frontend/%,$(builddir)/dev/%,$(wildcard data/frontend/*))
 
 
 # These rules produce HTML drivers for the local development environment
@@ -215,7 +215,7 @@ $(builddir)/dev/newest-bundle.zip \
 devfiles += $(patsubst demo/drivers/%.in,$(builddir)/dev/%,$(wildcard demo/drivers/*.in))
 
 
-# These rules produce demo files for the installable distribution.
+# These rules produce test files for the local development environment
 
 $(builddir)/dev/brockton.zip: \
 | $(builddir)/dev
@@ -227,12 +227,7 @@ $(builddir)/node-webtex.js \
 | $(builddir)/dev
 	./webtex -n3 -T chrome demo/brockton/paper.tex >$@.new && mv -f $@.new $@
 
-$(builddir)/%.html: \
-demo/drivers/%.html.in \
-$(builddir)/dev/newest-bundle.zip \
-| $(builddir)
-	sed -e "s/@BUNDLE@/`readlink $(builddir)/dev/newest-bundle.zip`/g" $< >$@.new \
-	 && mv -f $@.new $@
+devfiles += $(builddir)/dev/brockton.zip $(builddir)/dev/brockton.json
 
 
 # These rules produce HTML drivers that will be included in the distribution Zip.
