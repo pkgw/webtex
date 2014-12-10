@@ -126,7 +126,7 @@ dev-scripts/preprocess.py src/backend-wrapper.js $(sharedjs) $(backendjs) \
 
 primaries += $(builddir)/dev/webtex-backend.js
 devfiles += $(builddir)/dev/webtex-backend.js
-
+distfiles += $(builddir)/dev/webtex-backend.js
 
 # The frontend, which drives the backend and renders its output into the DOM.
 # This can only be built after the bundle, because the frontend code embeds
@@ -150,6 +150,7 @@ dev-scripts/preprocess.py src/frontend-wrapper.js $(frontendjs) \
 
 primaries += $(builddir)/dev/webtex-frontend.js
 devfiles += $(builddir)/dev/webtex-frontend.js
+distfiles += $(builddir)/dev/webtex-frontend.js
 
 $(builddir)/intermediates/frontend-glyph-helper.js: \
 dev-scripts/preprocess.py src/frontend-glyph-helper-tmpl.js $(builddir)/glyph-encoding.json \
@@ -194,28 +195,35 @@ devfiles += \
   $(builddir)/dev/compatibility.js \
   $(builddir)/dev/pdf.js \
   $(builddir)/dev/pdf.worker.js
+distfiles += \
+  $(builddir)/dev/compatibility.js \
+  $(builddir)/dev/pdf.js \
+  $(builddir)/dev/pdf.worker.js
 
 
-# Here we copy the chrome data files into the local development environment.
+# Here we link the chrome data files into the local development environment.
+# Too bad that we're encoding an absolute path to the data/fronted/ directory,
+# but I'd rather do that than rely on the location of $(builddir). (Call me
+# Mr. Overkill.)
 
-$(builddir)/dev/%: data/frontend/% \
+$(builddir)/dev/dev-frontend-data: \
 | $(builddir)/dev
-	cp $^ $@
+	d=`cd data/frontend && pwd` ; cd $(builddir)/dev && ln -s $$d dev-frontend-data
 
-devfiles += $(patsubst data/frontend/%,$(builddir)/dev/%,$(wildcard data/frontend/*))
+devfiles += $(builddir)/dev/dev-frontend-data
 
 
 # These rules produce HTML drivers for the local development environment.
 
-$(builddir)/dev/%.html: \
+$(builddir)/dev/dev-%.html: \
 demo/drivers/%.html.in \
 $(builddir)/dev/dev-bundle.zip \
 | $(builddir)
 	sed -e "s|@BUNDLE@|dev-bundle.zip|g" \
-	    -e "s|@CHROME@|.|g" $< >$@.new \
+	    -e "s|@CHROME@|dev-frontend-data|g" $< >$@.new \
 	 && mv -f $@.new $@
 
-devfiles += $(patsubst demo/drivers/%.in,$(builddir)/dev/%,$(wildcard demo/drivers/*.in))
+devfiles += $(patsubst demo/drivers/%.in,$(builddir)/dev/dev-%,$(wildcard demo/drivers/*.in))
 
 
 # These rules produce demo files for the local development environment.
@@ -231,6 +239,7 @@ $(builddir)/node-webtex.js \
 	./webtex -n3 -T chrome demo/brockton/paper.tex >$@.new && mv -f $@.new $@
 
 devfiles += $(builddir)/dev/brockton.zip $(builddir)/dev/brockton.json
+distfiles += $(builddir)/dev/brockton.zip $(builddir)/dev/brockton.json
 
 
 # Now we work on the "distribution" Zip, which is pretty much like the local
@@ -240,7 +249,7 @@ devfiles += $(builddir)/dev/brockton.zip $(builddir)/dev/brockton.json
 # server of your own. First, these rules produce driver HTML drivers
 # customized for the distribution.
 
-$(builddir)/intermediates/distrib-%.html: \
+$(builddir)/dev/%.html: \
 demo/drivers/%.html.in \
 $(builddir)/dev/dev-bundle.zip \
 | $(builddir)/intermediates
@@ -249,32 +258,21 @@ $(builddir)/dev/dev-bundle.zip \
 	    -e "s|@CHROME@|http://webtex.newton.cx/latest|g" $< >$@.new \
 	 && mv -f $@.new $@
 
+distfiles += $(patsubst demo/drivers/%.in,$(builddir)/dev/%,$(wildcard demo/drivers/*.in))
 
-# Now a hairy rule to make the Zip itself.
+
+# Here make the distribution Zip itself.
+
+distfiles += demo/drivers/README.md demo/drivers/local-server.js
 
 $(builddir)/distrib.zip: \
-$(builddir)/dev/webtex-backend.js \
-$(builddir)/dev/webtex-frontend.js \
-$(pdfjs_unzip_stamp) \
-$(builddir)/dev/brockton.zip \
-$(builddir)/dev/brockton.json \
-demo/drivers/local-server.js \
-$(builddir)/intermediates/distrib-render-preparsed.html \
-$(builddir)/intermediates/distrib-parse-and-render.html \
+$(distfiles) \
 Makefile \
 | $(builddir)
-	@w=`mktemp -d $(builddir)/distrib.XXXXXXXX`; \
-	dstem=distrib-$(texdist)-`date +%Y%m%d`.zip ; \
+	@dstem=distrib-$(texdist)-`date +%Y%m%d`.zip ; \
 	rm -f $(builddir)/$$dstem $@ ; \
-	cp $(builddir)/dev/webtex-backend.js $(builddir)/dev/webtex-frontend.js \
-	   $(builddir)/pdfjs/build/pdf*.js $(builddir)/pdfjs/web/compatibility.js \
-	   $(builddir)/dev/brockton.zip $(builddir)/dev/brockton.json \
-	   demo/drivers/local-server.js demo/drivers/README.md $$w ; \
-	cp $(builddir)/intermediates/distrib-render-preparsed.html $$w/render-preparsed.html ; \
-	cp $(builddir)/intermediates/distrib-parse-and-render.html $$w/parse-and-render.html ; \
-	(cd $$w && zip ../$$dstem *) ; \
-	(cd $(builddir) && ln -s $$dstem `basename $@`) ; \
-	rm -rf $$w ; \
+	zip -j $(builddir)/$$dstem $(distfiles) ; \
+	ln -s $$dstem $@ ; \
 	echo Created $(builddir)/$$dstem
 
 distrib: $(builddir)/distrib.zip
