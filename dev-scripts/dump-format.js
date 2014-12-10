@@ -22,7 +22,7 @@ var outpath = process.argv[5];
 var eng = webtex.setup_process_format ({
     jobname: fmtname,
     initial_linebuf: webtex.LineBuffer.new_static (['\\input ' + fmtname]),
-    bundlepath: 'misc/minimal-bundle-tl2013.zip',
+    bundlepath: 'data/minimal-bundle-tl2013.zip',
     debug_trace: false,
     debug_input_lines: false,
     fontdata: {

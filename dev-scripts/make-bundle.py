@@ -340,7 +340,7 @@ class Bundler (object):
         if encname[0] == '*':
             rv = self.encoding_data.get (encname)
             if rv is None:
-                data = io.open ('misc/%s.enc' % (encname[1:]), 'rb').read ()
+                data = io.open ('data/encodings/%s.enc' % (encname[1:]), 'rb').read ()
                 self.process_encoding_file (encname, data)
                 rv = self.encoding_data.get (encname)
             return rv
