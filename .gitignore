@@ -1,4 +1,3 @@
 /build*
-/glyphlist.pyc
+/dev-scripts/glyphlist.pyc
 /texcache
-/yuicompressor-*.jar
