@@ -65,7 +65,7 @@ sharedjs += \
   src/html-translate-target.js
 
 $(builddir)/intermediates/%-helpers.js: \
-generate.py src/%-helpers-tmpl.js $(genlists) \
+dev-scripts/preprocess.py src/%-helpers-tmpl.js $(genlists) \
 | $(builddir)/intermediates
 	$(python) $< src/$*-helpers-tmpl.js $@
 
@@ -78,7 +78,7 @@ nodejs = \
   src/node-api.js
 
 $(builddir)/node-webtex.js: \
-generate.py src/node-wrapper.js $(preamble) $(sharedjs) $(nodejs) \
+dev-scripts/preprocess.py src/node-wrapper.js $(preamble) $(sharedjs) $(nodejs) \
 | $(builddir)/intermediates
 	$(python) $^ $@
 
@@ -119,7 +119,7 @@ backendjs = \
   src/backend-api.js
 
 $(builddir)/dev/webtex-backend.js: \
-generate.py src/backend-wrapper.js $(sharedjs) $(backendjs) \
+dev-scripts/preprocess.py src/backend-wrapper.js $(sharedjs) $(backendjs) \
 | $(builddir)/dev
 	$(python) $^ $@
 
@@ -142,7 +142,7 @@ frontendjs = \
   src/dom-renderer.js
 
 $(builddir)/dev/webtex-frontend.js: \
-generate.py src/frontend-wrapper.js $(frontendjs) \
+dev-scripts/preprocess.py src/frontend-wrapper.js $(frontendjs) \
 | $(builddir)/dev
 	$(python) $^ $@
 
@@ -150,7 +150,7 @@ primaries += $(builddir)/dev/webtex-frontend.js
 devfiles += $(builddir)/dev/webtex-frontend.js
 
 $(builddir)/intermediates/frontend-glyph-helper.js: \
-generate.py src/frontend-glyph-helper-tmpl.js $(builddir)/dev/glyph-encoding.json \
+dev-scripts/preprocess.py src/frontend-glyph-helper-tmpl.js $(builddir)/dev/glyph-encoding.json \
 | $(builddir)/intermediates
 	$(python) $^ $@
 
