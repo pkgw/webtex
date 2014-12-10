@@ -298,7 +298,7 @@ test:
 
 # Utility
 
-server:
+server: $(devfiles)
 	node dev-scripts/testing-server.js $(builddir)/dev &
 
 
