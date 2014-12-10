@@ -300,7 +300,7 @@ test:
 # Utility
 
 server:
-	node misc/testing-server.js $(builddir)/dev &
+	node dev-scripts/testing-server.js $(builddir)/dev &
 
 
 # Generic helpers
