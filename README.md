@@ -21,6 +21,7 @@ would upload to a website, you need:
 * node.js
 * `curl`
 * Python version 2.7
+* The Python `lzma` module, installable with "pip install pyliblzma"
 * the Node.js `yargs` module, for the `webtex` console program (optional)
 * Java, for minification with YUI Compressor (optional)
 
