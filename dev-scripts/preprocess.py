@@ -64,7 +64,7 @@ def load_all ():
     h = Holder ()
 
     for basename, colnames in all_tables:
-        data = list (read_table (basename + '.txt', colnames))
+        data = list (read_table ('data/' + basename + '.txt', colnames))
         setattr (h, basename, data)
 
     # Globally-applicable fixup

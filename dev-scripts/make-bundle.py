@@ -422,7 +422,7 @@ class Bundler (object):
 
 def commandline (argv):
     if len (sys.argv) < 6:
-        print ('usage: make-tex-bundle.py <specfile-path> <mapfile-path> <cachedir> <destdir> '
+        print ('usage: make-bundle.py <specfile-path> <mapfile-path> <cachedir> <destdir> '
                '<patchdir> [otherfiles...]', file=sys.stderr)
         sys.exit (1)
 

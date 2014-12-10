@@ -13,8 +13,8 @@ default: all
 # Source files for the main JavaScript apps.
 
 genlists = \
-  commands.txt \
-  namedparams.txt
+  data/commands.txt \
+  data/namedparams.txt
 
 # Non-TeX-specific low-level utilities
 sharedjs = \
@@ -102,9 +102,9 @@ dev-scripts/dump-format.js $(builddir)/node-webtex.js \
 	node $< $(builddir)/node-webtex.js texpatches/$(texdist)/ plain.tex $@
 
 $(builddir)/dev/newest-bundle.zip $(builddir)/dev/glyph-encoding.json: \
-dev-scripts/make-bundle.py packages.txt mapfiles.txt $(bundleextras) \
+dev-scripts/make-bundle.py data/packages.txt data/mapfiles.txt $(bundleextras) \
 | $(builddir)/dev
-	$(python) $< packages.txt mapfiles.txt texcache $(builddir)/dev texpatches $(bundleextras)
+	$(python) $< data/packages.txt data/mapfiles.txt texcache $(builddir)/dev texpatches $(bundleextras)
 
 
 # Next up is the browser version of Webtex. This is split into two parts: the
