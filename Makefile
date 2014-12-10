@@ -92,12 +92,12 @@ bundleextras = \
   $(builddir)/latex.dump.json
 
 $(builddir)/latex.dump.json: \
-dump-format.js $(builddir)/node-webtex.js texpatches/$(texdist)/latex.ltx.post \
+dev-scripts/dump-format.js $(builddir)/node-webtex.js texpatches/$(texdist)/latex.ltx.post \
 | $(builddir)
 	node $< $(builddir)/node-webtex.js texpatches/$(texdist)/ latex.ltx $@
 
 $(builddir)/plain.dump.json: \
-dump-format.js $(builddir)/node-webtex.js \
+dev-scripts/dump-format.js $(builddir)/node-webtex.js \
 | $(builddir)
 	node $< $(builddir)/node-webtex.js texpatches/$(texdist)/ plain.tex $@
 
