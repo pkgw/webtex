@@ -9,9 +9,6 @@ yuiversion = 2.4.8
 
 default: all
 
-
-# Source files for the main JavaScript apps.
-
 genlists = \
   data/commands.txt \
   data/namedparams.txt
@@ -128,6 +125,7 @@ primaries += $(builddir)/dev/webtex-backend.js
 devfiles += $(builddir)/dev/webtex-backend.js
 distfiles += $(builddir)/dev/webtex-backend.js
 
+
 # The frontend, which drives the backend and renders its output into the DOM.
 # This can only be built after the bundle, because the frontend code embeds
 # the list of glyph identifiers, which is generated as font files in the
@@ -202,7 +200,7 @@ distfiles += \
 
 
 # Here we link the chrome data files into the local development environment.
-# Too bad that we're encoding an absolute path to the data/fronted/ directory,
+# Too bad that we're encoding an absolute path to the data/frontend/ directory,
 # but I'd rather do that than rely on the location of $(builddir). (Call me
 # Mr. Overkill.)
 
@@ -226,7 +224,7 @@ $(builddir)/dev/dev-bundle.zip \
 devfiles += $(patsubst demo/drivers/%.in,$(builddir)/dev/dev-%,$(wildcard demo/drivers/*.in))
 
 
-# These rules produce demo files for the local development environment.
+# These rules produce the demo files.
 
 $(builddir)/dev/brockton.zip: \
 | $(builddir)/dev
