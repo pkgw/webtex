@@ -37,3 +37,18 @@
   {#1}\@caption@fignum@sep#2%
   \special{webtex end-tag figcaption}%
 }%
+
+
+% Footnotes. Emit them directly as <aside>s rather than inserts.
+
+\long\def\ltx@foottext#1#2{%
+ \begingroup
+  \special{webtex start-tag aside {class} {footnote}}%
+  \expandafter\ltx@make@current@footnote\expandafter{\@mpfn}{#1}%
+  \@footnotetext{#2}%
+  \special{webtex end-tag aside}%
+ \endgroup
+}%
+
+\long\def\@footnotetext{\bgroup\make@footnotetext}
+\long\def\@mpfootnotetext{\bgroup\make@footnotetext}

@@ -61,3 +61,8 @@
   \@startsection{subsubsection}{3}{\z@}%
   {2ex plus 1ex minus .2ex}{1ex plus .2ex}%
   {\special{webtex start-tag h4}\aftergroup\webtex@@endsection}}
+
+
+% Disable \lastpagefootnotes
+\long\def\lastpagefootnotes{}
+\let\lastpagefootnote=\lastpagefootnotes
