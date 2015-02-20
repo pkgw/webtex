@@ -31,45 +31,45 @@ _space_			n	n	inval	# "ex_space" command
 above			n	n	inval
 abovewithdelims		n	n	inval	# -> "above"
 accent			n	n	inval
-advance			n	n	consume
+advance			n	n	consume	# via "prefixed_command"
 afterassignment		n	n	inval
 aftergroup		n	n	inval
 atop			n	n	inval	# -> "above"
 atopwithdelims		n	n	inval	# -> "above"
 badness			n	n	inval	# -> "last_item"
-batchmode		n	n	consume # -> "set_interaction"
+batchmode		n	n	consume # -> "set_interaction" via "prefixed_command"
 beginL			n	n	inval	# eTeX
 beginR			n	n	inval	# eTeX
 begingroup		n	n	inval
 botmark			yes	n	inval	# -> "top_bot_mark"
 botmarks		yes	n	inval	# eTeX
 box			n	n	inval	# -> "make_box"
-catcode			n	n	consume # -> "def_code"
+catcode			n	n	consume # -> "def_code" via "prefixed_command"
 char			n	n	inval	# "char_num" command
-chardef			n	n	consume	# -> "shorthand_def"
+chardef			n	n	consume	# -> "shorthand_def" via "prefixed_command"
 cleaders		n	n	inval	# -> "leader_ship"
 closein			n	n	inval	# -> "in_stream"
 closeout		n	n	inval	# -> *"extension"
 copy			n	n	inval	# -> "make_box"
-count			n	n	consume # -> "register"
-countdef		n	n	consume	# -> "shorthand_def"
+count			n	n	consume # -> "register" via "prefixed_command"
+countdef		n	n	consume	# -> "shorthand_def" via "prefixed_command"
 cr			n	n	inval	# -> "car_ret"
 crcr			n	n	inval	# -> "car_ret"
 csname			yes 	n	inval
-deadcycles		n	n	consume # -> "set_page_int"
-def			n	n	consume
-delcode			n	n	consume # -> "def_code"
+deadcycles		n	n	consume # -> "set_page_int" via "prefixed_command"
+def			n	n	consume	#  via "prefixed_command"
+delcode			n	n	consume # -> "def_code" via "prefixed_command"
 delimiter		n	n	inval	# "delim_num" cmd; also: invalid_char
 detokenize		yes	n	inval	# eTeX
-dimen			n	n	consume # -> "register"
-dimendef		n	n	consume	# -> "shorthand_def"
+dimen			n	n	consume # -> "register" via "prefixed_command"
+dimendef		n	n	consume	# -> "shorthand_def" via "prefixed_command"
 discretionary		n	n	inval
 displaylimits		n	n	inval	# -> "limit_switch"
 displaystyle		n	n	inval	# -> "math_style"
-divide			n	n	consume
-dp			n	n	consume	# -> "set_box_dimen"
+divide			n	n	consume	#  via "prefixed_command"
+dp			n	n	consume	# -> "set_box_dimen" via "prefixed_command"
 dump			n	n	inval	# -> "stop"
-edef			n	n	consume # -> "def"
+edef			n	n	consume # -> "def" via "prefixed_command"
 else			yes	n	inval	# -> "fi_or_else"
 end			n	n	inval	# -> "stop"
 endL			n	n	inval	# eTeX
@@ -80,17 +80,17 @@ endinput		n	n	inval	# -> "input"
 endtemplate		yes	n	inval
 eqno			n	n	inval
 errmessage		n	n	inval	# -> "message"
-errorstopmode		n	n	consume	# -> "set_interaction"
+errorstopmode		n	n	consume	# -> "set_interaction" via "prefixed_command"
 eTeXrevision		yes	n	inval	# eTeX (duh); note this is *not* an int
 expandafter		yes	n	inval
 fi			yes	n	inval	# -> "fi_or_else"
 firstmark		yes	n	inval	# -> "top_bot_mark"
 firstmarks		yes	n	inval	# eTeX
-font			n	n	consume	# "def_font" command
-fontdimen		n	n	consume	# "assign_font_dimen" cmd
+font			n	n	consume	# "def_font" command via "prefixed_command"
+fontdimen		n	n	consume	# "assign_font_dimen" cmd via "prefixed_command"
 fontname		yes	n	inval	# -> "convert"
-futurelet		n	n	consume	# -> "let"
-gdef			n	n	consume # -> "def"
+futurelet		n	n	consume	# -> "let" via "prefixed_command"
+gdef			n	n	consume # -> "def" via "prefixed_command"
 global			n	n	cont	# -> "prefix"
 halign			n	n	inval
 hbox			n	n	inval	# -> "make_box"
@@ -100,9 +100,9 @@ hfilneg			n	n	inval	# -> "hskip"
 hrule			n	n	inval
 hskip			n	n	inval
 hss			n	n	inval	# -> "hskip"
-ht			n	n	consume	# -> "set_box_dimen"
-hyphenation		n	n	consume # -> "hyph_data"
-hyphenchar		n	n	consume # -> "assign_font_int"
+ht			n	n	consume	# -> "set_box_dimen" via "prefixed_command"
+hyphenation		n	n	inval # -> "hyph_data"
+hyphenchar		n	n	inval # -> "assign_font_int"
 if			yes	yes	inval
 ifcase			yes	yes	inval	# -> "if"
 ifcat			yes	yes	inval	# -> "if"
@@ -129,20 +129,20 @@ indent			n	n	inval	# -> "start_par"
 input			n	n	inval
 inputlineno		n	n	inval	# -> "last_item"
 insert			n	n	inval
-insertpenalties		n	n	consume # -> "set_page_int"
+insertpenalties		n	n	consume # -> "set_page_int" via "prefixed_command"
 jobname			yes	n	inval	# -> "convert"
 kern			n	n	inval
 lastbox			n	n	inval	# -> "make_box"
 lastkern		n	n	inval	# -> "last_item"
 lastpenalty		n	n	inval	# -> "last_item"
 lastskip		n	n	inval	# -> "last_item"
-lccode			n	n	consume # -> "def_code"
+lccode			n	n	consume # -> "def_code" via "prefixed_command"
 leaders			n	n	inval	# -> "leader_ship"
 left			n	n	inval	# -> "left_right"
 leqno			n	n	inval	# -> "eqno"
-let			n	n	consume
+let			n	n	consume	#  via "prefixed_command"
 limits			n	n	inval	# -> "limit_switch"
-long			n	n	cont	# -> "prefix"
+long			n	n	cont	# -> "prefixed_command"
 lower			n	n	inval	# -> "vmove"
 lowercase		n	n	inval	# -> "caseshift"
 mark			n	n	inval
@@ -150,10 +150,10 @@ marks			n	n	inval	# eTeX
 mathaccent		n	n	inval
 mathbin			n	n	inval	# -> "math_comp"
 mathchar		n	n	inval	# "math_char_num" command
-mathchardef		n	n	consume	# -> "shorthand_def"
+mathchardef		n	n	consume	# -> "shorthand_def" via "prefixed_command"
 mathchoice		n	n	inval
 mathclose		n	n	inval	# -> "math_comp"
-mathcode		n	n	consume # -> "def_code"
+mathcode		n	n	consume # -> "def_code" via "prefixed_command"
 mathinner		n	n	inval	# -> "math_comp"
 mathop			n	n	inval	# -> "math_comp"
 mathopen		n	n	inval	# -> "math_comp"
@@ -168,56 +168,56 @@ moveleft		n	n	inval	# -> "hmove"
 moveright		n	n	inval	# -> "hmove"
 mskip			n	n	inval
 multiply		n	n	consume
-muskip			n	n	consume # -> "register"
-muskipdef		n	n	consume	# -> "shorthand_def"
+muskip			n	n	consume # -> "register" via "prefixed_command"
+muskipdef		n	n	consume	# -> "shorthand_def" via "prefixed_command"
 noalign			n	n	inval
 noboundary		n	n	inval
 noexpand		yes	n	inval
 noindent		n	n	inval	# -> "start_par"
 nolimits		n	n	inval	# -> "limit_switch"
 nonscript		n	n	inval
-nonstopmode		n	n	consume	# -> "set_interaction"
-nullfont		n	n	consume # -> "set_font"
+nonstopmode		n	n	consume	# -> "set_interaction" via "prefixed_command"
+nullfont		n	n	consume # -> "set_font" via "prefixed_command"
 number			yes	n	inval	# -> "convert"
 omit			n	n	inval
 openin			n	n	inval	# -> "in_stream"
 openout			n	n	inval	# -> *"extension"
 or			yes	n	inval	# -> "fi_or_else"
-outer			n	n	cont	# -> "prefix"
+outer			n	n	cont	# -> "prefixed_command"
 over			n	n	inval	# -> "above"
 overline		n	n	inval	# -> "math_comp"
 overwithdelims		n	n	inval	# -> "above"
-pagedepth		n	n	consume # -> "set_page_dimen"
-pagefilllstretch	n	n	consume # -> "set_page_dimen"
-pagefillstretch		n	n	consume # -> "set_page_dimen"
-pagefilstretch		n	n	consume # -> "set_page_dimen"
-pagegoal		n	n	consume # -> "set_page_dimen"
-pageshrink		n	n	consume # -> "set_page_dimen"
-pagestretch		n	n	consume # -> "set_page_dimen"
-pagetotal		n	n	consume # -> "set_page_dimen"
+pagedepth		n	n	consume # -> "set_page_dimen" via "prefixed_command"
+pagefilllstretch	n	n	consume # -> "set_page_dimen" via "prefixed_command"
+pagefillstretch		n	n	consume # -> "set_page_dimen" via "prefixed_command"
+pagefilstretch		n	n	consume # -> "set_page_dimen" via "prefixed_command"
+pagegoal		n	n	consume # -> "set_page_dimen" via "prefixed_command"
+pageshrink		n	n	consume # -> "set_page_dimen" via "prefixed_command"
+pagestretch		n	n	consume # -> "set_page_dimen" via "prefixed_command"
+pagetotal		n	n	consume # -> "set_page_dimen" via "prefixed_command"
 par			n	n	inval	# "par_end" cmd; also: active_char,match
-parshape		n	n	consume	# "set_shape" command
-patterns		n	n	consume # -> "hyph_data"
+parshape		n	n	consume	# "set_shape" command via "prefixed_command"
+patterns		n	n	inval	# -> "hyph_data" via "prefixed_command"
 penalty			n	n	inval	# "break_penalty" command
-prevdepth		n	n	consume # -> "set_aux"
-prevgraf		n	n	consume	# "set_prev_graf" command
-protected		yes	n	consume	# eTeX
+prevdepth		n	n	consume # -> "set_aux" via "prefixed_command"
+prevgraf		n	n	consume	# "set_prev_graf" command via "prefixed_command"
+protected		yes	n	cont	# eTeX
 radical			n	n	inval
 raise			n	n	inval	# -> "vmove"
-read			n	n	consume	# "read_to_cs" command
-readline		n	n	consume	# eTeX
+read			n	n	consume	# "read_to_cs" command via "prefixed_command"
+readline		n	n	consume	# eTeX via "prefixed_command"
 relax			n	n	inval	# also: escape
 right			n	n	inval	# -> "left_right"
 romannumeral		yes	n	inval	# -> "convert"
 scantokens		yes	n	inval	# eTeX
-scriptfont		n	n	consume	# -> "def_family"
-scriptscriptfont	n	n	consume	# -> "def_family"
+scriptfont		n	n	consume	# -> "def_family" via "prefixed_command"
+scriptscriptfont	n	n	consume	# -> "def_family" via "prefixed_command"
 scriptstyle		n	n	inval	# -> "math_style"
 scriptscriptstyle	n	n	inval	# -> "math_style"
-scrollmode		n	n	consume	# -> "set_interaction"
-setbox			n	n	consume
+scrollmode		n	n	consume	# -> "set_interaction" via "prefixed_command"
+setbox			n	n	consume	#  via "prefixed_command"
 setlanguage		n	n	inval	# -> *"extension"
-sfcode			n	n	consume # -> "def_code"
+sfcode			n	n	consume # -> "def_code" via "prefixed_command"
 shipout			n	n	inval	# -> "leader_ship"
 show			n	n	inval	# -> "xray"
 showbox			n	n	inval	# -> "xray"
@@ -225,10 +225,10 @@ showgroups		n	n	inval	# eTeX
 showlists		n	n	inval	# -> "xray"
 showthe			n	n	inval	# -> "xray"
 showtokens		n	n	inval	# eTeX
-skewchar		n	n	consume # -> "assign_font_int"
-skip			n	n	consume # -> "register"
-skipdef			n	n	consume	# -> "shorthand_def"
-spacefactor		n	n	consume # -> "set_aux"
+skewchar		n	n	consume # -> "assign_font_int" via "prefixed_command"
+skip			n	n	consume # -> "register" via "prefixed_command"
+skipdef			n	n	consume	# -> "shorthand_def" via "prefixed_command"
+spacefactor		n	n	consume # -> "set_aux" via "prefixed_command"
 span			n	n	inval	# "tab_mark" command
 special			n	n	inval	# -> *"extension"
 splitbotmark		yes	n	inval	# -> "top_bot_mark"
@@ -236,14 +236,14 @@ splitbotmarks		yes	n	inval	# eTeX
 splitfirstmark		yes	n	inval	# -> "top_bot_mark"
 splitfirstmarks		yes	n	inval	# eTeX
 string			yes	n	inval	# -> "convert"
-textfont		n	n	consume	# -> "def_family"
+textfont		n	n	consume	# -> "def_family" via "prefixed_command"
 textstyle		n	n	inval	# -> "math_style"
 the			yes	n	inval
-toks			n	n	consume	# "toks_register" command
-toksdef			n	n	consume	# -> "shorthand_def"
+toks			n	n	consume	# "toks_register" command via "prefixed_command"
+toksdef			n	n	consume	# -> "shorthand_def" via "prefixed_command"
 topmark			yes	n	inval	# -> "top_bot_mark"
 topmarks		yes	n	inval	# eTeX
-uccode			n	n	consume # -> "def_code"
+uccode			n	n	consume # -> "def_code" via "prefixed_command"
 underline		n	n	inval	# -> "math_comp"
 unexpanded		yes	n	inval	# eTeX
 unhbox			n	n	inval
@@ -267,9 +267,9 @@ vskip			n	n	inval
 vsplit			n	n	inval	# -> "make_box"
 vss			n	n	inval	# -> "vskip"
 vtop			n	n	inval	# -> "make_box"
-wd			n	n	consume	# -> "set_box_dimen"
+wd			n	n	consume	# -> "set_box_dimen" via "prefixed_command"
 write			n	n	inval	# -> *"extension"
-xdef			n	n	consume # -> "def"
+xdef			n	n	consume # -> "def" via "prefixed_command"
 xleaders		n	n	inval	# -> "leader_ship"
 
 WEBTEXtraceon		n	n	inval
