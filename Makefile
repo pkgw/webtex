@@ -54,6 +54,7 @@ sharedjs += \
   src/math.js \
   src/align.js \
   src/page-builder.js \
+  src/macros.js \
   src/command-classes.js \
   src/command-impls.js \
   src/etex.js \

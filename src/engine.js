@@ -641,7 +641,6 @@ var Engine = (function Engine_closure () {
     register_command_deserializer ('<end-group>', EndGroupCommand.deserialize);
     register_command_deserializer ('<given-char>', GivenCharCommand.deserialize);
     register_command_deserializer ('<given-mathchar>', GivenMathcharCommand.deserialize);
-    register_command_deserializer ('<macro>', MacroCommand.deserialize);
     register_command_deserializer ('<space>', SpacerCommand.deserialize);
     register_command_deserializer ('<subscript>', SubCommand.deserialize);
     register_command_deserializer ('<superscript>', SuperCommand.deserialize);
