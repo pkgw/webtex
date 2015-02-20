@@ -53,4 +53,29 @@
 	engine.handle_if (result);
     });
 
+    register_command ('unexpanded', function cmd_unexpanded (engine) {
+	engine.trace ('unexpanded ...');
+	engine.scan_left_brace ();
+
+	var depth = 1;
+	var toks = [];
+
+	while (true) {
+	    var tok = engine.next_tok_throw ();
+
+	    if (tok.is_cat (C_BGROUP))
+		depth += 1;
+	    else if (tok.is_cat (C_EGROUP)) {
+		depth -= 1;
+		if (depth == 0)
+		    break;
+	    }
+
+	    toks.push (tok);
+	}
+
+	engine.trace ('... => %T', toks);
+	engine.push_toks (toks);
+    });
+
 }) ();
