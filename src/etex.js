@@ -28,4 +28,29 @@
 	return EtexVersionCommand;
     }) ());
 
+    register_command ('ifcsname', function cmd_ifcsname (engine) {
+	var csname = '';
+	engine.start_parsing_condition ();
+
+	while (true) {
+	    var tok = engine.next_x_tok ();
+	    if (tok == null)
+		throw new TexSyntaxError ('EOF in \\ifcsname');
+	    if (tok.is_cmd (engine, 'endcsname'))
+		break;
+	    if (!tok.is_char ())
+		throw new TexRuntimeError ('only character tokens should occur ' +
+					   'between \\ifcsname and \\endcsname');
+
+	    csname += String.fromCharCode (tok.ord);
+	}
+
+	engine.done_parsing_condition ();
+
+	var cmd = engine.get_cseq (csname);
+	var result = (cmd != null && cmd.name != 'undefined');
+	engine.trace ('ifcsname %s => %b', csname, result);
+	engine.handle_if (result);
+    });
+
 }) ();
