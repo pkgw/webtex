@@ -41,8 +41,8 @@ batchmode		n	n	consume # -> "set_interaction"
 beginL			n	n	inval	# eTeX
 beginR			n	n	inval	# eTeX
 begingroup		n	n	inval
-botmark			n	n	inval	# -> "top_bot_mark"
-botmarks		n	n	inval	# eTeX
+botmark			yes	n	inval	# -> "top_bot_mark"
+botmarks		yes	n	inval	# eTeX
 box			n	n	inval	# -> "make_box"
 catcode			n	n	consume # -> "def_code"
 char			n	n	inval	# "char_num" command
@@ -60,7 +60,7 @@ deadcycles		n	n	consume # -> "set_page_int"
 def			n	n	consume
 delcode			n	n	consume # -> "def_code"
 delimiter		n	n	inval	# "delim_num" cmd; also: invalid_char
-detokenize		n	n	inval	# eTeX
+detokenize		yes	n	inval	# eTeX
 dimen			n	n	consume # -> "register"
 dimendef		n	n	consume	# -> "shorthand_def"
 discretionary		n	n	inval
@@ -84,8 +84,8 @@ errorstopmode		n	n	consume	# -> "set_interaction"
 eTeXrevision		yes	n	inval	# eTeX (duh); note this is *not* an int
 expandafter		yes	n	inval
 fi			yes	n	inval	# -> "fi_or_else"
-firstmark		n	n	inval	# -> "top_bot_mark"
-firstmarks		n	n	inval	# eTeX
+firstmark		yes	n	inval	# -> "top_bot_mark"
+firstmarks		yes	n	inval	# eTeX
 font			n	n	consume	# "def_font" command
 fontdimen		n	n	consume	# "assign_font_dimen" cmd
 fontname		yes	n	inval	# -> "convert"
@@ -111,6 +111,7 @@ ifdefined		yes	yes	inval	# eTeX
 ifdim			yes	yes	inval	# -> "if"
 ifeof			yes	yes	inval	# -> "if"
 iffalse			yes	yes	inval	# -> "if"
+iffontchar		yes	yes	inval	# eTeX
 ifhbox			yes	yes	inval	# -> "if"
 ifhmode			yes	yes	inval	# -> "if"
 ifinner			yes	yes	inval	# -> "if"
@@ -208,7 +209,7 @@ readline		n	n	consume	# eTeX
 relax			n	n	inval	# also: escape
 right			n	n	inval	# -> "left_right"
 romannumeral		yes	n	inval	# -> "convert"
-scantokens		n	n	inval	# eTeX
+scantokens		yes	n	inval	# eTeX
 scriptfont		n	n	consume	# -> "def_family"
 scriptscriptfont	n	n	consume	# -> "def_family"
 scriptstyle		n	n	inval	# -> "math_style"
@@ -230,10 +231,10 @@ skipdef			n	n	consume	# -> "shorthand_def"
 spacefactor		n	n	consume # -> "set_aux"
 span			n	n	inval	# "tab_mark" command
 special			n	n	inval	# -> *"extension"
-splitbotmark		n	n	inval	# -> "top_bot_mark"
-splitbotmarks		n	n	inval	# eTeX
-splitfirstmark		n	n	inval	# -> "top_bot_mark"
-splitfirstmarks		n	n	inval	# eTeX
+splitbotmark		yes	n	inval	# -> "top_bot_mark"
+splitbotmarks		yes	n	inval	# eTeX
+splitfirstmark		yes	n	inval	# -> "top_bot_mark"
+splitfirstmarks		yes	n	inval	# eTeX
 string			yes	n	inval	# -> "convert"
 textfont		n	n	consume	# -> "def_family"
 textstyle		n	n	inval	# -> "math_style"
@@ -244,7 +245,7 @@ topmark			yes	n	inval	# -> "top_bot_mark"
 topmarks		yes	n	inval	# eTeX
 uccode			n	n	consume # -> "def_code"
 underline		n	n	inval	# -> "math_comp"
-unexpanded		n	n	inval	# eTeX
+unexpanded		yes	n	inval	# eTeX
 unhbox			n	n	inval
 unhcopy			n	n	inval	# -> "unhbox"
 unkern			n	n	inval	# -> "remove_item"
