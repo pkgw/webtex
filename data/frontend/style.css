@@ -30,12 +30,9 @@
 }
 
 
-body {
+.webtex {
   background: #fff;
   background-color: #fff;
-}
-
-.webtex {
   font-family: 'Latin Modern Roman';
   font-style: normal;
   font-weight: 400;
@@ -52,12 +49,40 @@ body {
   vertical-align: baseline;
 }
 
-h1 {
+.webtex h1 {
   /* This isn't a great long-term solution -- math won't look good
    * since it won't get bolded */
   font-weight: 700;
 }
 
-h2 {
+.webtex h2 {
   font-size: 24px;
+}
+
+.webtex aside.footnote {
+  font-size: smaller;
+}
+
+
+/* Width settings for standard 800px-wide column setup. */
+
+.webtex-800px {
+  width: 800px;
+  margin: 0px auto;
+}
+
+.webtex-800px p,
+.webtex-800px h1,
+.webtex-800px h2,
+.webtex-800px h3,
+.webtex-800px h4,
+.webtex-800px h5 {
+  width: 600px;
+  padding-left: 30px;
+}
+
+.webtex-800px aside.footnote {
+  position: absolute;
+  padding-left: 660px;
+  width: 110px;
 }

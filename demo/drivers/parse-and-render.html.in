@@ -5,12 +5,6 @@
     <title>Webtex Demo: Parse and Render</title>
     <meta charset="utf-8">
     <link rel="stylesheet" href="@CHROME@/style.css">
-    <style type="text/css">
-      article {
-        width: 700px;
-        margin: 0px auto;
-      }
-    </style>
   </head>
 
   <body>
@@ -18,7 +12,7 @@
     See <a href="https://github.com/pkgw/webtex/issues/1">the bug report</a>
     for more information.</b></p>
 
-    <article class="webtex" id="webtex"></article>
+    <article class="webtex webtex-800px" id="webtex"></article>
 
     <script type="text/javascript" src="compatibility.js"></script>
     <script type="text/javascript" src="pdf.js"></script>
