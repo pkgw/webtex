@@ -34,6 +34,7 @@ everyhbox		toklist
 everyvbox		toklist
 everyjob		toklist
 everycr			toklist
+everyeof		toklist
 errhelp			toklist
 
 pretolerance		int
@@ -91,6 +92,19 @@ lefthyphenmin		int
 righthyphenmin		int
 holdinginserts		int
 errorcontextlines	int
+
+# eTeX:
+eTeXversion		int
+grouplevel		int
+grouptype		int
+interactionmode		int
+lastnodetype		int
+predisplaydirection	int
+TeXXeTstate		int
+tracingassigns		int
+tracinggroups		int
+tracingifs		int
+tracingscantokens	int
 
 parindent		dimen
 mathsurround		dimen

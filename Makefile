@@ -56,6 +56,7 @@ sharedjs += \
   src/page-builder.js \
   src/command-classes.js \
   src/command-impls.js \
+  src/etex.js \
   $(builddir)/intermediates/engine-helpers.js \
   src/engine.js \
   src/ship-target.js \
