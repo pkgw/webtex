@@ -85,9 +85,10 @@ class Bundler (object):
         lpath = os.path.join (self.destdir, 'dev', 'dev-bundle.zip')
         try:
             prevbase = os.path.basename (os.readlink (lpath))
-            prev = os.path.join (self.destdir, prevbase)
-            archive = os.path.join (self.destdir, 'old-bundles', prevbase)
-            os.rename (prev, archive)
+            if prevbase != zbase:
+                prev = os.path.join (self.destdir, prevbase)
+                archive = os.path.join (self.destdir, 'old-bundles', prevbase)
+                os.rename (prev, archive)
         except OSError:
             pass
 
