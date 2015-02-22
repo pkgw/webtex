@@ -78,4 +78,29 @@
 	engine.push_toks (toks);
     });
 
+    register_command ('detokenize', function cmd_detokenize (engine) {
+	engine.trace ('detokenize ...');
+	engine.scan_left_brace ();
+
+	var depth = 1;
+	var text = '';
+
+	while (true) {
+	    var tok = engine.next_tok_throw ();
+
+	    if (tok.is_cat (C_BGROUP))
+		depth += 1;
+	    else if (tok.is_cat (C_EGROUP)) {
+		depth -= 1;
+		if (depth == 0)
+		    break;
+	    }
+
+	    text += tok.textext (engine, false);
+	}
+
+	engine.trace ('... => "%s"', text);
+	engine.push_string (text);
+    });
+
 }) ();
