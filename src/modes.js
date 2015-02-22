@@ -84,11 +84,13 @@ var M_VERT = 1,  // standard vertical mode
     // Mode changes.
 
     engine_proto.register_method ('enter_mode', function Engine_enter_mode (mode) {
+	// engine.enter_mode() is like TeX's "push_nest" function (TTP 216).
 	this.mode_stack.unshift (new ModeState (mode));
 	this.trace ('<enter %s mode newdepth=%d>', mode_name (mode), this.mode_stack.length);
     });
 
     engine_proto.register_method ('leave_mode', function Engine_leave_mode (mode) {
+	// engine.leave_mode() is like TeX's "pop_nest" function (TTP 217).
 	if (this.mode_stack.length == 1)
 	    throw new TexInternalError ('cannot leave the outer vertical mode');
 
