@@ -19,16 +19,28 @@
 
     engine_proto.register_method ('get_prefix_flags',
 				  function Engine_get_prefix_flags () {
-	return this.cur_prefix_flags;
+	var cpf = this.cur_prefix_flags;
+
+	// TeXBook p. 275 / TTP 1214
+	var gd = this.get_parameter__O_I ('globaldefs');
+	if (gd > 0)
+	    cpf |= Prefixing.FLAG_GLOBAL;
+	else if (gd < 0)
+	    cpf &= (~Prefixing.FLAG_GLOBAL);
+
+	return cpf;
     });
 
     engine_proto.register_method ('global_prefix_is_active',
 				  function Engine_global_prefix_is_active () {
-	return !!(this.cur_prefix_flags & Prefixing.FLAG_GLOBAL);
+	return !!(this.get_prefix_flags () & Prefixing.FLAG_GLOBAL);
     });
 
     engine_proto.register_method ('with_global_prefix',
 				  function Engine_with_global_prefix (callback) {
+	// If \globaldefs < 0, the global flag should not take effect; but
+	// this will be handled by get_prefix_flags() and/or
+	// global_prefix_is_active().
 	var orig_prefix_flags = this.cur_prefix_flags;
 	this.cur_prefix_flags |= Prefixing.FLAG_GLOBAL;
 	var rv = callback ();
@@ -77,13 +89,6 @@
 	    engine.cur_prefix_flags & MACRO_FLAGS)
 	    throw new TexRuntimeError ('command "%s" does not accept ' +
 				       '\\long/\\outer/\\protected', cmd.name);
-
-	// TeXBook p. 275 / TTP 1214
-	var gd = engine.get_parameter__O_I ('globaldefs');
-	if (gd > 0)
-	    engine.cur_prefix_flags |= Prefixing.FLAG_GLOBAL;
-	if (gd < 0)
-	    engine.cur_prefix_flags &= (~Prefixing.FLAG_GLOBAL);
 
 	var ret = cmd.invoke (engine);
 	engine.cur_prefix_flags = 0;
