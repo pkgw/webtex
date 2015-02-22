@@ -127,22 +127,6 @@ register_command ('csname', function cmd_csname (engine) {
 });
 
 
-register_command ('global', function cmd_global (engine) {
-    engine.trace ('global');
-    engine.set_global_assign_mode ();
-});
-
-
-register_command ('outer', function cmd_outer (engine) {
-    engine.trace ('outer'); // I think it's OK to make this a noop.
-});
-
-
-register_command ('long', function cmd_long (engine) {
-    engine.trace ('long'); // I think it's OK to make this a noop.
-});
-
-
 register_command ('let', function cmd_let (engine) {
     var cstok = engine.scan_r_token ();
 

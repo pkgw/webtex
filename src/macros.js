@@ -349,8 +349,9 @@
     });
 
     register_command ('gdef', function cmd_gdef (engine) {
-	engine.set_global_assign_mode ();
-	return do_def (engine, 'gdef', false);
+	return engine.with_global_prefix (function () {
+	    return do_def (engine, 'gdef', false);
+	});
     });
 
     register_command ('edef', function cmd_edef (engine) {
@@ -358,8 +359,9 @@
     });
 
     register_command ('xdef', function cmd_xdef (engine) {
-	engine.set_global_assign_mode ();
-	return do_def (engine, 'xdef', true);
+	return engine.with_global_prefix (function () {
+	    return do_def (engine, 'xdef', true);
+	});
     });
 
 }) ();

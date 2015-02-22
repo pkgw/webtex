@@ -480,7 +480,7 @@ var FontFamilyCommand = (function FontFamilyCommand_closure () {
 
     inherit (FontFamilyCommand, Command);
     var proto = FontFamilyCommand.prototype;
-    proto.assign_flag_mode = AFM_CONSUME;
+    proto.prefixing_mode = Prefixing.MODE_ASSIGNMENT;
 
     proto.invoke = function FontFamilyCommand_invoke (engine) {
 	var index = engine.scan_int_4bit__I ();

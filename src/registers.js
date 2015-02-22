@@ -122,7 +122,7 @@
 
     engine_proto.register_method ('set_register',
 				  function Engine_get_register (valtype, reg, value) {
-	this.eqtb.set_register (valtype, reg, value, this._global_flag ());
+	this.eqtb.set_register (valtype, reg, value, this.global_prefix_is_active ());
 	this.maybe_insert_after_assign_token ();
     });
 
@@ -184,7 +184,7 @@
 	inherit (GivenRegisterCommand, Command);
 	var proto = GivenRegisterCommand.prototype;
 	proto.multi_instanced = true;
-	proto.assign_flag_mode = AFM_CONSUME;
+	proto.prefixing_mode = Prefixing.MODE_ASSIGNMENT;
 
 	proto._serialize_data = function GivenRegisterCommand__serialize_data (state, housekeeping) {
 	    return this.register;

@@ -196,7 +196,17 @@ var ord_standard_catcodes = [
   12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12  // 240-255
 ];
 
+// Prefixing modes and flags. FIXME: would be nice to be able to keep these in
+// prefixed-commands.js, but MODE constants are needed earlier.
 
-var AFM_INVALID = 0, // assign flags should not be active for this command
-    AFM_CONTINUE = 1, // assign flags are propagated after this command
-    AFM_CONSUME = 2; // this command responds to assign flags
+var Prefixing = {
+    FLAG_GLOBAL:    1 << 0,
+    FLAG_LONG:      1 << 1,
+    FLAG_OUTER:     1 << 2,
+    FLAG_PROTECTED: 1 << 3, // e-TeX
+
+    MODE_NONE:       0, // no prefixes allowed
+    MODE_ASSIGNMENT: 1, // assignment command: only GLOBAL allowed
+    MODE_FULL:       2  // macro definition or prefix command: all flags allowed
+};
+webtex_export ('Prefixing', Prefixing);

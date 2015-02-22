@@ -15,261 +15,261 @@
 # expand: whether this command is expandable into a new set of tokens to
 #   be evaluated
 # cond: whether this command starts a conditional
-# afm: assign flag mode. Sets whether this command can legally accept or
-#   propagate \global, etc., assignment flags
+# prefixing: prefixing mode. Sets whether this command can legally accept or
+#   propagate \global, etc., prefixed.
 #
 # The file tex.py in commits 499ed6ca2 or earlier list the builtin control
 # sequences with some annotations about their origins. That list was manually
 # constructed from examinination of TeX: The Program, and seems to have been
 # complete except for the omission of "noindent".
 
-#escname		expand	cond	afm
+#escname		expand	cond	prefixing
 
--			n	n	inval	# -> "discretionary"
-/			n	n	inval	# "ital_corr" command in TeX
-_space_			n	n	inval	# "ex_space" command
-above			n	n	inval
-abovewithdelims		n	n	inval	# -> "above"
-accent			n	n	inval
-advance			n	n	consume	# via "prefixed_command"
-afterassignment		n	n	inval
-aftergroup		n	n	inval
-atop			n	n	inval	# -> "above"
-atopwithdelims		n	n	inval	# -> "above"
-badness			n	n	inval	# -> "last_item"
-batchmode		n	n	consume # -> "set_interaction" via "prefixed_command"
-beginL			n	n	inval	# eTeX
-beginR			n	n	inval	# eTeX
-begingroup		n	n	inval
-botmark			yes	n	inval	# -> "top_bot_mark"
-botmarks		yes	n	inval	# eTeX
-box			n	n	inval	# -> "make_box"
-catcode			n	n	consume # -> "def_code" via "prefixed_command"
-char			n	n	inval	# "char_num" command
-chardef			n	n	consume	# -> "shorthand_def" via "prefixed_command"
-cleaders		n	n	inval	# -> "leader_ship"
-closein			n	n	inval	# -> "in_stream"
-closeout		n	n	inval	# -> *"extension"
-copy			n	n	inval	# -> "make_box"
-count			n	n	consume # -> "register" via "prefixed_command"
-countdef		n	n	consume	# -> "shorthand_def" via "prefixed_command"
-cr			n	n	inval	# -> "car_ret"
-crcr			n	n	inval	# -> "car_ret"
-csname			yes 	n	inval
-deadcycles		n	n	consume # -> "set_page_int" via "prefixed_command"
-def			n	n	consume	#  via "prefixed_command"
-delcode			n	n	consume # -> "def_code" via "prefixed_command"
-delimiter		n	n	inval	# "delim_num" cmd; also: invalid_char
-detokenize		yes	n	inval	# eTeX
-dimen			n	n	consume # -> "register" via "prefixed_command"
-dimendef		n	n	consume	# -> "shorthand_def" via "prefixed_command"
-discretionary		n	n	inval
-displaylimits		n	n	inval	# -> "limit_switch"
-displaystyle		n	n	inval	# -> "math_style"
-divide			n	n	consume	#  via "prefixed_command"
-dp			n	n	consume	# -> "set_box_dimen" via "prefixed_command"
-dump			n	n	inval	# -> "stop"
-edef			n	n	consume # -> "def" via "prefixed_command"
-else			yes	n	inval	# -> "fi_or_else"
-end			n	n	inval	# -> "stop"
-endL			n	n	inval	# eTeX
-endR			n	n	inval	# eTeX
-endcsname		n	n	inval
-endgroup		n	n	inval
-endinput		n	n	inval	# -> "input"
-endtemplate		yes	n	inval
-eqno			n	n	inval
-errmessage		n	n	inval	# -> "message"
-errorstopmode		n	n	consume	# -> "set_interaction" via "prefixed_command"
-eTeXrevision		yes	n	inval	# eTeX (duh); note this is *not* an int
-expandafter		yes	n	inval
-fi			yes	n	inval	# -> "fi_or_else"
-firstmark		yes	n	inval	# -> "top_bot_mark"
-firstmarks		yes	n	inval	# eTeX
-font			n	n	consume	# "def_font" command via "prefixed_command"
-fontdimen		n	n	consume	# "assign_font_dimen" cmd via "prefixed_command"
-fontname		yes	n	inval	# -> "convert"
-futurelet		n	n	consume	# -> "let" via "prefixed_command"
-gdef			n	n	consume # -> "def" via "prefixed_command"
-global			n	n	cont	# -> "prefix"
-halign			n	n	inval
-hbox			n	n	inval	# -> "make_box"
-hfil			n	n	inval	# -> "hskip"
-hfill			n	n	inval	# -> "hskip"
-hfilneg			n	n	inval	# -> "hskip"
-hrule			n	n	inval
-hskip			n	n	inval
-hss			n	n	inval	# -> "hskip"
-ht			n	n	consume	# -> "set_box_dimen" via "prefixed_command"
-hyphenation		n	n	inval # -> "hyph_data"
-hyphenchar		n	n	inval # -> "assign_font_int"
-if			yes	yes	inval
-ifcase			yes	yes	inval	# -> "if"
-ifcat			yes	yes	inval	# -> "if"
-ifcsname		yes	yes	inval	# eTeX
-ifdefined		yes	yes	inval	# eTeX
-ifdim			yes	yes	inval	# -> "if"
-ifeof			yes	yes	inval	# -> "if"
-iffalse			yes	yes	inval	# -> "if"
-iffontchar		yes	yes	inval	# eTeX
-ifhbox			yes	yes	inval	# -> "if"
-ifhmode			yes	yes	inval	# -> "if"
-ifinner			yes	yes	inval	# -> "if"
-ifmmode			yes	yes	inval	# -> "if"
-ifnum			yes	yes	inval	# -> "if"
-ifodd			yes	yes	inval	# -> "if"
-iftrue			yes	yes	inval	# -> "if"
-ifvbox			yes	yes	inval	# -> "if"
-ifvmode			yes	yes	inval	# -> "if"
-ifvoid			yes	yes	inval	# -> "if"
-ifx			yes	yes	inval	# -> "if"
-ignorespaces		n	n	inval
-immediate		n	n	inval	# -> *"extension"
-indent			n	n	inval	# -> "start_par"
-input			n	n	inval
-inputlineno		n	n	inval	# -> "last_item"
-insert			n	n	inval
-insertpenalties		n	n	consume # -> "set_page_int" via "prefixed_command"
-jobname			yes	n	inval	# -> "convert"
-kern			n	n	inval
-lastbox			n	n	inval	# -> "make_box"
-lastkern		n	n	inval	# -> "last_item"
-lastpenalty		n	n	inval	# -> "last_item"
-lastskip		n	n	inval	# -> "last_item"
-lccode			n	n	consume # -> "def_code" via "prefixed_command"
-leaders			n	n	inval	# -> "leader_ship"
-left			n	n	inval	# -> "left_right"
-leqno			n	n	inval	# -> "eqno"
-let			n	n	consume	#  via "prefixed_command"
-limits			n	n	inval	# -> "limit_switch"
-long			n	n	cont	# -> "prefixed_command"
-lower			n	n	inval	# -> "vmove"
-lowercase		n	n	inval	# -> "caseshift"
-mark			n	n	inval
-marks			n	n	inval	# eTeX
-mathaccent		n	n	inval
-mathbin			n	n	inval	# -> "math_comp"
-mathchar		n	n	inval	# "math_char_num" command
-mathchardef		n	n	consume	# -> "shorthand_def" via "prefixed_command"
-mathchoice		n	n	inval
-mathclose		n	n	inval	# -> "math_comp"
-mathcode		n	n	consume # -> "def_code" via "prefixed_command"
-mathinner		n	n	inval	# -> "math_comp"
-mathop			n	n	inval	# -> "math_comp"
-mathopen		n	n	inval	# -> "math_comp"
-mathord			n	n	inval	# -> "math_comp"
-mathpunct		n	n	inval	# -> "math_comp"
-mathrel			n	n	inval	# -> "math_comp"
-meaning			yes	n	inval	# -> "convert"
-message			n	n	inval
-middle			n	n	inval	# eTeX
-mkern			n	n	inval
-moveleft		n	n	inval	# -> "hmove"
-moveright		n	n	inval	# -> "hmove"
-mskip			n	n	inval
-multiply		n	n	consume
-muskip			n	n	consume # -> "register" via "prefixed_command"
-muskipdef		n	n	consume	# -> "shorthand_def" via "prefixed_command"
-noalign			n	n	inval
-noboundary		n	n	inval
-noexpand		yes	n	inval
-noindent		n	n	inval	# -> "start_par"
-nolimits		n	n	inval	# -> "limit_switch"
-nonscript		n	n	inval
-nonstopmode		n	n	consume	# -> "set_interaction" via "prefixed_command"
-nullfont		n	n	consume # -> "set_font" via "prefixed_command"
-number			yes	n	inval	# -> "convert"
-omit			n	n	inval
-openin			n	n	inval	# -> "in_stream"
-openout			n	n	inval	# -> *"extension"
-or			yes	n	inval	# -> "fi_or_else"
-outer			n	n	cont	# -> "prefixed_command"
-over			n	n	inval	# -> "above"
-overline		n	n	inval	# -> "math_comp"
-overwithdelims		n	n	inval	# -> "above"
-pagedepth		n	n	consume # -> "set_page_dimen" via "prefixed_command"
-pagefilllstretch	n	n	consume # -> "set_page_dimen" via "prefixed_command"
-pagefillstretch		n	n	consume # -> "set_page_dimen" via "prefixed_command"
-pagefilstretch		n	n	consume # -> "set_page_dimen" via "prefixed_command"
-pagegoal		n	n	consume # -> "set_page_dimen" via "prefixed_command"
-pageshrink		n	n	consume # -> "set_page_dimen" via "prefixed_command"
-pagestretch		n	n	consume # -> "set_page_dimen" via "prefixed_command"
-pagetotal		n	n	consume # -> "set_page_dimen" via "prefixed_command"
-par			n	n	inval	# "par_end" cmd; also: active_char,match
-parshape		n	n	consume	# "set_shape" command via "prefixed_command"
-patterns		n	n	inval	# -> "hyph_data" via "prefixed_command"
-penalty			n	n	inval	# "break_penalty" command
-prevdepth		n	n	consume # -> "set_aux" via "prefixed_command"
-prevgraf		n	n	consume	# "set_prev_graf" command via "prefixed_command"
-protected		yes	n	cont	# eTeX
-radical			n	n	inval
-raise			n	n	inval	# -> "vmove"
-read			n	n	consume	# "read_to_cs" command via "prefixed_command"
-readline		n	n	consume	# eTeX via "prefixed_command"
-relax			n	n	inval	# also: escape
-right			n	n	inval	# -> "left_right"
-romannumeral		yes	n	inval	# -> "convert"
-scantokens		yes	n	inval	# eTeX
-scriptfont		n	n	consume	# -> "def_family" via "prefixed_command"
-scriptscriptfont	n	n	consume	# -> "def_family" via "prefixed_command"
-scriptstyle		n	n	inval	# -> "math_style"
-scriptscriptstyle	n	n	inval	# -> "math_style"
-scrollmode		n	n	consume	# -> "set_interaction" via "prefixed_command"
-setbox			n	n	consume	#  via "prefixed_command"
-setlanguage		n	n	inval	# -> *"extension"
-sfcode			n	n	consume # -> "def_code" via "prefixed_command"
-shipout			n	n	inval	# -> "leader_ship"
-show			n	n	inval	# -> "xray"
-showbox			n	n	inval	# -> "xray"
-showgroups		n	n	inval	# eTeX
-showlists		n	n	inval	# -> "xray"
-showthe			n	n	inval	# -> "xray"
-showtokens		n	n	inval	# eTeX
-skewchar		n	n	consume # -> "assign_font_int" via "prefixed_command"
-skip			n	n	consume # -> "register" via "prefixed_command"
-skipdef			n	n	consume	# -> "shorthand_def" via "prefixed_command"
-spacefactor		n	n	consume # -> "set_aux" via "prefixed_command"
-span			n	n	inval	# "tab_mark" command
-special			n	n	inval	# -> *"extension"
-splitbotmark		yes	n	inval	# -> "top_bot_mark"
-splitbotmarks		yes	n	inval	# eTeX
-splitfirstmark		yes	n	inval	# -> "top_bot_mark"
-splitfirstmarks		yes	n	inval	# eTeX
-string			yes	n	inval	# -> "convert"
-textfont		n	n	consume	# -> "def_family" via "prefixed_command"
-textstyle		n	n	inval	# -> "math_style"
-the			yes	n	inval
-toks			n	n	consume	# "toks_register" command via "prefixed_command"
-toksdef			n	n	consume	# -> "shorthand_def" via "prefixed_command"
-topmark			yes	n	inval	# -> "top_bot_mark"
-topmarks		yes	n	inval	# eTeX
-uccode			n	n	consume # -> "def_code" via "prefixed_command"
-underline		n	n	inval	# -> "math_comp"
-unexpanded		yes	n	inval	# eTeX
-unhbox			n	n	inval
-unhcopy			n	n	inval	# -> "unhbox"
-unkern			n	n	inval	# -> "remove_item"
-unless			yes	yes	inval	# eTeX
-unpenalty		n	n	inval	# -> "remove_item"
-unskip			n	n	inval	# -> "remove_item"
-unvbox			n	n	inval
-unvcopy			n	n	inval	# -> "unvbox"
-uppercase		n	n	inval	# -> "caseshift"
-vadjust			n	n	inval
-valign			n	n	inval
-vbox			n	n	inval	# -> "make_box"
-vcenter			n	n	inval
-vrule			n	n	inval
-vfil			n	n	inval	# -> "vskip"
-vfill			n	n	inval	# -> "vskip"
-vfilneg			n	n	inval	# -> "vskip"
-vskip			n	n	inval
-vsplit			n	n	inval	# -> "make_box"
-vss			n	n	inval	# -> "vskip"
-vtop			n	n	inval	# -> "make_box"
-wd			n	n	consume	# -> "set_box_dimen" via "prefixed_command"
-write			n	n	inval	# -> *"extension"
-xdef			n	n	consume # -> "def" via "prefixed_command"
-xleaders		n	n	inval	# -> "leader_ship"
+-			n	n	none	# -> "discretionary"
+/			n	n	none	# "ital_corr" command in TeX
+_space_			n	n	none	# "ex_space" command
+above			n	n	none
+abovewithdelims		n	n	none	# -> "above"
+accent			n	n	none
+advance			n	n	assign	# via "prefixed_command"
+afterassignment		n	n	none
+aftergroup		n	n	none
+atop			n	n	none	# -> "above"
+atopwithdelims		n	n	none	# -> "above"
+badness			n	n	none	# -> "last_item"
+batchmode		n	n	assign	# -> "set_interaction" via "prefixed_command"
+beginL			n	n	none	# eTeX
+beginR			n	n	none	# eTeX
+begingroup		n	n	none
+botmark			yes	n	none	# -> "top_bot_mark"
+botmarks		yes	n	none	# eTeX
+box			n	n	none	# -> "make_box"
+catcode			n	n	assign	# -> "def_code" via "prefixed_command"
+char			n	n	none	# "char_num" command
+chardef			n	n	assign	# -> "shorthand_def" via "prefixed_command"
+cleaders		n	n	none	# -> "leader_ship"
+closein			n	n	none	# -> "in_stream"
+closeout		n	n	none	# -> *"extension"
+copy			n	n	none	# -> "make_box"
+count			n	n	assign	# -> "register" via "prefixed_command"
+countdef		n	n	assign	# -> "shorthand_def" via "prefixed_command"
+cr			n	n	none	# -> "car_ret"
+crcr			n	n	none	# -> "car_ret"
+csname			yes 	n	none
+deadcycles		n	n	assign	# -> "set_page_int" via "prefixed_command"
+def			n	n	full	#  via "prefixed_command"
+delcode			n	n	assign	# -> "def_code" via "prefixed_command"
+delimiter		n	n	none	# "delim_num" cmd; also: noneid_char
+detokenize		yes	n	none	# eTeX
+dimen			n	n	assign	# -> "register" via "prefixed_command"
+dimendef		n	n	assign	# -> "shorthand_def" via "prefixed_command"
+discretionary		n	n	none
+displaylimits		n	n	none	# -> "limit_switch"
+displaystyle		n	n	none	# -> "math_style"
+divide			n	n	assign	#  via "prefixed_command"
+dp			n	n	assign	# -> "set_box_dimen" via "prefixed_command"
+dump			n	n	none	# -> "stop"
+edef			n	n	full	 # -> "def" via "prefixed_command"
+else			yes	n	none	# -> "fi_or_else"
+end			n	n	none	# -> "stop"
+endL			n	n	none	# eTeX
+endR			n	n	none	# eTeX
+endcsname		n	n	none
+endgroup		n	n	none
+endinput		n	n	none	# -> "input"
+endtemplate		yes	n	none
+eqno			n	n	none
+errmessage		n	n	none	# -> "message"
+errorstopmode		n	n	assign	# -> "set_interaction" via "prefixed_command"
+eTeXrevision		yes	n	none	# eTeX (duh); note this is *not* an int
+expandafter		yes	n	none
+fi			yes	n	none	# -> "fi_or_else"
+firstmark		yes	n	none	# -> "top_bot_mark"
+firstmarks		yes	n	none	# eTeX
+font			n	n	assign	# "def_font" command via "prefixed_command"
+fontdimen		n	n	assign	# "assign_font_dimen" cmd via "prefixed_command"
+fontname		yes	n	none	# -> "convert"
+futurelet		n	n	assign	# -> "let" via "prefixed_command"
+gdef			n	n	full	# -> "def" via "prefixed_command"
+global			n	n	full	# -> "prefix"
+halign			n	n	none
+hbox			n	n	none	# -> "make_box"
+hfil			n	n	none	# -> "hskip"
+hfill			n	n	none	# -> "hskip"
+hfilneg			n	n	none	# -> "hskip"
+hrule			n	n	none
+hskip			n	n	none
+hss			n	n	none	# -> "hskip"
+ht			n	n	assign	# -> "set_box_dimen" via "prefixed_command"
+hyphenation		n	n	none # -> "hyph_data"
+hyphenchar		n	n	none # -> "assign_font_int"
+if			yes	yes	none
+ifcase			yes	yes	none	# -> "if"
+ifcat			yes	yes	none	# -> "if"
+ifcsname		yes	yes	none	# eTeX
+ifdefined		yes	yes	none	# eTeX
+ifdim			yes	yes	none	# -> "if"
+ifeof			yes	yes	none	# -> "if"
+iffalse			yes	yes	none	# -> "if"
+iffontchar		yes	yes	none	# eTeX
+ifhbox			yes	yes	none	# -> "if"
+ifhmode			yes	yes	none	# -> "if"
+ifinner			yes	yes	none	# -> "if"
+ifmmode			yes	yes	none	# -> "if"
+ifnum			yes	yes	none	# -> "if"
+ifodd			yes	yes	none	# -> "if"
+iftrue			yes	yes	none	# -> "if"
+ifvbox			yes	yes	none	# -> "if"
+ifvmode			yes	yes	none	# -> "if"
+ifvoid			yes	yes	none	# -> "if"
+ifx			yes	yes	none	# -> "if"
+ignorespaces		n	n	none
+immediate		n	n	none	# -> *"extension"
+indent			n	n	none	# -> "start_par"
+input			n	n	none
+inputlineno		n	n	none	# -> "last_item"
+insert			n	n	none
+insertpenalties		n	n	assign	# -> "set_page_int" via "prefixed_command"
+jobname			yes	n	none	# -> "convert"
+kern			n	n	none
+lastbox			n	n	none	# -> "make_box"
+lastkern		n	n	none	# -> "last_item"
+lastpenalty		n	n	none	# -> "last_item"
+lastskip		n	n	none	# -> "last_item"
+lccode			n	n	assign	# -> "def_code" via "prefixed_command"
+leaders			n	n	none	# -> "leader_ship"
+left			n	n	none	# -> "left_right"
+leqno			n	n	none	# -> "eqno"
+let			n	n	assign	#  via "prefixed_command"
+limits			n	n	none	# -> "limit_switch"
+long			n	n	full	# -> "prefixed_command"
+lower			n	n	none	# -> "vmove"
+lowercase		n	n	none	# -> "caseshift"
+mark			n	n	none
+marks			n	n	none	# eTeX
+mathaccent		n	n	none
+mathbin			n	n	none	# -> "math_comp"
+mathchar		n	n	none	# "math_char_num" command
+mathchardef		n	n	assign	# -> "shorthand_def" via "prefixed_command"
+mathchoice		n	n	none
+mathclose		n	n	none	# -> "math_comp"
+mathcode		n	n	assign	# -> "def_code" via "prefixed_command"
+mathinner		n	n	none	# -> "math_comp"
+mathop			n	n	none	# -> "math_comp"
+mathopen		n	n	none	# -> "math_comp"
+mathord			n	n	none	# -> "math_comp"
+mathpunct		n	n	none	# -> "math_comp"
+mathrel			n	n	none	# -> "math_comp"
+meaning			yes	n	none	# -> "convert"
+message			n	n	none
+middle			n	n	none	# eTeX
+mkern			n	n	none
+moveleft		n	n	none	# -> "hmove"
+moveright		n	n	none	# -> "hmove"
+mskip			n	n	none
+multiply		n	n	assign
+muskip			n	n	assign	# -> "register" via "prefixed_command"
+muskipdef		n	n	assign	# -> "shorthand_def" via "prefixed_command"
+noalign			n	n	none
+noboundary		n	n	none
+noexpand		yes	n	none
+noindent		n	n	none	# -> "start_par"
+nolimits		n	n	none	# -> "limit_switch"
+nonscript		n	n	none
+nonstopmode		n	n	assign	# -> "set_interaction" via "prefixed_command"
+nullfont		n	n	assign	# -> "set_font" via "prefixed_command"
+number			yes	n	none	# -> "convert"
+omit			n	n	none
+openin			n	n	none	# -> "in_stream"
+openout			n	n	none	# -> *"extension"
+or			yes	n	none	# -> "fi_or_else"
+outer			n	n	full	# -> "prefixed_command"
+over			n	n	none	# -> "above"
+overline		n	n	none	# -> "math_comp"
+overwithdelims		n	n	none	# -> "above"
+pagedepth		n	n	assign	# -> "set_page_dimen" via "prefixed_command"
+pagefilllstretch	n	n	assign	# -> "set_page_dimen" via "prefixed_command"
+pagefillstretch		n	n	assign	# -> "set_page_dimen" via "prefixed_command"
+pagefilstretch		n	n	assign	# -> "set_page_dimen" via "prefixed_command"
+pagegoal		n	n	assign	# -> "set_page_dimen" via "prefixed_command"
+pageshrink		n	n	assign	# -> "set_page_dimen" via "prefixed_command"
+pagestretch		n	n	assign	# -> "set_page_dimen" via "prefixed_command"
+pagetotal		n	n	assign	# -> "set_page_dimen" via "prefixed_command"
+par			n	n	none	# "par_end" cmd; also: active_char,match
+parshape		n	n	assign	# "set_shape" command via "prefixed_command"
+patterns		n	n	none	# -> "hyph_data" via "prefixed_command"
+penalty			n	n	none	# "break_penalty" command
+prevdepth		n	n	assign	# -> "set_aux" via "prefixed_command"
+prevgraf		n	n	assign	# "set_prev_graf" command via "prefixed_command"
+protected		yes	n	full	# eTeX
+radical			n	n	none
+raise			n	n	none	# -> "vmove"
+read			n	n	assign	# "read_to_cs" command via "prefixed_command"
+readline		n	n	assign	# eTeX via "prefixed_command"
+relax			n	n	none	# also: escape
+right			n	n	none	# -> "left_right"
+romannumeral		yes	n	none	# -> "convert"
+scantokens		yes	n	none	# eTeX
+scriptfont		n	n	assign	# -> "def_family" via "prefixed_command"
+scriptscriptfont	n	n	assign	# -> "def_family" via "prefixed_command"
+scriptstyle		n	n	none	# -> "math_style"
+scriptscriptstyle	n	n	none	# -> "math_style"
+scrollmode		n	n	assign	# -> "set_interaction" via "prefixed_command"
+setbox			n	n	assign	#  via "prefixed_command"
+setlanguage		n	n	none	# -> *"extension"
+sfcode			n	n	assign	# -> "def_code" via "prefixed_command"
+shipout			n	n	none	# -> "leader_ship"
+show			n	n	none	# -> "xray"
+showbox			n	n	none	# -> "xray"
+showgroups		n	n	none	# eTeX
+showlists		n	n	none	# -> "xray"
+showthe			n	n	none	# -> "xray"
+showtokens		n	n	none	# eTeX
+skewchar		n	n	assign	# -> "assign_font_int" via "prefixed_command"
+skip			n	n	assign	# -> "register" via "prefixed_command"
+skipdef			n	n	assign	# -> "shorthand_def" via "prefixed_command"
+spacefactor		n	n	assign	# -> "set_aux" via "prefixed_command"
+span			n	n	none	# "tab_mark" command
+special			n	n	none	# -> *"extension"
+splitbotmark		yes	n	none	# -> "top_bot_mark"
+splitbotmarks		yes	n	none	# eTeX
+splitfirstmark		yes	n	none	# -> "top_bot_mark"
+splitfirstmarks		yes	n	none	# eTeX
+string			yes	n	none	# -> "convert"
+textfont		n	n	assign	# -> "def_family" via "prefixed_command"
+textstyle		n	n	none	# -> "math_style"
+the			yes	n	none
+toks			n	n	assign	# "toks_register" command via "prefixed_command"
+toksdef			n	n	assign	# -> "shorthand_def" via "prefixed_command"
+topmark			yes	n	none	# -> "top_bot_mark"
+topmarks		yes	n	none	# eTeX
+uccode			n	n	assign	# -> "def_code" via "prefixed_command"
+underline		n	n	none	# -> "math_comp"
+unexpanded		yes	n	none	# eTeX
+unhbox			n	n	none
+unhcopy			n	n	none	# -> "unhbox"
+unkern			n	n	none	# -> "remove_item"
+unless			yes	yes	none	# eTeX
+unpenalty		n	n	none	# -> "remove_item"
+unskip			n	n	none	# -> "remove_item"
+unvbox			n	n	none
+unvcopy			n	n	none	# -> "unvbox"
+uppercase		n	n	none	# -> "caseshift"
+vadjust			n	n	none
+valign			n	n	none
+vbox			n	n	none	# -> "make_box"
+vcenter			n	n	none
+vrule			n	n	none
+vfil			n	n	none	# -> "vskip"
+vfill			n	n	none	# -> "vskip"
+vfilneg			n	n	none	# -> "vskip"
+vskip			n	n	none
+vsplit			n	n	none	# -> "make_box"
+vss			n	n	none	# -> "vskip"
+vtop			n	n	none	# -> "make_box"
+wd			n	n	assign	# -> "set_box_dimen" via "prefixed_command"
+write			n	n	none	# -> *"extension"
+xdef			n	n	full	# -> "def" via "prefixed_command"
+xleaders		n	n	none	# -> "leader_ship"
 
-WEBTEXtraceon		n	n	inval
+WEBTEXtraceon		n	n	none

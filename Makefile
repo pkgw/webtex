@@ -42,6 +42,7 @@ sharedjs += \
 
 # High-level features
 sharedjs += \
+  src/prefixed-commands.js \
   src/modes.js \
   src/registers.js \
   src/parameters.js \

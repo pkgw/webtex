@@ -52,7 +52,7 @@ def parsebool (text):
 
 all_tables = [
     ('catcodes', 'long_name code short_name charlike single_char'),
-    ('commands', 'escname expand cond afm'),
+    ('commands', 'escname expand cond prefixing'),
     ('namedparams', 'name type'),
 ]
 
@@ -128,19 +128,19 @@ def mac_insert_files (emit, data, restargs):
 
 def mac_command_info (emit, data, restargs):
     for item in data.commands:
-        if item.afm == 'inval':
-            afm = 'AFM_INVALID'
-        elif item.afm == 'consume':
-            afm = 'AFM_CONSUME'
-        elif item.afm == 'cont':
-            afm = 'AFM_CONTINUE'
+        if item.prefixing == 'none':
+            prefixing = 'Prefixing.MODE_NONE'
+        elif item.prefixing == 'assign':
+            prefixing = 'Prefixing.MODE_ASSIGNMENT'
+        elif item.prefixing == 'full':
+            prefixing = 'Prefixing.MODE_FULL'
         else:
-            die ('unexpected command "afm" setting %r', item.afm)
+            die ('unexpected command "prefixing" setting %r', item.prefixing)
 
         emit ('[%r, %r, %s, %s, %s],', item.name, item.escname,
               repr (item.expand).lower (),
               repr (item.cond).lower (),
-              afm)
+              prefixing)
 
 
 def mac_parameter_info (emit, data, restargs):

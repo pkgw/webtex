@@ -10,7 +10,7 @@ function fill_cseq_commands (engine) {
 
     command_info.forEach (function (item) {
 	var name = item[0], escname = item[1], expand = item[2],
-	    cond = item[3], afm = item[4];
+	    cond = item[3], prefixing = item[4];
 	var cmd = null;
 
 	if (!registry.hasOwnProperty (escname))
@@ -31,7 +31,7 @@ function fill_cseq_commands (engine) {
 	cmd.name = name;
 	cmd.expandable = expand;
 	cmd.conditional = cond;
-	cmd.assign_flag_mode = afm;
+	cmd.prefixing_mode = prefixing;
 	engine.commands[name] = cmd;
 	engine.set_cseq (name, cmd);
     });

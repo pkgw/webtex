@@ -219,9 +219,9 @@ var Command = (function Command_closure () {
     var proto = Command.prototype;
     proto.expandable = false;
     proto.conditional = false;
-    proto.boxlike = false;
+    proto.boxlike = false; // TODO: can probably be removed
     proto.multi_instanced = false; // can multiple Command instances with the same name exist?
-    proto.assign_flag_mode = AFM_INVALID;
+    proto.prefixing_mode = Prefixing.MODE_NONE;
     proto.name = '<unset command name>';
 
     proto.toString = function Command_toString () {
@@ -329,7 +329,7 @@ var AssignmentCommand = (function AssignmentCommand_closure () {
 
     inherit (AssignmentCommand, Command);
     var proto = AssignmentCommand.prototype;
-    proto.assign_flag_mode = AFM_CONSUME;
+    proto.prefixing_mode = Prefixing.MODE_ASSIGNMENT;
 
     proto.invoke = function AssignmentCommand_invoke (engine) {
 	var as_valref = this.as_valref (engine);

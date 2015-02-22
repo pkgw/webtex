@@ -152,14 +152,14 @@ var NamedParamCommand = (function parameter_wrapper () {
 
     engine_proto.register_method ('set_parameter',
 				  function Engine_set_parameter (valtype, name, value) {
-	this.eqtb.set_parameter (valtype, name, value, this._global_flag ());
+	this.eqtb.set_parameter (valtype, name, value, this.global_prefix_is_active ());
 	this.maybe_insert_after_assign_token ();
     });
 
     engine_proto.register_method ('set_parameter__OS',
 				  function Engine_set_parameter__OS (name, value_S) {
 	// Alias to help with naming-convention consistency.
-	this.eqtb.set_parameter (T_DIMEN, name, value_S, this._global_flag ());
+	this.eqtb.set_parameter (T_DIMEN, name, value_S, this.global_prefix_is_active ());
 	this.maybe_insert_after_assign_token ();
     });
 

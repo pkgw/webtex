@@ -307,7 +307,6 @@ var Engine = (function Engine_closure () {
 
 	this.group_exit_stack = [];
 
-	this.assign_flags = 0;
 	this.after_assign_token = null;
 
 	this.infiles = [];
@@ -361,22 +360,12 @@ var Engine = (function Engine_closure () {
 
     // Wrappers for the EquivTable.
 
-    proto._global_flag = function Engine__global_flag () {
-	// TeXBook p. 275
-	var gd = this.get_parameter__O_I ('globaldefs');
-	if (gd > 0)
-	    return true;
-	if (gd < 0)
-	    return false;
-	return this.assign_flags & AF_GLOBAL;
-    };
-
     proto.get_code = function Engine_get_code (valtype, ord) {
 	return this.eqtb.get_code (valtype, ord);
     };
 
     proto.set_code = function Engine_get_code (valtype, ord, value) {
-	this.eqtb.set_code (valtype, ord, value, this._global_flag ());
+	this.eqtb.set_code (valtype, ord, value, this.global_prefix_is_active ());
 	this.maybe_insert_after_assign_token ();
     };
 
@@ -385,7 +374,7 @@ var Engine = (function Engine_closure () {
     };
 
     proto.set_active = function Engine_get_active (ord, value) {
-	this.eqtb.set_active (ord, value, this._global_flag ());
+	this.eqtb.set_active (ord, value, this.global_prefix_is_active ());
 	this.maybe_insert_after_assign_token ();
     };
 
@@ -394,7 +383,7 @@ var Engine = (function Engine_closure () {
     };
 
     proto.set_cseq = function Engine_get_cseq (name, cmd) {
-	this.eqtb.set_cseq (name, cmd, this._global_flag ());
+	this.eqtb.set_cseq (name, cmd, this.global_prefix_is_active ());
 	this.maybe_insert_after_assign_token ();
     };
 
@@ -403,7 +392,7 @@ var Engine = (function Engine_closure () {
     };
 
     proto.set_font_family = function Engine_set_font_family (style, index, value) {
-	this.eqtb.set_font_family (style, index, value, this._global_flag ());
+	this.eqtb.set_font_family (style, index, value, this.global_prefix_is_active ());
 	this.maybe_insert_after_assign_token ();
     };
 
@@ -454,11 +443,6 @@ var Engine = (function Engine_closure () {
 		throw new TexRuntimeError ('unexpected EOF while parsing');
 	    throw e;
 	}
-
-	if (cmd.assign_flag_mode == AFM_INVALID && this.assign_flags)
-	    this.warn ('assignment flags applied to inapplicable command %o', cmd);
-	else if (cmd.assign_flag_mode != AFM_CONTINUE)
-	    this.assign_flags = 0;
 
 	// We successfully completed this step, so we can throw away any old
 	// tokens we were holding on to. This is a hangover from the days of
@@ -610,8 +594,6 @@ var Engine = (function Engine_closure () {
 	    throw new TexRuntimeError ('can only serialize Engine in topmost eqtb');
 	if (this.group_exit_stack.length > 0)
 	    throw new TexRuntimeError ('can only serialize Engine without open groups');
-	if (this.assign_flags != 0)
-	    throw new TexRuntimeError ('cannot serialize Engine with active assignment flags');
 	if (this.after_assign_token != null)
 	    throw new TexRuntimeError ('cannot serialize Engine with active ' +
 				       'after_assign_token');
@@ -965,29 +947,6 @@ var Engine = (function Engine_closure () {
 		return [negfactor, tok];
 	    }
 	}
-    };
-
-    proto.scan_through_assignments = function Engine_scan_through_assignments () {
-	// TTP 1270, "do_assignments". Also includes TTP 404.
-
-	var tok = null;
-
-	while (true) {
-	    tok = this.next_x_tok_throw ();
-	    if (tok.is_space (this) || tok.is_cmd (this, 'relax'))
-		continue;
-
-	    var cmd = tok.to_cmd (this);
-
-	    if (cmd.assign_flag_mode == AFM_INVALID)
-		break;
-
-	    // XXX TeX sets a global flag set_box_allowed=False that does what
-	    // it sounds like.
-	    cmd.invoke (this);
-	}
-
-	return tok;
     };
 
     proto.scan_int__I = function Engine_scan_int__I () {
@@ -1458,10 +1417,6 @@ var Engine = (function Engine_closure () {
 
 
     // Miscellaneous
-
-    proto.set_global_assign_mode = function Engine_set_global_assign_mode () {
-	this.assign_flags |= AF_GLOBAL;
-    };
 
     proto.set_after_assign_token =
 	function Engine_set_after_assign_token (tok) {

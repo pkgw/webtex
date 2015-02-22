@@ -770,7 +770,7 @@ var VBox = (function VBox_closure () {
 	// since the callback may be called somewhere much later in the
 	// processing.
 
-	var is_global = !!engine._global_flag ();
+	var is_global = engine.global_prefix_is_active ();
 
         function set_the_box (engine, box) {
 	    // handle_finished_box() has already printed the box contents
