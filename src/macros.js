@@ -5,8 +5,9 @@
 
 (function macros_wrapper () {
     var MacroCommand = (function MacroCommand_closure () {
-	function MacroCommand (origcs, tmpl, repl) {
+	function MacroCommand (flags, origcs, tmpl, repl) {
 	    Command.call (this);
+	    this.flags = flags;
 	    this.origcs = origcs;
 	    this.tmpl = tmpl;
 	    this.repl = repl;
@@ -19,22 +20,26 @@
 	proto.multi_instanced = true;
 
 	proto._serialize_data = function MacroCommand__serialize_data (state, housekeeping) {
-	    return [this.origcs.to_serialize_str (),
+	    return [this.flags,
+		    this.origcs.to_serialize_str (),
 		    (new Toklist (this.tmpl)).as_serializable (),
 		    (new Toklist (this.repl)).as_serializable ()];
 	};
 
 	MacroCommand.deserialize = function MacroCommand_deserialize (data, housekeeping) {
-	    var origcs = Toklist.deserialize (data[0]).toks[0];
-	    var tmpl = Toklist.deserialize (data[1]).toks;
-	    var repl = Toklist.deserialize (data[2]).toks;
-	    return new MacroCommand (origcs, tmpl, repl);
+	    var flags = data[0];
+	    var origcs = Toklist.deserialize (data[1]).toks[0];
+	    var tmpl = Toklist.deserialize (data[2]).toks;
+	    var repl = Toklist.deserialize (data[3]).toks;
+	    return new MacroCommand (flags, origcs, tmpl, repl);
 	};
 
 	proto.same_cmd = function MacroCommand_same_cmd (other) {
 	    if (other == null)
 		return false;
 	    if (this.name != other.name)
+		return false;
+	    if (this.flags != other.flags)
 		return false;
 	    if (this.tmpl.length != other.tmpl.length)
 		return false;
@@ -339,8 +344,11 @@
 	if (end_with_lbrace)
 	    repl_toks.push (tmpl_toks[tmpl_toks.length - 1]);
 
-	engine.trace ('%s %o: %T -> %T', cname, cstok, tmpl_toks, repl_toks);
-	cstok.assign_cmd (engine, new MacroCommand (cstok, tmpl_toks, repl_toks));
+	var flags = engine.get_prefix_flags ();
+	flags &= (~Prefixing.FLAG_GLOBAL);
+
+	engine.trace ('%s (%x) %o: %T -> %T', cname, flags, cstok, tmpl_toks, repl_toks);
+	cstok.assign_cmd (engine, new MacroCommand (flags, cstok, tmpl_toks, repl_toks));
     }
 
 
