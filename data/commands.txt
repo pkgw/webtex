@@ -249,7 +249,7 @@ unexpanded		yes	n	none	# eTeX
 unhbox			n	n	none
 unhcopy			n	n	none	# -> "unhbox"
 unkern			n	n	none	# -> "remove_item"
-unless			yes	yes	none	# eTeX
+unless			yes	n	none	# eTeX
 unpenalty		n	n	none	# -> "remove_item"
 unskip			n	n	none	# -> "remove_item"
 unvbox			n	n	none

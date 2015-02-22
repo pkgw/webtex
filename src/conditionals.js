@@ -10,6 +10,7 @@
     engine_proto.register_state ({
 	engine_init: function (engine) {
 	    engine.conditional_stack = [];
+	    engine.conditional_unless_mode = false;
 	},
 	is_clean: function (engine) {
 	    return engine.conditional_stack.length == 0;
@@ -97,6 +98,13 @@
         // outcome. We'll have to evaluate one branch and skip the other,
         // taking care to pay attention to nesting in the latter. We'll also
         // have to swallow \else and \fi tokens as appropriate.
+
+	if (this.conditional_unless_mode) {
+	    // \unless, introduced by e-TeX
+	    this.trace ('(result inverted by \\unless!)');
+	    result = !result;
+	    this.conditional_unless_mode = false;
+	}
 
 	if (result) {
 	    /* All we need to do now is mark that we're an expecting an \else
@@ -224,6 +232,19 @@
 	}
     });
 
+    // e-TeX adds "unless"
+
+    register_command ('unless', function cmd_unless (engine) {
+	engine.trace ('unless ...');
+
+	var tok = engine.next_tok_throw ();
+	var cmd = tok.to_cmd (engine);
+	if (!cmd.conditional)
+	    throw new TexRuntimeError ('\\unless must be followed by a conditional');
+
+	engine.conditional_unless_mode = true;
+	return cmd.invoke (engine);
+    });
 
     // Now we can get to the basic conditional commands. These all
     // delegate to engine.handle_if().
