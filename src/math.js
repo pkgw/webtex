@@ -851,12 +851,15 @@ var mathlib = (function mathlib_closure () {
     function _cmd_limit_switch (engine, desc, value) {
 	// T:TP 1158, 1159
 	engine.trace (desc);
+	if (engine.absmode () != M_DMATH)
+	    throw new TexRuntimeError ('\\%s may only be used in math mode', desc);
+
 	var last = engine.get_last_listable ();
 
 	if (last == null ||
 	    !(last instanceof AtomNode) ||
 	    last.ltype != MT_OP)
-	    throw new TexRuntimeError ('\\%s must follow an operator', desc);
+	    throw new TexRuntimeError ('\\%s must follow an operator; got %s', desc, last);
 
 	last.limtype = value;
     };
@@ -867,6 +870,10 @@ var mathlib = (function mathlib_closure () {
 
     register_command ('limits', function cmd_limits (engine) {
 	_cmd_limit_switch (engine, 'limits', LIMTYPE_LIMITS);
+    });
+
+    register_command ('displaylimits', function cmd_displaylimits (engine) {
+	_cmd_limit_switch (engine, 'displaylimits', LIMTYPE_NORMAL);
     });
 
 
