@@ -168,23 +168,22 @@
 
     var GivenRegisterCommand = (function GivenRegisterCommand_closure () {
 	function GivenRegisterCommand (valtype, desc, register) {
-	    Command.call (this);
 	    if (!vt_ok_for_register[valtype])
 		throw new TexInternalError ('illegal valtype for register: %s',
 					    vt_names[valtype]);
 	    if (register < 0 || register > 255)
 		throw new TexInternalError ('illegal register number %d', register);
 
+	    AssignmentCommand.call (this);
 	    this.valtype = valtype;
 	    this.desc = desc;
 	    this.register = register;
 	    this.name = '<given-' + desc + '>';
 	}
 
-	inherit (GivenRegisterCommand, Command);
+	inherit (GivenRegisterCommand, AssignmentCommand);
 	var proto = GivenRegisterCommand.prototype;
 	proto.multi_instanced = true;
-	proto.prefixing_mode = Prefixing.MODE_ASSIGNMENT;
 
 	proto._serialize_data = function GivenRegisterCommand__serialize_data (state, housekeeping) {
 	    return this.register;
@@ -206,13 +205,6 @@
 
 	proto.as_valref = function GivenRegisterCommand_as_valref (engine) {
 	    return new RegisterValref (this.valtype, this.register);
-	};
-
-	proto.invoke = function GivenRegisterCommand_invoke (engine) {
-	    engine.scan_optional_equals ();
-	    var newval = engine.scan_valtype (this.valtype);
-	    engine.trace ('%s #%d = %o', this.desc, this.register, newval);
-	    this.as_valref (engine).set (engine, newval);
 	};
 
 	proto.texmeaning = function GivenRegisterCommand_texmeaning (engine) {
