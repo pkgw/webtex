@@ -450,6 +450,217 @@ var mathlib = (function mathlib_closure () {
 	return d;
     };
 
+    // Entering and leaving math mode
+
+    function init_math (engine) {
+	// TTP 1138, "init_math"
+	var m = engine.mode ();
+	var tok = engine.next_tok_throw ();
+	if (tok.to_cmd (engine) instanceof MathShiftCommand &&
+	    (m == M_VERT || m == M_HORZ || m == M_DMATH)) { // XXX don't understand mode check
+	    engine.end_graf ();
+	    engine.trace ('math shift: enter display');
+	    engine.enter_math (M_DMATH, true);
+
+	    // TTP 1146: setting predisplaysize. We use the default, which is max_dimen:
+	    engine.set_parameter__OS ('predisplaysize', 0x3fffffff);
+
+	    // TeX futzes the display width based on the indentation parameters,
+	    // but it's essentially hsize. TTP 1149.
+	    engine.set_parameter__OS ('displaywidth',
+				      engine.get_parameter__O_S ('hsize'));
+	    engine.set_parameter__OS ('displayindent', nlib.Zero_S);
+	    engine.maybe_push_toklist ('everydisplay');
+	    // XXX: no pagebuilder
+	} else {
+	    engine.trace ('math shift: enter non-display');
+	    engine.push_back (tok);
+	    engine.enter_math (M_MATH, true);
+	    engine.maybe_push_toklist ('everymath');
+	}
+    }
+
+    function after_math (engine) {
+	// TTP 1194, "after_math". Called when a math shift command causes us
+	// to exit math mode. XXX: skipping TTP 1195 sanity checks.
+	engine.trace ('math shift: exit');
+
+	var first_mode = engine.mode ();
+	var have_left_eqno = engine.mode_stack[0].math_eqno_is_left || false; // XXX hack
+	var mlist = finish_math_list (engine, null); // causes us to leave the mode
+	var eqno_box = null;
+
+	if (first_mode == M_MATH && engine.mode () == M_DMATH) {
+	    // The mode structure tells us that we were in an \eqno clause
+	    // inside a math display. We need to save mlist as the eqno bit
+	    // and finish up the actual main display math part.
+	    var tok = engine.next_x_tok ();
+	    if (!(tok.to_cmd (engine) instanceof MathShiftCommand))
+		throw new TexRuntimeError ('display math must be ended with $$; got $ then %s', tok);
+
+	    var eqlist = ml.mlist_to_hlist (engine, mlist, MS_TEXT, false, false);
+	    eqno_box = hpack_natural (engine, eqlist);
+	    // XXX recover whether we're \eqno or \leqno
+
+	    mlist = finish_math_list (engine, null);
+	    first_mode = M_DMATH;
+	}
+
+	if (first_mode == M_MATH) {
+	    // TTP 1196. Text-mode math.
+	    var ms_S = engine.get_parameter__O_S ('mathsurround');
+	    engine.accum (new MathDelim (ms_S, false));
+
+	    var hlist = ml.mlist_to_hlist (engine, mlist, MS_TEXT, false, false);
+	    var box = new HBox ();
+	    box.list = hlist;
+	    box.set_glue__OOS (engine, false, nlib.Zero_S);
+
+	    // XXX: we are appending the equation as a single box in canvas
+	    // mode, rather than splicing in the list of boxes with canvas
+	    // delimiters. This may break code that pokes back into the list
+	    // of items after the math is rendered.
+	    box.render_as_canvas = true;
+	    engine.trace ('rendered math: %U', box);
+	    engine.accum (box);
+
+	    engine.accum (new MathDelim (ms_S, true));
+
+	    engine.set_spacefactor (1000);
+	    engine.unnest_eqtb ();
+	} else {
+	    // TTP 1199. Display-mode math. Check for second "$", if we
+	    // haven't already done so.
+	    if (eqno_box == null) {
+		var tok = engine.next_x_tok ();
+		if (!(tok.to_cmd (engine) instanceof MathShiftCommand))
+		    throw new TexRuntimeError ('display math must be ended with $$; got $ then %s', tok);
+	    }
+
+	    var hlist = ml.mlist_to_hlist (engine, mlist, MS_DISPLAY, false, false);
+	    var pending_adjustments = [];
+	    var box = new HBox ();
+	    box.list = hlist;
+	    box.set_glue__OOS (engine, false, nlib.Zero_S, pending_adjustments);
+
+	    var w_S = box.width_S;
+	    var z_S = engine.get_parameter__O_S ('displaywidth');
+	    var s_S = engine.get_parameter__O_S ('displayindent');
+	    var e_S = nlib.Zero_S;
+	    var q_S = nlib.Zero_S;
+
+	    if (eqno_box != null) {
+		// This is a pretty circuitous route to get the text-style
+		// math quad size.
+		var tmpstate = new MathState (engine, MS_TEXT, false);
+		var mq_S = tmpstate.sym_dimen__NN_S (MS_TEXT, SymDimens.MathQuad);
+
+		e_S = eqno_box.width_S;
+		q_S = e_S + mq_S;
+	    }
+
+	    if (w_S + q_S > z_S) {
+		// TTP 1201. Equation plus eq-number is wider than the space
+		// we have. We may be able to make it fit by squeezing the
+		// equation down, though. If we can't, we'll need to put the
+		// equation number on its own line, something that can also be
+		// forced by setting the number's width to 0.
+		box.save_glue_info ();
+
+		if (e_S != nlib.Zero_S && (box._glue_shrink_order > 0 ||
+					   w_S - box._glue_shrink_S + q_S <= z_S)) {
+		    box.set_glue__OOS (engine, true, z_S - q_S); // It fits!
+		} else {
+		    // It doesn't fit :-(
+		    e_S = nlib.Zero_S;
+		    if (w_S > z_S)
+			box.set_glue__OOS (engine, true, z_S);
+		    w_S = box.width_S;
+		}
+	    }
+
+	    // TTP 1202
+	    var d_S = half (z_S - w_S);
+
+	    if (e_S > nlib.Zero_S && d_S < 2 * e_S) {
+		d_S = half (z_S - w_S - e_S);
+		if (mlist.length && mlist[0].ltype == LT_GLUE)
+		    d_S = nlib.Zero_S;
+	    }
+
+	    // TTP 1203
+	    engine.accum (new Penalty (engine.get_parameter__O_I ('predisplaypenalty')));
+	    var g1, g2;
+
+	    if (d_S + s_S <= engine.get_parameter__O_S ('predisplaysize') || have_left_eqno) {
+		g1 = engine.get_parameter (T_GLUE, 'abovedisplayskip');
+		g2 = engine.get_parameter (T_GLUE, 'belowdisplayskip');
+	    } else {
+		g1 = engine.get_parameter (T_GLUE, 'abovedisplayshortskip');
+		g2 = engine.get_parameter (T_GLUE, 'belowdisplayshortskip');
+	    }
+
+	    if (have_left_eqno && e_S == nlib.Zero_S) {
+		eqno_box.shift_amount_S = s_S;
+		engine.accum_to_vlist (eqno_box);
+		engine.accum (new Penalty (10000)); // "inf_penalty"
+	    } else {
+		engine.accum (new BoxGlue (g1));
+	    }
+
+	    // TTP 1204
+	    if (e_S != nlib.Zero_S) {
+		var r = new Kern (z_S - w_S - e_S - d_S);
+		if (have_left_eqno) {
+		    eqno_box.list.push (r);
+		    eqno_box.list = eqno_box.list.concat (box_list);
+		    box = eqno_box;
+		    d_S = nlib.Zero_S;
+		} else {
+		    box.list.push (r);
+		    box.list = box.list.concat (eqno_box.list);
+		}
+
+		box.set_glue__OOS (engine, false, nlib.Zero_S);
+	    }
+
+	    box.shift_amount_S = s_S + d_S;
+	    engine.accum_to_vlist (box);
+
+	    // TTP 1205
+	    if (eqno_box != null && e_S == nlib.zero_S && !have_left_eqno) {
+		engine.accum (new Penalty (10000)); // "inf_penalty"
+		eqno_box.shift_amount_S = s_S + z_S - a.width_S;
+		engine.accum_to_vlist (eqno_box);
+		g2 = null;
+	    }
+
+	    engine.accum_list (pending_adjustments);
+	    engine.accum (new Penalty (engine.get_parameter__O_I ('postdisplaypenalty')));
+
+	    if (g2 != null)
+		engine.accum (new BoxGlue (g2));
+
+	    // TTP 1199
+	    engine.unnest_eqtb ();
+	    resume_after_display (engine);
+	}
+    }
+
+    function handle_math_shift (engine, cmd) {
+	// TTP 1090, 1137, 1193. Vertical mode? Command will be reread after new paragraph
+	// is started.
+	if (engine.ensure_horizontal (this))
+	    return;
+
+	if (engine.absmode () == M_HORZ)
+	    init_math (engine);
+	else
+	    // XXX: check currently in math shift group.
+	    after_math (engine);
+    }
+    ml.handle_math_shift = handle_math_shift;
+
     engine_proto.register_method ('enter_math', function Engine_enter_math (mode, is_outer) {
 	// TTP 1136: "push_math", more or less
 	this.enter_mode (mode);
@@ -461,7 +672,8 @@ var mathlib = (function mathlib_closure () {
     });
 
     function resume_after_display (engine) {
-	// TTP 1200 "resume_after_display" XXX probably not complete
+	// TTP 1200 "resume_after_display". XXX not complete. Skips the
+	// unnest_eqtb/"unsave".
 
 	// XXX square off grouping, modes, etc.
 	// XXX: moving pagebuilder invocation
@@ -783,6 +995,28 @@ var mathlib = (function mathlib_closure () {
 	n.nuc = mlist;
 	engine.accum (n);
     });
+
+    // Equation numbering
+
+    function handle_eqno (engine, cmdname, is_left) {
+	// TTP 1140 ; TTP 1142 "start_eq_no"
+	engine.trace (cmdname);
+	if (engine.mode () != M_DMATH)
+	    throw new TexRuntimeError ('\\%s must be used in display math mode', cmdname);
+
+	engine.enter_math (M_MATH, true);
+	engine.mode_stack[0].math_eqno_is_left = is_left; // XXX haaaaack
+	engine.maybe_push_toklist ('everymath');
+    };
+
+    register_command ('eqno', function cmd_eqno (engine) {
+	handle_eqno (engine, 'eqno', false);
+    });
+
+    register_command ('leqno', function cmd_leqno (engine) {
+	handle_eqno (engine, 'leqno', true);
+    });
+
 
     // Rendering of math lists into horizontal lists
 
@@ -1551,7 +1785,7 @@ var mathlib = (function mathlib_closure () {
 	return MT_CLOSE;
     }
 
-    ml.mlist_to_hlist = function mlist_to_hlist (engine, mlist, style, cramped, penalties) {
+    function mlist_to_hlist (engine, mlist, style, cramped, penalties) {
 	var state = new MathState (engine, style, cramped);
 	var i = 0;
 	var r_type = MT_OP;
@@ -1817,6 +2051,7 @@ var mathlib = (function mathlib_closure () {
 
 	return outlist;
     };
+    ml.mlist_to_hlist = mlist_to_hlist;
 
     return ml;
 }) ();

@@ -455,12 +455,14 @@ var Engine = (function Engine_closure () {
     // Mode and grouping stuff.
 
     proto.nest_eqtb = function Engine_nest_eqtb () {
-	// Note that this is equivalent to new_save_level in TeX, not push_nest.
+	// engine.nest_eqtb() is roughly equivalent to TeX's "new_save_level"
+	// (TTP 274), not push_nest.
 	this.eqtb = new EquivTable (this.eqtb);
     };
 
     proto.unnest_eqtb = function Engine_unnest_eqtb () {
-	// Likewise, this is equivalent to unsave, not pop_nest.
+	// engine.unnest_eqtb() is roughly equivalent to TeX's "unsave" (TTP
+	// 281), not pop_nest.
 	if (this.eqtb.parent == null)
 	    // if we check after the fact, our standard error-printing mechanism fails.
 	    throw new TexInternalError ('unnested eqtb too far');
@@ -532,7 +534,6 @@ var Engine = (function Engine_closure () {
 
 	this.group_exit_stack[l - 1][2].push (tok);
     };
-
 
 
     // Input nesting and other I/O

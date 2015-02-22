@@ -149,57 +149,7 @@ var MathShiftCommand = (function MathShiftCommand_closure () {
     proto.desc = 'math shift character';
 
     proto.invoke = function MathShiftCommand_invoke (engine) {
-	// T:TP 1138.
-	if (engine.ensure_horizontal (this))
-	    return; // this command will be reread after new paragraph is started.
-
-	var m = engine.mode ();
-
-	if (m == M_DMATH || m == M_MATH) {
-	    // T:TP 1194 -- after_math(). XXX: this code is a poor approximation so far.
-	    engine.trace ('math shift: exit');
-	    var mlist = mathlib.finish_math_list (engine, null);
-	    var mstyle = MS_DISPLAY;
-	    if (m == M_MATH)
-		mstyle = MS_TEXT;
-
-	    var hlist = mathlib.mlist_to_hlist (engine, mlist, mstyle, false, false);
-	    var box = new HBox ();
-	    box.list = hlist;
-	    box.set_glue__OOS (engine, false, nlib.Zero_S);
-	    box.render_as_canvas = true;
-	    engine.trace ('rendered math: %U', box);
-
-	    var ms_S = engine.get_parameter__O_S ('mathsurround');
-	    engine.accum (new MathDelim (ms_S, false));
-	    engine.accum (box);
-	    engine.accum (new MathDelim (ms_S, true));
-	    engine.unnest_eqtb (); // XXX: check that this matches an unsave, not pop_nest
-	} else {
-	    var tok = engine.next_tok_throw ();
-	    if (tok.to_cmd (engine) instanceof MathShiftCommand &&
-		(m == M_VERT || m == M_HORZ || m == M_DMATH)) { // XXX don't understand mode check; see T:TP
-		    engine.end_graf ();
-		engine.trace ('math shift: enter display');
-		engine.enter_math (M_DMATH, true);
-
-		// TTP 1146: setting predisplaysize. We use the default, which is max_dimen:
-		engine.set_parameter__OS ('predisplaysize', 0x3fffffff);
-
-		// TeX futzes the display width based on the indentation parameters,
-		// but it's essentially hsize. TTP 1149.
-		engine.set_parameter__OS ('displaywidth',
-					  engine.get_parameter__O_S ('hsize'));
-		engine.set_parameter__OS ('displayindent', nlib.Zero_S);
-		engine.maybe_push_toklist ('everydisplay');
-		// XXX: no pagebuilder
-	    } else {
-		engine.trace ('math shift: enter non-display');
-		engine.push_back (tok);
-		engine.enter_math (M_MATH, true);
-		engine.maybe_push_toklist ('everymath');
-	    }
-	}
+	return mathlib.handle_math_shift (engine, this);
     };
 
     return MathShiftCommand;
