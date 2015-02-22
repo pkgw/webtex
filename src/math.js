@@ -294,6 +294,43 @@ var mathlib = (function mathlib_closure () {
 	}
     }
 
+    // Scaling math units
+
+    function mu_mult__SSS_S (n_S, x_S, f_S) {
+	// TTP 716. Type-safety violations are intentional.
+	var tmp_S = nlib.xn_over_d__ISI_SS (x_S, f_S, 0x10000)[0];
+	return nlib.nx_plus_y__ISS_S (n_S, x_S, tmp_S);
+    }
+
+    function scale_math_glue (state, muglue) {
+	// TTP 716.
+	var tmp_SS = nlib.x_over_n__SI_SS (state.mu_S, 0x10000);
+	var n_S = tmp_SS[0],
+	    f_S = tmp_SS[1];
+
+	if (f_S < nlib.Zero_S) {
+	    n_S -= 1;
+	    f_S += 0x10000;
+	}
+
+	var g = new Glue ();
+	g.amount_S = mu_mult__SSS_S (n_S, muglue.amount_S, f_S);
+
+	g.stretch_order = muglue.stretch_order;
+	if (g.stretch_order == 0)
+	    g.stretch_S = mu_mult__SSS_S (n_S, muglue.stretch_S, f_S);
+	else
+	    g.stretch_S = muglue.stretch_S;
+
+	g.shrink_order = muglue.shrink_order;
+	if (g.shrink_order == 0)
+	    g.shrink_S = mu_mult__SSS_S (n_S, muglue.shrink_S, f_S);
+	else
+	    g.shrink_S = muglue.shrink_S;
+
+	return g;
+    }
+
     ml.set_math_char = function mathlib_set_math_char (engine, ord, mathcode, cur_fam) {
 	// T:TP 1155.
 	if (mathcode >= 0x8000) {
@@ -1907,8 +1944,24 @@ var mathlib = (function mathlib_closure () {
 		// goto done_with_node:
 		process_atom = check_dimensions = remember_as_prev = false;
 		break;
-	    case LT_RULE:
 	    case LT_GLUE:
+		if (q.kind == BoxGlue.KIND_MATH) {
+		    q.kind = BoxGlue.KIND_REGULAR;
+		    q.amount = scale_math_glue (state, q.amount);
+		} else if (q.kind == BoxGlue.KIND_COND_MATH && state.style != MS_TEXT) {
+		    // Here too we grossly mutate the list, but we must. If we're in script
+		    // or scriptscript mode, and this is a cond_math glue, and the next
+		    // item is a glue or a kern: get rid of the next item.
+		    if (i < mlist.length - 1) {
+			var tmp = mlist[i+1];
+			if (tmp.ltype == LT_GLUE || tmp.ltype == LT_KERN)
+			    mlist.splice (i + 1, 1);
+		    }
+		}
+		// goto done_with_node:
+		process_atom = check_dimensions = remember_as_prev = false;
+		break;
+	    case LT_RULE:
 		throw new TexInternalError ('unimplemented not-quite-math %o', q);
 	    default:
 		throw new TexInternalError ('unrecognized math %o', q);

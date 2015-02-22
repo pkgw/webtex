@@ -52,7 +52,7 @@ large_fam(x)       -> x.large_fam
 left_delimiter(x)  -> x.left_delimiter
 link(x)            -> x.next
 math_type(x)       -> x.math_type
-mu_mult(x)         -> mu_mult (x, f)
+mu_mult(x)         -> mu_mult (n, x, f)
 new_hlist(x)       -> x.new_hlist
 nucleus(x)         -> x.nucleus
 null               -> None
@@ -1064,11 +1064,11 @@ def math_kern (p, m): #<717>
             n -= 1
             f += 0x10000
 
-        p.width = mu_mult (p.width, f)
+        p.width = mu_mult (n, p.width, f)
         p.subtype = Explicit
 
 
-def mu_mult (x, f): #<716>
+def mu_mult (n, x, f): #<716>
     return nx_plus_y (n, x, xn_over_d (x, f, 0x10000))
 
 
@@ -1084,15 +1084,15 @@ def math_glue (g, m):
         f += 0x10000
 
     p = Node ()
-    p.width = mu_mult (g.width, f)
+    p.width = mu_mult (n, g.width, f)
     p.stretch_order = g.stretch_order
     if p.stretch_order == Normal:
-        p.stretch = mu_mult (g.stretch, f)
+        p.stretch = mu_mult (n, g.stretch, f)
     else:
         p.stretch = g.stretch
     p.shrink_order = g.shrink_order
     if p.shrink_order == Normal:
-        p.shrink = mu_mult (g.shrink, f)
+        p.shrink = mu_mult (n, g.shrink, f)
     else:
         p.shrink = g.shrink
     return p
