@@ -4,20 +4,20 @@
 // The implementations in this file don't get bound to specific
 // control sequences by default.
 
-var CommandUnimplPrimitive = (function CommandUnimplPrimitive_closure () {
-    function CommandUnimplPrimitive (name) {
+var UnimplementedCommand = (function UnimplementedCommand_closure () {
+    function UnimplementedCommand (name) {
 	Command.call (this);
 	this.name = name;
     }
 
-    inherit (CommandUnimplPrimitive, Command);
-    var proto = CommandUnimplPrimitive.prototype;
+    inherit (UnimplementedCommand, Command);
+    var proto = UnimplementedCommand.prototype;
 
-    proto.invoke = function CommandUnimplPrimitive_invoke (engine) {
+    proto.invoke = function UnimplementedCommand_invoke (engine) {
 	throw new TexRuntimeError ('unimplemented primitive \\%s', this.name);
     };
 
-    return CommandUnimplPrimitive;
+    return UnimplementedCommand;
 })();
 
 

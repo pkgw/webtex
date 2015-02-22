@@ -14,7 +14,7 @@ function fill_cseq_commands (engine) {
 	var cmd = null;
 
 	if (!registry.hasOwnProperty (escname))
-	    cmd = new CommandUnimplPrimitive (name);
+	    cmd = new UnimplementedCommand (name);
 	else {
 	    var val = registry[escname];
 
