@@ -1082,17 +1082,19 @@ var Engine = (function Engine_closure () {
 	var nonfrac_I = null;
 
 	var vt = tok.to_cmd (this).get_valtype ();
+	var ok_dimen = false;
 
-	if (vt == T_DIMEN || vt == T_GLUE) {
+	if (mumode)
+	    ok_dimen = (vt == T_MUGLUE);
+	else
+	    ok_dimen = (vt == T_DIMEN || vt == T_GLUE);
+
+	if (ok_dimen) {
+	    // TTP 449
 	    var result_S = tok.to_cmd (this).as_scaled__S (this);
-
-	    if (mumode) {
-		throw new TexRuntimeError ('not implemented');
-	    } else {
-		if (infmode)
-		    return [negfactor_I * result_S, 0];
-		return negfactor_I * result_S;
-	    }
+	    if (infmode)
+		return [negfactor_I * result_S, 0];
+	    return negfactor_I * result_S;
 	} else if (vt == T_INT) {
 	    nonfrac_I = tok.to_cmd (this).as_int__I (this);
 	} else if (vt != null) {

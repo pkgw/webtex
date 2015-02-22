@@ -622,14 +622,35 @@ var mathlib = (function mathlib_closure () {
 
 
     register_command ('mkern', function cmd_mkern (engine) {
-	throw new TexInternalError ('must implement math_kern correctly in math.js');
+	if (engine.absmode () != M_DMATH)
+	    throw new TexRuntimeError ('\\mkern may only be used in math mode');
+
+	var amount_S = engine.scan_dimen__O_S (true);
+	engine.trace ('mkern of %S (mu)', amount_S);
+	engine.accum (new Kern (amount_S, Kern.KIND_MATH));
     });
 
+    register_command ('mskip', function cmd_mskip (engine) {
+	if (engine.absmode () != M_DMATH)
+	    throw new TexRuntimeError ('\\mskip may only be used in math mode');
+
+	var g = engine.scan_glue (true);
+	engine.trace ('mskip of %o', g);
+	engine.accum (new BoxGlue (g, BoxGlue.KIND_MATH));
+    });
+
+    register_command ('nonscript', function cmd_nonscript (engine) {
+	// TTP 1171.
+	engine.trace ('nonscript');
+	if (engine.absmode () != M_DMATH)
+	    throw new TexRuntimeError ('\\nonscript may only be used in math mode');
+
+	engine.accum (new BoxGlue (new Glue (), BoxGlue.KIND_COND_MATH));
+    });
 
     register_command ('vcenter', function cmd_vcenter (engine) {
 	engine.trace ('vcenter');
-
-	if (engine.mode () != M_MATH && engine.mode () != M_DMATH)
+	if (engine.absmode () != M_DMATH)
 	    throw new TexRuntimeError ('\\vcenter may only be used in math mode');
 
 	// XXX this is scan_spec (TTP:645), which is duplicated in

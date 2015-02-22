@@ -143,9 +143,10 @@ var Mark = (function Mark_closure () {
 
 
 var Kern = (function Kern_closure () {
-    function Kern (amount_S) {
+    function Kern (amount_S, kind) {
 	this.ltype = LT_KERN;
 	this.amount_S = amount_S;
+	this.kind = kind || Kern.KIND_REGULAR;
 
 	if (typeof this.amount_S !== 'number')
 	    throw new TexInternalError ('QQQ %o', amount_S);
@@ -154,8 +155,13 @@ var Kern = (function Kern_closure () {
     inherit (Kern, Listable);
     var proto = Kern.prototype;
 
+    Kern.KIND_REGULAR = 0;
+    Kern.KIND_MATH = 1;
+
+    var kinds = ['regular', 'math'];
+
     proto._uisummary = function Kern__uisummary () {
-	return format ('Kern %S', this.amount_S);
+	return format ('Kern %S (%s)', this.amount_S, kinds[this.kind]);
     };
 
     return Kern;
@@ -200,19 +206,26 @@ var Penalty = (function Penalty_closure () {
 
 
 var BoxGlue = (function BoxGlue_closure () {
-    function BoxGlue (amount) {
+    function BoxGlue (amount, kind) {
 	if (!(amount instanceof Glue))
 	    throw new TexInternalError ('BoxGlue needs glue; got %o', amount);
 
 	this.ltype = LT_GLUE;
 	this.amount = amount;
+	this.kind = kind || BoxGlue.KIND_REGULAR;
     }
 
     inherit (BoxGlue, Listable);
     var proto = BoxGlue.prototype;
 
+    BoxGlue.KIND_REGULAR = 0;
+    BoxGlue.KIND_MATH = 1;
+    BoxGlue.KIND_COND_MATH = 2;
+
+    var kinds = ['regular', 'math', 'conditional math'];
+
     proto._uisummary = function BoxGlue__uisummary () {
-	return 'BoxGlue ' + this.amount;
+	return format ('BoxGlue %o (%s)', this.amount, kinds[this.kind]);
     };
 
     return BoxGlue;
