@@ -506,7 +506,7 @@ var GivenMathcharCommand = (function GivenMathcharCommand_closure () {
     };
 
     proto.invoke = function GivenMathcharCommand_invoke (engine) {
-	if (engine.mode () != M_MATH && engine.mode () != M_DMATH)
+	if (engine.absmode () != M_DMATH)
 	    throw new TexRuntimeError ('cannot insert math character in non-math context');
 
 	engine.trace ('given-math %x', this.mathchar);

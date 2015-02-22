@@ -345,7 +345,7 @@ var mathlib = (function mathlib_closure () {
 
 	var ord = mathcode & 0xFF;
 	var fam = (mathcode >> 8) & 0xF;
-	var ltype = ((mathcode >> 13) & 0x7) + MT_ORD;
+	var ltype = ((mathcode >> 12) & 0x7) + MT_ORD;
 
 	if (mathcode >= 0x7000) {
 	    if (cur_fam >= 0 && cur_fam < 16)
