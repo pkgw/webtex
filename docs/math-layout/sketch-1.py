@@ -657,7 +657,7 @@ def make_math_accent (q): #<738>
         else:
             delta = f.x_height
 
-        if q.subscr.math_type != Empty or q.subscr.math_type != Empty:
+        if q.supscr.math_type != Empty or q.subscr.math_type != Empty:
             if q.nucleus.math_type == MathChar:
                 #<742>
                 x = Node ()
