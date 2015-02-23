@@ -1,4 +1,4 @@
-// Copyright 2014 Peter Williams and collaborators.
+// Copyright 2014-2015 Peter Williams and collaborators.
 // Licensed under the MIT license. See LICENSE.md for details.
 
 // Fonts and related things.
@@ -177,6 +177,10 @@ var TfmMetrics = (function TfmMetrics_closure () {
 	for (var i = 0; i < num_ics; i++)
 	    ics_S[i] = this.fw2s__N_S (dv.getUint32 (ic_ofs + 4 * i, false));
 
+	this.kerns_S = new Array (num_kns);
+	for (var i = 0; i < num_kns; i++)
+	    this.kerns_S[i] = this.fw2s__N_S (dv.getUint32 (kt_ofs + 4 * i, false));
+
 	// Read in other necessary tables.
 
 	this.ligkern = new Array (num_lks);
@@ -254,12 +258,24 @@ var TfmMetrics = (function TfmMetrics_closure () {
 	return this.ord_rembytes[ord];
     };
 
+    proto.width__O_S = function TfmMetrics_width__O_S (ord) {
+	return this.ord_widths_S[ord];
+    };
+
     proto.height_plus_depth__O_S = function TfmMetrics_height_plus_depth__O_S (ord) {
 	return this.ord_heights_S[ord] + this.ord_depths_S[ord];
     };
 
     proto.italic_correction__O_S = function TfmMetrics_italic_correction__O_S (ord) {
 	return this.ord_ics_S[ord];
+    };
+
+    proto.kern__O_S = function TfmMetrics_kern__O_S (ligkerndword) {
+	// TTP 545. op_byte > 128 implies a kern step, indexing into the kern
+	// table thusly:
+	var op_byte = (ligkerndword >> 8) & 0xFF;
+	var rem_byte = ligkerndword & 0xFF;
+	return this.kerns_S[0xFF * (op_byte - 0x80) + rem_byte ];
     };
 
     proto.box_for_ord = function TfmMetrics_box_for_ord (font, ord) {
