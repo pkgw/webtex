@@ -1,4 +1,4 @@
-// Copyright 2014 Peter Williams and collaborators.
+// Copyright 2014-2015 Peter Williams and collaborators.
 // Licensed under the MIT license. See LICENSE.md for details.
 
 // Math layout.
@@ -329,6 +329,24 @@ var mathlib = (function mathlib_closure () {
 	    g.shrink_S = muglue.shrink_S;
 
 	return g;
+    }
+
+    // Dealing with individual math chars
+
+    function char_to_box (font, ord) {
+	// TTP 709, "char_box".
+
+	var c = font.box_for_ord (ord);
+	c.width_S += font.italic_correction__O_S (ord);
+
+	var b = new HBox ();
+	b.list = [c];
+	b.width_S = c.width_S;
+	b.height_S = c.height_S;
+	b.depth_S = c.depth_S;
+	b.glue_state = 1; // pretend that we've been glued
+	b.glue_set = 1.;
+	return b
     }
 
     ml.set_math_char = function mathlib_set_math_char (engine, ord, mathcode, cur_fam) {
@@ -1467,9 +1485,7 @@ var mathlib = (function mathlib_closure () {
 	    b.width_S = state.engine.get_parameter__O_S ('nulldelimiterspace');
 	} else if (!f.get_metrics ().is_extensible (c)) {
 	    state.engine.trace ('making single-char delimiter font=%o chr=%c', f, c);
-	    b = new HBox ();
-	    b.list = [f.box_for_ord (c)];
-	    b.set_glue__OOS (state.engine, false, nlib.Zero_S);
+	    b = char_to_box (f, c);
 	} else {
 	    // Need to build a giant delimiter manually :-(
 	    state.engine.trace ('making extensible delimiter');
