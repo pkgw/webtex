@@ -24,7 +24,8 @@ var Boxlike = (function Boxlike_closure () {
     var proto = Boxlike.prototype;
 
     proto._uishape = function Boxlike__uishape () {
-	return format ('w=%S h=%S d=%S', this.width_S, this.height_S, this.depth_S);
+	return format ('w=%S h=%S d=%S s=%S', this.width_S, this.height_S,
+		       this.depth_S, this.shift_amount_S);
     };
 
     proto._copyto = function Boxlike__copyto (other) {
