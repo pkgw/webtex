@@ -938,7 +938,8 @@ var VBox = (function VBox_closure () {
     });
 
 
-    // Shifting boxes. Sign conventions: TTP 185.
+    // Shifting boxes. Sign conventions: TTP 135. Positive shifts result in
+    // lowering or rightward motion.
 
     function shift_a_box (engine, desc, negate) {
 	var amount_S = engine.scan_dimen__O_S (false);
