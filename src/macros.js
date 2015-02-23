@@ -301,8 +301,12 @@
 			}
 		    }
 
-		    tok.to_cmd (engine).invoke (engine);
-		    continue;
+		    // e-TeX: \protected macros aren't expanded here.
+		    var cmd = tok.to_cmd (engine);
+		    if (!(cmd instanceof MacroCommand) || !(cmd.flags & Prefixing.FLAG_PROTECTED)) {
+			cmd.invoke (engine);
+			continue;
+		    }
 		}
 	    }
 

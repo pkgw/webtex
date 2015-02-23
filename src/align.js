@@ -1,4 +1,4 @@
-// Copyright 2014 Peter Williams and collaborators.
+// Copyright 2014-2015 Peter Williams and collaborators.
 // Licensed under the MIT license. See LICENSE.md for details.
 
 // Implementing \halign and \valign.
@@ -246,7 +246,10 @@
 	while (true) {
 	    engine.align_state = 1000000;
 
-	    var tok = engine.chomp_spaces ();
+	    // Here the 'true' signifies that we shouldn't expand \protected
+	    // macros, as per e-TeX's manual. Presumably there's a good but
+	    // subtle reason why ...
+	    var tok = engine.chomp_spaces (true);
 
 	    if (tok.is_cmd (engine, 'noalign')) {
 		engine.scan_left_brace ();

@@ -1,4 +1,4 @@
-// Copyright 2014 Peter Williams and collaborators.
+// Copyright 2014-2015 Peter Williams and collaborators.
 // Licensed under the MIT license. See LICENSE.md for details.
 
 // The engine that holds all TeX state and drives processing.
@@ -801,7 +801,11 @@ var Engine = (function Engine_closure () {
 	return tok;
     };
 
-    proto.next_x_tok = function Engine_next_x_tok () {
+    proto.next_x_tok = function Engine_next_x_tok (protect_macros) {
+	// The macro protection stuff is needed to honor \protected in
+	// alignment lookahead, as per e-TeX's manual.
+	protect_macros = protect_macros || false;
+
 	while (true) {
 	    var tok = this.next_tok ();
 	    if (tok === EOF)
@@ -816,6 +820,10 @@ var Engine = (function Engine_closure () {
 		this.trace ('noexpand: %o', tok);
 		return tok;
 	    }
+
+	    if (protect_macros && cmd.flags & Prefixing.FLAG_PROTECTED)
+		// Above we assume that cmd.flags is undefined for non-macros.
+		return tok;
 
 	    // The core source of recursion:
 	    cmd.invoke (this);
@@ -857,10 +865,12 @@ var Engine = (function Engine_closure () {
 	}
     }
 
-    proto.chomp_spaces = function Engine_chomp_spaces () {
+    proto.chomp_spaces = function Engine_chomp_spaces (protect_macros) {
+	protect_macros = protect_macros || false;
+
 	// TTP 406.
 	while (1) {
-	    var tok = this.next_x_tok ();
+	    var tok = this.next_x_tok (protect_macros);
 	    if (!tok.is_space (this))
 		return tok;
 	}
@@ -1368,8 +1378,12 @@ var Engine = (function Engine_closure () {
 			continue;
 		    }
 
-		    cmd.invoke (this);
-		    continue;
+		    // e-TeX: \protected macros aren't expanded here. We assume that
+		    // for non-macros, cmd.flags is undefined.
+		    if (!(cmd.flags & Prefixing.FLAG_PROTECTED)) {
+			cmd.invoke (this);
+			continue;
+		    }
 		}
 	    }
 
