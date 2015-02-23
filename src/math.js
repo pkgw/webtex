@@ -2011,7 +2011,7 @@ var mathlib = (function mathlib_closure () {
 		} else if (q.nuc == null) {
 		    p = null;
 		} else if (q.nuc instanceof ListBox) {
-		    p = q.nuc.list;
+		    p = [q.nuc];
 		} else if (q.nuc instanceof Array) {
 		    var sublist = mlist_to_hlist (engine, q.nuc, state.style,
 						  state.cramped, false);
