@@ -302,6 +302,23 @@ var mathlib = (function mathlib_closure () {
 	return nlib.nx_plus_y__ISS_S (n_S, x_S, tmp_S);
     }
 
+    function scale_math_kern (state, p) {
+	// TTP 717, "math_kern".
+	if (p.kind == Kern.KIND_MATH) {
+	    var tmp_SS = nlib.x_over_n__SI_SS (state.mu_S, 0x10000);
+	    var n_S = tmp_SS[0],
+		f_S = tmp_SS[1];
+
+	    if (f_S < nlib.Zero_S) {
+		n_S -= 1;
+		f_S += 0x10000;
+	    }
+
+	    p.amount_S = mu_mult__SSS_S (n_S, p.amount_S, f_S);
+	    p.kind = Kern.KIND_EXPLICIT;
+	}
+    }
+
     function scale_math_glue (state, muglue) {
 	// TTP 716.
 	var tmp_SS = nlib.x_over_n__SI_SS (state.mu_S, 0x10000);
@@ -1330,11 +1347,6 @@ var mathlib = (function mathlib_closure () {
     }) ();
 
 
-    function math_kern (state, p) {
-	// XXX TODO: if this is a special \mkern kern, we need to scale its
-	// size by the current math unit (stored in 'state'). See T:TP 717.
-    }
-
     function make_ord (state, mlist, i) {
 	var q = mlist[i];
 
@@ -2092,7 +2104,7 @@ var mathlib = (function mathlib_closure () {
 		process_atom = check_dimensions = remember_as_prev = false;
 		break;
 	    case LT_KERN:
-		math_kern (state, q);
+		scale_math_kern (state, q);
 		// goto done_with_node:
 		process_atom = check_dimensions = remember_as_prev = false;
 		break;

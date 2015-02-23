@@ -1,4 +1,4 @@
-// Copyright 2014 Peter Williams and collaborators.
+// Copyright 2014-2015 Peter Williams and collaborators.
 // Licensed under the MIT license. See LICENSE.md for details.
 
 // Things that can go in lists = Listables.
@@ -147,7 +147,7 @@ var Kern = (function Kern_closure () {
     function Kern (amount_S, kind) {
 	this.ltype = LT_KERN;
 	this.amount_S = amount_S;
-	this.kind = kind || Kern.KIND_REGULAR;
+	this.kind = kind || Kern.KIND_NORMAL;
 
 	if (typeof this.amount_S !== 'number')
 	    throw new TexInternalError ('QQQ %o', amount_S);
@@ -156,10 +156,12 @@ var Kern = (function Kern_closure () {
     inherit (Kern, Listable);
     var proto = Kern.prototype;
 
-    Kern.KIND_REGULAR = 0;
-    Kern.KIND_MATH = 1;
+    Kern.KIND_NORMAL = 0; // TTP 155.
+    Kern.KIND_EXPLICIT = 1;
+    Kern.KIND_ACCENT = 2;
+    Kern.KIND_MATH = 3;
 
-    var kinds = ['regular', 'math'];
+    var kinds = ['normal', 'explicit', 'accent', 'math'];
 
     proto._uisummary = function Kern__uisummary () {
 	return format ('Kern %S (%s)', this.amount_S, kinds[this.kind]);
