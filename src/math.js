@@ -399,6 +399,7 @@ var mathlib = (function mathlib_closure () {
 
     function finish_math_list (engine, trailing_right_node) {
 	// TTP 1184 "fin_mlist"
+	// finish_math_list causes a mode-unnest.
 	var umn = engine.get_unfinished_math_node ();
 	var retval = engine.leave_mode ();
 
@@ -572,7 +573,7 @@ var mathlib = (function mathlib_closure () {
 
 	    var eqlist = ml.mlist_to_hlist (engine, mlist, MS_TEXT, false, false);
 	    eqno_box = hpack_natural (engine, eqlist);
-	    // XXX recover whether we're \eqno or \leqno
+	    engine.unnest_eqtb ();
 
 	    mlist = finish_math_list (engine, null);
 	    first_mode = M_DMATH;
@@ -735,6 +736,7 @@ var mathlib = (function mathlib_closure () {
 
     engine_proto.register_method ('enter_math', function Engine_enter_math (mode, is_outer) {
 	// TTP 1136: "push_math", more or less
+	// enter_math causes an eqtb-nest and a mode-nest.
 	this.enter_mode (mode);
 	this.trace ('<is_outer=%b>', is_outer);
 	this.nest_eqtb ();
@@ -1079,6 +1081,7 @@ var mathlib = (function mathlib_closure () {
 
     function handle_eqno (engine, cmdname, is_left) {
 	// TTP 1140 ; TTP 1142 "start_eq_no"
+	// handle_eqno causes an eqtb-nest and a mode-nest.
 	engine.trace (cmdname);
 	if (engine.mode () != M_DMATH)
 	    throw new TexRuntimeError ('\\%s must be used in display math mode', cmdname);
