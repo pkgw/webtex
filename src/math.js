@@ -1079,6 +1079,133 @@ var mathlib = (function mathlib_closure () {
 	handle_eqno (engine, 'leqno', true);
     });
 
+    // Accents
+
+    function make_accent (state, q) {
+	// TTP 738, "make_math_accent". XXX: we're implementing TTP 722
+	// ("fetch"); should be centralized? Also we're not expressing the
+	// fetch() logic faithfully.
+
+	var c = q.accent_ord;
+	var f = state.font (q.accent_fam);
+	var m = f.get_metrics ();
+
+	if (!m.has_ord (c))
+	    // XXX: recover
+	    throw new TexRuntimeError ('missing character %c in font %o (fam %d)',
+				       c, f, q.accent_fam);
+
+	// TTP 741
+	var s_S = nlib.Zero_S;
+
+	if (q.nuc instanceof MathChar) {
+	    var nuc_font = state.font (q.nuc.fam);
+	    var nuc_m = nuc_font.get_metrics ();
+
+	    if (nuc_m.is_lig (q.nuc.ord)) {
+		var lk = nuc_m.ligkern;
+		var ofs = nuc_m.rembyte (q.nuc.ord);
+		var data = lk[ofs];
+
+		if (((data >> 24) & 0xFF) > 0x80) { // skip_byte > stop_flag?
+		    ofs = 256 * ((data >> 8) & 0xFF) + (data & 0xFF); // lig_kern_restart: op_byte, rem_byte
+		    data = lk[ofs];
+		}
+
+		while (true) {
+		    if (((data >> 16) & 0xFF) == nuc_font.skewchar) { // next_char == skew_char?
+			var op = (data >> 8) & 0xFF;
+			if (op >= 0x80) { // op_byte >= kern_flag?
+			    if (((data >> 24) & 0xFF) <= 0x80) // skip_byte <= stop_flag?
+				s_S = nuc_m.kern__O_S (data);
+			}
+			break;
+		    }
+
+		    if (((data >> 24) & 0xFF) >= 0x80) // skip_byte >= stop_flag?
+			break;
+
+		    ofs += ((data >> 24) & 0xFF) + 1; // ofs += skip_byte + 1
+		    data = lk[ofs];
+		}
+	    }
+	}
+
+	var x = clean_box (state.to_cramped (), q.nuc);
+	var w_S = x.width_S;
+	var h_S = x.height_S;
+
+	while (true) {
+	    // TTP 740.
+	    if (!m.is_list (c)) // char_tag
+		break;
+
+	    var next = m.rembyte (c);
+	    if (!m.has_ord (next))
+		break;
+	    if (m.width__O_S (next) > w_S)
+		break;
+
+	    c = next;
+	}
+
+	var delta_S;
+
+	if (h_S < f.get_dimen__N_S (5)) // x-height
+	    delta_S = h_S;
+	else
+	    delta_S = f.get_dimen__N_S (5); // x-height
+
+	if ((q.sup != null || q.sub != null) && q.nuc instanceof MathChar) {
+	    // TTP 742
+	    var tmp = new AtomNode (MT_ORD);
+	    tmp.nuc = q.nuc;
+	    tmp.sup = q.sup;
+	    tmp.sub = q.sub;
+	    q.sub = q.sup = null;
+	    q.nuc = clean_box (state, [tmp]);
+	    delta_S += q.nuc.height_S - h_S;
+	    h_S = q.nuc.height_S;
+	}
+
+	var y = char_to_box (f, c);
+	y.shift_amount_S = s_S + half (w_S - y.width_S);
+	y.width_S = nlib.Zero_S;
+
+	y = vpack_natural (state.engine, [y, new Kern (-delta_S), x]);
+	y.width_S = x.width_S;
+
+	if (y.height_S < h_S) {
+	    y.list = [new Kern (h_S - y.height_S)].concat (y.list);
+	    y.height_S = h_S;
+	}
+
+	q.nuc = y;
+    }
+
+    register_command ('mathaccent', function cmd_mathaccent (engine) {
+	// TTP 1165, "math_ac".
+	if (engine.absmode () != M_DMATH)
+	    throw new TexRuntimeError ('\\mathaccent must be used in math mode');
+
+	var acc = new AccentNode ();
+	var c = engine.scan_int_15bit__I ();
+	var fam = engine.get_parameter__O_I ('fam');
+
+	acc.accent_ord = c & 0xFF;
+
+	// "cur_val >= var_code && fam_in_range":
+	if (c >= 0x7000 && fam >= 0 && fam < 16)
+	    acc.accent_fam = fam;
+	else
+	    acc.accent_fam = (c >> 8) & 0xF;
+
+	engine.trace ('mathaccent %x -> %o', c, acc);
+	engine.accum (acc);
+	ml.scan_math (engine, function (engine, subitem) {
+	    acc.nuc = subitem;
+	});
+    });
 
     // Rendering of math lists into horizontal lists
 
@@ -1933,8 +2060,10 @@ var mathlib = (function mathlib_closure () {
 	    case MT_OPEN:
 	    case MT_INNER:
 		break;
-	    case MT_UNDER:
 	    case MT_ACCENT:
+		make_accent (state, q);
+		break;
+	    case MT_UNDER:
 		throw new TexInternalError ('unimplemented math %o', q);
 	    case MT_SCHOICE:
 		if (state.style == MS_DISPLAY)
