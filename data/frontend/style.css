@@ -64,7 +64,10 @@
 }
 
 
-/* Width settings for standard 800px-wide column setup. */
+/* Width settings for standard 800px-wide column setup. Basic measurements
+ * are 30 px of space on the left, a column width of 600px, 60px of spacing,
+ * and 110px on the right for marginalia.
+ */
 
 .webtex-800px {
   width: 800px;
@@ -79,6 +82,14 @@
 .webtex-800px h5 {
   width: 600px;
   padding-left: 30px;
+}
+
+.webtex-800px h1 p,
+.webtex-800px h2 p,
+.webtex-800px h3 p,
+.webtex-800px h4 p {
+  /* No double-padding if <p> is in <h1> */
+  padding-left: 0px;
 }
 
 .webtex-800px aside.wt-footnote {
