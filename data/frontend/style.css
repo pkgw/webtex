@@ -128,8 +128,8 @@
 }
 
 /* Width settings for standard 800px-wide column setup. Basic measurements
- * are 30 px of space on the left, a column width of 600px, 60px of spacing,
- * and 110px on the right for marginalia.
+ * are 30px of space on the left, a column width of 600px, 30px of space,
+ * 110px on the right for marginalia, then 30px more padding.
  */
 
 .webtex-800px {
