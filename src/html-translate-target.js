@@ -141,13 +141,9 @@ var HTMLTranslateTarget = (function HTMLTranslateTarget_closure () {
 	    j_stack[0]++; // This item is dealt with.
 
 	    if (item instanceof ListBox) {
-		if (item.render_as_canvas) {
-		    this.maybe_push (this.render_box_as_canvas (engine, item, last_font));
-		} else {
-		    // Recurse into this box.
-		    box_stack.unshift (item);
-		    j_stack.unshift (0);
-		}
+		// Recurse into this box.
+		box_stack.unshift (item);
+		j_stack.unshift (0);
 	    } else if (item instanceof Character) {
 		if (item.font.enc_unicode == null)
 		    throw new TexRuntimeError ('cannot ship out character in unsupported font %s',

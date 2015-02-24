@@ -1,4 +1,4 @@
-// Copyright 2014 Peter Williams and collaborators.
+// Copyright 2014-2015 Peter Williams and collaborators.
 // Licensed under the MIT license. See LICENSE.md for details.
 
 // Horizontal and vertical boxes, and the many things that can be done with them.
@@ -16,7 +16,6 @@ var ListBox = (function ListBox_closure () {
 	this.list = [];
 	this.glue_state = 0; // 0 -> glue not set
 	this.glue_set = null;
-	this.render_as_canvas = false;
     }
 
     inherit (ListBox, Boxlike);
@@ -41,7 +40,6 @@ var ListBox = (function ListBox_closure () {
 	other.btype = this.btype;
 	other.glue_state = this.glue_state;
 	other.glue_set = this.glue_set;
-	other.render_as_canvas = this.render_as_canvas;
 	other.list = this.list.slice ();
     };
 

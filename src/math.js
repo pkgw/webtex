@@ -582,23 +582,13 @@ var mathlib = (function mathlib_closure () {
 	if (first_mode == M_MATH) {
 	    // TTP 1196. Text-mode math.
 	    var ms_S = engine.get_parameter__O_S ('mathsurround');
+
 	    engine.accum (new MathDelim (ms_S, false));
-
-	    var hlist = ml.mlist_to_hlist (engine, mlist, MS_TEXT, false, false);
-	    var box = new HBox ();
-	    box.list = hlist;
-	    box.set_glue__OOS (engine, false, nlib.Zero_S);
-
-	    // XXX: we are appending the equation as a single box in canvas
-	    // mode, rather than splicing in the list of boxes with canvas
-	    // delimiters. This may break code that pokes back into the list
-	    // of items after the math is rendered.
-	    box.render_as_canvas = true;
-	    engine.trace ('rendered math: %U', box);
 	    engine.accum (new CanvasControl (false));
-	    engine.accum (box);
+	    var hlist = ml.mlist_to_hlist (engine, mlist, MS_TEXT, false, false);
+	    engine.trace ('rendered non-display math: %L', hlist);
+	    engine.accum_list (hlist);
 	    engine.accum (new CanvasControl (true));
-
 	    engine.accum (new MathDelim (ms_S, true));
 
 	    engine.set_spacefactor (1000);
