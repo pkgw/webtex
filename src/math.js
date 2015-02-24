@@ -1684,23 +1684,23 @@ var mathlib = (function mathlib_closure () {
 	return b;
     }
 
-    function make_op (state, q) {
-	var delta;
+    function make_op__OO_S (state, q) {
+	var delta_S;
 
 	if (q.limtype == LIMTYPE_NORMAL && state.style == MS_DISPLAY)
 	    q.limtype = LIMTYPE_LIMITS;
 
 	if (!(q.nuc instanceof MathChar))
-	    delta = 0;
+	    delta_S = nlib.Zero_S;
 	else {
 	    // XXX skipping list-tag char stuff
 	    var f = state.font (q.nuc.fam);
 	    var m = f.get_metrics ();
-	    delta = m.italic_correction__O_S (q.nuc.ord);
+	    delta_S = m.italic_correction__O_S (q.nuc.ord);
 	    var x = clean_box (state, q.nuc);
 
 	    if (q.sub != null && q.limtype != LIMTYPE_LIMITS)
-		x.width_S -= delta; // remove italic correction
+		x.width_S -= delta_S; // remove italic correction
 
 	    x.shift_amount_S = half ((x.height_S - x.depth_S)
 				     - state.sym_dimen__NN_S (state.size, SymDimens.AxisHeight));
@@ -1708,7 +1708,7 @@ var mathlib = (function mathlib_closure () {
 	}
 
 	if (q.limtype != LIMTYPE_LIMITS)
-	    return delta;
+	    return delta_S;
 
 	var x = clean_box (state.superscript (), q.sup);
 	var y = clean_box (state, q.nuc);
@@ -1719,7 +1719,7 @@ var mathlib = (function mathlib_closure () {
 	x = rebox__OOS (state.engine, x, v.width_S);
 	y = rebox__OOS (state.engine, y, v.width_S);
 	z = rebox__OOS (state.engine, z, v.width_S);
-	x.shift_amount_S = half (delta);
+	x.shift_amount_S = half (delta_S);
 	z.shift_amount_S = -x.shift_amount_S;
 	v.height_S = y.height_S;
 	v.depth_S = y.height_S;
@@ -1751,7 +1751,7 @@ var mathlib = (function mathlib_closure () {
 	}
 
 	q.new_hlist = [v];
-	return delta;
+	return delta_S;
     }
 
     function make_radical (state, q) {
@@ -1881,7 +1881,7 @@ var mathlib = (function mathlib_closure () {
 	q.new_hlist = [hpack_natural (state.engine, [x, v, z])];
     }
 
-    function make_scripts (engine, state, q, delta) {
+    function make_scripts__OOOS (engine, state, q, delta_S) {
 	// T:TP 756
 	var p = q.new_hlist;
 	var shift_up = 0;
@@ -1944,7 +1944,7 @@ var mathlib = (function mathlib_closure () {
 		    }
 		}
 
-		x.shift_amount_S = delta;
+		x.shift_amount_S = delta_S;
 		var k = new Kern ((shift_up - x.depth_S) -
 				  (y.height_S - shift_down));
 		x = vpack_natural ([x, k, y]);
@@ -2036,7 +2036,7 @@ var mathlib = (function mathlib_closure () {
 	state.update_sizes ();
 
 	while (i < mlist.length) {
-	    var delta = 0;
+	    var delta_S = nlib.Zero_S;
 	    var q = mlist[i];
 	    var p = null;
 	    var process_atom = true; // gotos to "check_dimensions",
@@ -2087,7 +2087,7 @@ var mathlib = (function mathlib_closure () {
 		make_ord (state, mlist, i);
 		break;
 	    case MT_OP:
-		delta = make_op (state, q);
+		delta_S = make_op__OO_S (state, q);
 		break;
 	    case MT_RADICAL:
 		make_radical (state, q);
@@ -2184,13 +2184,13 @@ var mathlib = (function mathlib_closure () {
 				     q.nuc.fam, q.nuc.ord);
 			p = null;
 		    } else {
-			delta = m.italic_correction__O_S (q.nuc.ord);
+			delta_S = m.italic_correction__O_S (q.nuc.ord);
 			p = [f.box_for_ord (q.nuc.ord)];
 			if (q.nuc instanceof MathTextChar && f.get_dimen__N_S (2) != 0)
-			    delta = 0;
-			if (q.sub == null && delta != 0) {
-			    p.push (new Kern (delta));
-			    delta = 0;
+			    delta_S = nlib.Zero_S;
+			if (q.sub == null && delta_S != nlib.Zero_S) {
+			    p.push (new Kern (delta_S));
+			    delta_S = nlib.Zero_S;
 			}
 		    }
 		} else if (q.nuc == null) {
@@ -2208,7 +2208,7 @@ var mathlib = (function mathlib_closure () {
 		q.new_hlist = p;
 
 		if (q.sub != null || q.sup != null)
-		    make_scripts (engine, state, q, delta);
+		    make_scripts__OOOS (engine, state, q, delta_S);
 	    }
 
 	    if (check_dimensions) {
