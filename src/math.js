@@ -1984,6 +1984,47 @@ var mathlib = (function mathlib_closure () {
 	return MT_CLOSE;
     }
 
+    var math_spacing_data = ('02340001' + // 0: no space
+			     '22*40001' + // 1: conditional thin space
+			     '33**3**3' + // 2: thin space
+			     '44*04004' + // 3: conditional medium space
+			     '00*00000' + // 4: conditional thick space
+			     '02340001' + // *: not allowed
+			     '11*11111' +
+			     '12341011');
+
+    function compute_math_spacing (state, r_type, t) {
+	// TTP 766, partially.
+	if (r_type <= 0)
+	    return null;;
+
+	var code = math_spacing_data[8 * (r_type - MT_ORD) + (t - MT_ORD)];
+	if (code == '0')
+	    return null;
+
+	var gluename = null;
+
+	if (code == '1') {
+	    if (state.style > MS_TEXT)
+		return null; // script or scriptscript
+	    gluename = 'thinmuskip';
+	} else if (code == '2') {
+	    gluename = 'thinmuskip';
+	} else if (code == '3') {
+	    if (state.style > MS_TEXT)
+		return null;
+	    gluename = 'medmuskip';
+	} else if (code == '4') {
+	    if (state.style > MS_TEXT)
+		return null;
+	    gluename = 'thickmuskip';
+	} else {
+	    throw new TexInternalError ('cant-happen: %o %o %o', r_type, t, code);
+	}
+
+	return scale_math_glue (state, state.engine.get_parameter (T_MUGLUE, gluename));
+    }
+
     function mlist_to_hlist (engine, mlist, style, cramped, penalties) {
 	var state = new MathState (engine, style, cramped);
 	var i = 0;
@@ -2207,7 +2248,7 @@ var mathlib = (function mathlib_closure () {
 	    case MT_CLOSE:
 	    case MT_PUNCT:
 	    case MT_INNER:
-		t = q.type;
+		t = q.ltype;
 		break;
 	    case MT_BIN:
 		t = MT_BIN;
@@ -2259,7 +2300,9 @@ var mathlib = (function mathlib_closure () {
 	    }
 
 	    if (do_usual) {
-		// XXX: insert appropriate spacing
+		var g = compute_math_spacing (state, r_type, t);
+		if (g != null)
+		    outlist.push (new BoxGlue (g));
 
 		if (q.new_hlist != null)
 		    outlist = outlist.concat (q.new_hlist);
