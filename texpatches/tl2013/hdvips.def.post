@@ -1,0 +1,115 @@
+% -*- latex -*-
+% Copyright 2015 Peter Williams and collaborators.
+% Licensed under the MIT license. See LICENSE.md for details.
+
+% We look like plain TeX to hyperref, so hdvips.def ends up getting loaded as
+% the hyperlink driver. Here we override all of its settings with ones that
+% are better for webtex. Thise code is based off of hvtexhtml.def and
+% htex4ht.def.
+
+% For internal links we need to insert a hash sign in the href field. Because
+% of the way \special parsing works, "\#" doesn't help, because it's not
+% expandable (it's a \chardef). Easiest answer is a macro that expands to
+% #-as-a-letter:
+\catcode`\#=11%
+\def\wt@hyper@pound{#}%
+\catcode`\#=6%
+
+\def\hyper@link#1#2#3{% #1=link kind? #2=anchor name #3=display text
+  \Hy@VerboseLinkStart{#1}{#2}%
+  \leavevmode
+  \special{webtex start-tag a {href} {\wt@hyper@pound\HyperDestNameFilter{#2}} {class} {wt-href}}%
+  #3\Hy@xspace@end
+  \special{webtex end-tag a}%
+}%
+
+\def\@urltype{url}%
+
+\def\hyper@linkstart#1#2{% #1=link kind, #2=anchor name or URL
+  \Hy@VerboseLinkStart{#1}{#2}%
+  \def\Hy@tempa{#1}%
+  \ifx\Hy@tempa\@urltype
+    \special{webtex start-tag a {href} {#2} {class} {wt-href}}%
+  \else
+    \begingroup
+    \hyper@chars
+    \special{webtex start-tag a {href} {\wt@hyper@pound\HyperDestNameFilter{#2}} {class} {wt-href}}%
+    \endgroup
+  \fi
+}%
+
+\def\hyper@linkend{%
+  \special{webtex end-tag a}%
+}%
+
+\def\hyper@linkurl#1#2{% #1=display text, #2=URL
+  \leavevmode
+  \begingroup
+  \hyper@chars
+  \special{webtex start-tag a {href} {#2} {class} {wt-href}}%
+  #1\Hy@xspace@end
+  \special{webtex end-tag a}%
+  \endgroup
+}%
+
+\def\hyper@linkfile#1#2#3{%
+  \hyper@linkurl{#1}{#3} % correct?
+}%
+
+\Hy@WrapperDef\hyper@anchor#1{% #1=anchor name
+  \Hy@SaveLastskip
+  \Hy@VerboseAnchor{#1}%
+  \begingroup
+  \let\protect=\string
+  \special{webtex start-tag a {name} {\HyperDestNameFilter{#1}}}%
+  \endgroup
+  \Hy@activeanchortrue
+  \special{webtex end-tag a}%
+  \Hy@activeanchorfalse
+  \Hy@RestoreLastskip
+}%
+
+\Hy@WrapperDef\hyper@anchorstart#1{% #1=anchor name
+  \Hy@SaveLastskip
+  \Hy@VerboseAnchor{#1}%
+  \begingroup
+  \hyper@chars
+  \special{webtex start-tag a {name} {\HyperDestNameFilter{#1}}}%
+  \endgroup
+  \Hy@activeanchortrue
+}%
+
+\def\hyper@anchorend{%
+  \special{webtex end-tag a}%
+  \Hy@activeanchorfalse
+  \Hy@RestoreLastskip
+}%
+
+
+% Non-supported
+
+\def\@Form[#1]{%
+  \Hy@Message{Webtex does not support forms}%
+}
+\let\@endForm\ltx@empty
+\def\@Gauge[#1]#2#3#4{% parameters, label, minimum, maximum
+  \Hy@Message{Webtex does not support form gauges}%
+}
+\def\@TextField[#1]#2{% parameters, label
+  \Hy@Message{Webtex does not support form text fields}%
+}
+\def\@CheckBox[#1]#2{% parameters, label
+  \Hy@Message{Webtex does not support form checkboxes}%
+}
+\def\@ChoiceMenu[#1]#2#3{% parameters, label, choices
+  \Hy@Message{Webtex does not support form choice menus}%
+}
+\def\@PushButton[#1]#2{% parameters, label
+  \Hy@Message{Webtex does not support form pushbuttons}%
+}
+\def\@Reset[#1]#2{%
+  \Hy@Message{Webtex does not support forms}%
+}
+\def\@Submit[#1]#2{%
+  \Hy@Message{Webtex does not support forms}%
+}
