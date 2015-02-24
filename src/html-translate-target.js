@@ -1,4 +1,4 @@
-// Copyright 2014 Peter Williams and collaborators.
+// Copyright 2014-2015 Peter Williams and collaborators.
 // Licensed under the MIT license. See LICENSE.md for details.
 
 // This "translates" a TeX ListBox to a flattened JSON-type representation of
@@ -189,7 +189,7 @@ var HTMLTranslateTarget = (function HTMLTranslateTarget_closure () {
 
 		var canvas_level = 1;
 		var list = box_stack[0].list;
-		var j_start = j_stack[0] + 1;
+		var j_start = j_stack[0]; // note that we incremented j_stack[0] above
 		var j_end = j_start;
 
 		while (canvas_level > 0 && j_end < list.length) {
