@@ -173,7 +173,7 @@ var DOMRenderer = (function DOMRenderer_callback () {
 	}
 
 	var ctx = e.getContext ('2d');
-	ctx.fillStyle = 'rgba(0,0,0,0.8)';
+	ctx.fillStyle = '#000';
 	//ctx.strokeRect (0, 0, e.width, e.height); // XXX debugging
 
 	for (var j = 0; j < item.gl.length; j++) {
