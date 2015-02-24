@@ -1,28 +1,28 @@
 % -*- latex -*-
-% Copyright 2014 Peter Williams and collaborators.
+% Copyright 2014-2015 Peter Williams and collaborators.
 % Licensed under the MIT license. See LICENSE.md for details.
 
 % Clean up the title section. We don't uppercase it and we avoid informational
 % junk. We also defuse \\ to avoid unsightly explicit newlines.
-%
-\long\def\frontmatter@title@above{}
+
+\long\def\frontmatter@title@above{}%
 \renewcommand\title[2][]{%
   \def\@title{\special{webtex start-tag h1}{\let\\\relax #2}\special{webtex end-tag h1}}%
   \def\@shorttitle{#1}%
   \let\@AF@join\@title@join
-}
+}%
 \long\def\frontmatter@abstractheading{%
   \par
-}
-%
-%
+}%
+
+
 % Don't uppercase section names either.
-%
-\def\sec@upcase#1{#1}
-%
-%
+
+\def\sec@upcase#1{#1}%
+
+
 % Proper <figcaption> tags for figure captions.
-%
+
 \long\def\@makecaption#1#2{%
  \noindent\begin{minipage}{0.9999\linewidth} %% \noindent is needed because
    %% otherwise minipage + parindent does not fit into the line and spurious
@@ -36,11 +36,11 @@
    \fi
    \special{webtex end-tag figcaption}%
  \end{minipage}\par
- }
-%
-%
+ }%
+
+
 % <h2>..<h4> tags for sections
-%
+
 \def\section{%
     \if@firstsection\@firstsectionfalse
       \maketitle\setcounter{footnote}{\thefront@matter@foot@note}%
@@ -49,20 +49,140 @@
     \fi
     \def\webtex@@endsection{\special{webtex end-tag h2}}%
     \@startsection{section}{1}{\z@}{9pt plus 2pt minus 1pt}{4pt}{%
-      \special{webtex start-tag h2}\aftergroup\webtex@@endsection}}
+      \special{webtex start-tag h2}\aftergroup\webtex@@endsection}}%
 
 \def\subsection{%
   \def\webtex@@endsection{\special{webtex end-tag h3}}%
   \@startsection{subsection}{2}{\z@}{9pt plus 1pt minus 1pt}{4pt}%
-  {\special{webtex start-tag h3}\aftergroup\webtex@@endsection}}
+  {\special{webtex start-tag h3}\aftergroup\webtex@@endsection}}%
 
 \def\subsubsection{%
   \def\webtex@@endsection{\special{webtex end-tag h4}}%
   \@startsection{subsubsection}{3}{\z@}%
   {2ex plus 1ex minus .2ex}{1ex plus .2ex}%
-  {\special{webtex start-tag h4}\aftergroup\webtex@@endsection}}
+  {\special{webtex start-tag h4}\aftergroup\webtex@@endsection}}%
 
 
 % Disable \lastpagefootnotes
-\long\def\lastpagefootnotes{}
+
+\long\def\lastpagefootnotes{}%
 \let\lastpagefootnote=\lastpagefootnotes
+
+
+% Wrap Appendix title in <h2> tags and don't capitalize it. Sadly this is a
+% large command that we're copy/pasting just to tweak a few things.
+
+\renewenvironment{appendix}[0]{%
+  \vspace*{0pt plus 20pt minus 5pt}%
+  \if@two@col
+    \if@two@col@app\else
+      \onecolumngrid
+    \fi
+  \fi
+  \vskip 10pt plus 2pt minus 1pt
+  % begin patch:
+  \special{webtex start-tag h2}Appendix\special{webtex end-tag h2}%
+  % end patch
+  \nopagebreak\medskip\@nobreaktrue\def\ApjSectionpenalty{\@M}%
+  \@firstsectionfalse
+  \setcounter{section}{0}%
+  \setcounter{subsection}{0}%
+  \setcounter{equation}{0}%
+  \setcounter{remember@figure@num}{\c@figure}%
+  \setcounter{remember@table@num}{\c@table}%
+  \def\thesection{\Alph{section}}%
+  \def\theequation{\hbox{\Alph{section}\arabic{equation}}}%
+  \if@number@appendix@floats
+    \setcounter{figure}{0}%
+    \setcounter{table}{0}%
+    \def\thefigure{\thesection\@arabic\c@figure}%
+    \def\thetable{\thesection\@arabic\c@table}%
+  \fi
+  \def\ApjSectionMarkInTitle{\AppendixApjSectionMarkInTitle}%
+  \def\section{%
+    \setcounter{equation}{0}%
+    \if@number@appendix@floats
+      \setcounter{figure}{0}%
+      \setcounter{table}{0}%
+    \fi
+    \@startsection {setction}{1}{\z@}{10pt}{5pt}{\centering\scshape\apjsecfont}}%
+}{%
+  \if@number@appendix@floats
+  \setcounter{figure}{\c@remember@figure@num}%
+  \setcounter{table}{\c@remember@table@num}%
+  \fi
+}%
+
+
+% Old-style "references" environment: wrap title in <h2> and don't capitalize.
+% Once again we're copy-pasting a lot for a small change.
+
+\renewenvironment{references}[0]{%
+  \onecolumngrid
+  % begin patch:
+  \special{webtex start-tag h2}References\special{webtex end-tag h2}%
+  % end patch
+  \set@column@hsize{2}\twocolumngrid
+  \parindent=0cm \parskip=0cm
+  \def\baselinestretch{1.0}%
+  \footnotesize
+  \baselineskip=\baselinestretch\bibbaselineskip plus 1pt minus 1pt
+  \interlinepenalty \@M
+  \hyphenpenalty=10000
+  \frenchspacing
+  \def\refpar{\par\hangindent=1.2em\hangafter=1}%
+}{%
+  \onecolumngrid
+}%
+
+
+% Newer "thebibliography" environment. Same deal.
+
+\renewenvironment{thebibliography}[1]{%
+  \if@chicago
+    \onecolumngrid
+  \else
+    \twocolumngrid
+  \fi
+  \par
+  \raggedright
+  \vspace{10pt plus 3pt}%
+  % begin patch:
+  \special{webtex start-tag h2}References\special{webtex end-tag h2}%
+  % end patch
+  \par
+  \if@chicago
+    \vspace*{4pt plus 3pt}%
+    \set@column@hsize{2}%
+    \twocolumngrid
+  \fi
+  \list{}{%
+    \parindent=0pt
+    \parskip=0pt
+    \parsep=0pt
+    \bibindent=0pt
+    \def\baselinestretch{1.0}%
+    \footnotesize
+    \baselineskip=\bibbaselineskip
+    \interlinepenalty \@M
+    \frenchspacing
+    \hyphenpenalty=10000
+    \itemindent=-1.0em
+    \itemsep=0pt
+    \listparindent=0pt
+    \settowidth\labelwidth{0pt}%
+    \labelsep=0pt
+    \leftmargin=1.0em
+    \advance\leftmargin\labelsep
+    \let\p@enumiv\@empty
+    \renewcommand\theenumiv{\relax}%
+  }%
+  \sloppy
+  \clubpenalty4000
+  \widowpenalty4000
+  \sfcode`\.\@m
+}{%
+  \def\@noitemerr{\@latex@warning{Empty `thebibliography' environment}}%
+  \endlist
+  \onecolumngrid
+}%
