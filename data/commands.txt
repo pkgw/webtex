@@ -82,6 +82,7 @@ eqno			n	n	none
 errmessage		n	n	none	# -> "message"
 errorstopmode		n	n	assign	# -> "set_interaction" via "prefixed_command"
 eTeXrevision		yes	n	none	# eTeX (duh); note this is *not* an int
+eTeXversion		n	n	none	# eTeX (duh)
 expandafter		yes	n	none
 fi			yes	n	none	# -> "fi_or_else"
 firstmark		yes	n	none	# -> "top_bot_mark"

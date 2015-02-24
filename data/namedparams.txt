@@ -94,7 +94,6 @@ holdinginserts		int
 errorcontextlines	int
 
 # eTeX:
-eTeXversion		int
 grouplevel		int
 grouptype		int
 interactionmode		int
