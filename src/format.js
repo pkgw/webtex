@@ -1,4 +1,4 @@
-// Copyright 2007-2013, Alexandru Marasteanu; 2014, Peter Williams and collaborators.
+// Copyright 2007-2013, Alexandru Marasteanu; 2014-2015, Peter Williams and collaborators.
 // Licensed under the 3-clause BSD license. See LICENSE.md for details.
 
 // This is loosely based on sprintf.js from
@@ -15,6 +15,7 @@
 // %C - character ordinal to escaped character via texchr()
 // %d - number
 // %j - JSON stringification of object
+// %L - TeX "listable" list; either Array or Box object
 // %o - toString() stringification of object
 // %s - raw string
 // %S - JS integer represented as a TeX "scaled" fixed-point value
@@ -115,6 +116,21 @@ var format = (function format_wrapper () {
                 case 'j':
                     arg = JSON.stringify (arg);
                     break;
+		case 'L':
+		    var bare_array = false;
+		    if (arg instanceof Array) {
+			bare_array = true;
+			var tmp = new HBox ();
+			tmp.list = arg;
+			arg = tmp;
+		    }
+		    if (!(arg instanceof ListBox))
+			throw new Error ('format %L expected ListBox but got ' + arg);
+		    arg = arg.uitext ();
+		    if (bare_array)
+			// Strip off misleading "HBox" bits
+			arg = 'Listables: ' + arg.substr (arg.indexOf ('#'));
+		    break;
                 case 'o':
                     arg = '' + arg; // This works even for undefined, etc; arg.toString() doesn't.
                     break;
