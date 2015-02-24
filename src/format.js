@@ -16,6 +16,7 @@
 // %d - number
 // %j - JSON stringification of object
 // %L - TeX "listable" list; either Array or Box object
+// %I - node.js "util.inspect()" of an object
 // %o - toString() stringification of object
 // %s - raw string
 // %S - JS integer represented as a TeX "scaled" fixed-point value
@@ -115,6 +116,9 @@ var format = (function format_wrapper () {
                     break;
                 case 'j':
                     arg = JSON.stringify (arg);
+                    break;
+                case 'I':
+                    arg = require ('util').inspect (arg); // only works in Node.js!
                     break;
 		case 'L':
 		    var bare_array = false;
