@@ -63,14 +63,32 @@
   font-size: smaller;
 }
 
+.webtex :link {
+  color: #00E;
+  text-decoration: none;
+}
+
+/* Doing this draws attention to the weird way that our links get broken up.
+.webtex :link:hover {
+  text-decoration: underline;
+}
+*/
+
 .webtex figure {
   background: #eee;
   border-radius: 12px;
   padding: 10px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .webtex figure .wt-image {
   display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.webtex figure > * {
   margin-left: auto;
   margin-right: auto;
 }
