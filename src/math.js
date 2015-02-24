@@ -32,8 +32,8 @@ var Delimiter = (function Delimiter_closure () {
 
 
 var MathNode = (function MathNode_closure () {
-    // Something that can be put in a box; or more precisely, a horizontal or
-    // vertical list.
+    // Vacuous superclass for math-specific listables.
+
     function MathNode (ltype) {
 	this.ltype = ltype;
 
@@ -595,7 +595,9 @@ var mathlib = (function mathlib_closure () {
 	    // of items after the math is rendered.
 	    box.render_as_canvas = true;
 	    engine.trace ('rendered math: %U', box);
+	    engine.accum (new CanvasControl (false));
 	    engine.accum (box);
+	    engine.accum (new CanvasControl (true));
 
 	    engine.accum (new MathDelim (ms_S, true));
 
@@ -663,6 +665,7 @@ var mathlib = (function mathlib_closure () {
 
 	    // TTP 1203
 	    engine.accum (new Penalty (engine.get_parameter__O_I ('predisplaypenalty')));
+	    engine.accum (new CanvasControl (false));
 	    var g1, g2;
 
 	    if (d_S + s_S <= engine.get_parameter__O_S ('predisplaysize') || have_left_eqno) {
@@ -699,6 +702,7 @@ var mathlib = (function mathlib_closure () {
 
 	    box.shift_amount_S = s_S + d_S;
 	    engine.accum_to_vlist (box);
+	    engine.accum (new CanvasControl (true));
 
 	    // TTP 1205
 	    if (eqno_box != null && e_S == nlib.zero_S && !have_left_eqno) {
