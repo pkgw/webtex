@@ -44,7 +44,7 @@
   line-height: 1.3;
 }
 
-.webtex .cbox {
+.webtex .wt-cbox {
   display: inline-block;
   vertical-align: baseline;
 }
@@ -59,7 +59,7 @@
   font-size: 24px;
 }
 
-.webtex aside.footnote {
+.webtex aside.wt-footnote {
   font-size: smaller;
 }
 
@@ -81,7 +81,7 @@
   padding-left: 30px;
 }
 
-.webtex-800px aside.footnote {
+.webtex-800px aside.wt-footnote {
   position: absolute;
   padding-left: 660px;
   width: 110px;

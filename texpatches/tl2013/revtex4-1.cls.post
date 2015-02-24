@@ -43,7 +43,7 @@
 
 \long\def\ltx@foottext#1#2{%
  \begingroup
-  \special{webtex start-tag aside {class} {footnote}}%
+  \special{webtex start-tag aside {class} {wt-footnote}}%
   \expandafter\ltx@make@current@footnote\expandafter{\@mpfn}{#1}%
   \@footnotetext{#2}%
   \special{webtex end-tag aside}%
