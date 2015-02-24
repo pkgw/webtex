@@ -741,7 +741,9 @@ var mathlib = (function mathlib_closure () {
 
     function resume_after_display (engine) {
 	// TTP 1200 "resume_after_display". XXX not complete. Skips the
-	// unnest_eqtb/"unsave".
+	// unnest_eqtb/"unsave". Note that this function is much like
+	// begin_graf(), so any unusal changes relevant there might be
+	// relevant here too. Namely, insertion of a <p> tag.
 
 	// XXX square off grouping, modes, etc.
 	// XXX: moving pagebuilder invocation
@@ -752,6 +754,7 @@ var mathlib = (function mathlib_closure () {
 	engine.set_spacefactor (1000);
 	// XXX: set clang, prev_graf
 	engine.scan_one_optional_space ();
+	engine.accum (new StartTag ('p', {})); // webtex special!
     }
     ml.resume_after_display = resume_after_display;
 
