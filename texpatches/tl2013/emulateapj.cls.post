@@ -3,11 +3,11 @@
 % Licensed under the MIT license. See LICENSE.md for details.
 
 % Clean up the title section. We don't uppercase it and we avoid informational
-% junk.
+% junk. We also defuse \\ to avoid unsightly explicit newlines.
 %
 \long\def\frontmatter@title@above{}
 \renewcommand\title[2][]{%
-  \def\@title{\special{webtex start-tag h1}#2\special{webtex end-tag h1}}%
+  \def\@title{\special{webtex start-tag h1}{\let\\\relax #2}\special{webtex end-tag h1}}%
   \def\@shorttitle{#1}%
   \let\@AF@join\@title@join
 }
