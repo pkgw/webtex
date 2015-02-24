@@ -42,6 +42,13 @@
   text-align: left;
   text-rendering: optimizelegibility;
   line-height: 1.3;
+
+  /* Relative positioning is needed for "loading" spinner. Feels gross, must
+   * be a better way? The spinner's <div> is absolutely positioned which is
+   * relative to "closest positioned ancestor [us] or to the containing block".
+   * Padding is to make room for the spinner. */
+  position: relative;
+  padding-bottom: 64px;
 }
 
 .webtex .wt-cbox {
@@ -100,6 +107,24 @@
 
 .webtex figure figcaption {
   font-size: 0.9em;
+}
+
+.webtex .wt-failure {
+  width: 100%;
+  text-align: center;
+  font-weight: 700;
+}
+
+.webtex .wt-loading-spinner {
+  width: 100%;
+  height: 64px; /* XXX random hardcoding */
+  display: block;
+  position: absolute;
+  bottom: 0px;
+
+  background-image: url(./spinner.gif);
+  background-repeat: no-repeat;
+  background-position: center center;
 }
 
 /* Width settings for standard 800px-wide column setup. Basic measurements

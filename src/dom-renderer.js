@@ -22,9 +22,23 @@ var DOMRenderer = (function DOMRenderer_callback () {
 	this.pdf_render_interval_id = null;
 	this.pdf_render_is_waiting = false;
 	this.max_img_width = 700; // XXX total hack hardcoding
+
+	this._initialize_container ();
     }
 
     var proto = DOMRenderer.prototype;
+
+    proto._initialize_container = function DOMRenderer__initialize_container () {
+	// Clear out the container contents and insert a loading animation
+	// ASAP. The default contents should be an error message; it will
+	// only appear if Webtex fails badly.
+	while (this.container.firstChild)
+	    this.container.removeChild (this.container.firstChild);
+
+	var div = this.container.ownerDocument.createElement ('div');
+	div.className = 'wt-loading-spinner';
+	this.container.appendChild (div);
+    };
 
     proto.process_fontdata = function DOMRenderer_process_fontdata (item) {
 	if (this.fonts[item.ident] != null) {
@@ -247,9 +261,25 @@ var DOMRenderer = (function DOMRenderer_callback () {
 	}
     };
 
+    proto.handle_parse_finish = function DOMRenderer_handle_parse_finish (data) {
+	console.log ('parse finished');
+
+	// Remove the spinner.
+
+	for (var i = 0; i < this.container.childNodes.length; i++) {
+	    var node = this.container.childNodes[i];
+
+	    if (node.className == 'wt-loading-spinner') {
+		this.container.removeChild (node);
+		break;
+	    }
+	}
+    };
+
     proto.launch_parse = function DOMRenderer_launch_parse (data) {
 	var master = new Master (this.worker_url);
 	master.handle_render = this.handle_render.bind (this);
+	master.handle_parse_finish = this.handle_parse_finish.bind (this);
 
 	data.jobname = data.jobname || 'texput';
 	data.ship_target_name = data.ship_target_name || 'html';
@@ -260,6 +290,7 @@ var DOMRenderer = (function DOMRenderer_callback () {
     proto.launch_parse_archive = function DOMRenderer_launch_parse_archive (data) {
 	var master = new Master (this.worker_url);
 	master.handle_render = this.handle_render.bind (this);
+	master.handle_parse_finish = this.handle_parse_finish.bind (this);
 
 	data.jobname = data.jobname || 'texput';
 	data.ship_target_name = data.ship_target_name || 'html';
@@ -270,6 +301,7 @@ var DOMRenderer = (function DOMRenderer_callback () {
     proto.launch_feed_pre_parsed = function DOMRenderer_launch_feed_pre_parsed (data) {
 	var master = new Master (this.worker_url);
 	master.handle_render = this.handle_render.bind (this);
+	master.handle_parse_finish = this.handle_parse_finish.bind (this);
 	master.send_message ('feed_pre_parsed', data);
     };
 

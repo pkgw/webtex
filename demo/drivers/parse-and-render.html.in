@@ -12,7 +12,12 @@
     See <a href="https://github.com/pkgw/webtex/issues/1">the bug report</a>
     for more information.</b></p>
 
-    <article class="webtex webtex-800px" id="webtex"></article>
+    <article class="webtex webtex-800px" id="webtex">
+      <!-- Contents will be replaced by a "loading" animation as soon as
+	   Webtex starts up; this should only show up if something is
+	   seriously wrong with the JS. -->
+      <p class="wt-failure">Unfortunately, webtex has failed :-(</p>
+    </article>
 
     <script type="text/javascript" src="compatibility.js"></script>
     <script type="text/javascript" src="pdf.js"></script>
