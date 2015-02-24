@@ -717,7 +717,7 @@ var mathlib = (function mathlib_closure () {
     function handle_math_shift (engine, cmd) {
 	// TTP 1090, 1137, 1193. Vertical mode? Command will be reread after new paragraph
 	// is started.
-	if (engine.ensure_horizontal (this))
+	if (engine.ensure_horizontal (cmd))
 	    return;
 
 	if (engine.absmode () == M_HORZ)
