@@ -368,6 +368,8 @@ var Token = (function Token_closure () {
     Token.new_cmd = function Token_new_cmd (cmd) {
 	if (cmd == null)
 	    throw new TexInternalError ('illegal null command');
+	if (!(cmd instanceof Command))
+	    throw new TexInternalError ('illegal command argument %o', cmd);
 
 	var tok = new Token ();
 	tok.kind = TK_PURECMD;
