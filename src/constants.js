@@ -38,7 +38,8 @@ var LT_BOX = 0,
     LT_SPECIAL = 14, // a \special{}
     LT_IO = 15, // a \write{}, etc.
     LT_STARTTAG = 16, // an HTML start tag
-    LT_ENDTAG = 17; // an HTML end tag
+    LT_ENDTAG = 17, // an HTML end tag
+    LT_DIRECTTEXT = 18; // text directly inserted into the HTML output
 
 var lt_names = ['box', 'rule', 'character', 'glue', 'kern', 'mark', 'penalty',
 		'leader', 'special', 'starttag', 'endtag'];

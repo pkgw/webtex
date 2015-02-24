@@ -551,7 +551,14 @@ register_command ('special', function cmd_special (engine) {
     } else {
 	var pieces = text.split (' ');
 
-	if (pieces[1] == 'push-suppress') {
+	if (pieces[1] == 'utf16') {
+	    if (pieces[2][0] != '0' || pieces[2][1] != 'x')
+		throw new TexRuntimeError ('argument webtex utf16 \\special must have leading "0x"');
+	    var value = parseInt (pieces[2].substr (2), 16);
+	    if (value > 0xFFFF)
+		throw new TexInternalError ('TODO: verify JS decoding for non-BMP code points');
+	    object = new DirectText (String.fromCharCode (value));
+	} else if (pieces[1] == 'push-suppress') {
 	    object = new SuppressionControl (false);
 	} else if (pieces[1] == 'pop-suppress') {
 	    object = new SuppressionControl (true);

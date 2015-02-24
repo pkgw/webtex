@@ -235,6 +235,33 @@ var BoxGlue = (function BoxGlue_closure () {
 }) ();
 
 
+// Here are the Webtex special items
+
+var DirectText = (function DirectText_closure () {
+    // Why might we want such an object? Well, one example is the "webtex
+    // utf16" special, which lets us insert Unicode characters. (Someday I'll
+    // emulate however modern TeXs support Unicode inputs, but today is not
+    // that day.)
+
+    function DirectText (value) {
+	if (typeof (value) != 'string')
+	    throw new TexInternalError ('DirectText needs string; got %o', value);
+
+	this.ltype = LT_DIRECTTEXT;
+	this.value = value;
+    }
+
+    inherit (DirectText, Listable);
+    var proto = DirectText.prototype;
+
+    proto._uisummary = function DirectText__uisummary () {
+	return format ('DirectText %s', this.value);
+    };
+
+    return DirectText;
+}) ();
+
+
 var StartTag = (function StartTag_closure () {
     function StartTag (name, attrs) {
 	if (typeof (name) != 'string')
@@ -259,7 +286,7 @@ var StartTag = (function StartTag_closure () {
 var EndTag = (function EndTag_closure () {
     function EndTag (name) {
 	if (typeof (name) != 'string')
-	    throw new TexInternalError ('StartTag needs string; got %o', name);
+	    throw new TexInternalError ('EndTag needs string; got %o', name);
 
 	this.ltype = LT_ENDTAG;
 	this.name = name;

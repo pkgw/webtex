@@ -157,6 +157,8 @@ var HTMLTranslateTarget = (function HTMLTranslateTarget_closure () {
 	    } else if (item instanceof BoxGlue) {
 		if (item.amount.is_nonzero ())
 		    this.queued_text += ' ';
+	    } else if (item instanceof DirectText) {
+		this.queued_text += item.value;
 	    } else if (item instanceof StartTag) {
 		this.maybe_push ({
 		    kind: 'starttag',

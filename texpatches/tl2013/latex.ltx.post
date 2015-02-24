@@ -23,6 +23,11 @@
 %
 \AtBeginDocument{\input{lmodern.sty}}
 %
+% Cause \nobreakspace to emit an actual HTML nbsp entity.
+%
+\DeclareRobustCommand{\nobreakspace}{%
+  \leavevmode\nobreak\special{webtex utf16 0x00A0}}
+%
 % Futz with the "float" infrastructure to just emit them immediately.
 % This way we can avoid firing up the output routines.
 %
