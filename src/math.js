@@ -77,9 +77,9 @@ var AtomNode = (function AtomNode_closure () {
 
     proto._uiitems = function AtomNode__uiitems () {
 	var uilist = [this._uisummary () + ' {'];
-	ml._addui (uilist, 'nuc', this.nuc);
-	ml._addui (uilist, 'sub', this.sub);
-	ml._addui (uilist, 'sup', this.sup);
+	mathlib._addui (uilist, 'nuc', this.nuc);
+	mathlib._addui (uilist, 'sub', this.sub);
+	mathlib._addui (uilist, 'sup', this.sup);
 	uilist.push ('}');
 	return uilist;
     };
@@ -158,8 +158,8 @@ var FractionNode = (function FractionNode_closure () {
 
     proto._uiitems = function FractionNode__uiitems () {
 	var uilist = [this._uisummary () + ' {'];
-	ml._addui (uilist, 'numer', this.numer);
-	ml._addui (uilist, 'denom', this.denom);
+	mathlib._addui (uilist, 'numer', this.numer);
+	mathlib._addui (uilist, 'denom', this.denom);
 	uilist.push ('}');
 	return uilist;
     };
@@ -241,10 +241,10 @@ var StyleChoiceNode = (function StyleChoiceNode_closure () {
 
     proto._uiitems = function FractionNode__uiitems () {
 	var uilist = [this._uisummary () + ' {'];
-	ml._addui (uilist, 'display', this.in_display);
-	ml._addui (uilist, 'text', this.in_text);
-	ml._addui (uilist, 'script', this.in_script);
-	ml._addui (uilist, 'scriptscript', this.in_scriptscript);
+	mathlib._addui (uilist, 'display', this.in_display);
+	mathlib._addui (uilist, 'text', this.in_text);
+	mathlib._addui (uilist, 'script', this.in_script);
+	mathlib._addui (uilist, 'scriptscript', this.in_scriptscript);
 	uilist.push ('}');
 	return uilist;
     };
