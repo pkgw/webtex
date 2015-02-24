@@ -95,6 +95,7 @@ var DOMRenderer = (function DOMRenderer_callback () {
 	var bytes = new Uint8Array (item.data);
 	var canvas = doc.createElement ('canvas');
 	canvas.height = canvas.width = 200; // arbitrary non-zero default
+	canvas.className = 'wt-pdf-canvas';
 
 	var js_is_lame = this;
 
@@ -120,8 +121,11 @@ var DOMRenderer = (function DOMRenderer_callback () {
 
 	var ext = item.name.split ('.').pop ();
 
-	if (ext == 'pdf')
-	    return this.create_pdf_image (doc, item);
+	if (ext == 'pdf') {
+	    var elem = this.create_pdf_image (doc, item);
+	    elem.className += ' wt-image';
+	    return elem;
+	}
 
 	if (ext == 'ps' || ext == 'eps') {
 	    // TODO.
@@ -136,6 +140,7 @@ var DOMRenderer = (function DOMRenderer_callback () {
 	var elem = doc.createElement ('img');
 	elem.src = ['data:', extension_to_mime[ext], ';base64,',
 		    arraybuffer_to_base64 (item.data)].join ('');
+	elem.className = 'wt-image';
 	return elem;
     };
 
