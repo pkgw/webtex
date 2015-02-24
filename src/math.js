@@ -1977,7 +1977,7 @@ var mathlib = (function mathlib_closure () {
 	if (delta_S < delta2_S)
 	    delta_S = delta2_S;
 
-	q.new_hlist = var_delimiter__OOS (state, q.delimiter, cur_size, delta_S);
+	q.new_hlist = var_delimiter__OOS (state, q.delimiter, delta_S);
 
 	if (q.ltype == MT_LEFT)
 	    return MT_OPEN;
@@ -2212,7 +2212,7 @@ var mathlib = (function mathlib_closure () {
 	    }
 
 	    if (check_dimensions) {
-		var z = hpack_natural (q.new_hlist);
+		var z = hpack_natural (engine, q.new_hlist);
 		max_h_S = Math.max (max_h_S, z.height_S);
 		max_d_S = Math.max (max_d_S, z.depth_S);
 	    }
