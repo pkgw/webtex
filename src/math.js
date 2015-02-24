@@ -2100,6 +2100,9 @@ var mathlib = (function mathlib_closure () {
 	    case LT_PENALTY:
 	    case LT_IO:
 	    case LT_DISCRETIONARY:
+	    case LT_STARTTAG:
+	    case LT_ENDTAG:
+	    case LT_DIRECTTEXT:
 		// goto done_with_node:
 		process_atom = check_dimensions = remember_as_prev = false;
 		break;
@@ -2245,6 +2248,9 @@ var mathlib = (function mathlib_closure () {
 	    case LT_MARK:
 	    case LT_GLUE:
 	    case LT_KERN:
+	    case LT_STARTTAG:
+	    case LT_ENDTAG:
+	    case LT_DIRECTTEXT:
 		outlist.push (q);
 		do_usual = false;
 		break;
