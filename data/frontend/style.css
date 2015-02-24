@@ -127,6 +127,15 @@
   background-position: center center;
 }
 
+.webtex .wt-internal-error {
+  width: 100%;
+  display: block;
+  background: #F44;
+  border-radius: 12px;
+  padding: 10px;
+  text-align: center;
+}
+
 /* Width settings for standard 800px-wide column setup. Basic measurements
  * are 30px of space on the left, a column width of 600px, 30px of space,
  * 110px on the right for marginalia, then 30px more padding.

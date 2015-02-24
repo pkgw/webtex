@@ -261,48 +261,62 @@ var DOMRenderer = (function DOMRenderer_callback () {
 	}
     };
 
-    proto.handle_parse_finish = function DOMRenderer_handle_parse_finish (data) {
-	console.log ('parse finished');
-
-	// Remove the spinner.
-
+    proto._try_remove_spinner = function DOMRenderer__try_remove_spinner () {
 	for (var i = 0; i < this.container.childNodes.length; i++) {
 	    var node = this.container.childNodes[i];
 
 	    if (node.className == 'wt-loading-spinner') {
 		this.container.removeChild (node);
-		break;
+		return;
 	    }
 	}
     };
 
-    proto.launch_parse = function DOMRenderer_launch_parse (data) {
+    proto.handle_parse_finish = function DOMRenderer_handle_parse_finish (data) {
+	console.log ('parse finished');
+	this._try_remove_spinner ();
+    };
+
+    proto.handle_worker_error = function DOMRenderer_handle_worker_error (errevent) {
+	// XXX do better! Collect/report information about where crashes were
+	// triggered, tell the user what to do, implement error recovery, ...
+	console.error ('DOM renderer notified of uncaught worker error');
+	console.error ('Partial info: ' + errevent.message + ' (' +
+		       errevent.filename + ':' + errevent.lineno + ')');
+
+	this._try_remove_spinner ();
+
+	var err = this.container.ownerDocument.createElement ('div');
+	err.className = 'wt-internal-error';
+	err.textContent = 'Webtex crashed :-( The ' +
+	    'JavaScript console has technical details.';
+	this.container.appendChild (err);
+    };
+
+    proto._make_master = function DOMRenderer__make_master () {
 	var master = new Master (this.worker_url);
 	master.handle_render = this.handle_render.bind (this);
 	master.handle_parse_finish = this.handle_parse_finish.bind (this);
+	master.onerror = this.handle_worker_error.bind (this);
+	return master;
+    };
 
+    proto.launch_parse = function DOMRenderer_launch_parse (data) {
 	data.jobname = data.jobname || 'texput';
 	data.ship_target_name = data.ship_target_name || 'html';
 
-	master.send_message ('parse_loop', data);
+	this._make_master ().send_message ('parse_loop', data);
     };
 
     proto.launch_parse_archive = function DOMRenderer_launch_parse_archive (data) {
-	var master = new Master (this.worker_url);
-	master.handle_render = this.handle_render.bind (this);
-	master.handle_parse_finish = this.handle_parse_finish.bind (this);
-
 	data.jobname = data.jobname || 'texput';
 	data.ship_target_name = data.ship_target_name || 'html';
 
-	master.send_message ('parse_archive_loop', data);
+	this._make_master ().send_message ('parse_archive_loop', data);
     };
 
     proto.launch_feed_pre_parsed = function DOMRenderer_launch_feed_pre_parsed (data) {
-	var master = new Master (this.worker_url);
-	master.handle_render = this.handle_render.bind (this);
-	master.handle_parse_finish = this.handle_parse_finish.bind (this);
-	master.send_message ('feed_pre_parsed', data);
+	this._make_master ().send_message ('feed_pre_parsed', data);
     };
 
     return DOMRenderer;
