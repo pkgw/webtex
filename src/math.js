@@ -1480,7 +1480,7 @@ var mathlib = (function mathlib_closure () {
 	    cur_mlist = [new AtomNode (MT_ORD)];
 	    cur_mlist[0].nuc = p;
 	} else if (p instanceof ListBox) {
-	    q = p.list;
+	    q = [p];
 	} else if (p instanceof Array) {
 	    cur_mlist = p;
 	} else {
@@ -1505,7 +1505,6 @@ var mathlib = (function mathlib_closure () {
 
     function rebox__OOS (engine, box, width_S) {
 	// TTP 715 "rebox"
-
 	if (box.width_S == width_S || box.list.length == 0) {
 	    box.width_S = width_S;
 	    return box;
@@ -1693,15 +1692,24 @@ var mathlib = (function mathlib_closure () {
 	if (!(q.nuc instanceof MathChar))
 	    delta_S = nlib.Zero_S;
 	else {
-	    // XXX skipping list-tag char stuff
+	    var c = q.nuc.ord;
 	    var f = state.font (q.nuc.fam);
 	    var m = f.get_metrics ();
+
+	    // Enlarge character if display mode
+	    if (state.style == MS_DISPLAY && m.is_list (q.nuc.ord)) {
+		var new_c = m.rembyte (c);
+		if (m.has_ord (new_c))
+		    q.nuc.ord = new_c;
+	    }
+
 	    delta_S = m.italic_correction__O_S (q.nuc.ord);
 	    var x = clean_box (state, q.nuc);
 
 	    if (q.sub != null && q.limtype != LIMTYPE_LIMITS)
 		x.width_S -= delta_S; // remove italic correction
 
+	    // Center vertically
 	    x.shift_amount_S = half ((x.height_S - x.depth_S)
 				     - state.sym_dimen__NN_S (state.size, SymDimens.AxisHeight));
 	    q.nuc = x;
@@ -1722,32 +1730,32 @@ var mathlib = (function mathlib_closure () {
 	x.shift_amount_S = half (delta_S);
 	z.shift_amount_S = -x.shift_amount_S;
 	v.height_S = y.height_S;
-	v.depth_S = y.height_S;
+	v.depth_S = y.depth_S;
 
 	if (q.sup == null) {
 	    v.list = [y];
 	} else {
-	    var shift_up = state.ext_dimen__N_S (ExtDimens.BigOpSpacing3) - x.depth_S;
-	    shift_up = Math.max (shift_up, state.ext_dimen__N_S (ExtDimens.BigOpSpacing1));
-	    var k1 = new Kern (shift_up);
+	    var shift_up_S = state.ext_dimen__N_S (ExtDimens.BigOpSpacing3) - x.depth_S;
+	    shift_up_S = Math.max (shift_up_S, state.ext_dimen__N_S (ExtDimens.BigOpSpacing1));
+	    var k1 = new Kern (shift_up_S);
 	    var k2 = new Kern (state.ext_dimen__N_S (ExtDimens.BigOpSpacing5));
 	    v.list = [k2, x, k1, y];
 	    v.height_S += state.ext_dimen__N_S (ExtDimens.BigOpSpacing5);
 	    v.height_S += x.height_S;
 	    v.height_S += x.depth_S;
-	    v.height_S += shift_up;
+	    v.height_S += shift_up_S;
 	}
 
 	if (q.sub != null) {
-	    var shift_down = state.ext_dimen__N_S (ExtDimens.BigOpSpacing4) - z.height_S;
-	    shift_down = Math.max (shift_down, state.ext_dimen__N_S (ExtDimens.BigOpSpacing2));
-	    var k1 = new Kern (shift_down);
+	    var shift_down_S = state.ext_dimen__N_S (ExtDimens.BigOpSpacing4) - z.height_S;
+	    shift_down_S = Math.max (shift_down_S, state.ext_dimen__N_S (ExtDimens.BigOpSpacing2));
+	    var k1 = new Kern (shift_down_S);
 	    var k2 = new Kern (state.ext_dimen__N_S (ExtDimens.BigOpSpacing5));
 	    v.list = v.list.concat ([k1, z, k2]);
-	    v.height_S += state.ext_dimen__N_S (ExtDimens.BigOpSpacing5);
-	    v.height_S += z.height_S;
-	    v.height_S += z.depth_S;
-	    v.height_S += shift_down;
+	    v.depth_S += state.ext_dimen__N_S (ExtDimens.BigOpSpacing5);
+	    v.depth_S += z.height_S;
+	    v.depth_S += z.depth_S;
+	    v.depth_S += shift_down_S;
 	}
 
 	q.new_hlist = [v];
@@ -2088,6 +2096,9 @@ var mathlib = (function mathlib_closure () {
 		break;
 	    case MT_OP:
 		delta_S = make_op__OO_S (state, q);
+		if (q.limtype == LIMTYPE_LIMITS)
+		    // goto check_dimensions:
+		    process_atom = false;
 		break;
 	    case MT_RADICAL:
 		make_radical (state, q);
