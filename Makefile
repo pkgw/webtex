@@ -239,7 +239,6 @@ $(builddir)/node-webtex.js \
 | $(builddir)/dev
 	./webtex -n3 -T chrome demo/brockton/paper.tex >$@.new && mv -f $@.new $@
 
-devfiles += $(builddir)/dev/brockton.zip $(builddir)/dev/brockton.json
 distfiles += $(builddir)/dev/brockton.zip $(builddir)/dev/brockton.json
 
 
