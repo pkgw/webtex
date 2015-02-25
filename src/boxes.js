@@ -262,13 +262,9 @@ var HBox = (function HBox_closure () {
     };
 
     proto.traverse__SSO = function HBox_traverse__SSO (x0_S, y0_S, callback__SSO) {
-	if (this.list.length == 0)
-	    return; // ignore unglued error in this case.
-	if (this.glue_state == 0)
-	    throw new TexInternalError ('cannot traverse unglued box %o', this);
-
 	var gs = this.glue_state;
 	var gr = this.glue_set; // the glue set ratio
+	var not_glued = (this.glue_state == 0) || (gr == null);
 	var x_S = x0_S;
 
 	for (var i = 0; i < this.list.length; i++) {
@@ -292,6 +288,9 @@ var HBox = (function HBox_closure () {
 	    } else if (item instanceof Kern) {
 		x_S += item.amount_S;
 	    } else if (item instanceof BoxGlue) {
+		if (not_glued)
+		    throw new TexInternalError ('cannot traverse unglued hbox %o', this);
+
 		var g = item.amount;
 		var dx_S = g.amount_S;
 
@@ -449,17 +448,10 @@ var VBox = (function VBox_closure () {
     };
 
     proto.traverse__SSO = function VBox_traverse__SSO (x0_S, y0_S, callback__SSO) {
-	if (this.list.length == 0)
-	    return; // ignore unglued error in this case.
-	if (this.glue_state == 0)
-	    throw new TexInternalError ('cannot traverse unglued box %o', this);
-
 	var gs = this.glue_state;
 	var gr = this.glue_set; // the glue set ratio
+	var not_glued = (this.glue_state == 0) || (gr == null);
 	var y_S = y0_S - this.height_S;
-
-	if (gr == null)
-	    throw new TexInternalError ('unset glue in %o', this);
 
 	for (var i = 0; i < this.list.length; i++) {
 	    var item = this.list[i];
@@ -484,6 +476,9 @@ var VBox = (function VBox_closure () {
 	    } else if (item instanceof Kern) {
 		y_S += item.amount_S;
 	    } else if (item instanceof BoxGlue) {
+		if (not_glued)
+		    throw new TexInternalError ('cannot traverse unglued vbox %o', this);
+
 		var g = item.amount;
 		var dy_S = g.amount_S;
 
