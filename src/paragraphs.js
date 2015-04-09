@@ -13,9 +13,11 @@
 	    // happy about using a global for this but it's not very obvious
 	    // how all of the pieces fit together within TeX.
 	    engine.pending_adjustments = [];
+	    engine.partag_settings = [true]; // controls automatic insertion of <p> tags
+	    engine.partag_inserted_stack = [];
 	},
 	is_clean: function (engine) {
-	    return engine.pending_adjustments.length == 0;
+	    return engine.pending_adjustments.length == 0 && engine.partag_settings.length == 1;
 	},
     });
 
@@ -43,7 +45,10 @@
 	this.enter_mode (M_HORZ);
 	this.set_spacefactor (1000);
 
-	this.accum (new StartTag ('p', {})); // webtex special!
+	// webtex special!
+	this.partag_inserted_stack.push (this.partag_settings[0]);
+	if (this.partag_settings[0])
+	    this.accum (new StartTag ('p', {}));
 
 	// We don't run the linebreaking algorithm so we should insert
 	// \leftskip manually. TeX doesn't bother to insert it if it's zero.
@@ -69,7 +74,9 @@
 	list.push (new Penalty (10000));
 	list.push (new BoxGlue (this.get_parameter (T_GLUE, 'parfillskip')));
 	list.push (new BoxGlue (this.get_parameter (T_GLUE, 'rightskip')));
-	list.push (new EndTag ('p')); // webtex special!
+
+	if (this.partag_inserted_stack.pop ()) // webtex special!
+	    list.push (new EndTag ('p'));
 
 	var hbox = new HBox ();
 	hbox.list = list;
@@ -142,5 +149,23 @@
 	}
 
 	engine.trace ('parshape: ignoring results');
+    });
+
+    register_command ('WEBTEXpushparon', function cmd_webtex_pushparon (engine) {
+	engine.trace ('WEBTEX pushparon');
+	engine.partag_settings.unshift (true);
+    });
+
+    register_command ('WEBTEXpushparoff', function cmd_webtex_pushparoff (engine) {
+	engine.trace ('WEBTEX pushparoff');
+	engine.partag_settings.unshift (false);
+    });
+
+    register_command ('WEBTEXpopparctl', function cmd_webtex_popparctl (engine) {
+	if (engine.partag_settings.length < 2)
+	    throw new TexRuntimeError ('cannot \\WEBTEXpopparctl: at bottom of stack');
+
+	engine.partag_settings.shift ();
+	engine.trace ('WEBTEX popparctl: now partags = %b', engine.partag_settings[0]);
     });
 }) ();

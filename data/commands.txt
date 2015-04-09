@@ -273,4 +273,7 @@ write			n	n	none	# -> *"extension"
 xdef			n	n	full	# -> "def" via "prefixed_command"
 xleaders		n	n	none	# -> "leader_ship"
 
+WEBTEXpopparctl		n	n	none
+WEBTEXpushparoff	n	n	none
+WEBTEXpushparon		n	n	none
 WEBTEXtraceon		n	n	none

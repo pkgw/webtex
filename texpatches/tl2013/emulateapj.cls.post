@@ -7,7 +7,8 @@
 
 \long\def\frontmatter@title@above{}%
 \renewcommand\title[2][]{%
-  \def\@title{\special{webtex start-tag h1}{\let\\\relax #2}\special{webtex end-tag h1}}%
+  \def\@title{\special{webtex start-tag h1}\WEBTEXpushparoff{\let\\\relax #2}%
+    \WEBTEXpopparctl\special{webtex end-tag h1}}%
   \def\@shorttitle{#1}%
   \let\@AF@join\@title@join
 }%
@@ -47,20 +48,20 @@
       \let\footnotetext=\old@foot@note@text
       \let\footnotemark=\old@foot@note@mark
     \fi
-    \def\webtex@@endsection{\special{webtex end-tag h2}}%
+    \def\webtex@@endsection{\WEBTEXpopparctl\special{webtex end-tag h2}}%
     \@startsection{section}{1}{\z@}{9pt plus 2pt minus 1pt}{4pt}{%
-      \special{webtex start-tag h2}\aftergroup\webtex@@endsection}}%
+      \special{webtex start-tag h2}\WEBTEXpushparoff\aftergroup\webtex@@endsection}}%
 
 \def\subsection{%
-  \def\webtex@@endsection{\special{webtex end-tag h3}}%
+  \def\webtex@@endsection{\WEBTEXpopparctl\special{webtex end-tag h3}}%
   \@startsection{subsection}{2}{\z@}{9pt plus 1pt minus 1pt}{4pt}%
-  {\special{webtex start-tag h3}\aftergroup\webtex@@endsection}}%
+  {\special{webtex start-tag h3}\WEBTEXpushparoff\aftergroup\webtex@@endsection}}%
 
 \def\subsubsection{%
-  \def\webtex@@endsection{\special{webtex end-tag h4}}%
+  \def\webtex@@endsection{\WEBTEXpopparctl\special{webtex end-tag h4}}%
   \@startsection{subsubsection}{3}{\z@}%
   {2ex plus 1ex minus .2ex}{1ex plus .2ex}%
-  {\special{webtex start-tag h4}\aftergroup\webtex@@endsection}}%
+  {\special{webtex start-tag h4}\WEBTEXpushparoff\aftergroup\webtex@@endsection}}%
 
 
 % Disable \lastpagefootnotes
@@ -81,7 +82,8 @@
   \fi
   \vskip 10pt plus 2pt minus 1pt
   % begin patch:
-  \special{webtex start-tag h2}Appendix\special{webtex end-tag h2}%
+  \special{webtex start-tag h2}\WEBTEXpushparoff Appendix%
+    \WEBTEXpopparctl\special{webtex end-tag h2}%
   % end patch
   \nopagebreak\medskip\@nobreaktrue\def\ApjSectionpenalty{\@M}%
   \@firstsectionfalse
@@ -120,7 +122,8 @@
 \renewenvironment{references}[0]{%
   \onecolumngrid
   % begin patch:
-  \special{webtex start-tag h2}References\special{webtex end-tag h2}%
+  \special{webtex start-tag h2}\WEBTEXpushparoff References%
+    \WEBTEXpopparctl\special{webtex end-tag h2}%
   % end patch
   \set@column@hsize{2}\twocolumngrid
   \parindent=0cm \parskip=0cm
@@ -148,7 +151,8 @@
   \raggedright
   \vspace{10pt plus 3pt}%
   % begin patch:
-  \special{webtex start-tag h2}References\special{webtex end-tag h2}%
+  \special{webtex start-tag h2}\WEBTEXpushparoff References%
+    \WEBTEXpopparctl \special{webtex end-tag h2}%
   % end patch
   \par
   \if@chicago

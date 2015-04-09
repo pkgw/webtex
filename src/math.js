@@ -754,7 +754,11 @@ var mathlib = (function mathlib_closure () {
 	engine.set_spacefactor (1000);
 	// XXX: set clang, prev_graf
 	engine.scan_one_optional_space ();
-	engine.accum (new StartTag ('p', {})); // webtex special!
+
+	// XXX not so nice encapsulation-breaking
+	engine.partag_inserted_stack.push (engine.partag_settings[0]);
+	if (engine.partag_settings[0])
+	    engine.accum (new StartTag ('p', {}));
     }
     ml.resume_after_display = resume_after_display;
 

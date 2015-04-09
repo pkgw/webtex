@@ -54,10 +54,12 @@
   \normalsize%
   \@setminipage%
   \special{webtex start-tag figure}%
+  \WEBTEXpushparoff%
 }
 \def\@endfloatbox{%
   \par\vskip\z@skip%
   \@minipagefalse%
+  \WEBTEXpopparctl%
   \special{webtex end-tag figure}%
   \outer@nobreak%
   \egroup%
