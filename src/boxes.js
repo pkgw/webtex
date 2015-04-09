@@ -553,7 +553,7 @@ var VBox = (function VBox_closure () {
 		engine.pending_adjustments = [];
 	    }
 	} else {
-	    engine.trace ('... accumulate the finished box (non-math)');
+	    engine.trace ('... accumulate the finished box (horizontal)');
 	    engine.accum (box);
 	    engine.set_spacefactor (1000);
 	}
@@ -658,6 +658,32 @@ var VBox = (function VBox_closure () {
 	engine.enter_group (bt_names[boxtype], leave_box_construction);
     }
 
+    function clear_box_register (engine, reg) {
+	// OK. So. TeX voids out box registers when they are used (cf. TeXBook
+	// p. 120). However, it does not do this by calling eq_define() with
+	// a null value. Instead, it clears out the current eqtb entry for the
+	// box directly. Now, TeX manages eqtb nesting by remembering values
+	// that have been overwritten and explicitly restoring them when
+	// exiting a save level. This means that the way that it clears boxes
+	// effectively nullifies the *most recent* explicit assignment of the
+	// box's value. To emulate this, we must reach up the eqtb chain to
+	// find the level where the box's value was actually defined most
+	// recently -- we *can't* just insert a new value in engine.eqtb.
+
+	var eqtb = engine.eqtb;
+
+	while (eqtb != null) {
+	    if (eqtb._registers[T_BOX].hasOwnProperty (reg)) {
+		eqtb._registers[T_BOX][reg] = new VoidBox ();
+		return;
+	    }
+
+	    eqtb = eqtb.parent;
+	}
+
+	throw new TexInternalError ('clear_box_register lookup failed');
+    }
+
     // Commands that yield boxes.
 
     var BoxValuedCommand = (function BoxValuedCommand_closure () {
@@ -689,11 +715,11 @@ var VBox = (function VBox_closure () {
     });
 
     register_box_command ('vbox', function vbox_start_box (engine) {
-	    enter_box_construction (engine, BT_VBOX, M_IVERT, false);
+	enter_box_construction (engine, BT_VBOX, M_IVERT, false);
     });
 
     register_box_command ('vtop', function vtop_start_box (engine) {
-	    enter_box_construction (engine, BT_VBOX, M_IVERT, true);
+	enter_box_construction (engine, BT_VBOX, M_IVERT, true);
     });
 
     register_box_command ('copy', function copy_start_box (engine) {
@@ -707,7 +733,7 @@ var VBox = (function VBox_closure () {
 	var reg = engine.scan_char_code__I ();
 	var box = engine.get_register (T_BOX, reg);
 	engine.trace ('fetch box %d', reg);
-	engine.set_register (T_BOX, reg, new VoidBox ());
+	clear_box_register (engine, reg);
 	handle_finished_box (engine, box);
     });
 
@@ -728,7 +754,7 @@ var VBox = (function VBox_closure () {
 	} else if (box.btype == BT_HBOX) {
 	    throw new TexRuntimeError ('cannot \\vsplit an hbox');
 	} else {
-	    engine.set_register (T_BOX, reg, new VoidBox ());
+	    clear_box_register (engine, reg);
 	    handle_finished_box (engine, box);
 	}
     });
@@ -869,7 +895,7 @@ var VBox = (function VBox_closure () {
 	    throw new TexRuntimeError ('trying to unhbox non-hbox reg %d: %U', reg, box);
 
 	engine.trace ('unhbox %d (non-void) -> %U', reg, box);
-	engine.set_register (T_BOX, reg, new VoidBox ());
+	clear_box_register (engine, reg);
 	engine.accum_list (box.list);
     });
 
@@ -890,7 +916,7 @@ var VBox = (function VBox_closure () {
 	    throw new TexRuntimeError ('trying to unvbox non-vbox reg %d: %U', reg, box);
 
 	engine.trace ('unvbox %d (non-void)', reg);
-	engine.set_register (T_BOX, reg, new VoidBox ());
+	clear_box_register (engine, reg);
 	engine.accum_list (box.list);
     });
 
