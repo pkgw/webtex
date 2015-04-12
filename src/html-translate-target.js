@@ -18,6 +18,8 @@ var HTMLTranslateTarget = (function HTMLTranslateTarget_closure () {
     function HTMLTranslateTarget (post_message) {
 	this.post_message = post_message;
 	this.shipped_fonts = {};
+	this.tag_stack = [];
+	// TODO: check that tag_stack is empty when done processing whole document
     }
 
     inherit (HTMLTranslateTarget, ShipTarget);
@@ -161,9 +163,15 @@ var HTMLTranslateTarget = (function HTMLTranslateTarget_closure () {
 		    name: item.name,
 		    attrs: item.attrs,
 		});
+		this.tag_stack.unshift (item);
 	    } else if (item instanceof EndTag) {
-		// XXX: check start and end tags agree.
+		if (!this.tag_stack.length)
+		    throw new TexRuntimeError ('HTML end tag %s without opening tag', item.name);
+		if (item.name != this.tag_stack[0].name)
+		    throw new TexRuntimeError ('mismatched HTML start (%s) and end tags (%s)',
+					       tag_stack[0].name, item.name);
 		this.maybe_push ({kind: 'endtag'});
+		this.tag_stack.shift ();
 	    } else if (item instanceof SuppressionControl) {
 		this.finish_text ();
 
