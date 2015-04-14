@@ -758,7 +758,7 @@ var mathlib = (function mathlib_closure () {
 	// XXX not so nice encapsulation-breaking
 	engine.partag_inserted_stack.push (engine.partag_settings[0]);
 	if (engine.partag_settings[0])
-	    engine.accum (new StartTag ('p', {}));
+	    engine.accum (new StartTag ('p', 'par', {}));
     }
     ml.resume_after_display = resume_after_display;
 

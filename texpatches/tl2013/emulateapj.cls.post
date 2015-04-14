@@ -139,7 +139,8 @@
 }%
 
 
-% Newer "thebibliography" environment. Same deal.
+% Newer "thebibliography" environment. Same deal. We also need a end-delim-tag
+% for pop-up references (which are mainly done in natbib.sty.post).
 
 \renewenvironment{thebibliography}[1]{%
   \if@chicago
@@ -186,6 +187,9 @@
   \widowpenalty4000
   \sfcode`\.\@m
 }{%
+  % begin webtex modifications:
+  \special{webtex end-delim-tag div natbib.item}
+  % end webtex modifications
   \def\@noitemerr{\@latex@warning{Empty `thebibliography' environment}}%
   \endlist
   \onecolumngrid

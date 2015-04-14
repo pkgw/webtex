@@ -564,10 +564,18 @@ register_command ('special', function cmd_special (engine) {
 	    object = new SuppressionControl (true);
 	} else if (pieces[1] == 'start-tag') {
 	    var tag = pieces[2];
-	    object = new StartTag (tag, parse_tag_attrs (engine, tlist.toks));
+	    object = new StartTag (tag, null, parse_tag_attrs (engine, tlist.toks));
 	} else if (pieces[1] == 'end-tag') {
 	    var tag = pieces[2];
-	    object = new EndTag (tag);
+	    object = new EndTag (tag, null);
+	} else if (pieces[1] == 'delim-tag') {
+	    var tag = pieces[2];
+	    var delimgroup = pieces[3];
+	    object = new StartTag (tag, delimgroup, parse_tag_attrs (engine, tlist.toks));
+	} else if (pieces[1] == 'end-delim-tag') {
+	    var tag = pieces[2];
+	    var delimgroup = pieces[3];
+	    object = new EndTag (tag, delimgroup);
 	} else if (pieces[1] == 'image') {
 	    object = new Image (parse_tag_attrs (engine, tlist.toks));
 	} else {

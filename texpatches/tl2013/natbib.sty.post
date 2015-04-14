@@ -1,0 +1,76 @@
+% -*- latex -*-
+% Copyright 2015 Peter Williams and collaborators.
+% Licensed under the MIT license. See LICENSE.md for details.
+
+% Wrap bibitems in special <div> tags to enable pop-up references.
+% Unfortunately we need to copy-paste a large chunk of code ...
+
+\def\@lbibitem[#1]#2{%
+  \if\relax\@extra@b@citeb\relax\else
+    \@ifundefined{br@#2\@extra@b@citeb}{}{%
+     \@namedef{br@#2}{\@nameuse{br@#2\@extra@b@citeb}}%
+    }%
+  \fi
+  \@ifundefined{b@#2\@extra@b@citeb}{%
+   \def\NAT@num{}%
+  }{%
+   \NAT@parse{#2}%
+  }%
+  \def\NAT@tmp{#1}%
+  \expandafter\let\expandafter\bibitemOpen\csname NAT@b@open@#2\endcsname
+  \expandafter\let\expandafter\bibitemShut\csname NAT@b@shut@#2\endcsname
+  \@ifnum{\NAT@merge>\@ne}{%
+   \NAT@bibitem@first@sw{%
+    \@firstoftwo
+   }{%
+    \@ifundefined{NAT@b*@#2}{%
+     \@firstoftwo
+    }{%
+     \expandafter\def\expandafter\NAT@num\expandafter{\the\c@NAT@ctr}%
+     \@secondoftwo
+    }%
+   }%
+  }{%
+   \@firstoftwo
+  }%
+  {%
+   \global\advance\c@NAT@ctr\@ne
+   \@ifx{\NAT@tmp\@empty}{\@firstoftwo}{%
+    \@secondoftwo
+   }%
+   {%
+    \expandafter\def\expandafter\NAT@num\expandafter{\the\c@NAT@ctr}%
+    \global\NAT@stdbsttrue
+   }{}%
+   \bibitem@fin
+   % begin webtex modifications:
+   \special{webtex delim-tag div natbib.item {class} {wt-refinfo wt-refident-#2}}
+   % end webtex modifications
+   \item[\hfil\NAT@anchor{#2}{\NAT@num}]%
+   \global\let\NAT@bibitem@first@sw\@secondoftwo
+   \NAT@bibitem@init
+  }%
+  {%
+   \NAT@anchor{#2}{}%
+   \NAT@bibitem@cont
+   \bibitem@fin
+  }%
+  \@ifx{\NAT@tmp\@empty}{%
+    \NAT@wrout{\the\c@NAT@ctr}{}{}{}{#2}%
+  }{%
+    \expandafter\NAT@ifcmd\NAT@tmp(@)(@)\@nil{#2}%
+  }%
+}%
+
+\long\def\endthebibliography{%
+ \bibitem@fin
+ % begin webtex modifications:
+ \special{webtex end-delim-tag div natbib.item}
+ % end webtex modifications
+ \bibpostamble
+ \def\@noitemerr{%
+  \PackageWarning{natbib}{Empty `thebibliography' environment}%
+ }%
+ \endlist
+ \bibcleanup
+}%

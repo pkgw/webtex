@@ -263,12 +263,13 @@ var DirectText = (function DirectText_closure () {
 
 
 var StartTag = (function StartTag_closure () {
-    function StartTag (name, attrs) {
+    function StartTag (name, delimgroup, attrs) {
 	if (typeof (name) != 'string')
 	    throw new TexInternalError ('StartTag needs string; got %o', name);
 
 	this.ltype = LT_STARTTAG;
 	this.name = name;
+	this.delimgroup = delimgroup;
 	this.attrs = attrs;
     }
 
@@ -276,7 +277,7 @@ var StartTag = (function StartTag_closure () {
     var proto = StartTag.prototype;
 
     proto._uisummary = function StartTag__uisummary () {
-	return format ('StartTag %s %j', this.name, this.attrs);
+	return format ('StartTag %s (%o) %j', this.name, this.delimgroup, this.attrs);
     };
 
     return StartTag;
@@ -284,19 +285,20 @@ var StartTag = (function StartTag_closure () {
 
 
 var EndTag = (function EndTag_closure () {
-    function EndTag (name) {
+    function EndTag (name, delimgroup) {
 	if (typeof (name) != 'string')
 	    throw new TexInternalError ('EndTag needs string; got %o', name);
 
 	this.ltype = LT_ENDTAG;
 	this.name = name;
+	this.delimgroup = delimgroup;
     }
 
     inherit (EndTag, Listable);
     var proto = EndTag.prototype;
 
     proto._uisummary = function EndTag__uisummary () {
-	return format ('EndTag %s', this.name);
+	return format ('EndTag %s (%o)', this.name, this.delimgroup);
     };
 
     return EndTag;

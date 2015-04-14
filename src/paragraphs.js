@@ -48,7 +48,7 @@
 	// webtex special!
 	this.partag_inserted_stack.push (this.partag_settings[0]);
 	if (this.partag_settings[0])
-	    this.accum (new StartTag ('p', {}));
+	    this.accum (new StartTag ('p', 'par', {})); // XXX pursue delimgroup applicability...
 
 	// We don't run the linebreaking algorithm so we should insert
 	// \leftskip manually. TeX doesn't bother to insert it if it's zero.
@@ -76,7 +76,7 @@
 	list.push (new BoxGlue (this.get_parameter (T_GLUE, 'rightskip')));
 
 	if (this.partag_inserted_stack.pop ()) // webtex special!
-	    list.push (new EndTag ('p'));
+	    list.push (new EndTag ('p', 'par'));
 
 	var hbox = new HBox ();
 	hbox.list = list;

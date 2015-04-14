@@ -158,6 +158,18 @@ var HTMLTranslateTarget = (function HTMLTranslateTarget_closure () {
 	    } else if (item instanceof DirectText) {
 		this.queued_text += item.value;
 	    } else if (item instanceof StartTag) {
+		if (item.delimgroup != null) {
+		    // If we're in a delimited group, we might have to auto-finish the
+		    // previous tag.
+		    if (this.tag_stack.length && this.tag_stack[0].delimgroup == item.delimgroup) {
+			if (item.name != this.tag_stack[0].name)
+			    throw new TexRuntimeError ('mismatched HTML start (%s) and end tags (%s)',
+						       tag_stack[0].name, item.name);
+			this.maybe_push ({kind: 'endtag'});
+			this.tag_stack.shift ();
+		    }
+		}
+
 		this.maybe_push ({
 		    kind: 'starttag',
 		    name: item.name,
@@ -165,13 +177,25 @@ var HTMLTranslateTarget = (function HTMLTranslateTarget_closure () {
 		});
 		this.tag_stack.unshift (item);
 	    } else if (item instanceof EndTag) {
-		if (!this.tag_stack.length)
-		    throw new TexRuntimeError ('HTML end tag %s without opening tag', item.name);
-		if (item.name != this.tag_stack[0].name)
-		    throw new TexRuntimeError ('mismatched HTML start (%s) and end tags (%s)',
-					       tag_stack[0].name, item.name);
-		this.maybe_push ({kind: 'endtag'});
-		this.tag_stack.shift ();
+		if (item.delimgroup != null) {
+		    // If we're in a delimited group, it's OK to not actually be closing
+		    // anything! That happens if the group contains no items.
+		    if (this.tag_stack.length && this.tag_stack[0].delimgroup == item.delimgroup) {
+			if (item.name != this.tag_stack[0].name)
+			    throw new TexRuntimeError ('mismatched HTML start (%s) and end tags (%s)',
+						       tag_stack[0].name, item.name);
+			this.maybe_push ({kind: 'endtag'});
+			this.tag_stack.shift ();
+		    }
+		} else {
+		    if (!this.tag_stack.length)
+			throw new TexRuntimeError ('HTML end tag %s without opening tag', item.name);
+		    if (item.name != this.tag_stack[0].name)
+			throw new TexRuntimeError ('mismatched HTML start (%s) and end tags (%s)',
+						   tag_stack[0].name, item.name);
+		    this.maybe_push ({kind: 'endtag'});
+		    this.tag_stack.shift ();
+		}
 	    } else if (item instanceof SuppressionControl) {
 		this.finish_text ();
 
