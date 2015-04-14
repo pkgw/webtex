@@ -49,12 +49,15 @@
 	    refelem.style.marginTop = dt + 'px';
 
 	    blockelem.parentNode.insertBefore (refelem, blockelem);
+	    refelem.offsetHeight; // triggers a re-layout so that ...
+	    refelem.style.opacity = 1.0; // ... this line triggers a CSS transition
 
 	    elem._mouseout_cleanup = function (event) {
 		placeholder.parentNode.replaceChild (refelem, placeholder);
 		refelem.className = prev_classname;
 		refelem.style.position = prev_pos;
 		refelem.style.marginTop = prev_mt;
+		refelem.style.opacity = ''; // restore default
 	    };
 	});
 

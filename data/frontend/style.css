@@ -181,6 +181,8 @@
   padding-left: 660px;
   width: 110px;
   pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
 }
 
 .webtex-800px .wt-popup-ref p {
