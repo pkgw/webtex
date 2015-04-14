@@ -248,6 +248,8 @@ var DOMRenderer = (function DOMRenderer_callback () {
 		else {
 		    var e = dom_stack.shift ();
 		    dom_stack[0].appendChild (e);
+		    for (var j = 0; j < DOMRenderer._tag_callbacks.length; j++)
+			DOMRenderer._tag_callbacks[j] (doc, this.container, e);
 		}
 	    } else if (item.kind === 'canvas') {
 		dom_stack[0].appendChild (this.create_canvas (doc, item));
@@ -318,6 +320,17 @@ var DOMRenderer = (function DOMRenderer_callback () {
     proto.launch_feed_pre_parsed = function DOMRenderer_launch_feed_pre_parsed (data) {
 	this._make_master ().send_message ('feed_pre_parsed', data);
     };
+
+    // API for adding functionality onto DOMRenderer for chrome effects, e.g.
+    // pop-up references. This is similar to the way in which the Engine is
+    // extensible.
+
+    DOMRenderer._tag_callbacks = [];
+
+    DOMRenderer.register_tag_callback = function DOMRenderer_register_tag_callback (func) {
+	// Called as func (doc, container, newly_added_element).
+	DOMRenderer._tag_callbacks.push (func);
+    }
 
     return DOMRenderer;
 }) ();

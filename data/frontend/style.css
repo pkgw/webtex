@@ -175,3 +175,16 @@
   max-width: 700px;
   max-height: 800px;
 }
+
+.webtex-800px .wt-popup-ref {
+  position: absolute;
+  padding-left: 660px;
+  width: 110px;
+  pointer-events: none;
+}
+
+.webtex-800px .wt-popup-ref p {
+  padding: 0px;
+  margin: 0px;
+  width: 110px;
+}
