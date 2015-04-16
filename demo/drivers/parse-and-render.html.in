@@ -12,7 +12,7 @@
     See <a href="https://github.com/pkgw/webtex/issues/1">the bug report</a>
     for more information.</b></p>
 
-    <article class="webtex webtex-800px" id="webtex">
+    <article class="webtex webtex-900px" id="webtex">
       <!-- Contents will be replaced by a "loading" animation as soon as
 	   Webtex starts up; this should only show up if something is
 	   seriously wrong with the JS. -->

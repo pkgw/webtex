@@ -136,57 +136,57 @@
   text-align: center;
 }
 
-/* Width settings for standard 800px-wide column setup. Basic measurements
+/* Width settings for standard 900px-wide column setup. Basic measurements
  * are 30px of space on the left, a column width of 600px, 30px of space,
- * 110px on the right for marginalia, then 30px more padding.
+ * 210px on the right for marginalia, then 30px more padding.
  */
 
-.webtex-800px {
-  width: 800px;
+.webtex-900px {
+  width: 900px;
   margin: 0px auto;
 }
 
-.webtex-800px p,
-.webtex-800px h1,
-.webtex-800px h2,
-.webtex-800px h3,
-.webtex-800px h4,
-.webtex-800px h5 {
+.webtex-900px p,
+.webtex-900px h1,
+.webtex-900px h2,
+.webtex-900px h3,
+.webtex-900px h4,
+.webtex-900px h5 {
   width: 600px;
   padding-left: 30px;
 }
 
-.webtex-800px h1 p,
-.webtex-800px h2 p,
-.webtex-800px h3 p,
-.webtex-800px h4 p,
-.webtex-800px figure p {
+.webtex-900px h1 p,
+.webtex-900px h2 p,
+.webtex-900px h3 p,
+.webtex-900px h4 p,
+.webtex-900px figure p {
   /* No double-padding for <p>s in various containers */
   padding-left: 0px;
 }
 
-.webtex-800px aside.wt-footnote {
+.webtex-900px aside.wt-footnote {
   position: absolute;
   padding-left: 660px;
-  width: 110px;
+  width: 210px;
 }
 
-.webtex-800px .wt-image {
+.webtex-900px .wt-image {
   max-width: 700px;
-  max-height: 800px;
+  max-height: 900px;
 }
 
-.webtex-800px .wt-popup-ref {
+.webtex-900px .wt-popup-ref {
   position: absolute;
   padding-left: 660px;
-  width: 110px;
+  width: 210px;
   pointer-events: none;
   opacity: 0;
   transition: opacity 0.3s ease-in-out;
 }
 
-.webtex-800px .wt-popup-ref p {
+.webtex-900px .wt-popup-ref p {
   padding: 0px;
   margin: 0px;
-  width: 110px;
+  width: 210px;
 }
