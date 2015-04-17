@@ -21,6 +21,7 @@
 
     <script type="text/javascript" src="compatibility.js"></script>
     <script type="text/javascript" src="pdf.js"></script>
+    <script type="text/javascript" src="interact.js"></script>
     <script type="text/javascript" src="webtex-frontend.js"></script>
     <script type="text/javascript">
 'use strict';

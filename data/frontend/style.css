@@ -88,12 +88,14 @@
   padding: 10px;
   margin-left: auto;
   margin-right: auto;
+  overflow: auto;
 }
 
 .webtex figure .wt-image {
   display: block;
   margin-left: auto;
   margin-right: auto;
+  width: 90%;
 }
 
 .webtex figure > * {
@@ -225,11 +227,6 @@
   position: absolute;
   padding-left: 660px;
   width: 210px;
-}
-
-.webtex-900px .wt-image {
-  max-width: 700px;
-  max-height: 900px;
 }
 
 .webtex-900px .wt-popup-ref {

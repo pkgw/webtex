@@ -144,7 +144,8 @@ frontendjs = \
   src/frontend/type1-font.js \
   src/frontend/dom-renderer.js \
   src/frontend/popup-references.js \
-  src/frontend/table-of-contents.js
+  src/frontend/table-of-contents.js \
+  src/frontend/resizable-figures.js
 
 $(builddir)/dev/webtex-frontend.js: \
 dev-scripts/preprocess.py src/frontend-wrapper.js $(frontendjs) \
@@ -203,6 +204,19 @@ distfiles += \
   $(builddir)/dev/pdf.js \
   $(builddir)/dev/pdf.worker.js
 
+
+# We use an internal copy of interact.js for some interactive effects.
+
+interact_js_version = 1.2.4
+
+
+$(builddir)/dev/interact.js: \
+| $(builddir)
+	curl -L http://code.interactjs.io/interact-$(interact_js_version).js >$@
+
+primaries += $(builddir)/dev/interact.js
+devfiles += $(builddir)/dev/interact.js
+distfiles += $(builddir)/dev/interact.js
 
 # Here we link the chrome data files into the local development environment.
 # Too bad that we're encoding an absolute path to the data/frontend/ directory,
