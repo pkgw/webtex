@@ -193,6 +193,18 @@
   margin-bottom: 10px;
 }
 
+/* Pop-out figures */
+
+.webtex .wt-popout-icon {
+  display: block;
+  margin-right: 0px;
+
+  background-image: url(./new-window.png);
+  background-repeat: no-repeat;
+  background-position: center center;
+  width: 32px;
+  height: 28px;
+}
 
 /* Width settings for standard 900px-wide column setup. Basic measurements
  * are 30px of space on the left, a column width of 600px, 30px of space,

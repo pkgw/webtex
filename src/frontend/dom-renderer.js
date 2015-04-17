@@ -159,6 +159,10 @@ var DOMRenderer = (function DOMRenderer_callback () {
     };
 
     proto.create_canvas = function DOMRenderer_create_canvas (doc, item) {
+	if (item.gl.length < 1 || item.w == 0 || item.h == 0)
+	    // Zero-area canvases are invalid.
+	    return null;
+
 	var e = doc.createElement ('canvas');
 	e.className = 'wt-cbox';
 
@@ -252,7 +256,9 @@ var DOMRenderer = (function DOMRenderer_callback () {
 			DOMRenderer._tag_callbacks[j] (doc, this.container, e);
 		}
 	    } else if (item.kind === 'canvas') {
-		dom_stack[0].appendChild (this.create_canvas (doc, item));
+		var c = this.create_canvas (doc, item);
+		if (c != null)
+		    dom_stack[0].appendChild (c);
 	    } else if (item.kind === 'image') {
 		dom_stack[0].appendChild (this.create_image (doc, item));
 	    } else if (item.kind === 'fontdata') {

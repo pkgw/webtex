@@ -145,7 +145,8 @@ frontendjs = \
   src/frontend/dom-renderer.js \
   src/frontend/popup-references.js \
   src/frontend/table-of-contents.js \
-  src/frontend/resizable-figures.js
+  src/frontend/resizable-figures.js \
+  src/frontend/popout-figures.js
 
 $(builddir)/dev/webtex-frontend.js: \
 dev-scripts/preprocess.py src/frontend-wrapper.js $(frontendjs) \
@@ -242,6 +243,14 @@ $(builddir)/dev/dev-bundle.zip \
 
 devfiles += $(patsubst demo/drivers/%.in,$(builddir)/dev/dev-%,$(wildcard demo/drivers/*.in))
 
+$(builddir)/dev/dev-%.popout.html: \
+$(builddir)/dev/dev-popout.html \
+| $(builddir)
+	cd $(dir $@) && ln -s $(notdir $<) $(notdir $@)
+
+devfiles += \
+  $(builddir)/dev/dev-parse-and-render.popout.html \
+  $(builddir)/dev/dev-render-preparsed.popout.html
 
 # These rules produce the demo files.
 
