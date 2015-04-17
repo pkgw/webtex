@@ -44,7 +44,6 @@
 
 	    if (atag.name != null && atag.name.length) {
 		dest = atag.name;
-		global_logf ('target: %s', dest);
 		break;
 	    }
 	}
