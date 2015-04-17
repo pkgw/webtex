@@ -143,7 +143,8 @@ frontendjs = \
   $(builddir)/intermediates/frontend-glyph-helper.js \
   src/frontend/type1-font.js \
   src/frontend/dom-renderer.js \
-  src/frontend/popup-references.js
+  src/frontend/popup-references.js \
+  src/frontend/table-of-contents.js
 
 $(builddir)/dev/webtex-frontend.js: \
 dev-scripts/preprocess.py src/frontend-wrapper.js $(frontendjs) \

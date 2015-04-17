@@ -1,4 +1,4 @@
-/* Copyright 2014 Peter Williams and collaborators.
+/* Copyright 2014-2015 Peter Williams and collaborators.
  * Licensed under the MIT license. See README.md for details. */
 
 @font-face {
@@ -42,6 +42,7 @@
   text-align: left;
   text-rendering: optimizelegibility;
   line-height: 1.3;
+  z-index: 0;
 
   /* Relative positioning is needed for "loading" spinner. Feels gross, must
    * be a better way? The spinner's <div> is absolutely positioned which is
@@ -135,6 +136,61 @@
   padding: 10px;
   text-align: center;
 }
+
+/* Auto-generated table of contents */
+
+.webtex .wt-toc-wrapper {
+  /* Note that the height of this element is 0 because of the fixed
+   * positioning of its child. */
+  position: absolute;
+  left: 0px;
+  top: 0px;
+}
+
+.webtex .wt-toc-icon {
+  position: fixed;
+  top: 1em;
+  margin-left: 1px;
+  margin-top: 1px;
+
+  width: 28px;
+  height: 24px;
+  background-image: url(./toc.png);
+  z-index: 20;
+}
+
+.webtex .wt-toc-wrapper .wt-toc {
+  position: fixed;
+  top: 1em;
+  padding-left: 0px;
+  margin: 0px;
+
+  list-style-type: none; /* TeX header text includes numbering */
+  z-index: 10;
+  background: #FFF;
+  border: 1px solid #222;
+
+  /* default: not shown / unexpanded */
+  opacity: 0;
+  /*width: 0;
+  height: 0;*/
+
+  transition-property: opacity, width, height;
+  transition-duration: 0.3s;
+}
+
+.webtex .wt-toc li {
+  padding: 0px 10px;
+}
+
+.webtex .wt-toc li:first-child {
+  margin-top: 26px;
+}
+
+.webtex .wt-toc li:last-child {
+  margin-bottom: 10px;
+}
+
 
 /* Width settings for standard 900px-wide column setup. Basic measurements
  * are 30px of space on the left, a column width of 600px, 30px of space,
