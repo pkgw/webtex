@@ -287,7 +287,7 @@
 		// not supposed to be sub-expanded (TeXBook p. 216). Yargh.
 		if (tok.is_cmd (engine, 'noexpand')) {
 		    tok = engine.next_tok_throw ();
-		} else if (tok.is_expandable (engine)) {
+		} else if (tok.is_currently_expandable (engine)) {
 		    if (tok.is_cmd (engine, 'the')) {
 			var next = engine.next_tok_throw ();
 			var ncmd = next.to_cmd (engine);

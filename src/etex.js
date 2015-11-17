@@ -82,8 +82,8 @@
 	    toks.push (tok);
 	}
 
-	engine.trace ('... => %T', toks);
-	engine.push_toks (toks);
+	engine.trace ('... => %T (in noexpand mode)', toks);
+	engine.push_toks (toks, null, true); // true -> noexpand mode
     });
 
     register_command ('detokenize', function cmd_detokenize (engine) {
@@ -108,6 +108,10 @@
 	}
 
 	engine.trace ('... => "%s"', text);
+	// eTeX docs say that the token list resulting from \detokenize does
+	// not have any expansions performed, but seeing as the result is all
+	// characters, I'm not sure how this could happen anyway. Active
+	// characters? Anyway, we don't currently ensure this.
 	engine.push_string (text);
     });
 

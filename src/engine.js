@@ -726,12 +726,12 @@ var Engine = (function Engine_closure () {
 	}
     };
 
-    proto.push_toks = function Engine_push_toks (toks, callback) {
+    proto.push_toks = function Engine_push_toks (toks, callback, noexpand_mode) {
 	if (toks instanceof Toklist)
 	    toks = toks.toks; // convenience.
 	if (!(toks instanceof Array))
 	    throw new TexInternalError ('illegal push_toks argument: %o', toks);
-	this.inputstack.push_toklist (toks, callback);
+	this.inputstack.push_toklist (toks, callback, noexpand_mode);
     };
 
     proto.maybe_push_toklist = function Engine_maybe_push_toklist (name) {
@@ -809,6 +809,9 @@ var Engine = (function Engine_closure () {
 	while (true) {
 	    var tok = this.next_tok ();
 	    if (tok === EOF)
+		return tok;
+
+	    if (this.inputstack.is_noexpand_mode ())
 		return tok;
 
 	    var cmd = tok.to_cmd (this);

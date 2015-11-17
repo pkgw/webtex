@@ -144,6 +144,10 @@ var Token = (function Token_closure () {
 	    name = this.name;
 	} else if (this.kind == TK_PURECMD) {
 	    return this.cmd;
+	} else if (this.kind == TK_PARAM) {
+	    // Unsure if this is right. Encountered in a construct along the
+	    // lines of \edef{\unexpanded{\def#1{#1}}}.
+	    return new MacroParameterCommand (O_ZERO + this.pnum);
 	} else {
 	    throw new TexInternalError ('cannot commandify token %o', this);
 	}
@@ -283,7 +287,9 @@ var Token = (function Token_closure () {
     };
 
 
-    proto.is_expandable = function Token_is_expandable (engine) {
+    proto.is_currently_expandable = function Token_is_currently_expandable (engine) {
+	if (engine.inputstack.is_noexpand_mode ())
+	    return false;
 	return this.to_cmd (engine).expandable;
     };
 

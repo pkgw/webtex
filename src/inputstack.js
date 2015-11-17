@@ -11,8 +11,10 @@
 // switched to synchronous I/O, which simplifies many things.
 
 var ToklistInput = (function ToklistInput_closure () {
-    function ToklistInput (toks) {
+    function ToklistInput (toks, noexpand_mode) {
 	this.toks = toks;
+	// this is for e-TeX support of \unexpanded, etc:
+	this.noexpand_mode = noexpand_mode || false;
     }
 
     var proto = ToklistInput.prototype;
@@ -238,8 +240,16 @@ var InputStack = (function InputStack_closure () {
 	return this.next_tok ();
     };
 
-    proto.push_toklist = function InputStack_push_toklist (toks, callback) {
-	this.inputs.push (new ToklistInput (toks));
+    proto.is_noexpand_mode = function InputStack_is_noexpand_mode () {
+	var i = this.inputs.length - 1;
+	if (i < 0)
+	    return false;
+
+	return this.inputs[i].noexpand_mode || false;
+    };
+
+    proto.push_toklist = function InputStack_push_toklist (toks, callback, noexpand_mode) {
+	this.inputs.push (new ToklistInput (toks, noexpand_mode));
 	this.next_toknums.push (0);
 	this.cleanups.push (callback || null);
     };
