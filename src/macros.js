@@ -318,7 +318,10 @@
 		}
 
 		if (tok.is_cat (C_OTHER) && tok.ord > O_ZERO &&
-		    tok.ord < O_ZERO + next_pnum) {
+		    tok.ord < O_ZERO + 10) {
+		    // If the \def defines sub-macros, we can encounter
+		    // parameter tokens that have numbers higher than our
+		    // next_pnum.
 		    repl_toks.push (Token.new_param (tok.ord - O_ZERO));
 		    last_was_param = false;
 		    continue;
