@@ -53,6 +53,14 @@
 	engine.handle_if (result);
     });
 
+    register_command ('ifdefined', function cmd_ifdefined (engine) {
+	var t = engine.next_tok_throw ();
+	var cmd = t.to_cmd (engine);
+	var result = (cmd.name != 'undefined');
+	engine.trace ('ifdefined %o => %b', t, result);
+	engine.handle_if (result);
+    });
+
     register_command ('unexpanded', function cmd_unexpanded (engine) {
 	engine.trace ('unexpanded ...');
 	engine.scan_left_brace ();
