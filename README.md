@@ -1,6 +1,8 @@
 webtex
 ======
 
+**NOTE**: my work on the Webtex project is on hold for the time being. Feel free to run with it, though! — PKGW, 2016 Feb 4.
+
 An essentially-complete LaTeX engine in JavaScript, rendered in your browser.
 Revolutionizing scientific communication since 2014. See the public website at
 http://pkgw.github.io/webtex/.
